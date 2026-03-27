@@ -41,6 +41,13 @@ function Dashboard() {
   // Close sidebar when weapon changes
   useEffect(() => { setSidebarOpen(false); }, [activeWeapon?.hash]);
 
+  // Auto-select first weapon once the database loads (if none active)
+  useEffect(() => {
+    if (weapons.length > 0 && !activeWeapon && !searchParams.get('w')) {
+      loadWeapon(weapons[0]);
+    }
+  }, [weapons, activeWeapon, loadWeapon, searchParams]);
+
   // URL-based weapon/perk loading
   useEffect(() => {
     const weaponHash = searchParams.get('w');
