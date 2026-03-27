@@ -1,60 +1,74 @@
 {
+  "_source": "huwugo_ D2 WeaponStat Chart v2.0 + rockstarmatt TTK Breakpoints v1.2 (patch 9.5.0.5)",
   "resilienceHp": {
     "0": 192, "1": 193, "2": 194, "3": 196, "4": 198,
     "5": 200, "6": 202, "7": 204, "8": 206, "9": 208, "10": 230
   },
   "subtypes": {
     "6":  { "name": "Auto Rifle",              "rpmBuckets": [360, 450, 600, 720] },
-    "7":  { "name": "Shotgun",                 "rpmBuckets": [55, 65, 80] },
-    "8":  { "name": "Machine Gun",             "rpmBuckets": [360, 450, 900] },
-    "9":  { "name": "Hand Cannon",             "rpmBuckets": [120, 140, 150, 180] },
-    "11": { "name": "Fusion Rifle",            "rpmBuckets": [500, 540, 660, 740, 860, 960] },
+    "7":  { "name": "Shotgun",                 "rpmBuckets": [55, 65, 72, 86, 140] },
+    "8":  { "name": "Machine Gun",             "rpmBuckets": [360, 450, 600, 900] },
+    "9":  { "name": "Hand Cannon",             "rpmBuckets": [120, 140, 150, 180, 257] },
+    "11": { "name": "Fusion Rifle",            "rpmBuckets": [660, 740, 860, 960] },
     "12": { "name": "Sniper Rifle",            "rpmBuckets": [72, 90, 140] },
-    "13": { "name": "Pulse Rifle",             "rpmBuckets": [340, 390, 450, 540] },
-    "14": { "name": "Scout Rifle",             "rpmBuckets": [120, 150, 180, 260] },
-    "17": { "name": "Sidearm",                 "rpmBuckets": [300, 325, 491] },
-    "22": { "name": "Linear Fusion Rifle",     "rpmBuckets": [533, 533] },
-    "24": { "name": "SMG",                     "rpmBuckets": [600, 750, 900] },
+    "13": { "name": "Pulse Rifle",             "rpmBuckets": [327, 340, 390, 450, 540] },
+    "14": { "name": "Scout Rifle",             "rpmBuckets": [120, 150, 180, 200, 260] },
+    "17": { "name": "Sidearm",                 "rpmBuckets": [260, 300, 327, 360, 450, 491] },
+    "22": { "name": "Linear Fusion Rifle",     "rpmBuckets": [533] },
+    "24": { "name": "SMG",                     "rpmBuckets": [600, 720, 900] },
     "25": { "name": "Grenade Launcher",        "rpmBuckets": [90, 120] },
-    "29": { "name": "Trace Rifle",             "rpmBuckets": [1000] },
+    "29": { "name": "Trace Rifle",             "rpmBuckets": [900] },
     "31": { "name": "Bow",                     "rpmBuckets": [50, 60, 70, 80] }
   },
   "archetypes": {
-    "9_120":  { "label": "Aggressive Frame",   "pvp": { "crit": 83, "body": 49, "burstSize": 1 }, "pve": { "crit": 248, "body": 147, "burstSize": 1 } },
-    "9_140":  { "label": "Adaptive Frame",     "pvp": { "crit": 70, "body": 41, "burstSize": 1 }, "pve": { "crit": 206, "body": 121, "burstSize": 1 } },
-    "9_150":  { "label": "Lightweight Frame",  "pvp": { "crit": 68, "body": 40, "burstSize": 1 }, "pve": { "crit": 199, "body": 117, "burstSize": 1 } },
-    "9_180":  { "label": "Precision Frame",    "pvp": { "crit": 55, "body": 32, "burstSize": 1 }, "pve": { "crit": 162, "body":  94, "burstSize": 1 } },
+    "9_120":  { "label": "Aggressive Frame",    "pvp": { "crit": 90.83, "body": 49.02, "burstSize": 1 }, "pve": { "crit": 272, "body": 147, "burstSize": 1 } },
+    "9_140":  { "label": "Adaptive Frame",      "pvp": { "crit": 79.88, "body": 44.52, "burstSize": 1 }, "pve": { "crit": 240, "body": 134, "burstSize": 1 } },
+    "9_150":  { "label": "Lightweight Frame",   "pvp": { "crit": 77.87, "body": 42.03, "burstSize": 1 }, "pve": { "crit": 234, "body": 126, "burstSize": 1 } },
+    "9_180":  { "label": "Precision Frame",     "pvp": { "crit": 70.60, "body": 45.29, "burstSize": 1 }, "pve": { "crit": 212, "body": 136, "burstSize": 1 } },
+    "9_257":  { "label": "Heavy Burst",         "pvp": { "crit": 52.85, "body": 24.01, "burstSize": 2 }, "pve": { "crit": 159, "body":  72, "burstSize": 2 } },
 
-    "6_360":  { "label": "High-Impact Frame",  "pvp": { "crit": 24, "body": 14, "burstSize": 1 }, "pve": { "crit":  70, "body":  41, "burstSize": 1 } },
-    "6_450":  { "label": "Adaptive Frame",     "pvp": { "crit": 18, "body": 11, "burstSize": 1 }, "pve": { "crit":  53, "body":  31, "burstSize": 1 } },
-    "6_600":  { "label": "Precision Frame",    "pvp": { "crit": 14, "body":  9, "burstSize": 1 }, "pve": { "crit":  41, "body":  26, "burstSize": 1 } },
-    "6_720":  { "label": "Rapid-Fire Frame",   "pvp": { "crit": 12, "body":  7, "burstSize": 1 }, "pve": { "crit":  35, "body":  21, "burstSize": 1 } },
+    "6_360":  { "label": "High-Impact Frame",   "pvp": { "crit": 43.05, "body": 23.99, "burstSize": 1 }, "pve": { "crit": 129, "body":  72, "burstSize": 1 } },
+    "6_450":  { "label": "Precision Frame",     "pvp": { "crit": 33.94, "body": 20.01, "burstSize": 1 }, "pve": { "crit": 102, "body":  60, "burstSize": 1 } },
+    "6_600":  { "label": "Adaptive Frame",      "pvp": { "crit": 26.36, "body": 15.02, "burstSize": 1 }, "pve": { "crit":  79, "body":  45, "burstSize": 1 } },
+    "6_720":  { "label": "Rapid-Fire Frame",    "pvp": { "crit": 23.09, "body": 13.61, "burstSize": 1 }, "pve": { "crit":  69, "body":  41, "burstSize": 1 } },
 
-    "13_340": { "label": "High-Impact Frame",  "pvp": { "crit": 27, "body": 16, "burstSize": 3 }, "pve": { "crit":  79, "body":  47, "burstSize": 3 } },
-    "13_390": { "label": "Adaptive Frame",     "pvp": { "crit": 23, "body": 14, "burstSize": 3 }, "pve": { "crit":  68, "body":  41, "burstSize": 3 } },
-    "13_450": { "label": "Lightweight Frame",  "pvp": { "crit": 20, "body": 12, "burstSize": 3 }, "pve": { "crit":  59, "body":  35, "burstSize": 3 } },
-    "13_540": { "label": "Rapid-Fire Frame",   "pvp": { "crit": 17, "body": 10, "burstSize": 3 }, "pve": { "crit":  50, "body":  29, "burstSize": 3 } },
+    "13_327": { "label": "Heavy Burst",         "pvp": { "crit": 42.68, "body": 23.03, "burstSize": 2 }, "pve": { "crit": 128, "body":  69, "burstSize": 2 } },
+    "13_340": { "label": "High-Impact Frame",   "pvp": { "crit": 38.57, "body": 21.50, "burstSize": 3 }, "pve": { "crit": 116, "body":  65, "burstSize": 3 } },
+    "13_390": { "label": "Adaptive Frame",      "pvp": { "crit": 32.66, "body": 19.71, "burstSize": 3 }, "pve": { "crit":  98, "body":  59, "burstSize": 3 } },
+    "13_450": { "label": "Lightweight Frame",   "pvp": { "crit": 31.50, "body": 19.71, "burstSize": 3 }, "pve": { "crit":  95, "body":  59, "burstSize": 3 } },
+    "13_540": { "label": "Rapid-Fire Frame",    "pvp": { "crit": 28.73, "body": 15.50, "burstSize": 3 }, "pve": { "crit":  86, "body":  47, "burstSize": 3 } },
 
-    "14_120": { "label": "High-Impact Frame",  "pvp": { "crit": 90, "body": 53, "burstSize": 1 }, "pve": { "crit": 265, "body": 156, "burstSize": 1 } },
-    "14_150": { "label": "Precision Frame",    "pvp": { "crit": 76, "body": 45, "burstSize": 1 }, "pve": { "crit": 224, "body": 132, "burstSize": 1 } },
-    "14_180": { "label": "Adaptive Frame",     "pvp": { "crit": 63, "body": 37, "burstSize": 1 }, "pve": { "crit": 186, "body": 109, "burstSize": 1 } },
-    "14_260": { "label": "Rapid-Fire Frame",   "pvp": { "crit": 44, "body": 26, "burstSize": 1 }, "pve": { "crit": 130, "body":  76, "burstSize": 1 } },
+    "14_120": { "label": "Aggressive Frame",    "pvp": { "crit": 91.59, "body": 54.00, "burstSize": 1 }, "pve": { "crit": 275, "body": 162, "burstSize": 1 } },
+    "14_150": { "label": "High-Impact Frame",   "pvp": { "crit": 84.50, "body": 42.04, "burstSize": 1 }, "pve": { "crit": 254, "body": 126, "burstSize": 1 } },
+    "14_180": { "label": "Precision Frame",     "pvp": { "crit": 69.14, "body": 38.54, "burstSize": 1 }, "pve": { "crit": 208, "body": 116, "burstSize": 1 } },
+    "14_200": { "label": "Lightweight Frame",   "pvp": { "crit": 64.49, "body": 38.02, "burstSize": 1 }, "pve": { "crit": 194, "body": 114, "burstSize": 1 } },
+    "14_260": { "label": "Rapid-Fire Frame",    "pvp": { "crit": 54.61, "body": 27.99, "burstSize": 1 }, "pve": { "crit": 164, "body":  84, "burstSize": 1 } },
 
-    "24_600": { "label": "Precision Frame",    "pvp": { "crit": 16, "body": 10, "burstSize": 1 }, "pve": { "crit":  47, "body":  29, "burstSize": 1 } },
-    "24_750": { "label": "Adaptive Frame",     "pvp": { "crit": 13, "body":  8, "burstSize": 1 }, "pve": { "crit":  38, "body":  24, "burstSize": 1 } },
-    "24_900": { "label": "Rapid-Fire Frame",   "pvp": { "crit": 11, "body":  7, "burstSize": 1 }, "pve": { "crit":  32, "body":  21, "burstSize": 1 } },
+    "24_600": { "label": "Precision Frame",     "pvp": { "crit": 26.69, "body": 16.70, "burstSize": 1 }, "pve": { "crit":  80, "body":  50, "burstSize": 1 } },
+    "24_720": { "label": "Aggressive Frame",    "pvp": { "crit": 23.89, "body": 13.62, "burstSize": 1 }, "pve": { "crit":  72, "body":  41, "burstSize": 1 } },
+    "24_900": { "label": "Adaptive Frame",      "pvp": { "crit": 19.06, "body": 11.50, "burstSize": 1 }, "pve": { "crit":  57, "body":  35, "burstSize": 1 } },
 
-    "17_300": { "label": "Adaptive Frame",     "pvp": { "crit": 40, "body": 24, "burstSize": 1 }, "pve": { "crit": 118, "body":  71, "burstSize": 1 } },
-    "17_325": { "label": "Lightweight Frame",  "pvp": { "crit": 37, "body": 22, "burstSize": 1 }, "pve": { "crit": 109, "body":  65, "burstSize": 1 } },
-    "17_491": { "label": "Adaptive Burst",     "pvp": { "crit": 26, "body": 15, "burstSize": 2 }, "pve": { "crit":  77, "body":  44, "burstSize": 2 } },
+    "17_260": { "label": "Precision Frame",     "pvp": { "crit": 63.95, "body": 40.02, "burstSize": 1 }, "pve": { "crit": 192, "body": 120, "burstSize": 1 } },
+    "17_300": { "label": "Adaptive Frame",      "pvp": { "crit": 57.57, "body": 36.03, "burstSize": 1 }, "pve": { "crit": 173, "body": 108, "burstSize": 1 } },
+    "17_327": { "label": "Heavy Burst",         "pvp": { "crit": 49.55, "body": 31.01, "burstSize": 2 }, "pve": { "crit": 149, "body":  93, "burstSize": 2 } },
+    "17_360": { "label": "Lightweight Frame",   "pvp": { "crit": 49.55, "body": 31.00, "burstSize": 1 }, "pve": { "crit": 149, "body":  93, "burstSize": 1 } },
+    "17_450": { "label": "Rapid-Fire Frame",    "pvp": { "crit": 39.97, "body": 25.01, "burstSize": 1 }, "pve": { "crit": 120, "body":  75, "burstSize": 1 } },
+    "17_491": { "label": "Adaptive Burst",      "pvp": { "crit": 37.08, "body": 20.01, "burstSize": 3 }, "pve": { "crit": 111, "body":  60, "burstSize": 3 } },
 
-    "8_360":  { "label": "High-Impact Frame",  "pvp": { "crit": 24, "body": 14, "burstSize": 1 }, "pve": { "crit":  70, "body":  41, "burstSize": 1 } },
-    "8_450":  { "label": "Adaptive Frame",     "pvp": { "crit": 18, "body": 11, "burstSize": 1 }, "pve": { "crit":  53, "body":  31, "burstSize": 1 } },
-    "8_900":  { "label": "Rapid-Fire Frame",   "pvp": { "crit": 11, "body":  7, "burstSize": 1 }, "pve": { "crit":  32, "body":  21, "burstSize": 1 } },
+    "8_360":  { "label": "High-Impact Frame",   "pvp": { "crit": 68.44, "body": 47.49, "burstSize": 1 }, "pve": { "crit": 205, "body": 142, "burstSize": 1 } },
+    "8_450":  { "label": "Adaptive Frame",      "pvp": { "crit": 58.18, "body": 41.50, "burstSize": 1 }, "pve": { "crit": 175, "body": 125, "burstSize": 1 } },
+    "8_600":  { "label": "Aggressive Frame",    "pvp": { "crit": 46.98, "body": 36.03, "burstSize": 1 }, "pve": { "crit": 141, "body": 108, "burstSize": 1 } },
+    "8_900":  { "label": "Rapid-Fire Frame",    "pvp": { "crit": 33.29, "body": 25.53, "burstSize": 1 }, "pve": { "crit": 100, "body":  77, "burstSize": 1 } },
 
-    "12_72":  { "label": "Aggressive Frame",   "pvp": { "crit": 218, "body": 110, "burstSize": 1 }, "pve": { "crit": 643, "body": 324, "burstSize": 1 } },
-    "12_90":  { "label": "Adaptive Frame",     "pvp": { "crit": 170, "body":  85, "burstSize": 1 }, "pve": { "crit": 501, "body": 251, "burstSize": 1 } },
-    "12_140": { "label": "Rapid-Fire Frame",   "pvp": { "crit": 115, "body":  58, "burstSize": 1 }, "pve": { "crit": 339, "body": 171, "burstSize": 1 } }
+    "12_72":  { "label": "Aggressive Frame",    "pvp": { "crit": 496.63, "body": 141.89, "burstSize": 1 }, "pve": { "crit": 1490, "body": 426, "burstSize": 1 } },
+    "12_90":  { "label": "Adaptive Frame",      "pvp": { "crit": 405.84, "body": 125.06, "burstSize": 1 }, "pve": { "crit": 1218, "body": 375, "burstSize": 1 } },
+    "12_140": { "label": "Rapid-Fire Frame",    "pvp": { "crit": 292.62, "body":  85.03, "burstSize": 1 }, "pve": { "crit":  878, "body": 255, "burstSize": 1 } },
+
+    "7_55":   { "label": "Aggressive Frame",    "pvp": { "crit": 31.02, "body": 28.00, "burstSize": 1 }, "pve": { "crit":  93, "body":  84, "burstSize": 1 } },
+    "7_65":   { "label": "Precision Frame",     "pvp": { "crit": 25.49, "body": 23.01, "burstSize": 1 }, "pve": { "crit":  76, "body":  69, "burstSize": 1 } },
+    "7_72":   { "label": "Heavy Burst",         "pvp": { "crit": 187.87, "body": 107.06, "burstSize": 1 }, "pve": { "crit": 563, "body": 321, "burstSize": 1 } },
+    "7_86":   { "label": "Rapid-Fire Frame",    "pvp": { "crit": 22.15, "body": 20.00, "burstSize": 1 }, "pve": { "crit":  66, "body":  60, "burstSize": 1 } },
+    "7_140":  { "label": "Rapid-Fire Slug",     "pvp": { "crit": 280.97, "body": 160.11, "burstSize": 1 }, "pve": { "crit": 843, "body": 480, "burstSize": 1 } }
   },
   "curves": {
     "9":  {
@@ -96,6 +110,11 @@
       "Range":    [{ "stat": 0, "value": 15.0 }, { "stat": 50, "value": 24.0 }, { "stat": 100, "value": 38.0 }],
       "Handling": [{ "stat": 0, "value": 1.10 }, { "stat": 100, "value": 0.60 }],
       "Reload":   [{ "stat": 0, "value": 5.0  }, { "stat": 100, "value": 2.5  }]
+    },
+    "7":  {
+      "Range":    [{ "stat": 0, "value": 4.5  }, { "stat": 50, "value": 7.5  }, { "stat": 100, "value": 12.0 }],
+      "Handling": [{ "stat": 0, "value": 0.90 }, { "stat": 100, "value": 0.50 }],
+      "Reload":   [{ "stat": 0, "value": 4.0  }, { "stat": 100, "value": 2.0  }]
     }
   },
   "defaultCurves": {
