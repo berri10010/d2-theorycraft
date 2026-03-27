@@ -1,0 +1,1799 @@
+{
+  "Eager Edge": {
+    "tier": "S",
+    "rank": 1,
+    "tags": [
+      "utility"
+    ],
+    "notes": "defines an entire subset of endgame PvE"
+  },
+  "Envious Arsenal": {
+    "tier": "S",
+    "rank": 2,
+    "tags": [
+      "refill"
+    ],
+    "notes": "class-agnostic BnS-compatible reloads and a lot of free ammo gen"
+  },
+  "Attrition Orbs": {
+    "tier": "S",
+    "rank": 3,
+    "tags": [
+      "utility"
+    ],
+    "notes": "extremely potent orb generation on certain weapon types"
+  },
+  "Fourth Time's the Charm": {
+    "tier": "S",
+    "rank": 4,
+    "tags": [
+      "overflow",
+      "ammo"
+    ],
+    "notes": "nearly doubles total damage and mag size at the same time"
+  },
+  "Aggregate Charge": {
+    "tier": "S",
+    "rank": 5,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "BnS replacement that works on first shot, great for fireteams, less so for solo"
+  },
+  "Elemental Honing": {
+    "tier": "S",
+    "rank": 6,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "best setup sustained DPS perk in the game"
+  },
+  "Heal Clip": {
+    "tier": "S",
+    "rank": 7,
+    "tags": [
+      "utility"
+    ],
+    "notes": "subclass-agnostic survivability and Benevolence procs"
+  },
+  "Physic": {
+    "tier": "S",
+    "rank": 8,
+    "tags": [
+      "utility"
+    ],
+    "notes": "BiS support auto perk, doubles its use cases"
+  },
+  "Bait and Switch": {
+    "tier": "S",
+    "rank": 9,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "lower setup alternative to Elemental Honing"
+  },
+  "One-Two Punch": {
+    "tier": "S",
+    "rank": 10,
+    "tags": [
+      "utility"
+    ],
+    "notes": "foundation of various meta-defining melee builds"
+  },
+  "Destabilizing Rounds": {
+    "tier": "A",
+    "rank": 11,
+    "tags": [
+      "splash"
+    ],
+    "notes": "probably the best on-kill splash effect in the game"
+  },
+  "Withering Gaze": {
+    "tier": "A",
+    "rank": 12,
+    "tags": [
+      "utility"
+    ],
+    "notes": "best universally applicable debuff extension packed into a legendary perk"
+  },
+  "Kinetic Tremors": {
+    "tier": "A",
+    "rank": 13,
+    "tags": [
+      "splash"
+    ],
+    "notes": "versatile: add clear, major chip, and even boss damage"
+  },
+  "Reaper's Tithe": {
+    "tier": "A",
+    "rank": 14,
+    "tags": [
+      "burst",
+      "spree"
+    ],
+    "notes": "best non-Surrounded burst perk, potentially great for roam too"
+  },
+  "Trench Barrel": {
+    "tier": "A",
+    "rank": 15,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "extremely high damage boost for now-ranged melee options"
+  },
+  "Jolting Feedback": {
+    "tier": "A",
+    "rank": 16,
+    "tags": [
+      "splash"
+    ],
+    "notes": "on-hit champ stun, stagger, and decent add clear"
+  },
+  "Rewind Rounds": {
+    "tier": "A",
+    "rank": 17,
+    "tags": [
+      "overflow"
+    ],
+    "notes": "almost Envious Assassin with zero setup requirement"
+  },
+  "Chaos Reshaped": {
+    "tier": "A",
+    "rank": 18,
+    "tags": [
+      "sustained",
+      "utility"
+    ],
+    "notes": "highest non-Surrounded sustained damage, plus small health ticks"
+  },
+  "Incandescent": {
+    "tier": "A",
+    "rank": 19,
+    "tags": [
+      "splash"
+    ],
+    "notes": "excellent stagger and simple trigger splash damage"
+  },
+  "Chill Clip": {
+    "tier": "A",
+    "rank": 20,
+    "tags": [
+      "utility"
+    ],
+    "notes": "BiS Overload stun perk"
+  },
+  "Ancillary Ordinance": {
+    "tier": "B",
+    "rank": 21,
+    "tags": [
+      "splash"
+    ],
+    "notes": "slow missile but requirement is easy and damage is good with decent radius"
+  },
+  "Voltshot": {
+    "tier": "B",
+    "rank": 22,
+    "tags": [
+      "splash"
+    ],
+    "notes": "decent staggering add clear with reduced uptime due to kill-reload requirement"
+  },
+  "Repulsor Brace": {
+    "tier": "B",
+    "rank": 23,
+    "tags": [
+      "utility"
+    ],
+    "notes": "sustain with Destabilizing Rounds and void builds"
+  },
+  "Lead from Gold": {
+    "tier": "B",
+    "rank": 24,
+    "tags": [
+      "ammo"
+    ],
+    "notes": "allows for focus on heavy generation instead of special"
+  },
+  "Chain Reaction": {
+    "tier": "B",
+    "rank": 25,
+    "tags": [
+      "splash"
+    ],
+    "notes": "still decent splash post-nerf, but only really relevant on specials"
+  },
+  "Slice": {
+    "tier": "B",
+    "rank": 26,
+    "tags": [
+      "utility"
+    ],
+    "notes": "useful for severing boss-tier enemies for Courage and damage reduction"
+  },
+  "Archer's Gambit": {
+    "tier": "B",
+    "rank": 27,
+    "tags": [
+      "reload",
+      "spree"
+    ],
+    "notes": "very significant on-hit draw time reduction"
+  },
+  "Air Trigger": {
+    "tier": "B",
+    "rank": 28,
+    "tags": [
+      "reload",
+      "ammo"
+    ],
+    "notes": "Field Prep without the awkward reload requirement"
+  },
+  "Field Prep": {
+    "tier": "B",
+    "rank": 29,
+    "tags": [
+      "reload",
+      "ammo"
+    ],
+    "notes": "nice passive ammo generation gain"
+  },
+  "Whirlwind Blade": {
+    "tier": "B",
+    "rank": 30,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "BiS consistent sustained sword damage perk"
+  },
+  "Crystalline Corpsebloom": {
+    "tier": "B",
+    "rank": 31,
+    "tags": [
+      "splash"
+    ],
+    "notes": "like Headstone except works on any kill with slightly worse crystal placement"
+  },
+  "Shoot to Loot": {
+    "tier": "B",
+    "rank": 32,
+    "tags": [
+      "refill",
+      "utility"
+    ],
+    "notes": "QoL and damage rotation option in niche endgame damage scenarios"
+  },
+  "Bipod": {
+    "tier": "B",
+    "rank": 33,
+    "tags": [
+      "utility"
+    ],
+    "notes": "solves rocket low shot count issue when combined with Pack Hunter, expands viability"
+  },
+  "Reconstruction": {
+    "tier": "B",
+    "rank": 34,
+    "tags": [
+      "overflow"
+    ],
+    "notes": "free overflow despite massive time requirement"
+  },
+  "Auto-Loading Holster": {
+    "tier": "B",
+    "rank": 35,
+    "tags": [
+      "refill"
+    ],
+    "notes": "still provides high QoL on slow reload weapons even post-nerf"
+  },
+  "Clown Cartridge": {
+    "tier": "B",
+    "rank": 36,
+    "tags": [
+      "overflow"
+    ],
+    "notes": "like Ambitious Assassin but doesn't need kills to reach 2 mag on relevant weapons"
+  },
+  "Relentless Strikes": {
+    "tier": "B",
+    "rank": 37,
+    "tags": [
+      "ammo"
+    ],
+    "notes": "essential for sword total damage"
+  },
+  "Explosive Light": {
+    "tier": "B",
+    "rank": 38,
+    "tags": [
+      "burst",
+      "splash"
+    ],
+    "notes": "decent to good damage, but dependent on either short phase or orb gen roam context"
+  },
+  "Redirection": {
+    "tier": "B",
+    "rank": 39,
+    "tags": [
+      "burst"
+    ],
+    "notes": "excellent storable damage perk on DPS specials and wave frames"
+  },
+  "Firefly": {
+    "tier": "B",
+    "rank": 40,
+    "tags": [
+      "splash",
+      "reload"
+    ],
+    "notes": "decent splash with great reload, good slot efficiency"
+  },
+  "Recombination": {
+    "tier": "C",
+    "rank": 41,
+    "tags": [
+      "burst"
+    ],
+    "notes": "enhances burst of weapons like slugs/aggressive snipers"
+  },
+  "Demolitionist": {
+    "tier": "C",
+    "rank": 42,
+    "tags": [
+      "ability",
+      "refill"
+    ],
+    "notes": "grenade regen and reload options less relevant than ever"
+  },
+  "Cascade Point": {
+    "tier": "C",
+    "rank": 43,
+    "tags": [
+      "burst"
+    ],
+    "notes": "niche extreme burst DPS perk"
+  },
+  "Controlled Burst": {
+    "tier": "C",
+    "rank": 44,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "extremely consistent sustained fusion damage"
+  },
+  "Desperate Measures": {
+    "tier": "C",
+    "rank": 45,
+    "tags": [
+      "spree"
+    ],
+    "notes": "very consistent spree perk in current sandbox, activates at tier 2 while stowed"
+  },
+  "Bewildering Burst": {
+    "tier": "C",
+    "rank": 46,
+    "tags": [
+      "splash"
+    ],
+    "notes": "blind radius is too small to be strongly effective, nice compacting of blinding GL role"
+  },
+  "Sharp Harvest": {
+    "tier": "C",
+    "rank": 47,
+    "tags": [
+      "ammo"
+    ],
+    "notes": "great on roam swords, potentially usable for damage"
+  },
+  "Lead From Light": {
+    "tier": "C",
+    "rank": 48,
+    "tags": [
+      "ammo"
+    ],
+    "notes": "decent but special ammo progress isn't a highly valued stat in endgame right now"
+  },
+  "Impromptu Ammunition": {
+    "tier": "C",
+    "rank": 49,
+    "tags": [
+      "ammo"
+    ],
+    "notes": "multiplicative ammo generation effect, doesn't seem as impactful as raw ammo generation boosts"
+  },
+  "Vorpal Weapon": {
+    "tier": "C",
+    "rank": 50,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "good on LP HCs and some specials"
+  },
+  "Impulse Amplifier": {
+    "tier": "C",
+    "rank": 51,
+    "tags": [
+      "reload"
+    ],
+    "notes": "excellent zero requirement reload perk on certain weapon types"
+  },
+  "Frenzy": {
+    "tier": "C",
+    "rank": 52,
+    "tags": [
+      "sustained",
+      "reload"
+    ],
+    "notes": "all-in-one stat and damage package, just missing splash"
+  },
+  "Surrounded": {
+    "tier": "C",
+    "rank": 53,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "surprisingly applicable in roam content, niche for sustained damage"
+  },
+  "Reciprocity": {
+    "tier": "C",
+    "rank": 54,
+    "tags": [
+      "utility"
+    ],
+    "notes": "essentially gives Restoration if held down"
+  },
+  "Explosive Head": {
+    "tier": "C",
+    "rank": 55,
+    "tags": [
+      "utility"
+    ],
+    "notes": "decent splash and consistent damage on bows"
+  },
+  "Explosive Payload": {
+    "tier": "C",
+    "rank": 56,
+    "tags": [
+      "utility",
+      "spree"
+    ],
+    "notes": "decent base damage, stagger, and champ stun interactions"
+  },
+  "Timed Payload": {
+    "tier": "C",
+    "rank": 57,
+    "tags": [
+      "utility",
+      "spree"
+    ],
+    "notes": "decent base damage, stagger, and champ stun interactions"
+  },
+  "One for All": {
+    "tier": "C",
+    "rank": 58,
+    "tags": [
+      "spree"
+    ],
+    "notes": "great on splash weapons (compressed waves, area denials), decent otherwise"
+  },
+  "Killing Tally": {
+    "tier": "C",
+    "rank": 59,
+    "tags": [
+      "spree"
+    ],
+    "notes": "consistent spree damage with an overflow/refill perk"
+  },
+  "Grave Robber": {
+    "tier": "C",
+    "rank": 60,
+    "tags": [
+      "refill"
+    ],
+    "notes": "BiS Trench and 12P reload perk"
+  },
+  "High Ground": {
+    "tier": "C",
+    "rank": 61,
+    "tags": [
+      "spree",
+      "sustained"
+    ],
+    "notes": "like Rampage with sustainable duration and instant stack option"
+  },
+  "Close to Melee": {
+    "tier": "C",
+    "rank": 62,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "sustained glaive melee damage"
+  },
+  "Bolt Scavenger": {
+    "tier": "C",
+    "rank": 63,
+    "tags": [
+      "reload"
+    ],
+    "notes": "apparently bypasses reload cap on crossbows, pretty noticeable"
+  },
+  "Enlightened Action": {
+    "tier": "C",
+    "rank": 64,
+    "tags": [
+      "reload"
+    ],
+    "notes": "like Rapid Hit but worse stats and no crit requirement"
+  },
+  "Rapid Hit": {
+    "tier": "C",
+    "rank": 65,
+    "tags": [
+      "reload"
+    ],
+    "notes": "best on-hit reload perk, requires crits"
+  },
+  "Precision Instrument": {
+    "tier": "C",
+    "rank": 66,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "like Focused Fury with higher peak damage but no swapping or reloading (without RoF and such)"
+  },
+  "All-Star": {
+    "tier": "C",
+    "rank": 67,
+    "tags": [
+      "damage"
+    ],
+    "notes": "solid damage but bricks aren't as universal as BnS or Honing"
+  },
+  "Firing Line": {
+    "tier": "C",
+    "rank": 68,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "decent sustained damage perk in teams"
+  },
+  "Focused Fury": {
+    "tier": "C",
+    "rank": 69,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "refreshable, swappable, consistent solo sustained damage"
+  },
+  "Replenishing Aegis": {
+    "tier": "C",
+    "rank": 70,
+    "tags": [
+      "refill"
+    ],
+    "notes": "ICD stops it from being useful"
+  },
+  "Slideshot": {
+    "tier": "C",
+    "rank": 71,
+    "tags": [
+      "refill"
+    ],
+    "notes": "transformative for single shot weapon uptime, multishot slides"
+  },
+  "Slideways": {
+    "tier": "C",
+    "rank": 72,
+    "tags": [
+      "refill"
+    ],
+    "notes": "transformative for single shot weapon uptime"
+  },
+  "Detonator Beam": {
+    "tier": "C",
+    "rank": 73,
+    "tags": [
+      "splash"
+    ],
+    "notes": "neutral major shred trace perk"
+  },
+  "Overflow": {
+    "tier": "C",
+    "rank": 74,
+    "tags": [
+      "overflow"
+    ],
+    "notes": "mix of okay QoL trigger and decent effect for DPS setup"
+  },
+  "Cold Steel": {
+    "tier": "C",
+    "rank": 75,
+    "tags": [
+      "utility"
+    ],
+    "notes": "Chill Clip equivalent on a more risky weapon family"
+  },
+  "Archer's Tempo": {
+    "tier": "C",
+    "rank": 76,
+    "tags": [
+      "reload",
+      "spree"
+    ],
+    "notes": "worse than Archer's Gambit, but easy to use uptime bow perk"
+  },
+  "Triple Tap": {
+    "tier": "C",
+    "rank": 77,
+    "tags": [
+      "overflow",
+      "ammo"
+    ],
+    "notes": "FTTC but half efficacy and worse per-mag damage"
+  },
+  "Target Lock": {
+    "tier": "C",
+    "rank": 78,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "LMG damage"
+  },
+  "Burning Ambition": {
+    "tier": "C",
+    "rank": 79,
+    "tags": [
+      "splash",
+      "sustained"
+    ],
+    "notes": "potential synergy with Eunoia, PotBS, and Dragon's Breath, usually not enough scorch"
+  },
+  "Reservoir Burst": {
+    "tier": "C",
+    "rank": 80,
+    "tags": [
+      "splash",
+      "burst"
+    ],
+    "notes": "okay add clear in mid-tier content, decent sustained damage with overflow perk"
+  },
+  "Meganeura": {
+    "tier": "C",
+    "rank": 81,
+    "tags": [
+      "splash"
+    ],
+    "notes": "BiS general on-kill splash perk for crit weapons"
+  },
+  "Onslaught": {
+    "tier": "D",
+    "rank": 82,
+    "tags": [
+      "spree"
+    ],
+    "notes": "underrated, ~59% DPS increase and reload perk, only problem is duration and annoying to max"
+  },
+  "Golden Tricorn": {
+    "tier": "D",
+    "rank": 83,
+    "tags": [
+      "spree"
+    ],
+    "notes": "very high damage spree perk, but requires constant matching ability kills"
+  },
+  "Loose Change": {
+    "tier": "D",
+    "rank": 84,
+    "tags": [
+      "reload"
+    ],
+    "notes": "like Collective Action, actually pretty easy to trigger in current sandbox"
+  },
+  "Sword Logic": {
+    "tier": "D",
+    "rank": 85,
+    "tags": [
+      "spree"
+    ],
+    "notes": "combatant tier gimmick doesn't work out due to time between engagements"
+  },
+  "Envious Assassin": {
+    "tier": "D",
+    "rank": 86,
+    "tags": [
+      "overflow"
+    ],
+    "notes": "still a no swap tripling of base mag even post-nerf"
+  },
+  "Eddy Current": {
+    "tier": "D",
+    "rank": 87,
+    "tags": [
+      "reload"
+    ],
+    "notes": "pretty consistent strong QoL stat buff in current sandbox"
+  },
+  "Beacon Rounds": {
+    "tier": "D",
+    "rank": 88,
+    "tags": [
+      "reload"
+    ],
+    "notes": "middling reload buff with unnecessary QoL tracking"
+  },
+  "Ambitious Assassin": {
+    "tier": "D",
+    "rank": 89,
+    "tags": [
+      "overflow"
+    ],
+    "notes": "great on high lethality low mag weapons (like wave frames) without Clown"
+  },
+  "Headstone": {
+    "tier": "D",
+    "rank": 90,
+    "tags": [
+      "splash"
+    ],
+    "notes": "stasis fragment synergy"
+  },
+  "Dragonfly": {
+    "tier": "D",
+    "rank": 91,
+    "tags": [
+      "splash"
+    ],
+    "notes": "higher splash than Firefly without reload bump"
+  },
+  "Circle of Life": {
+    "tier": "D",
+    "rank": 92,
+    "tags": [
+      "spree"
+    ],
+    "notes": "extremely straightforward trigger, damage is alright"
+  },
+  "Flash Counter": {
+    "tier": "D",
+    "rank": 93,
+    "tags": [
+      "utility"
+    ],
+    "notes": "utility blind for a movement sword"
+  },
+  "Blast Distributor": {
+    "tier": "D",
+    "rank": 94,
+    "tags": [
+      "utility"
+    ],
+    "notes": "only really good on area denials for now, 65 is a big stat bump"
+  },
+  "Unrelenting": {
+    "tier": "D",
+    "rank": 95,
+    "tags": [
+      "utility"
+    ],
+    "notes": "sustain on high lethality weapons"
+  },
+  "Tear": {
+    "tier": "D",
+    "rank": 96,
+    "tags": [
+      "splash"
+    ],
+    "notes": "similar to Demoralize, not really a needed niche"
+  },
+  "Demoralize": {
+    "tier": "D",
+    "rank": 97,
+    "tags": [
+      "splash"
+    ],
+    "notes": "Destabilizing's less useful younger brother"
+  },
+  "Collective Pugilism": {
+    "tier": "D",
+    "rank": 98,
+    "tags": [
+      "ability"
+    ],
+    "notes": "pretty solid melee on hit on certain archetypes, but build-dependent for subclass pickups"
+  },
+  "Rolling Storm": {
+    "tier": "D",
+    "rank": 99,
+    "tags": [
+      "splash"
+    ],
+    "notes": "doesn't significantly affect Bolt Charge builds, has okay melee build potential"
+  },
+  "Threat Detector": {
+    "tier": "D",
+    "rank": 100,
+    "tags": [
+      "reload"
+    ],
+    "notes": "can be used to boost handling or to boost reload, only good near 2 enemies"
+  },
+  "Master of Arms": {
+    "tier": "D",
+    "rank": 101,
+    "tags": [
+      "spree"
+    ],
+    "notes": "like Paracausal Affinity, but layered uptime and higher max"
+  },
+  "Paracausal Affinity": {
+    "tier": "D",
+    "rank": 102,
+    "tags": [
+      "spree"
+    ],
+    "notes": "basically guaranteed spree perk"
+  },
+  "Swashbuckler": {
+    "tier": "D",
+    "rank": 103,
+    "tags": [
+      "spree"
+    ],
+    "notes": "better duration and uptime vs. AJ"
+  },
+  "Pugilist": {
+    "tier": "D",
+    "rank": 104,
+    "tags": [
+      "ability"
+    ],
+    "notes": "fill perk, more useful on add clear weapons than most other ability regen perks"
+  },
+  "Discord": {
+    "tier": "D",
+    "rank": 105,
+    "tags": [
+      "ammo"
+    ],
+    "notes": "stretching ammo economy on one-shot specials"
+  },
+  "Cluster Bomb": {
+    "tier": "D",
+    "rank": 106,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "situationally decent depending on boss model"
+  },
+  "Deconstruct": {
+    "tier": "D",
+    "rank": 107,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "vehicle/construct damage"
+  },
+  "Rampage": {
+    "tier": "D",
+    "rank": 108,
+    "tags": [
+      "spree"
+    ],
+    "notes": "much better alternatives"
+  },
+  "Trickle Charge": {
+    "tier": "D",
+    "rank": 109,
+    "tags": [
+      "refill"
+    ],
+    "notes": "solid refill effect but more annoying than meta refill perk requirements"
+  },
+  "Subsistence": {
+    "tier": "E",
+    "rank": 110,
+    "tags": [
+      "refill"
+    ],
+    "notes": "situational refill dependent on TtK"
+  },
+  "Desperado": {
+    "tier": "E",
+    "rank": 111,
+    "tags": [
+      "spree"
+    ],
+    "notes": "tier 2 Onslaught equivalent for one kill"
+  },
+  "Stats for All": {
+    "tier": "E",
+    "rank": 112,
+    "tags": [
+      "reload"
+    ],
+    "notes": "decent paired with OfA"
+  },
+  "Adrenaline Junkie": {
+    "tier": "E",
+    "rank": 113,
+    "tags": [
+      "spree"
+    ],
+    "notes": "mediocre uptime but easy to max with grenade builds"
+  },
+  "Multikill Clip": {
+    "tier": "E",
+    "rank": 114,
+    "tags": [
+      "spree"
+    ],
+    "notes": "potentially decent on wave frames and other high lethality splash weapons"
+  },
+  "Compulsive Reloader": {
+    "tier": "E",
+    "rank": 115,
+    "tags": [
+      "reload"
+    ],
+    "notes": "playstyle and weapon-dependent"
+  },
+  "En Garde": {
+    "tier": "E",
+    "rank": 116,
+    "tags": [
+      "burst"
+    ],
+    "notes": "sword swap rotation perk"
+  },
+  "Kill Clip": {
+    "tier": "E",
+    "rank": 117,
+    "tags": [
+      "spree"
+    ],
+    "notes": "decent on wave frames"
+  },
+  "Adagio": {
+    "tier": "E",
+    "rank": 118,
+    "tags": [
+      "spree"
+    ],
+    "notes": "single shot damage on rocket sidearms"
+  },
+  "Proximity Power": {
+    "tier": "E",
+    "rank": 119,
+    "tags": [
+      "utility"
+    ],
+    "notes": "stats too low, kill requirement too high, compare against Blast Distributor"
+  },
+  "Unstoppable Force": {
+    "tier": "E",
+    "rank": 120,
+    "tags": [
+      "utility"
+    ],
+    "notes": "unhelpful boost to offensive aspect of glaives"
+  },
+  "Melee Momentum": {
+    "tier": "E",
+    "rank": 121,
+    "tags": [
+      "utility"
+    ],
+    "notes": "perhaps a niche option for glaive melee-centric builds"
+  },
+  "Rimestealer": {
+    "tier": "E",
+    "rank": 122,
+    "tags": [
+      "utility"
+    ],
+    "notes": "Frost Armor source on stasis builds"
+  },
+  "Under-Over": {
+    "tier": "E",
+    "rank": 123,
+    "tags": [
+      "utility"
+    ],
+    "notes": "Barrier primaries"
+  },
+  "Disruption Break": {
+    "tier": "E",
+    "rank": 124,
+    "tags": [
+      "utility"
+    ],
+    "notes": "shielded high-health targets rare"
+  },
+  "Hatchling": {
+    "tier": "E",
+    "rank": 125,
+    "tags": [
+      "splash"
+    ],
+    "notes": "worst 3.0 splash effect"
+  },
+  "Dual Loader": {
+    "tier": "E",
+    "rank": 126,
+    "tags": [
+      "reload"
+    ],
+    "notes": "great with low RoF Trench shotguns"
+  },
+  "Lasting Impression": {
+    "tier": "E",
+    "rank": 127,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "outdated unconditional damage boost"
+  },
+  "Full Court": {
+    "tier": "E",
+    "rank": 128,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "niche sustained damage for HGLs"
+  },
+  "Strategist": {
+    "tier": "E",
+    "rank": 129,
+    "tags": [
+      "ability"
+    ],
+    "notes": "least useful ability to waste a regen perk on"
+  },
+  "Thresh": {
+    "tier": "E",
+    "rank": 130,
+    "tags": [
+      "ability"
+    ],
+    "notes": "weapon kills not as coveted for super farming any more"
+  },
+  "Wellspring": {
+    "tier": "E",
+    "rank": 131,
+    "tags": [
+      "ability"
+    ],
+    "notes": "mathematically inefficient compared to other ability perks"
+  },
+  "Cooling Baubles": {
+    "tier": "E",
+    "rank": 132,
+    "tags": [
+      "refill"
+    ],
+    "notes": "niche usage for longer single mag firing use cases"
+  },
+  "Supercharged Magazine": {
+    "tier": "E",
+    "rank": 133,
+    "tags": [
+      "refill"
+    ],
+    "notes": "refill too slow with just Amplified, Speed Booster unrealistic activation during damage"
+  },
+  "Feeding Frenzy": {
+    "tier": "F",
+    "rank": 134,
+    "tags": [
+      "reload"
+    ],
+    "notes": "decent on spree primaries"
+  },
+  "Ensemble": {
+    "tier": "F",
+    "rank": 135,
+    "tags": [
+      "reload"
+    ],
+    "notes": "acceptable in team settings"
+  },
+  "Harmony": {
+    "tier": "F",
+    "rank": 136,
+    "tags": [
+      "spree"
+    ],
+    "notes": "better alternatives in same damage tier"
+  },
+  "Successful Warm-Up": {
+    "tier": "F",
+    "rank": 137,
+    "tags": [
+      "spree"
+    ],
+    "notes": "potentially strong if fusion minor scalar gets buffed"
+  },
+  "Binary Orbit": {
+    "tier": "F",
+    "rank": 138,
+    "tags": [
+      "spree"
+    ],
+    "notes": "build-dependent, but a decent refreshable roam option"
+  },
+  "Assassin's Blade": {
+    "tier": "F",
+    "rank": 139,
+    "tags": [
+      "spree"
+    ],
+    "notes": "better roam perks"
+  },
+  "Collective Action": {
+    "tier": "F",
+    "rank": 140,
+    "tags": [
+      "spree"
+    ],
+    "notes": "fairly consistent spree perk in current sandbox"
+  },
+  "Adhesive Ordnance": {
+    "tier": "F",
+    "rank": 141,
+    "tags": [
+      "damage",
+      "splash"
+    ],
+    "notes": "only really useful for Recomb-style play or brick spam mods"
+  },
+  "Tracking Module": {
+    "tier": "F",
+    "rank": 142,
+    "tags": [
+      "utility"
+    ],
+    "notes": "good frame + moving boss"
+  },
+  "Recycled Energy": {
+    "tier": "F",
+    "rank": 143,
+    "tags": [
+      "ability"
+    ],
+    "notes": "supports multikills, but still less efficient than other ability perks that don't need reloads"
+  },
+  "Shield Disorient": {
+    "tier": "F",
+    "rank": 144,
+    "tags": [
+      "utility"
+    ],
+    "notes": "usually not very relevant given current sandbox"
+  },
+  "Genesis": {
+    "tier": "F",
+    "rank": 145,
+    "tags": [
+      "utility"
+    ],
+    "notes": "okay on Barrier primaries"
+  },
+  "Immovable Object": {
+    "tier": "F",
+    "rank": 146,
+    "tags": [
+      "utility"
+    ],
+    "notes": "underrated but requires no movement"
+  },
+  "Energy Transfer": {
+    "tier": "F",
+    "rank": 147,
+    "tags": [
+      "utility"
+    ],
+    "notes": "underrated but class ability not high value"
+  },
+  "Slickdraw": {
+    "tier": "F",
+    "rank": 148,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "niche swap rotations"
+  },
+  "Quickdraw": {
+    "tier": "F",
+    "rank": 149,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "niche swap rotations"
+  },
+  "Danger Zone": {
+    "tier": "F",
+    "rank": 150,
+    "tags": [
+      "utility"
+    ],
+    "notes": "rocket jumping :D"
+  },
+  "Cornered": {
+    "tier": "F",
+    "rank": 151,
+    "tags": [
+      "burst"
+    ],
+    "notes": "extremely niche; paired with Surrounded"
+  },
+  "Backup Plan": {
+    "tier": "F",
+    "rank": 152,
+    "tags": [
+      "burst"
+    ],
+    "notes": "lowering initial charge on high-impacts"
+  },
+  "Outlaw": {
+    "tier": "F",
+    "rank": 153,
+    "tags": [
+      "reload"
+    ],
+    "notes": "outdated trigger"
+  },
+  "Tireless Blade": {
+    "tier": "F",
+    "rank": 154,
+    "tags": [
+      "ammo"
+    ],
+    "notes": "worse than Relentless in every circumstance"
+  },
+  "Blunt Execution Rounds": {
+    "tier": "F",
+    "rank": 155,
+    "tags": [
+      "burst"
+    ],
+    "notes": "ICD keeps it from being great"
+  },
+  "Counterattack": {
+    "tier": "F",
+    "rank": 156,
+    "tags": [
+      "burst"
+    ],
+    "notes": "very inconsistent upkeep"
+  },
+  "High-Impact Reserves": {
+    "tier": "F",
+    "rank": 157,
+    "tags": [
+      "sustained"
+    ],
+    "notes": "worse than Vorpal across entire mag"
+  },
+  "Adaptive Munitions": {
+    "tier": "F",
+    "rank": 158,
+    "tags": [
+      "utility"
+    ],
+    "notes": "Barrier primaries"
+  },
+  "Stopping Power": {
+    "tier": "F",
+    "rank": 159,
+    "tags": [
+      "damage"
+    ],
+    "notes": "not good enough to surpass other double damage perks"
+  },
+  "Osmosis": {
+    "tier": "F",
+    "rank": 160,
+    "tags": [
+      "utility"
+    ],
+    "notes": "affinity change is useless, mag refill is okay"
+  },
+  "Permeability": {
+    "tier": "F",
+    "rank": 161,
+    "tags": [
+      "utility"
+    ],
+    "notes": "affinity change is useless, mag refill is okay"
+  },
+  "Celerity": {
+    "tier": "F",
+    "rank": 162,
+    "tags": [
+      "reload"
+    ],
+    "notes": "better alternatives"
+  },
+  "Elemental Capacitor": {
+    "tier": "F",
+    "rank": 163,
+    "tags": [
+      "reload"
+    ],
+    "notes": "better subclass-agnostic alternatives"
+  },
+  "Thermal Atomization": {
+    "tier": "F",
+    "rank": 164,
+    "tags": [
+      "damage",
+      "splash"
+    ],
+    "notes": "like HIR with a mediocre splash effect, not very good"
+  },
+  "Surplus": {
+    "tier": "F",
+    "rank": 165,
+    "tags": [
+      "reload"
+    ],
+    "notes": "more consistent alternatives"
+  },
+  "Sleight of Hand": {
+    "tier": "F",
+    "rank": 166,
+    "tags": [
+      "reload"
+    ],
+    "notes": "better alternatives"
+  },
+  "Keep Away": {
+    "tier": "F",
+    "rank": 167,
+    "tags": [
+      "reload"
+    ],
+    "notes": "decent reload, just better options"
+  },
+  "Turnabout": {
+    "tier": "F",
+    "rank": 168,
+    "tags": [
+      "utility"
+    ],
+    "notes": "non-3.0 overshield with very low HP"
+  },
+  "Mulligan": {
+    "tier": "F",
+    "rank": 169,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "interaction with Armor-Piercing Rounds"
+  },
+  "Snapshot Sights": {
+    "tier": "F",
+    "rank": 170,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "QoL on snipers"
+  },
+  "Lone Wolf": {
+    "tier": "F",
+    "rank": 171,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "pseudo-Snapshot"
+  },
+  "Tap The Trigger": {
+    "tier": "F",
+    "rank": 172,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "Shoot to Loot traces"
+  },
+  "Reversal of Fortune": {
+    "tier": "F",
+    "rank": 173,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "possible interaction with Armor-Piercing Rounds, otherwise useless"
+  },
+  "Sympathetic Arsenal": {
+    "tier": "F",
+    "rank": 174,
+    "tags": [
+      "refill",
+      "reload"
+    ],
+    "notes": "Envious Arsenal's younger and much less cool brother"
+  },
+  "Perpetual Motion": {
+    "tier": "F",
+    "rank": 175,
+    "tags": [
+      "reload"
+    ],
+    "notes": "annoying upkeep and pitiful stats"
+  },
+  "Magnificent Howl": {
+    "tier": "F",
+    "rank": 176,
+    "tags": [
+      "spree"
+    ],
+    "notes": "awful damage return"
+  },
+  "Full Auto Trigger System": {
+    "tier": "F",
+    "rank": 177,
+    "tags": [
+      "burst"
+    ],
+    "notes": "worse Cascade Point"
+  },
+  "Box Breathing": {
+    "tier": "F",
+    "rank": 178,
+    "tags": [
+      "burst"
+    ],
+    "notes": "awful damage return"
+  },
+  "Reverberation": {
+    "tier": "F",
+    "rank": 179,
+    "tags": [
+      "splash"
+    ],
+    "notes": "better alternatives or literally does nothing"
+  },
+  "Butterfly": {
+    "tier": "F",
+    "rank": 180,
+    "tags": [
+      "splash"
+    ],
+    "notes": "terrible payoff for ADS + kill"
+  },
+  "Bottomless Grief": {
+    "tier": "F",
+    "rank": 181,
+    "tags": [
+      "reload"
+    ],
+    "notes": "mag increase never worth"
+  },
+  "Kickstart": {
+    "tier": "F",
+    "rank": 182,
+    "tags": [
+      "burst"
+    ],
+    "notes": "boost awful and short"
+  },
+  "Valiant Charge": {
+    "tier": "F",
+    "rank": 183,
+    "tags": [
+      "utility"
+    ],
+    "notes": "Eager better universally post-healing patch"
+  },
+  "Duelist's Trance": {
+    "tier": "F",
+    "rank": 184,
+    "tags": [
+      "utility"
+    ],
+    "notes": "60 charge never worth over Relentless"
+  },
+  "Pulse Monitor": {
+    "tier": "F",
+    "rank": 185,
+    "tags": [
+      "refill"
+    ],
+    "notes": "low health rotations are a gimmick"
+  },
+  "Shattering Blade": {
+    "tier": "F",
+    "rank": 186,
+    "tags": [
+      "burst"
+    ],
+    "notes": "awful damage return"
+  },
+  "Sneak Bow": {
+    "tier": "F",
+    "rank": 187,
+    "tags": [
+      "reload"
+    ],
+    "notes": "much worse than draw time"
+  },
+  "Steady Hands": {
+    "tier": "F",
+    "rank": 188,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Killing Wind": {
+    "tier": "G",
+    "rank": 189,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Shot Swap": {
+    "tier": "G",
+    "rank": 190,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Dynamic Sway Reduction": {
+    "tier": "G",
+    "rank": 191,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Zen Moment": {
+    "tier": "G",
+    "rank": 192,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Well-Rounded": {
+    "tier": "G",
+    "rank": 193,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "much better alternatives"
+  },
+  "Headseeker": {
+    "tier": "G",
+    "rank": 194,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Firmly Planted": {
+    "tier": "G",
+    "rank": 195,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Gutshot Straight": {
+    "tier": "G",
+    "rank": 196,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Fragile Focus": {
+    "tier": "G",
+    "rank": 197,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Threat Remover": {
+    "tier": "G",
+    "rank": 198,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "stats useless after shot"
+  },
+  "Iron Reach": {
+    "tier": "G",
+    "rank": 199,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Transcendent Moment": {
+    "tier": "G",
+    "rank": 200,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Tilting at Windmills": {
+    "tier": "G",
+    "rank": 201,
+    "tags": [
+      "utility"
+    ],
+    "notes": "does effectively nothing"
+  },
+  "No Distractions": {
+    "tier": "G",
+    "rank": 202,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Air Assault": {
+    "tier": "G",
+    "rank": 203,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Delicate Tuning": {
+    "tier": "G",
+    "rank": 204,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "To The Pain": {
+    "tier": "G",
+    "rank": 205,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Perfect Float": {
+    "tier": "G",
+    "rank": 206,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Barrel Constrictor": {
+    "tier": "G",
+    "rank": 207,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Moving Target": {
+    "tier": "G",
+    "rank": 208,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Iron Gaze": {
+    "tier": "G",
+    "rank": 209,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Tunnel Vision": {
+    "tier": "G",
+    "rank": 210,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Closing Time": {
+    "tier": "G",
+    "rank": 211,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Hip-Fire Grip": {
+    "tier": "G",
+    "rank": 212,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Encore": {
+    "tier": "G",
+    "rank": 213,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Built to Blast": {
+    "tier": "G",
+    "rank": 214,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Heating Up": {
+    "tier": "G",
+    "rank": 215,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Offhand Strike": {
+    "tier": "G",
+    "rank": 216,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Under Pressure": {
+    "tier": "G",
+    "rank": 217,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Rangefinder": {
+    "tier": "G",
+    "rank": 218,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Opening Shot": {
+    "tier": "G",
+    "rank": 219,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Eye of the Storm": {
+    "tier": "G",
+    "rank": 220,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Invisible Hand": {
+    "tier": "G",
+    "rank": 221,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "PvP"
+  },
+  "Iron Grip": {
+    "tier": "G",
+    "rank": 222,
+    "tags": [
+      "PvP"
+    ],
+    "notes": "literally lowers reload"
+  }
+}

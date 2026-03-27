@@ -8,6 +8,7 @@ import {
 } from './bungieTypes';
 import { getCurves } from '../archetypes';
 import { getBuffKeyForPerk } from '../buffDatabase';
+import { getPerkTier } from '../perkTierDatabase';
 
 const WEAPON_ITEM_TYPE = 3;
 
@@ -60,6 +61,17 @@ function isIntrinsicCategory(name: string): boolean {
 function isOriginTraitCategory(name: string): boolean {
   return name.toLowerCase().includes('origin');
 }
+
+function isTrackerCategory(name: string): boolean {
+  return name.toLowerCase().includes('tracker');
+}
+
+// Known tracker plug names — belt-and-suspenders filter if the category name slips through
+const TRACKER_PLUG_NAMES = new Set([
+  'Crucible Tracker', 'Vanguard Tracker', 'Gambit Tracker', 'Trials Tracker',
+  'Valor Tracker', 'Glory Tracker', 'Infamy Tracker', 'Competitive Tracker',
+  'Kill Tracker', 'Defeat Tracker', 'Invasion Tracker', 'Nightmare Tracker',
+]);
 
 /** Map a socket category name to a human-readable column label */
 function columnLabel(catName: string, slotIndex: number, totalSlots: number): string {
@@ -139,8 +151,9 @@ export function parseWeapons(
         if (!catDef) continue;
         const catName = catDef.displayProperties.name;
 
-        // Skip origin traits (handled separately / out of scope)
+        // Skip origin traits and tracker sockets
         if (isOriginTraitCategory(catName)) continue;
+        if (isTrackerCategory(catName)) continue;
 
         const isIntrinsic = isIntrinsicCategory(catName);
         if (!isIntrinsic && !isPerkCategory(catName)) continue;
@@ -185,6 +198,10 @@ export function parseWeapons(
 
             const perkName = plugItem.displayProperties.name;
 
+            // Belt-and-suspenders: skip any tracker plugs that slipped through
+            if (TRACKER_PLUG_NAMES.has(perkName)) continue;
+            if (perkName.toLowerCase().includes('tracker')) continue;
+
             const statModifiers = (plugItem.investmentStats ?? [])
               .filter((s) => !s.isConditionallyActive && s.value !== 0)
               .map((s) => {
@@ -194,6 +211,7 @@ export function parseWeapons(
               })
               .filter((s): s is { statName: string; value: number } => s !== null);
 
+            const tierEntry = getPerkTier(perkName);
             perks.push({
               hash: hashStr,
               name: perkName,
@@ -202,6 +220,7 @@ export function parseWeapons(
               statModifiers,
               isEnhanced: isEnhancedPerk(perkName),
               buffKey: getBuffKeyForPerk(perkName),
+              tier: tierEntry?.tier ?? null,
             });
           }
 

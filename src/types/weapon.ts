@@ -21,6 +21,8 @@ export interface Perk {
   isEnhanced: boolean;
   /** If set, selecting this perk auto-activates the matching buff key */
   buffKey: string | null;
+  /** PvE tier from community analysis: S/A/B/C/D/E/F/G, or null if unrated */
+  tier: string | null;
 }
 
 export interface PerkColumn {

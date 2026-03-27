@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE } from '../../lib/buffDatabase';
+import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 
 const BUNGIE_URL = 'https://www.bungie.net';
 
@@ -96,12 +97,27 @@ export const EffectsPanel: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <span className="font-semibold text-sm text-amber-400 truncate block">
-                      {name}
-                      {isEnhanced && (
-                        <span className="ml-1.5 text-xs text-amber-300 font-normal">(Enhanced)</span>
-                      )}
-                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm text-amber-400">
+                        {name}
+                        {isEnhanced && (
+                          <span className="ml-1.5 text-xs text-amber-300 font-normal">(Enhanced)</span>
+                        )}
+                      </span>
+                      {/* Tier badge */}
+                      {(() => {
+                        const p = activeWeapon.perkSockets
+                          .find((c) => c.name === columnName)
+                          ?.perks.find((p) => p.hash === perkHash);
+                        if (!p?.tier) return null;
+                        const cfg = TIER_CONFIG[p.tier as PerkTier];
+                        return cfg ? (
+                          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded leading-none shrink-0 ${cfg.badge}`}>
+                            {cfg.label}
+                          </span>
+                        ) : null;
+                      })()}
+                    </div>
                     <span className="text-xs text-slate-500 uppercase tracking-wide">{columnName}</span>
                   </div>
 
