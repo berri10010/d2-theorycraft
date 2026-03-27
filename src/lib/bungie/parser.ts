@@ -57,6 +57,25 @@ function isIntrinsicCategory(name: string): boolean {
   return name.toLowerCase().includes('intrinsic');
 }
 
+function isOriginTraitCategory(name: string): boolean {
+  return name.toLowerCase().includes('origin');
+}
+
+/** Map a socket category name to a human-readable column label */
+function columnLabel(catName: string, slotIndex: number, totalSlots: number): string {
+  const lower = catName.toLowerCase();
+  if (lower.includes('barrel') || lower.includes('sight') || lower.includes('bowstring') ||
+      lower.includes('blade') || lower.includes('guard') || lower.includes('battery')) {
+    return formatCategoryName(catName.replace(/^weapon\s+/i, ''));
+  }
+  if (lower.includes('magazine') || lower.includes('arrow') || lower.includes('projectile')) {
+    return formatCategoryName(catName.replace(/^weapon\s+/i, ''));
+  }
+  // Weapon perk slots (the two trait columns) → "Trait 1", "Trait 2"
+  if (totalSlots > 1) return `Trait ${slotIndex + 1}`;
+  return formatCategoryName(catName);
+}
+
 function formatCategoryName(raw: string): string {
   return raw.split(' ')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
@@ -111,24 +130,29 @@ export function parseWeapons(
     const perkSockets: PerkColumn[] = [];
     let intrinsicTrait: Perk | null = null;
 
+    // Bar stats that support perk stat-modifier deltas
+    const BAR_STATS = new Set(['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance']);
+
     if (item.sockets?.socketCategories && item.sockets?.socketEntries) {
       for (const category of item.sockets.socketCategories) {
         const catDef = socketCategoryDefs[category.socketCategoryHash.toString()];
         if (!catDef) continue;
         const catName = catDef.displayProperties.name;
 
+        // Skip origin traits (handled separately / out of scope)
+        if (isOriginTraitCategory(catName)) continue;
+
         const isIntrinsic = isIntrinsicCategory(catName);
         if (!isIntrinsic && !isPerkCategory(catName)) continue;
 
-        const perks: Perk[] = [];
-        const seenPlugs = new Set<string>();
+        const { socketIndexes } = category;
 
-        // Bar stats that benefit from perk stat modifier deltas
-        const BAR_STATS = new Set(['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance']);
-
-        for (const socketIndex of category.socketIndexes) {
-          const socket = item.sockets.socketEntries[socketIndex];
-          if (!socket) continue;
+        // One PerkColumn per socket index — each index is one physical slot on the weapon.
+        // "WEAPON PERKS" has two indexes (Trait 1, Trait 2); barrel/magazine categories
+        // typically have one. Putting both traits in the same list was the original bug.
+        socketIndexes.forEach((socketIndex, slotPos) => {
+          const socket = item.sockets!.socketEntries[socketIndex];
+          if (!socket) return;
 
           let plugHashes: number[] = [];
 
@@ -146,6 +170,9 @@ export function parseWeapons(
           if (plugHashes.length === 0 && socket.singleInitialItemHash) {
             plugHashes = [socket.singleInitialItemHash];
           }
+
+          const perks: Perk[] = [];
+          const seenPlugs = new Set<string>();
 
           for (const plugHash of plugHashes) {
             const hashStr = plugHash.toString();
@@ -167,7 +194,7 @@ export function parseWeapons(
               })
               .filter((s): s is { statName: string; value: number } => s !== null);
 
-            const perk: Perk = {
+            perks.push({
               hash: hashStr,
               name: perkName,
               icon: plugItem.displayProperties.icon,
@@ -175,18 +202,21 @@ export function parseWeapons(
               statModifiers,
               isEnhanced: isEnhancedPerk(perkName),
               buffKey: getBuffKeyForPerk(perkName),
-            };
-
-            perks.push(perk);
+            });
           }
-        }
 
-        if (isIntrinsic) {
-          // Use first perk in the intrinsic category as the intrinsic trait
-          if (perks.length > 0) intrinsicTrait = perks[0];
-        } else if (perks.length > 0) {
-          perkSockets.push({ name: formatCategoryName(catName), perks });
-        }
+          if (perks.length === 0) return;
+
+          if (isIntrinsic) {
+            // Grab the first perk as the intrinsic frame trait
+            intrinsicTrait = perks[0];
+          } else {
+            perkSockets.push({
+              name: columnLabel(catName, slotPos, socketIndexes.length),
+              perks,
+            });
+          }
+        });
       }
     }
 
