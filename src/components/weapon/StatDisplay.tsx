@@ -10,7 +10,11 @@ const STAT_TRANSLATIONS: Record<string, { label: string; unit: string }> = {
   Reload:   { label: 'Time',    unit: 's' },
 };
 
-const STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance'];
+// Stats with bar visualisation + optional curve translation
+const BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance'];
+
+// Stats shown as plain numbers (no meaningful 0-100 bar)
+const NUMERIC_STAT_KEYS = ['Zoom', 'Airborne Effectiveness', 'Inventory Size', 'Recoil Direction', 'Magazine'];
 
 export const StatDisplay: React.FC = () => {
   const { activeWeapon, getCalculatedStats } = useWeaponStore();
@@ -23,7 +27,7 @@ export const StatDisplay: React.FC = () => {
     <div className="bg-slate-900/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-slate-800">
       <h2 className="text-xl font-bold mb-6 text-slate-100">Weapon Stats</h2>
       <div className="flex flex-col gap-4">
-        {STAT_KEYS.map((statName) => {
+        {BAR_STAT_KEYS.map((statName) => {
           const base    = baseStats[statName] ?? 0;
           const current = calcStats[statName] ?? base;
           const diff    = current - base;
@@ -74,6 +78,36 @@ export const StatDisplay: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Numeric-only stats */}
+      {NUMERIC_STAT_KEYS.some((k) => (calcStats[k] ?? baseStats[k]) !== undefined) && (
+        <>
+          <div className="border-t border-slate-800 mt-2 pt-4">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              {NUMERIC_STAT_KEYS.map((statName) => {
+                const base    = baseStats[statName];
+                const current = calcStats[statName] ?? base;
+                if (current === undefined) return null;
+                const diff = current - (base ?? current);
+                return (
+                  <div key={statName} className="flex items-center justify-between text-sm">
+                    <span className="text-slate-400">{statName}</span>
+                    <span className={
+                      'font-mono font-bold ' +
+                      (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-slate-100')
+                    }>
+                      {current}
+                      {diff !== 0 && (
+                        <span className="text-xs ml-1">({diff > 0 ? '+' : ''}{diff})</span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

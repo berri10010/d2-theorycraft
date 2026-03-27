@@ -7,6 +7,7 @@ import { useCompareStore } from '../store/useCompareStore';
 import { useWeaponDb } from '../store/useWeaponDb';
 import { SearchSidebar } from '../components/layout/SearchSidebar';
 import { RollEditor } from '../components/weapon/RollEditor';
+import { EffectsPanel } from '../components/weapon/EffectsPanel';
 import { StatDisplay } from '../components/weapon/StatDisplay';
 import { BuffToggle } from '../components/ui/BuffToggle';
 import { TTKPanel } from '../components/ui/TTKPanel';
@@ -227,6 +228,7 @@ function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div className="lg:col-span-7 space-y-6">
                 <RollEditor />
+                <EffectsPanel />
                 <BuffToggle />
               </div>
               <div className="lg:col-span-5 space-y-6">
