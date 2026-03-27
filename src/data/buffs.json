@@ -1,0 +1,66 @@
+{
+  "kill_clip": {
+    "hash": "kill_clip",
+    "name": "Kill Clip",
+    "type": "perk",
+    "multiplier": 1.25,
+    "description": "Reloading after a kill grants increased damage.",
+    "perkNames": ["Kill Clip", "Enhanced Kill Clip"]
+  },
+  "radiant": {
+    "hash": "radiant",
+    "name": "Radiant",
+    "type": "empowering",
+    "multiplier": 1.10,
+    "description": "Increases weapon damage against all targets.",
+    "perkNames": []
+  },
+  "target_lock": {
+    "hash": "target_lock",
+    "name": "Target Lock (Max)",
+    "type": "perk",
+    "multiplier": 1.40,
+    "description": "Continued damage increases output. Value shown at maximum stacks.",
+    "perkNames": ["Target Lock", "Enhanced Target Lock"]
+  },
+  "frenzy": {
+    "hash": "frenzy",
+    "name": "Frenzy",
+    "type": "perk",
+    "multiplier": 1.15,
+    "description": "After 12s in combat, increases damage, handling, and reload.",
+    "perkNames": ["Frenzy", "Enhanced Frenzy"]
+  },
+  "surrounded": {
+    "hash": "surrounded",
+    "name": "Surrounded",
+    "type": "perk",
+    "multiplier": 1.40,
+    "description": "Increased damage when three or more enemies are nearby.",
+    "perkNames": ["Surrounded", "Enhanced Surrounded"]
+  },
+  "golden_tricorn_x2": {
+    "hash": "golden_tricorn_x2",
+    "name": "Golden Tricorn x2",
+    "type": "perk",
+    "multiplier": 1.15,
+    "description": "After a weapon kill of matching damage type.",
+    "perkNames": []
+  },
+  "golden_tricorn_x3": {
+    "hash": "golden_tricorn_x3",
+    "name": "Golden Tricorn x3",
+    "type": "perk",
+    "multiplier": 1.50,
+    "description": "After an ability kill of matching damage type.",
+    "perkNames": ["Golden Tricorn", "Enhanced Golden Tricorn"]
+  },
+  "explosive_light": {
+    "hash": "explosive_light",
+    "name": "Explosive Light",
+    "type": "perk",
+    "multiplier": 1.25,
+    "description": "Picking up an orb increases damage for the next shot.",
+    "perkNames": ["Explosive Light", "Enhanced Explosive Light"]
+  }
+}

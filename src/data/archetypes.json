@@ -1,0 +1,106 @@
+{
+  "resilienceHp": {
+    "0": 192, "1": 193, "2": 194, "3": 196, "4": 198,
+    "5": 200, "6": 202, "7": 204, "8": 206, "9": 208, "10": 230
+  },
+  "subtypes": {
+    "6":  { "name": "Auto Rifle",              "rpmBuckets": [360, 450, 600, 720] },
+    "7":  { "name": "Shotgun",                 "rpmBuckets": [55, 65, 80] },
+    "8":  { "name": "Machine Gun",             "rpmBuckets": [360, 450, 900] },
+    "9":  { "name": "Hand Cannon",             "rpmBuckets": [120, 140, 150, 180] },
+    "11": { "name": "Fusion Rifle",            "rpmBuckets": [500, 540, 660, 740, 860, 960] },
+    "12": { "name": "Sniper Rifle",            "rpmBuckets": [72, 90, 140] },
+    "13": { "name": "Pulse Rifle",             "rpmBuckets": [340, 390, 450, 540] },
+    "14": { "name": "Scout Rifle",             "rpmBuckets": [120, 150, 180, 260] },
+    "17": { "name": "Sidearm",                 "rpmBuckets": [300, 325, 491] },
+    "22": { "name": "Linear Fusion Rifle",     "rpmBuckets": [533, 533] },
+    "24": { "name": "SMG",                     "rpmBuckets": [600, 750, 900] },
+    "25": { "name": "Grenade Launcher",        "rpmBuckets": [90, 120] },
+    "29": { "name": "Trace Rifle",             "rpmBuckets": [1000] },
+    "31": { "name": "Bow",                     "rpmBuckets": [50, 60, 70, 80] }
+  },
+  "archetypes": {
+    "9_120":  { "label": "Aggressive Frame",   "pvp": { "crit": 83, "body": 49, "burstSize": 1 }, "pve": { "crit": 248, "body": 147, "burstSize": 1 } },
+    "9_140":  { "label": "Adaptive Frame",     "pvp": { "crit": 70, "body": 41, "burstSize": 1 }, "pve": { "crit": 206, "body": 121, "burstSize": 1 } },
+    "9_150":  { "label": "Lightweight Frame",  "pvp": { "crit": 68, "body": 40, "burstSize": 1 }, "pve": { "crit": 199, "body": 117, "burstSize": 1 } },
+    "9_180":  { "label": "Precision Frame",    "pvp": { "crit": 55, "body": 32, "burstSize": 1 }, "pve": { "crit": 162, "body":  94, "burstSize": 1 } },
+
+    "6_360":  { "label": "High-Impact Frame",  "pvp": { "crit": 24, "body": 14, "burstSize": 1 }, "pve": { "crit":  70, "body":  41, "burstSize": 1 } },
+    "6_450":  { "label": "Adaptive Frame",     "pvp": { "crit": 18, "body": 11, "burstSize": 1 }, "pve": { "crit":  53, "body":  31, "burstSize": 1 } },
+    "6_600":  { "label": "Precision Frame",    "pvp": { "crit": 14, "body":  9, "burstSize": 1 }, "pve": { "crit":  41, "body":  26, "burstSize": 1 } },
+    "6_720":  { "label": "Rapid-Fire Frame",   "pvp": { "crit": 12, "body":  7, "burstSize": 1 }, "pve": { "crit":  35, "body":  21, "burstSize": 1 } },
+
+    "13_340": { "label": "High-Impact Frame",  "pvp": { "crit": 27, "body": 16, "burstSize": 3 }, "pve": { "crit":  79, "body":  47, "burstSize": 3 } },
+    "13_390": { "label": "Adaptive Frame",     "pvp": { "crit": 23, "body": 14, "burstSize": 3 }, "pve": { "crit":  68, "body":  41, "burstSize": 3 } },
+    "13_450": { "label": "Lightweight Frame",  "pvp": { "crit": 20, "body": 12, "burstSize": 3 }, "pve": { "crit":  59, "body":  35, "burstSize": 3 } },
+    "13_540": { "label": "Rapid-Fire Frame",   "pvp": { "crit": 17, "body": 10, "burstSize": 3 }, "pve": { "crit":  50, "body":  29, "burstSize": 3 } },
+
+    "14_120": { "label": "High-Impact Frame",  "pvp": { "crit": 90, "body": 53, "burstSize": 1 }, "pve": { "crit": 265, "body": 156, "burstSize": 1 } },
+    "14_150": { "label": "Precision Frame",    "pvp": { "crit": 76, "body": 45, "burstSize": 1 }, "pve": { "crit": 224, "body": 132, "burstSize": 1 } },
+    "14_180": { "label": "Adaptive Frame",     "pvp": { "crit": 63, "body": 37, "burstSize": 1 }, "pve": { "crit": 186, "body": 109, "burstSize": 1 } },
+    "14_260": { "label": "Rapid-Fire Frame",   "pvp": { "crit": 44, "body": 26, "burstSize": 1 }, "pve": { "crit": 130, "body":  76, "burstSize": 1 } },
+
+    "24_600": { "label": "Precision Frame",    "pvp": { "crit": 16, "body": 10, "burstSize": 1 }, "pve": { "crit":  47, "body":  29, "burstSize": 1 } },
+    "24_750": { "label": "Adaptive Frame",     "pvp": { "crit": 13, "body":  8, "burstSize": 1 }, "pve": { "crit":  38, "body":  24, "burstSize": 1 } },
+    "24_900": { "label": "Rapid-Fire Frame",   "pvp": { "crit": 11, "body":  7, "burstSize": 1 }, "pve": { "crit":  32, "body":  21, "burstSize": 1 } },
+
+    "17_300": { "label": "Adaptive Frame",     "pvp": { "crit": 40, "body": 24, "burstSize": 1 }, "pve": { "crit": 118, "body":  71, "burstSize": 1 } },
+    "17_325": { "label": "Lightweight Frame",  "pvp": { "crit": 37, "body": 22, "burstSize": 1 }, "pve": { "crit": 109, "body":  65, "burstSize": 1 } },
+    "17_491": { "label": "Adaptive Burst",     "pvp": { "crit": 26, "body": 15, "burstSize": 2 }, "pve": { "crit":  77, "body":  44, "burstSize": 2 } },
+
+    "8_360":  { "label": "High-Impact Frame",  "pvp": { "crit": 24, "body": 14, "burstSize": 1 }, "pve": { "crit":  70, "body":  41, "burstSize": 1 } },
+    "8_450":  { "label": "Adaptive Frame",     "pvp": { "crit": 18, "body": 11, "burstSize": 1 }, "pve": { "crit":  53, "body":  31, "burstSize": 1 } },
+    "8_900":  { "label": "Rapid-Fire Frame",   "pvp": { "crit": 11, "body":  7, "burstSize": 1 }, "pve": { "crit":  32, "body":  21, "burstSize": 1 } },
+
+    "12_72":  { "label": "Aggressive Frame",   "pvp": { "crit": 218, "body": 110, "burstSize": 1 }, "pve": { "crit": 643, "body": 324, "burstSize": 1 } },
+    "12_90":  { "label": "Adaptive Frame",     "pvp": { "crit": 170, "body":  85, "burstSize": 1 }, "pve": { "crit": 501, "body": 251, "burstSize": 1 } },
+    "12_140": { "label": "Rapid-Fire Frame",   "pvp": { "crit": 115, "body":  58, "burstSize": 1 }, "pve": { "crit": 339, "body": 171, "burstSize": 1 } }
+  },
+  "curves": {
+    "9":  {
+      "Range":    [{ "stat": 0, "value": 9.0  }, { "stat": 50, "value": 16.5 }, { "stat": 100, "value": 24.5 }],
+      "Handling": [{ "stat": 0, "value": 0.96 }, { "stat": 100, "value": 0.52 }],
+      "Reload":   [{ "stat": 0, "value": 4.1  }, { "stat": 100, "value": 2.1  }]
+    },
+    "6":  {
+      "Range":    [{ "stat": 0, "value": 12.0 }, { "stat": 50, "value": 19.0 }, { "stat": 100, "value": 29.0 }],
+      "Handling": [{ "stat": 0, "value": 0.84 }, { "stat": 100, "value": 0.46 }],
+      "Reload":   [{ "stat": 0, "value": 3.8  }, { "stat": 100, "value": 1.9  }]
+    },
+    "13": {
+      "Range":    [{ "stat": 0, "value": 14.0 }, { "stat": 50, "value": 21.0 }, { "stat": 100, "value": 32.0 }],
+      "Handling": [{ "stat": 0, "value": 0.88 }, { "stat": 100, "value": 0.48 }],
+      "Reload":   [{ "stat": 0, "value": 3.6  }, { "stat": 100, "value": 1.8  }]
+    },
+    "14": {
+      "Range":    [{ "stat": 0, "value": 35.0 }, { "stat": 50, "value": 52.0 }, { "stat": 100, "value": 75.0 }],
+      "Handling": [{ "stat": 0, "value": 0.88 }, { "stat": 100, "value": 0.48 }],
+      "Reload":   [{ "stat": 0, "value": 3.7  }, { "stat": 100, "value": 1.85 }]
+    },
+    "24": {
+      "Range":    [{ "stat": 0, "value": 8.0  }, { "stat": 50, "value": 13.0 }, { "stat": 100, "value": 20.0 }],
+      "Handling": [{ "stat": 0, "value": 0.72 }, { "stat": 100, "value": 0.38 }],
+      "Reload":   [{ "stat": 0, "value": 3.2  }, { "stat": 100, "value": 1.6  }]
+    },
+    "17": {
+      "Range":    [{ "stat": 0, "value": 7.0  }, { "stat": 50, "value": 11.5 }, { "stat": 100, "value": 18.0 }],
+      "Handling": [{ "stat": 0, "value": 0.68 }, { "stat": 100, "value": 0.36 }],
+      "Reload":   [{ "stat": 0, "value": 2.8  }, { "stat": 100, "value": 1.4  }]
+    },
+    "12": {
+      "Range":    [{ "stat": 0, "value": 40.0 }, { "stat": 50, "value": 65.0 }, { "stat": 100, "value": 100.0 }],
+      "Handling": [{ "stat": 0, "value": 1.20 }, { "stat": 100, "value": 0.65 }],
+      "Reload":   [{ "stat": 0, "value": 4.5  }, { "stat": 100, "value": 2.2  }]
+    },
+    "8":  {
+      "Range":    [{ "stat": 0, "value": 15.0 }, { "stat": 50, "value": 24.0 }, { "stat": 100, "value": 38.0 }],
+      "Handling": [{ "stat": 0, "value": 1.10 }, { "stat": 100, "value": 0.60 }],
+      "Reload":   [{ "stat": 0, "value": 5.0  }, { "stat": 100, "value": 2.5  }]
+    }
+  },
+  "defaultCurves": {
+    "Range":    [{ "stat": 0, "value": 13.5 }, { "stat": 100, "value": 24.5 }],
+    "Handling": [{ "stat": 0, "value": 0.90 }, { "stat": 100, "value": 0.48 }],
+    "Reload":   [{ "stat": 0, "value": 3.8  }, { "stat": 100, "value": 1.9  }]
+  }
+}

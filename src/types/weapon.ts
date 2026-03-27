@@ -1,0 +1,53 @@
+export type StatMap = Record<string, number>;
+export type GameMode = 'pvp' | 'pve';
+export type DamageType = 'kinetic' | 'arc' | 'solar' | 'void' | 'stasis' | 'strand';
+
+export interface StatCurveNode {
+  stat: number;
+  value: number;
+}
+
+export interface PerkMod {
+  statName: string;
+  value: number;
+}
+
+export interface Perk {
+  hash: string;
+  name: string;
+  icon: string;
+  description: string;
+  statModifiers: PerkMod[];
+  isEnhanced: boolean;
+  /** If set, selecting this perk auto-activates the matching buff key */
+  buffKey: string | null;
+}
+
+export interface PerkColumn {
+  name: string;
+  perks: Perk[];
+}
+
+export interface Weapon {
+  hash: string;
+  name: string;
+  icon: string;
+  itemTypeDisplayName: string;
+  itemSubType: number;
+  damageType: DamageType;
+  rpm: number;
+  baseStats: StatMap;
+  perkSockets: PerkColumn[];
+  /** Populated from archetypes.json at parse time */
+  statCurves: Record<string, StatCurveNode[]>;
+}
+
+export interface CompareSnapshot {
+  id: string;
+  label: string;
+  weapon: Weapon;
+  calculatedStats: StatMap;
+  selectedPerks: Record<string, string>;
+  ttk: number | null;
+  mode: GameMode;
+}
