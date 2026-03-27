@@ -1,4 +1,6 @@
 import { Weapon, Perk, PerkColumn, StatMap } from '../../types/weapon';
+
+const BUNGIE_ROOT = 'https://www.bungie.net';
 import {
   BungieInventoryItem,
   BungieSocketCategoryDefinition,
@@ -24,8 +26,10 @@ const STAT_HASH_MAP: Record<number, string> = {
   1935470627: 'Draw Time',
 };
 
+// Stats stored in baseStats (used for display + stat modifier math)
 const DISPLAY_STATS = new Set([
   'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
+  'Zoom', 'Recoil Direction', 'Magazine', 'Airborne Effectiveness',
 ]);
 
 const DAMAGE_TYPE_MAP: Record<number, Weapon['damageType']> = {
@@ -37,6 +41,7 @@ const DAMAGE_TYPE_MAP: Record<number, Weapon['damageType']> = {
   3949783978: 'strand',
 };
 
+// Socket category name patterns for selectable perk columns (barrels, magazines, traits)
 const PERK_CATEGORY_PATTERNS = [
   'barrel', 'bowstring', 'blade', 'battery', 'guard',
   'magazine', 'arrow', 'projectile', 'perk', 'trait',
@@ -45,6 +50,10 @@ const PERK_CATEGORY_PATTERNS = [
 function isPerkCategory(name: string): boolean {
   const lower = name.toLowerCase();
   return PERK_CATEGORY_PATTERNS.some((p) => lower.includes(p));
+}
+
+function isIntrinsicCategory(name: string): boolean {
+  return name.toLowerCase().includes('intrinsic');
 }
 
 function formatCategoryName(raw: string): string {
@@ -99,13 +108,16 @@ export function parseWeapons(
     if (curves.Reload)   statCurves['Reload']   = curves.Reload;
 
     const perkSockets: PerkColumn[] = [];
+    let intrinsicTrait: Perk | null = null;
 
     if (item.sockets?.socketCategories && item.sockets?.socketEntries) {
       for (const category of item.sockets.socketCategories) {
         const catDef = socketCategoryDefs[category.socketCategoryHash.toString()];
         if (!catDef) continue;
         const catName = catDef.displayProperties.name;
-        if (!isPerkCategory(catName)) continue;
+
+        const isIntrinsic = isIntrinsicCategory(catName);
+        if (!isIntrinsic && !isPerkCategory(catName)) continue;
 
         const perks: Perk[] = [];
         const seenPlugs = new Set<string>();
@@ -142,16 +154,18 @@ export function parseWeapons(
 
             const perkName = plugItem.displayProperties.name;
 
+            // Only include stat modifiers for bar stats (numeric stats don't benefit from perk deltas meaningfully)
+            const BAR_STATS = new Set(['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance']);
             const statModifiers = (plugItem.investmentStats ?? [])
               .filter((s) => !s.isConditionallyActive && s.value !== 0)
               .map((s) => {
                 const statName = STAT_HASH_MAP[s.statTypeHash];
-                if (!statName || !DISPLAY_STATS.has(statName)) return null;
+                if (!statName || !BAR_STATS.has(statName)) return null;
                 return { statName, value: s.value };
               })
               .filter((s): s is { statName: string; value: number } => s !== null);
 
-            perks.push({
+            const perk: Perk = {
               hash: hashStr,
               name: perkName,
               icon: plugItem.displayProperties.icon,
@@ -159,11 +173,16 @@ export function parseWeapons(
               statModifiers,
               isEnhanced: isEnhancedPerk(perkName),
               buffKey: getBuffKeyForPerk(perkName),
-            });
+            };
+
+            perks.push(perk);
           }
         }
 
-        if (perks.length > 0) {
+        if (isIntrinsic) {
+          // Use first perk in the intrinsic category as the intrinsic trait
+          if (perks.length > 0) intrinsicTrait = perks[0];
+        } else if (perks.length > 0) {
           perkSockets.push({ name: formatCategoryName(catName), perks });
         }
       }
@@ -173,11 +192,15 @@ export function parseWeapons(
       hash: item.hash.toString(),
       name: item.displayProperties.name,
       icon: item.displayProperties.icon,
+      screenshot: item.screenshot ? BUNGIE_ROOT + item.screenshot : null,
+      flavorText: item.flavorText?.trim() || null,
+      rarity: item.tierTypeName || null,
       itemTypeDisplayName: item.itemTypeDisplayName || 'Weapon',
       itemSubType,
       damageType,
       rpm,
       baseStats,
+      intrinsicTrait,
       perkSockets,
       statCurves,
     });

@@ -26,6 +26,10 @@ export interface BungieInventoryItem {
   itemSubType: number;
   itemTypeDisplayName: string;
   defaultDamageTypeHash: number;
+  flavorText?: string;
+  screenshot?: string;
+  iconWatermark?: string;
+  tierTypeName?: string;
   equippingBlock?: { uniqueLabel?: string };
   stats?: {
     stats: Record<string, { statHash: number; value: number }>;

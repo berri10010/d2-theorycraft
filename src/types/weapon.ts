@@ -32,11 +32,19 @@ export interface Weapon {
   hash: string;
   name: string;
   icon: string;
+  /** Full-width weapon artwork image (from Bungie manifest screenshot field) */
+  screenshot: string | null;
+  /** Italicised lore/flavor text shown on the weapon card */
+  flavorText: string | null;
+  /** Rarity tier label, e.g. "Legendary" or "Exotic" */
+  rarity: string | null;
   itemTypeDisplayName: string;
   itemSubType: number;
   damageType: DamageType;
   rpm: number;
   baseStats: StatMap;
+  /** Intrinsic frame perk (e.g. "Adaptive Frame") — separate from roll perks */
+  intrinsicTrait: Perk | null;
   perkSockets: PerkColumn[];
   /** Populated from archetypes.json at parse time */
   statCurves: Record<string, StatCurveNode[]>;

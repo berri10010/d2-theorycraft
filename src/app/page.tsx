@@ -6,6 +6,7 @@ import { useWeaponStore } from '../store/useWeaponStore';
 import { useCompareStore } from '../store/useCompareStore';
 import { useWeaponDb } from '../store/useWeaponDb';
 import { SearchSidebar } from '../components/layout/SearchSidebar';
+import { WeaponHeader } from '../components/weapon/WeaponHeader';
 import { RollEditor } from '../components/weapon/RollEditor';
 import { EffectsPanel } from '../components/weapon/EffectsPanel';
 import { StatDisplay } from '../components/weapon/StatDisplay';
@@ -115,8 +116,6 @@ function Dashboard() {
     );
   }
 
-  const damageLabel = activeWeapon.damageType.charAt(0).toUpperCase() + activeWeapon.damageType.slice(1);
-
   return (
     <div className="h-screen bg-slate-950 text-slate-200 font-sans flex overflow-hidden">
       <a
@@ -146,94 +145,78 @@ function Dashboard() {
         className="flex-1 overflow-y-auto overscroll-y-contain min-w-0 focus:outline-none"
       >
         <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6">
-          <header className="border-b border-slate-800 pb-4">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <button
-                  aria-label={sidebarOpen ? 'Close weapon database' : 'Open weapon database'}
-                  aria-expanded={sidebarOpen}
-                  onClick={() => setSidebarOpen((o) => !o)}
-                  className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors shrink-0"
-                >
-                  <MenuIcon open={sidebarOpen} />
-                </button>
+          {/* Top action bar */}
+          <header className="flex items-center gap-2 flex-wrap justify-between">
+            <div className="flex items-center gap-2">
+              {/* Mobile sidebar toggle */}
+              <button
+                aria-label={sidebarOpen ? 'Close weapon database' : 'Open weapon database'}
+                aria-expanded={sidebarOpen}
+                onClick={() => setSidebarOpen((o) => !o)}
+                className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors shrink-0 border border-slate-700"
+              >
+                <MenuIcon open={sidebarOpen} />
+              </button>
 
-                {activeWeapon.icon && (
-                  <img
-                    src={`https://www.bungie.net${activeWeapon.icon}`}
-                    alt={`${activeWeapon.name} icon`}
-                    width={56} height={56}
-                    className="w-12 h-12 md:w-14 md:h-14 rounded border border-slate-700 shrink-0"
-                  />
-                )}
-
-                <div className="min-w-0">
-                  <h1 className="text-xl md:text-3xl font-bold text-amber-500 truncate">
-                    {activeWeapon.name}
-                  </h1>
-                  <p className="text-slate-400 text-xs md:text-sm">
-                    {activeWeapon.itemTypeDisplayName}
-                    {activeWeapon.rpm > 0 && ` · ${activeWeapon.rpm} RPM`}
-                    {` · ${damageLabel}`}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 flex-wrap">
-                <div role="tablist" aria-label="View mode" className="flex bg-slate-900 rounded-lg p-1 border border-slate-800">
-                  {(['editor', 'compare'] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      role="tab"
-                      aria-selected={activeTab === tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={
-                        'px-3 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] flex items-center gap-1.5 capitalize ' +
-                        (activeTab === tab ? 'bg-slate-800 text-amber-400' : 'text-slate-400 hover:text-slate-200')
-                      }
-                    >
-                      {tab}
-                      {tab === 'compare' && snapshots.length > 0 && (
-                        <span className="bg-amber-500 text-slate-950 text-xs px-1.5 py-0.5 rounded-full font-bold leading-none">
-                          {snapshots.length}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-
-                {activeTab === 'editor' && (
-                  <>
-                    <button
-                      onClick={handleShare}
-                      aria-label="Copy share link to clipboard"
-                      className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border border-slate-700 min-h-[44px]"
-                    >
-                      {copied ? 'Copied!' : 'Share'}
-                    </button>
-                    <button
-                      onClick={handleAddToCompare}
-                      aria-label={`Save current ${activeWeapon.name} roll to comparison`}
-                      className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-sm transition-colors min-h-[44px]"
-                    >
-                      + Compare
-                    </button>
-                  </>
-                )}
+              {/* View tabs */}
+              <div role="tablist" aria-label="View mode" className="flex bg-slate-900 rounded-lg p-1 border border-slate-800">
+                {(['editor', 'compare'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    role="tab"
+                    aria-selected={activeTab === tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={
+                      'px-3 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] flex items-center gap-1.5 capitalize ' +
+                      (activeTab === tab ? 'bg-slate-800 text-amber-400' : 'text-slate-400 hover:text-slate-200')
+                    }
+                  >
+                    {tab}
+                    {tab === 'compare' && snapshots.length > 0 && (
+                      <span className="bg-amber-500 text-slate-950 text-xs px-1.5 py-0.5 rounded-full font-bold leading-none">
+                        {snapshots.length}
+                      </span>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
+
+            {activeTab === 'editor' && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleShare}
+                  aria-label="Copy share link to clipboard"
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border border-slate-700 min-h-[44px]"
+                >
+                  {copied ? 'Copied!' : 'Share'}
+                </button>
+                <button
+                  onClick={handleAddToCompare}
+                  aria-label={`Save current ${activeWeapon.name} roll to comparison`}
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-sm transition-colors min-h-[44px]"
+                >
+                  + Compare
+                </button>
+              </div>
+            )}
           </header>
 
           <div role="tabpanel" aria-label="Roll editor" hidden={activeTab !== 'editor'}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-7 space-y-6">
-                <RollEditor />
-                <EffectsPanel />
-                <BuffToggle />
-              </div>
-              <div className="lg:col-span-5 space-y-6">
-                <StatDisplay />
-                <TTKPanel />
+            <div className="space-y-6">
+              {/* Weapon artwork, name, rarity, intrinsic trait, flavor text */}
+              <WeaponHeader />
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-7 space-y-6">
+                  <RollEditor />
+                  <EffectsPanel />
+                  <BuffToggle />
+                </div>
+                <div className="lg:col-span-5 space-y-6">
+                  <StatDisplay />
+                  <TTKPanel />
+                </div>
               </div>
             </div>
           </div>

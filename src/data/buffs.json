@@ -62,5 +62,53 @@
     "multiplier": 1.25,
     "description": "Picking up an orb increases damage for the next shot.",
     "perkNames": ["Explosive Light", "Enhanced Explosive Light"]
+  },
+  "bait_and_switch": {
+    "hash": "bait_and_switch",
+    "name": "Bait and Switch",
+    "type": "perk",
+    "multiplier": 1.35,
+    "description": "Dealing damage with all three equipped weapons briefly grants increased damage.",
+    "perkNames": ["Bait and Switch", "Enhanced Bait and Switch"]
+  },
+  "high_energy_fire": {
+    "hash": "high_energy_fire",
+    "name": "High-Energy Fire",
+    "type": "surge",
+    "multiplier": 1.20,
+    "description": "While Charged with Light, gain a damage bonus. Consumes a stack on kill.",
+    "perkNames": []
+  },
+  "empowering_rift": {
+    "hash": "empowering_rift",
+    "name": "Empowering Rift",
+    "type": "empowering",
+    "multiplier": 1.20,
+    "description": "Warlock empowering rift. Boosts weapon damage while active.",
+    "perkNames": []
+  },
+  "weapons_of_light": {
+    "hash": "weapons_of_light",
+    "name": "Weapons of Light",
+    "type": "empowering",
+    "multiplier": 1.25,
+    "description": "Titan Ward of Dawn bubble perk. Increases weapon damage.",
+    "perkNames": []
+  },
+  "well_of_radiance": {
+    "hash": "well_of_radiance",
+    "name": "Well of Radiance",
+    "type": "empowering",
+    "multiplier": 1.25,
+    "description": "Warlock Well of Radiance. Increases weapon damage while standing in it.",
+    "perkNames": []
+  },
+  "one_two_punch": {
+    "hash": "one_two_punch",
+    "name": "One-Two Punch",
+    "type": "perk",
+    "multiplier": 1.50,
+    "description": "Hitting an enemy with every pellet in a shot briefly increases melee damage. (Shotgun-only)",
+    "perkNames": ["One-Two Punch", "Enhanced One-Two Punch"]
   }
 }
