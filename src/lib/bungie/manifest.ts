@@ -1,4 +1,6 @@
 import { Redis } from '@upstash/redis';
+import { gzip, gunzip } from 'zlib';
+import { promisify } from 'util';
 import { Weapon } from '../../types/weapon';
 import { parseWeapons } from './parser';
 import {
@@ -8,17 +10,19 @@ import {
   BungiePlugSetDefinition,
 } from './bungieTypes';
 
-const BUNGIE_ROOT = 'https://www.bungie.net';
+const gzipAsync   = promisify(gzip);
+const gunzipAsync = promisify(gunzip);
+
+const BUNGIE_ROOT       = 'https://www.bungie.net';
 const CACHE_VERSION_KEY = 'd2:manifest-version';
-const CACHE_WEAPONS_KEY = 'd2:weapons';
+const CACHE_WEAPONS_KEY = 'd2:weapons-gz'; // new key — avoids reading old uncompressed data
+const TTL               = 60 * 60 * 24 * 7; // 7 days
 
 function getRedis(): Redis {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const url   = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) {
-    throw new Error(
-      'Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN in environment variables.'
-    );
+    throw new Error('Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN in environment variables.');
   }
   return new Redis({ url, token });
 }
@@ -29,6 +33,18 @@ function getApiKey(): string {
     throw new Error('BUNGIE_API_KEY is not set in .env.local');
   }
   return key;
+}
+
+async function compress(data: unknown): Promise<string> {
+  const json       = JSON.stringify(data);
+  const compressed = await gzipAsync(Buffer.from(json, 'utf-8'));
+  return compressed.toString('base64');
+}
+
+async function decompress<T>(encoded: string): Promise<T> {
+  const buf         = Buffer.from(encoded, 'base64');
+  const decompressed = await gunzipAsync(buf);
+  return JSON.parse(decompressed.toString('utf-8')) as T;
 }
 
 async function fetchManifestIndex(): Promise<BungieManifestResponse> {
@@ -53,15 +69,16 @@ export interface SyncResult {
 }
 
 export async function syncManifest(): Promise<SyncResult> {
-  const redis = getRedis();
-  const manifest = await fetchManifestIndex();
+  const redis          = getRedis();
+  const manifest       = await fetchManifestIndex();
   const currentVersion = manifest.Response.version;
-  const paths = manifest.Response.jsonWorldComponentContentPaths.en;
+  const paths          = manifest.Response.jsonWorldComponentContentPaths.en;
 
   const cachedVersion = await redis.get<string>(CACHE_VERSION_KEY);
   if (cachedVersion === currentVersion) {
-    const cached = await redis.get<Weapon[]>(CACHE_WEAPONS_KEY);
-    if (cached) {
+    const encoded = await redis.get<string>(CACHE_WEAPONS_KEY);
+    if (encoded) {
+      const cached = await decompress<Weapon[]>(encoded);
       return { synced: false, version: currentVersion, weaponCount: cached.length };
     }
   }
@@ -77,11 +94,14 @@ export async function syncManifest(): Promise<SyncResult> {
   console.log('  Parsing weapons...');
   const weapons = parseWeapons(items, socketCategoryDefs, plugSetDefs);
 
-  // Store version and weapons in Redis. TTL of 7 days as a safety net —
-  // syncManifest will refresh earlier if the Bungie manifest version changes.
+  console.log('  Compressing...');
+  const encoded = await compress(weapons);
+  const sizeMB  = (Buffer.byteLength(encoded, 'utf-8') / 1024 / 1024).toFixed(2);
+  console.log(`  Compressed size: ${sizeMB} MB`);
+
   await Promise.all([
-    redis.set(CACHE_VERSION_KEY, currentVersion, { ex: 60 * 60 * 24 * 7 }),
-    redis.set(CACHE_WEAPONS_KEY, weapons, { ex: 60 * 60 * 24 * 7 }),
+    redis.set(CACHE_VERSION_KEY, currentVersion, { ex: TTL }),
+    redis.set(CACHE_WEAPONS_KEY, encoded,        { ex: TTL }),
   ]);
 
   console.log('  Done - cached ' + weapons.length + ' weapons.');
@@ -90,8 +110,10 @@ export async function syncManifest(): Promise<SyncResult> {
 
 export async function getCachedWeapons(): Promise<Weapon[] | null> {
   try {
-    const redis = getRedis();
-    return await redis.get<Weapon[]>(CACHE_WEAPONS_KEY);
+    const redis   = getRedis();
+    const encoded = await redis.get<string>(CACHE_WEAPONS_KEY);
+    if (!encoded) return null;
+    return await decompress<Weapon[]>(encoded);
   } catch {
     return null;
   }

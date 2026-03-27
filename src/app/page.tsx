@@ -28,7 +28,7 @@ function MenuIcon({ open }: { open: boolean }) {
 function Dashboard() {
   const { loadWeapon, activeWeapon, selectedPerks, selectPerk, getCalculatedStats, getDamageMultiplier, mode } = useWeaponStore();
   const { addSnapshot, snapshots } = useCompareStore();
-  const { weapons, fetchWeapons } = useWeaponDb();
+  const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
   const searchParams = useSearchParams();
 
   const [activeTab, setActiveTab] = useState<'editor' | 'compare'>('editor');
@@ -94,8 +94,22 @@ function Dashboard() {
 
   if (!activeWeapon) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">
-        <p role="status">Loading...</p>
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4 text-slate-500 p-8">
+        {isLoading && <p role="status" className="text-lg">Loading weapon database...</p>}
+        {error && (
+          <div className="text-center space-y-3 max-w-md">
+            <p className="text-red-400 font-bold text-lg">Failed to load weapons</p>
+            <p className="text-slate-400 text-sm font-mono bg-slate-900 p-3 rounded-lg break-all">{error}</p>
+            <p className="text-slate-500 text-sm">Check that BUNGIE_API_KEY, UPSTASH_REDIS_REST_URL, and UPSTASH_REDIS_REST_TOKEN are set in your Vercel environment variables.</p>
+            <button
+              onClick={() => fetchWeapons()}
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        {!isLoading && !error && <p className="text-slate-600 text-sm">No weapons found.</p>}
       </div>
     );
   }
