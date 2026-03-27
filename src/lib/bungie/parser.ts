@@ -20,6 +20,7 @@ const STAT_HASH_MAP: Record<number, string> = {
   1345609583: 'Aim Assistance',
   3555269338: 'Zoom',
   2715839340: 'Recoil Direction',
+  2714457168: 'Airborne Effectiveness',
   4284893193: 'RPM',
   3871231066: 'Magazine',
   2168534779: 'Charge Time',
@@ -122,6 +123,9 @@ export function parseWeapons(
         const perks: Perk[] = [];
         const seenPlugs = new Set<string>();
 
+        // Bar stats that benefit from perk stat modifier deltas
+        const BAR_STATS = new Set(['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance']);
+
         for (const socketIndex of category.socketIndexes) {
           const socket = item.sockets.socketEntries[socketIndex];
           if (!socket) continue;
@@ -154,8 +158,6 @@ export function parseWeapons(
 
             const perkName = plugItem.displayProperties.name;
 
-            // Only include stat modifiers for bar stats (numeric stats don't benefit from perk deltas meaningfully)
-            const BAR_STATS = new Set(['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance']);
             const statModifiers = (plugItem.investmentStats ?? [])
               .filter((s) => !s.isConditionallyActive && s.value !== 0)
               .map((s) => {
