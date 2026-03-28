@@ -14,6 +14,16 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const TOKEN_URL = 'https://www.bungie.net/platform/app/oauth/token/';
 
+function getPublicOrigin(req: NextRequest): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return req.nextUrl.origin;
+}
+
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
   if (!code) {
@@ -28,7 +38,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'OAuth env vars not configured' }, { status: 500 });
   }
 
-  const origin      = req.nextUrl.origin;
+  const origin      = getPublicOrigin(req);
   const redirectUri = `${origin}/api/auth/bungie/callback`;
 
   // Exchange code for token
