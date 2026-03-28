@@ -84,28 +84,31 @@ export const SUBCLASS_VERBS: VerbDef[] = [
     tagline: 'On reload after kill: Jolt the target. Jolt chains lightning to nearby enemies.',
     calcBonus(baseImpact, rps, tier) {
       const bulletDmg = impactToDamage(baseImpact);
-      // Jolt: 6 procs over 5s, each ~15% of bullet damage, chains up to 5
+      // Jolt: 6 procs over 5s, each ~15% of bullet damage
       const joltProcs = 6;
       const joltProcDmg = bulletDmg * 0.15;
       const joltTotal = joltProcs * joltProcDmg;
-      // Chain: 80% damage to second target, 65% to 3rd, etc.
-      const chainTargets = 3;
-      const chainDmg = joltTotal * (0.8 + 0.65 + 0.52) / chainTargets;
-      const dps = (joltTotal / 5); // over 5s window
 
-      // Tier doesn't change Jolt damage directly (it's a fixed arc proc)
-      // but we note effective % of target HP
+      // Chain: each arc jumps to adjacent enemies at diminishing damage.
+      // Target 1 (original): 100% of proc dmg
+      // Target 2: ~80%, Target 3: ~65%, Target 4: ~52%
+      // chainTotalOnSecondary = sum of what chains to up to 3 OTHER targets from one proc
+      const chainProcDmg = joltProcDmg * (0.80 + 0.65 + 0.52); // total chain from one proc
+      const chainTotal   = joltProcs * chainProcDmg;            // total chain over full Jolt
+
+      const dps = joltTotal / 5; // primary target DPS over 5s window
+
       const tierHp = ENEMY_TIERS.find((t) => t.key === tier)!.hp;
       const pct = ((joltTotal / tierHp) * 100).toFixed(1);
 
       return {
-        headline: `${Math.round(joltTotal).toLocaleString()} Jolt damage`,
+        headline: `${Math.round(joltTotal).toLocaleString()} Jolt damage (primary target)`,
         element: 'arc',
         rows: [
           { label: 'Procs per application', value: `${joltProcs}` },
           { label: 'Damage per proc',        value: `~${Math.round(joltProcDmg).toLocaleString()}` },
-          { label: 'Total Jolt damage',      value: Math.round(joltTotal).toLocaleString() },
-          { label: 'Chain avg (3 targets)',  value: `~${Math.round(chainDmg).toLocaleString()}` },
+          { label: 'Total Jolt (primary)',   value: Math.round(joltTotal).toLocaleString() },
+          { label: 'Chain to 3 nearby (total)', value: `~${Math.round(chainTotal).toLocaleString()}` },
           { label: 'Jolt DPS (5 s)',         value: `${Math.round(dps).toLocaleString()}/s` },
           { label: '% of enemy HP',          value: `${pct}%` },
         ],

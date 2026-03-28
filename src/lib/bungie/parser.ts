@@ -281,7 +281,8 @@ export function parseWeapons(
       for (const stat of Object.values(item.stats.stats)) {
         const statName = STAT_HASH_MAP[stat.statHash];
         if (!statName) continue;
-        if (statName === 'RPM' || statName === 'Draw Time' || statName === 'Charge Time') {
+        // First value wins — RPM takes priority over Draw/Charge Time
+        if (!rpm && (statName === 'RPM' || statName === 'Draw Time' || statName === 'Charge Time')) {
           rpm = stat.value;
         }
         if (DISPLAY_STATS.has(statName)) {
@@ -406,11 +407,20 @@ export function parseWeapons(
             }
           }
 
-          // Attach enhancedVersion to base perks, then drop standalone enhanced perks
-          // (they remain accessible via enhancedVersion for the "upgrade" button in the UI)
+          // Attach enhancedVersion to base perks, then drop enhanced perks that have a base
+          // partner. Orphaned enhanced perks (no base version) are kept as-is so columns
+          // don't end up empty on craftable weapons that only surface enhanced variants.
           const perks: Perk[] = [];
           for (const p of rawPerks) {
-            if (p.isEnhanced) continue; // deduplicated into base perk
+            if (p.isEnhanced) {
+              // Only include if there's no base perk with the same base-name
+              const baseName = p.name.replace(/^Enhanced\s+/i, '');
+              const hasBase = rawPerks.some(
+                (b) => !b.isEnhanced && b.name.toLowerCase() === baseName.toLowerCase()
+              );
+              if (!hasBase) perks.push({ ...p, enhancedVersion: null });
+              continue;
+            }
             const enhanced = enhancedMap.get(p.name.toLowerCase()) ?? null;
             perks.push({ ...p, enhancedVersion: enhanced });
           }

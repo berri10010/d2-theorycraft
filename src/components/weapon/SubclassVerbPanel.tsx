@@ -120,7 +120,8 @@ export const SubclassVerbPanel: React.FC = () => {
 
   const stats = getCalculatedStats();
   const impact = stats['Impact'] ?? activeWeapon.baseStats['Impact'] ?? 50;
-  const rpm = activeWeapon.baseStats['Rounds Per Minute'] ?? stats['Rounds Per Minute'] ?? 90;
+  // baseStats stores this under 'RPM' (from STAT_HASH_MAP in parser.ts)
+  const rpm = activeWeapon.baseStats['RPM'] ?? activeWeapon.rpm ?? 90;
   const rps = rpm / 60;
 
   const activeVerb = SUBCLASS_VERBS.find((v) => v.key === activeVerbKey) ?? null;

@@ -73,6 +73,10 @@ export const useVaultStore = create<VaultState>((set, get) => ({
         }
       }
 
+      // Persist resolved membershipType back into state so future syncs skip the lookup
+      const resolvedCreds = { ...credentials, membershipType };
+      set({ credentials: resolvedCreds });
+
       const params = new URLSearchParams({
         membershipType: String(membershipType),
         membershipId: credentials.membershipId,
@@ -94,9 +98,9 @@ export const useVaultStore = create<VaultState>((set, get) => ({
         error: null,
       });
 
-      // Persist to sessionStorage so page refresh doesn't require re-login
+      // Persist resolved credentials to sessionStorage so page refresh doesn't re-lookup
       if (typeof window !== 'undefined') {
-        sessionStorage.setItem('d2tc_vault_creds', JSON.stringify(credentials));
+        sessionStorage.setItem('d2tc_vault_creds', JSON.stringify(resolvedCreds));
       }
     } catch (err) {
       set({

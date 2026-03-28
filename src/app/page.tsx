@@ -23,7 +23,8 @@ import { ArmorModPanel } from '../components/weapon/ArmorModPanel';
 import { SubclassVerbPanel } from '../components/weapon/SubclassVerbPanel';
 import { SimilarWeaponsPanel } from '../components/weapon/SimilarWeaponsPanel';
 import { VaultPanel } from '../components/weapon/VaultPanel';
-import { calculateTTK } from '../lib/damageMath';
+import { calculateTTK, PVE_HEALTH_TIERS } from '../lib/damageMath';
+import { MasterworkStat } from '../store/useWeaponStore';
 
 function MenuIcon({ open }: { open: boolean }) {
   return (
@@ -98,8 +99,7 @@ function Dashboard() {
     // Restore masterwork stat — validate against known stat list before casting
     if (mwParam && (MASTERWORK_STATS as readonly string[]).includes(mwParam)) {
       const { setMasterworkStat } = useWeaponStore.getState();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setMasterworkStat(mwParam as any);
+      setMasterworkStat(mwParam as MasterworkStat);
     }
 
     // Restore weapons stat
@@ -137,7 +137,7 @@ function Dashboard() {
 
   const handleAddToCompare = () => {
     if (!activeWeapon) return;
-    const ttkResult = calculateTTK(mode, activeWeapon.itemSubType, activeWeapon.rpm, getDamageMultiplier(), 192, 336);
+    const ttkResult = calculateTTK(mode, activeWeapon.itemSubType, activeWeapon.rpm, getDamageMultiplier(), 230, PVE_HEALTH_TIERS['Minor (Dreg/Grunt)'] ?? 336);
     addSnapshot({
       label: activeWeapon.name,
       weapon: activeWeapon,

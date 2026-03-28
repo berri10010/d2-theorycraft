@@ -43,6 +43,7 @@ export const useWeaponDb = create<WeaponDbState>((set) => ({
       }
       const data = await res.json();
       const weaponsRes = await fetch('/api/weapons');
+      if (!weaponsRes.ok) throw new Error('Failed to load weapons after sync: HTTP ' + weaponsRes.status);
       const weaponsData = await weaponsRes.json();
       set({ weapons: weaponsData.weapons, manifestVersion: data.version ?? null, isSyncing: false });
     } catch (err) {

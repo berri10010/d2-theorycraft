@@ -348,15 +348,16 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
         const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
         if (!column) continue;
-        // Find the base perk — the enhanced perk hash will be under enhancedVersion
+        // Find the base perk whose enhancedVersion hash matches the selected hash
         for (const basePerk of column.perks) {
           if (basePerk.enhancedVersion?.hash === perkHash) {
-            // This perk is currently in its enhanced state — apply +2 to its stat mods
+            // This perk is in its enhanced state — apply +2 to its stat mods
             for (const mod of basePerk.statModifiers) {
               if (finalStats[mod.statName] !== undefined) {
                 finalStats[mod.statName] = Math.min(100, finalStats[mod.statName] + 2);
               }
             }
+            break; // only one perk can own this enhanced hash
           }
         }
       }

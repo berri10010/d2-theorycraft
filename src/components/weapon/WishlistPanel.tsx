@@ -56,6 +56,12 @@ function useWishlist() {
         localStorage.setItem(LS_WISHLIST_KEY, JSON.stringify({ name: file.name, text }));
       } catch { /* ignore */ }
     };
+    reader.onerror = () => {
+      // Surface read errors so the user isn't left wondering why nothing happened
+      console.error('WishlistPanel: Failed to read file', file.name);
+      setWishlistName('');
+      setEntryCount(0);
+    };
     reader.readAsText(file);
   }, []);
 
@@ -79,11 +85,15 @@ function usePersonalRolls() {
     } catch { /* ignore */ }
   }, []);
 
+  /** Sort-stable equality so perk selection order doesn't matter */
+  const hashesEqual = (a: string[], b: string[]) =>
+    [...a].sort().join('\0') === [...b].sort().join('\0');
+
   const save = useCallback((roll: PersonalRoll) => {
     setRolls((prev) => {
       const next = [
         roll,
-        ...prev.filter((r) => !(r.weaponHash === roll.weaponHash && JSON.stringify(r.perkHashes) === JSON.stringify(roll.perkHashes))),
+        ...prev.filter((r) => !(r.weaponHash === roll.weaponHash && hashesEqual(r.perkHashes, roll.perkHashes))),
       ];
       localStorage.setItem(LS_PERSONAL_KEY, JSON.stringify(next));
       return next;
@@ -93,7 +103,7 @@ function usePersonalRolls() {
   const remove = useCallback((weaponHash: string, perkHashes: string[]) => {
     setRolls((prev) => {
       const next = prev.filter(
-        (r) => !(r.weaponHash === weaponHash && JSON.stringify(r.perkHashes) === JSON.stringify(perkHashes))
+        (r) => !(r.weaponHash === weaponHash && hashesEqual(r.perkHashes, perkHashes))
       );
       localStorage.setItem(LS_PERSONAL_KEY, JSON.stringify(next));
       return next;

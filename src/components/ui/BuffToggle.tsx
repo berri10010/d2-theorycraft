@@ -32,11 +32,14 @@ function BuffIcon({
     : (buff.icon ?? null);
 
   if (!iconPath) {
-    // Fallback: small category-coloured dot
-    const dotColor =
-      buff.category === 'subclass' ? 'bg-amber-400' :
-      buff.category === 'mod'      ? 'bg-purple-400' : 'bg-blue-400';
-    return <span className={`shrink-0 w-5 h-5 rounded ${dotColor}/20 border border-${dotColor}/30 flex items-center justify-center`} />;
+    // Fallback: small category-coloured dot — use static classes (Tailwind can't interpolate)
+    const dotClass =
+      buff.category === 'subclass'
+        ? 'bg-amber-400/20 border-amber-400/30'
+        : buff.category === 'mod'
+        ? 'bg-purple-400/20 border-purple-400/30'
+        : 'bg-blue-400/20 border-blue-400/30';
+    return <span className={`shrink-0 w-5 h-5 rounded border flex items-center justify-center ${dotClass}`} />;
   }
 
   const src = iconPath.startsWith('http') ? iconPath : BUNGIE_ROOT + iconPath;
@@ -145,13 +148,19 @@ export const BuffToggle: React.FC = () => {
         linkedPerkByBuffKey.set(basePerk.buffKey, basePerk);
       }
 
-      // Enhanced version selected
+      // Enhanced version selected — use the BASE perk for icon/buffKey since
+      // enhanced perks share the same visual icon and the buffKey lives on the base.
       for (const p of col.perks) {
         if (p.enhancedVersion?.hash === perkHash) {
-          const enh = p.enhancedVersion;
-          if (enh.buffKey) {
-            linkedBuffKeys.add(enh.buffKey);
-            linkedPerkByBuffKey.set(enh.buffKey, enh);
+          // p is the base perk; its buffKey and icon are the canonical ones
+          if (p.buffKey) {
+            linkedBuffKeys.add(p.buffKey);
+            linkedPerkByBuffKey.set(p.buffKey, p);
+          }
+          // Also check if the enhanced version itself has a distinct buffKey
+          if (p.enhancedVersion.buffKey && p.enhancedVersion.buffKey !== p.buffKey) {
+            linkedBuffKeys.add(p.enhancedVersion.buffKey);
+            linkedPerkByBuffKey.set(p.enhancedVersion.buffKey, p);
           }
         }
       }
