@@ -29,7 +29,10 @@ function MenuIcon({ open }: { open: boolean }) {
 }
 
 function Dashboard() {
-  const { loadWeapon, activeWeapon, selectedPerks, selectPerk, getCalculatedStats, getDamageMultiplier, mode } = useWeaponStore();
+  const {
+    loadWeapon, activeWeapon, selectedPerks, selectPerk,
+    getCalculatedStats, getDamageMultiplier, mode, setMode,
+  } = useWeaponStore();
   const { addSnapshot, snapshots } = useCompareStore();
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
   const searchParams = useSearchParams();
@@ -38,28 +41,21 @@ function Dashboard() {
   const [copied, setCopied] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Fetch weapon database on mount
   useEffect(() => { fetchWeapons(); }, [fetchWeapons]);
-
-  // Close sidebar when weapon changes
   useEffect(() => { setSidebarOpen(false); }, [activeWeapon?.hash]);
 
-  // Auto-select first weapon once the database loads (if none active)
   useEffect(() => {
     if (weapons.length > 0 && !activeWeapon && !searchParams.get('w')) {
       loadWeapon(weapons[0]);
     }
   }, [weapons, activeWeapon, loadWeapon, searchParams]);
 
-  // URL-based weapon/perk loading
   useEffect(() => {
     const weaponHash = searchParams.get('w');
     const perkParam  = searchParams.get('p');
     if (!weaponHash || weapons.length === 0) return;
-
     const found = weapons.find((w) => w.hash === weaponHash);
     if (!found) return;
-
     loadWeapon(found);
     if (perkParam) {
       const hashes = perkParam.split(',');
@@ -103,7 +99,10 @@ function Dashboard() {
           <div className="text-center space-y-3 max-w-md">
             <p className="text-red-400 font-bold text-lg">Failed to load weapons</p>
             <p className="text-slate-400 text-sm font-mono bg-slate-900 p-3 rounded-lg break-all">{error}</p>
-            <p className="text-slate-500 text-sm">Check that BUNGIE_API_KEY, UPSTASH_REDIS_REST_URL, and UPSTASH_REDIS_REST_TOKEN are set in your Vercel environment variables.</p>
+            <p className="text-slate-500 text-sm">
+              Check that BUNGIE_API_KEY, UPSTASH_REDIS_REST_URL, and UPSTASH_REDIS_REST_TOKEN
+              are set in your environment variables.
+            </p>
             <button
               onClick={() => fetchWeapons()}
               className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition-colors"
@@ -146,9 +145,10 @@ function Dashboard() {
         className="flex-1 overflow-y-auto overscroll-y-contain min-w-0 focus:outline-none"
       >
         <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6">
-          {/* Top action bar */}
-          <header className="flex items-center gap-2 flex-wrap justify-between">
-            <div className="flex items-center gap-2">
+
+          {/* ── Top action bar ──────────────────────────── */}
+          <header className="flex items-center gap-3 flex-wrap justify-between">
+            <div className="flex items-center gap-3">
               {/* Mobile sidebar toggle */}
               <button
                 aria-label={sidebarOpen ? 'Close weapon database' : 'Open weapon database'}
@@ -159,7 +159,7 @@ function Dashboard() {
                 <MenuIcon open={sidebarOpen} />
               </button>
 
-              {/* View tabs */}
+              {/* Editor / Compare tabs */}
               <div role="tablist" aria-label="View mode" className="flex bg-slate-900 rounded-lg p-1 border border-slate-800">
                 {(['editor', 'compare'] as const).map((tab) => (
                   <button
@@ -181,6 +181,40 @@ function Dashboard() {
                   </button>
                 ))}
               </div>
+
+              {/* ── PvE / PvP mode toggle ─────────────────── */}
+              {activeTab === 'editor' && (
+                <div
+                  role="group"
+                  aria-label="Game mode"
+                  className="flex rounded-xl border border-slate-700 overflow-hidden"
+                >
+                  <button
+                    onClick={() => setMode('pve')}
+                    aria-pressed={mode === 'pve'}
+                    className={[
+                      'px-5 py-2 text-sm font-bold transition-all min-h-[44px]',
+                      mode === 'pve'
+                        ? 'bg-green-500/20 text-green-400 border-r border-green-700/40'
+                        : 'bg-slate-900 text-slate-500 hover:text-slate-300 hover:bg-slate-800 border-r border-slate-700',
+                    ].join(' ')}
+                  >
+                    PvE
+                  </button>
+                  <button
+                    onClick={() => setMode('pvp')}
+                    aria-pressed={mode === 'pvp'}
+                    className={[
+                      'px-5 py-2 text-sm font-bold transition-all min-h-[44px]',
+                      mode === 'pvp'
+                        ? 'bg-blue-500/20 text-blue-400'
+                        : 'bg-slate-900 text-slate-500 hover:text-slate-300 hover:bg-slate-800',
+                    ].join(' ')}
+                  >
+                    PvP
+                  </button>
+                </div>
+              )}
             </div>
 
             {activeTab === 'editor' && (
@@ -203,29 +237,51 @@ function Dashboard() {
             )}
           </header>
 
+          {/* ── Editor tab ──────────────────────────────── */}
           <div role="tabpanel" aria-label="Roll editor" hidden={activeTab !== 'editor'}>
             <div className="space-y-6">
-              {/* Weapon artwork, name, rarity, intrinsic trait, flavor text */}
               <WeaponHeader />
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                {/* ── Left column (always visible) ───────── */}
                 <div className="lg:col-span-7 space-y-6">
                   <RollEditor />
-                  <GodRollPanel />
-                  <EffectsPanel />
-                  <BuffToggle />
+
+                  {/* PvE — god roll guide, effects, buffs */}
+                  {mode === 'pve' && (
+                    <>
+                      <GodRollPanel />
+                      <EffectsPanel />
+                      <BuffToggle />
+                    </>
+                  )}
+
+                  {/* PvP — effects and buffs still relevant for damage math */}
+                  {mode === 'pvp' && (
+                    <>
+                      <EffectsPanel />
+                      <BuffToggle />
+                    </>
+                  )}
                 </div>
+
+                {/* ── Right column ───────────────────────── */}
                 <div className="lg:col-span-5 space-y-6">
                   <StatDisplay />
-                  <TTKPanel />
+
+                  {/* TTK calculator only makes sense in PvP */}
+                  {mode === 'pvp' && <TTKPanel />}
                 </div>
               </div>
             </div>
           </div>
 
+          {/* ── Compare tab ─────────────────────────────── */}
           <div role="tabpanel" aria-label="Comparison grid" hidden={activeTab !== 'compare'}>
             <ComparisonGrid />
           </div>
+
         </div>
       </main>
     </div>
