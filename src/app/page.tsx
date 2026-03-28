@@ -22,6 +22,7 @@ import { WishlistPanel } from '../components/weapon/WishlistPanel';
 import { ArmorModPanel } from '../components/weapon/ArmorModPanel';
 import { SubclassVerbPanel } from '../components/weapon/SubclassVerbPanel';
 import { SimilarWeaponsPanel } from '../components/weapon/SimilarWeaponsPanel';
+import { VaultPanel } from '../components/weapon/VaultPanel';
 import { calculateTTK } from '../lib/damageMath';
 
 function MenuIcon({ open }: { open: boolean }) {
@@ -334,6 +335,7 @@ function Dashboard() {
                   {mode === 'pvp' && <TTKPanel />}
                   {mode === 'pve' && <SubclassVerbPanel />}
                   <SimilarWeaponsPanel />
+                  <VaultPanel />
                 </div>
               </div>
             </div>
