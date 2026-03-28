@@ -115,6 +115,60 @@ export const WEAPON_MODS: WeaponMod[] = [
   },
 ];
 
+// ─── Armor Mods ──────────────────────────────────────────────────────────────
+
+export type ArmorModTier = 0 | 1 | 2 | 3 | 4 | 5;
+
+export interface ArmorModState {
+  /** Targeting (Aim Assistance): 0-5 stacks, each +10 Aim Assist */
+  targeting: ArmorModTier;
+  /** Loader (Reload): 0-5 stacks, each +10 Reload */
+  loader: ArmorModTier;
+  /**
+   * Dexterity (Handling / ready+stow speed): 0-5 stacks.
+   * D2 frame data: each tier reduces ready+stow frames by ~3 frames (at 60fps).
+   * Tier 5 ≈ -15 frames total ≈ -0.25s at 60fps.
+   * We model this as +6 Handling per tier (approximate; real effect is animation-frame based).
+   */
+  dexterity: ArmorModTier;
+  /**
+   * Unflinching (flinch resistance): 0-5 stacks.
+   * Reduces flinch received — no stat bar equivalent, shown as a readout only.
+   * Each tier ≈ 10% flinch reduction, max -50%.
+   */
+  unflinching: ArmorModTier;
+}
+
+export const DEFAULT_ARMOR_MODS: ArmorModState = {
+  targeting: 0,
+  loader: 0,
+  dexterity: 0,
+  unflinching: 0,
+};
+
+/** Compute stat bonuses from armor mods */
+export function armorModStatDeltas(mods: ArmorModState): Partial<Record<string, number>> {
+  return {
+    'Aim Assistance': mods.targeting * 10,
+    'Reload':         mods.loader    * 10,
+    'Handling':       mods.dexterity * 6,
+  };
+}
+
+/** Human-readable summary of Dexterity frame reduction */
+export function dexterityFrameReduction(tier: ArmorModTier): string {
+  if (tier === 0) return '';
+  const frames = tier * 3;
+  const ms     = ((frames / 60) * 1000).toFixed(0);
+  return `-${frames} frames (−${ms}ms ready/stow)`;
+}
+
+/** Human-readable summary of Unflinching flinch reduction */
+export function unflinchingReduction(tier: ArmorModTier): string {
+  if (tier === 0) return '';
+  return `-${tier * 10}% flinch received`;
+}
+
 // ─── Masterwork stats ────────────────────────────────────────────────────────
 
 export const MASTERWORK_STATS = [
@@ -155,6 +209,9 @@ interface WeaponState {
    */
   weaponsStat: number;
 
+  /** Armor mod tiers (Targeting / Loader / Dexterity / Unflinching) */
+  armorMods: ArmorModState;
+
   // Actions
   loadWeapon: (weapon: Weapon, group?: Weapon[]) => void;
   selectPerk: (columnName: string, perkHash: string) => void;
@@ -166,6 +223,7 @@ interface WeaponState {
   setActiveMod: (mod: WeaponMod) => void;
   setSurgeStacks: (stacks: 0 | 1 | 2 | 3) => void;
   setWeaponsStat: (stat: number) => void;
+  setArmorMods: (mods: Partial<ArmorModState>) => void;
 
   // Computed
   getCalculatedStats: () => StatMap;
@@ -184,6 +242,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
   activeMod: WEAPON_MODS[0], // 'none'
   surgeStacks: 0,
   weaponsStat: 70, // ~equivalent to old Mobility 100, a reasonable default
+  armorMods: DEFAULT_ARMOR_MODS,
 
   loadWeapon: (weapon, group) =>
     set({
@@ -194,6 +253,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       masterworkStat: null,
       isCrafted: false,
       activeMod: WEAPON_MODS[0],
+      armorMods: DEFAULT_ARMOR_MODS,
     }),
 
   selectPerk: (columnName, perkHash) =>
@@ -243,9 +303,10 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
   setActiveMod: (mod) => set({ activeMod: mod }),
   setSurgeStacks: (stacks) => set({ surgeStacks: stacks }),
   setWeaponsStat: (stat) => set({ weaponsStat: Math.max(1, Math.min(200, stat)) }),
+  setArmorMods: (mods) => set((s) => ({ armorMods: { ...s.armorMods, ...mods } })),
 
   getCalculatedStats: () => {
-    const { activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod } = get();
+    const { activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods } = get();
     if (!activeWeapon) return {};
 
     const finalStats: StatMap = { ...activeWeapon.baseStats };
@@ -280,18 +341,36 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       }
     }
 
-    // Crafted Level-20 Enhanced Intrinsic: +2 to every stat NOT already boosted by Masterwork.
-    // If no masterwork is slotted, +2 applies to all stats.
+    // Crafted weapons with Enhanced perks selected get +2 only on the stats those
+    // enhanced perks boost (same stats as the base perk but with an extra +2 bonus).
+    // A crafted weapon with NO enhanced perks selected provides no blanket bonus.
     if (isCrafted) {
-      for (const stat of Object.keys(finalStats)) {
-        if (stat !== masterworkStat) {
-          finalStats[stat] = Math.min(100, finalStats[stat] + 2);
+      for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+        const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+        if (!column) continue;
+        // Find the base perk — the enhanced perk hash will be under enhancedVersion
+        for (const basePerk of column.perks) {
+          if (basePerk.enhancedVersion?.hash === perkHash) {
+            // This perk is currently in its enhanced state — apply +2 to its stat mods
+            for (const mod of basePerk.statModifiers) {
+              if (finalStats[mod.statName] !== undefined) {
+                finalStats[mod.statName] = Math.min(100, finalStats[mod.statName] + 2);
+              }
+            }
+          }
         }
       }
     }
 
     // Weapon mod stat changes
     for (const [stat, delta] of Object.entries(activeMod.statChanges)) {
+      if (delta && finalStats[stat] !== undefined) {
+        finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + delta));
+      }
+    }
+
+    // Armor mod stat bonuses (Targeting, Loader, Dexterity)
+    for (const [stat, delta] of Object.entries(armorModStatDeltas(armorMods))) {
       if (delta && finalStats[stat] !== undefined) {
         finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + delta));
       }

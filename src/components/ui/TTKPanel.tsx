@@ -55,16 +55,13 @@ export const TTKPanel: React.FC = () => {
             <span className="font-mono font-bold text-white">{PVP_GUARDIAN_HP}</span>
           </div>
 
-          {/* Weapons Stat — 101–200 tier only applies to PvP */}
+          {/* Weapons Stat — PvP only cares about 100–200 (the tier 2 range) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-400">
-                Weapons Stat
-                <span className="text-slate-600 text-xs ml-1">(101–200 tier)</span>
-              </span>
+              <span className="text-sm text-slate-400">Weapons Stat</span>
               <span className={[
                 'text-xs font-bold tabular-nums',
-                weaponsStat > 100 ? 'text-amber-400' : 'text-slate-600',
+                weaponsStat > 100 ? 'text-amber-400' : 'text-slate-500',
               ].join(' ')}>
                 {weaponsStat}
                 {pvpWeaponsBonus > 0
@@ -74,15 +71,14 @@ export const TTKPanel: React.FC = () => {
             </div>
             <input
               type="range"
-              min={1}
+              min={100}
               max={200}
-              value={weaponsStat}
+              value={Math.max(100, weaponsStat)}
               onChange={(e) => setWeaponsStat(Number(e.target.value))}
               className="w-full accent-amber-500 h-1.5 rounded-full cursor-pointer"
             />
-            {/* Quick presets around the 100 threshold */}
             <div className="flex gap-1.5 flex-wrap">
-              {[70, 100, 120, 150, 170, 200].map((v) => (
+              {[100, 120, 140, 160, 180, 200].map((v) => (
                 <button
                   key={v}
                   onClick={() => setWeaponsStat(v)}
@@ -100,7 +96,7 @@ export const TTKPanel: React.FC = () => {
               ))}
             </div>
             <p className="text-[10px] text-slate-600">
-              1–100 boosts PvE damage only. 101–200 adds up to +5% vs Guardians.
+              100 = baseline (0% bonus). 200 = +5% vs Guardians. Range below 100 only affects PvE.
             </p>
           </div>
         </div>

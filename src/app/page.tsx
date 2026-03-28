@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useWeaponStore } from '../store/useWeaponStore';
+import { useWeaponStore, MASTERWORK_STATS } from '../store/useWeaponStore';
 import { useCompareStore } from '../store/useCompareStore';
 import { useWeaponDb } from '../store/useWeaponDb';
 import { SearchSidebar } from '../components/layout/SearchSidebar';
@@ -18,6 +18,8 @@ import { GodRollPanel } from '../components/weapon/GodRollPanel';
 import { AmmoPanel } from '../components/weapon/AmmoPanel';
 import { MasterworkPanel } from '../components/weapon/MasterworkPanel';
 import { DamageFalloffGraph } from '../components/weapon/DamageFalloffGraph';
+import { WishlistPanel } from '../components/weapon/WishlistPanel';
+import { ArmorModPanel } from '../components/weapon/ArmorModPanel';
 import { calculateTTK } from '../lib/damageMath';
 
 function MenuIcon({ open }: { open: boolean }) {
@@ -36,6 +38,7 @@ function Dashboard() {
   const {
     loadWeapon, activeWeapon, selectedPerks, selectPerk,
     getCalculatedStats, getDamageMultiplier, mode, setMode,
+    masterworkStat, activeBuffs, setWeaponsStat, weaponsStat,
   } = useWeaponStore();
   const { addSnapshot, snapshots } = useCompareStore();
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
@@ -57,22 +60,55 @@ function Dashboard() {
   }, [weapons, activeWeapon, loadWeapon, searchParams]);
 
   useEffect(() => {
-    const weaponHash = searchParams.get('w');
-    const perkParam  = searchParams.get('p');
+    const weaponHash  = searchParams.get('w');
+    const perkParam   = searchParams.get('p');
+    const modeParam   = searchParams.get('m');
+    const mwParam     = searchParams.get('mw');
+    const wsParam     = searchParams.get('ws');
+    const buffsParam  = searchParams.get('b');
+
     if (!weaponHash || weapons.length === 0) return;
     const found = weapons.find((w) => w.hash === weaponHash);
     if (!found) return;
-    // Pass the variant group so WeaponHeader can show the picker
+
     const groups = groupWeapons(weapons);
-    const group = groups.find((g) => g.variants.some((v) => v.hash === weaponHash));
+    const group  = groups.find((g) => g.variants.some((v) => v.hash === weaponHash));
     loadWeapon(found, group?.variants);
+
+    // Restore selected perks
     if (perkParam) {
       const hashes = perkParam.split(',');
       found.perkSockets.forEach((col) =>
         col.perks.forEach((p) => {
           if (hashes.includes(p.hash)) selectPerk(col.name, p.hash);
+          // Also check enhanced versions
+          if (p.enhancedVersion && hashes.includes(p.enhancedVersion.hash)) {
+            selectPerk(col.name, p.enhancedVersion.hash);
+          }
         })
       );
+    }
+
+    // Restore mode
+    if (modeParam === 'pvp' || modeParam === 'pve') setMode(modeParam);
+
+    // Restore masterwork stat — validate against known stat list before casting
+    if (mwParam && (MASTERWORK_STATS as readonly string[]).includes(mwParam)) {
+      const { setMasterworkStat } = useWeaponStore.getState();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setMasterworkStat(mwParam as any);
+    }
+
+    // Restore weapons stat
+    if (wsParam) setWeaponsStat(Number(wsParam));
+
+    // Restore active buffs
+    if (buffsParam) {
+      const { toggleBuff, activeBuffs: currentBuffs } = useWeaponStore.getState();
+      const toActivate = buffsParam.split(',').filter(Boolean);
+      toActivate.forEach((hash) => {
+        if (!currentBuffs.includes(hash)) toggleBuff(hash);
+      });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, weapons.length]);
@@ -80,8 +116,17 @@ function Dashboard() {
   const handleShare = () => {
     if (!activeWeapon) return;
     const params = new URLSearchParams({ w: activeWeapon.hash });
+    // Perk hashes
     const perkHashes = Object.values(selectedPerks);
     if (perkHashes.length) params.set('p', perkHashes.join(','));
+    // Mode
+    params.set('m', mode);
+    // Masterwork stat
+    if (masterworkStat) params.set('mw', masterworkStat);
+    // Weapons stat (only if non-default)
+    if (weaponsStat !== 70) params.set('ws', String(weaponsStat));
+    // Active buffs
+    if (activeBuffs.length) params.set('b', activeBuffs.join(','));
     navigator.clipboard
       .writeText(`${window.location.origin}${window.location.pathname}?${params}`)
       .then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
@@ -257,18 +302,20 @@ function Dashboard() {
                 <div className="lg:col-span-7 space-y-6">
                   <RollEditor />
 
-                  {/* PvE — god roll guide, effects, buffs */}
+                  {/* PvE — god roll guide, wishlists, effects, buffs */}
                   {mode === 'pve' && (
                     <>
                       <GodRollPanel />
+                      <WishlistPanel />
                       <EffectsPanel />
                       <BuffToggle />
                     </>
                   )}
 
-                  {/* PvP — effects and buffs still relevant for damage math */}
+                  {/* PvP — wishlists, effects, buffs */}
                   {mode === 'pvp' && (
                     <>
+                      <WishlistPanel />
                       <EffectsPanel />
                       <BuffToggle />
                     </>
@@ -281,6 +328,7 @@ function Dashboard() {
                   <AmmoPanel />
                   <DamageFalloffGraph />
                   <MasterworkPanel />
+                  <ArmorModPanel />
                   {mode === 'pvp' && <TTKPanel />}
                 </div>
               </div>

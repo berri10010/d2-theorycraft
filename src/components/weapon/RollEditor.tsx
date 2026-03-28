@@ -37,7 +37,7 @@ export const RollEditor: React.FC = () => {
 
       <div className="flex overflow-x-auto pb-4 md:grid md:grid-cols-4 lg:grid-cols-5 gap-6 md:pb-0">
         {activeWeapon.perkSockets.map((column) => {
-          const isOriginTraitCol = column.name === 'Origin Trait';
+          const isOriginTraitCol = column.columnType === 'origin';
           const columnDisabled = isOriginTraitCol && isLegacy;
 
           return (

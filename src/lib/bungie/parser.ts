@@ -1,4 +1,4 @@
-import { Weapon, Perk, PerkColumn, StatMap } from '../../types/weapon';
+import { Weapon, Perk, PerkColumn, ColumnType, StatMap } from '../../types/weapon';
 
 const BUNGIE_ROOT = 'https://www.bungie.net';
 import {
@@ -120,41 +120,76 @@ function isTrackerPlug(name: string): boolean {
 }
 
 // ──────────────────────────────────────────────────
-// Column label helpers
+// Column type + label helpers
 // ──────────────────────────────────────────────────
 
-function formatCategoryName(raw: string): string {
-  return raw
-    .replace(/^weapon\s+/i, '')
-    .split(' ')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(' ');
+/**
+ * Determine the semantic ColumnType for a socket category.
+ * When Bungie uses separate categories per slot type, the category name tells us
+ * exactly what it is. When Bungie uses one catch-all "WEAPON PERKS" category we
+ * fall back to position within that catch-all.
+ */
+function columnTypeFromCategory(
+  catName: string,
+  slotPos: number,
+  totalInCat: number,
+): ColumnType {
+  if (isBarrelCategory(catName)) return 'barrel';
+  if (isMagCategory(catName))    return 'mag';
+  if (isOriginTraitCategory(catName)) return 'origin';
+
+  // Catch-all "WEAPON PERKS" category: use position to infer type
+  // Standard D2 order: 0=Barrel, 1=Magazine, 2+=Perk (last is Origin when totalInCat≥4)
+  if (totalInCat >= 4) {
+    if (slotPos === 0) return 'barrel';
+    if (slotPos === 1) return 'mag';
+    if (slotPos === totalInCat - 1) return 'origin';
+    return 'perk';
+  }
+
+  return 'perk';
 }
 
 /**
- * Human-readable label for a perk socket column.
- *
- * Bungie's manifest often bundles ALL weapon sockets into one catch-all
- * "WEAPON PERKS" category whose name doesn't tell us which slot is which.
- * For those cases we use the standard D2 slot ordering by position:
- *   [0] Barrel  [1] Magazine  [2] Perk 1  [3] Perk 2  ...
- *
- * When the category name IS specific (e.g. "Barrels", "Magazines"), we
- * use the formatted category name instead.
+ * Human-readable label for a perk column.
+ * Barrel / mag / origin columns get a fixed label.
+ * Trait columns get "Perk N" where N is the 1-based index among all trait columns
+ * seen so far (passed in as `traitIndex`).
  */
-function columnLabel(catName: string, slotIndex: number, totalSlots: number): string {
-  if (isBarrelCategory(catName)) return formatCategoryName(catName);
-  if (isMagCategory(catName))    return formatCategoryName(catName);
-
-  // Catch-all "WEAPON PERKS" category (4+ sockets = barrel, mag, perk1, perk2, origin)
-  if (totalSlots >= 4) {
-    const POSITIONAL_LABELS = ['Barrel', 'Magazine', 'Perk 1', 'Perk 2', 'Origin Trait'];
-    return POSITIONAL_LABELS[slotIndex] ?? 'Origin Trait';
+function columnLabel(
+  colType: ColumnType,
+  catName: string,
+  traitIndex: number, // 1-based count of trait columns already created
+): string {
+  switch (colType) {
+    case 'barrel': {
+      // Use the category name to get the weapon-type-appropriate label
+      // e.g. "Barrels" → "Barrel", "Bowstrings" → "Bowstring", "Blades" → "Blade"
+      const cleaned = catName
+        .replace(/^weapon\s+/i, '')
+        .replace(/s$/i, '') // strip trailing 's' (Barrels→Barrel, etc.)
+        .trim();
+      // Capitalize first letter of each word
+      return cleaned
+        .split(' ')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ') || 'Barrel';
+    }
+    case 'mag': {
+      const cleaned = catName
+        .replace(/^weapon\s+/i, '')
+        .replace(/s$/i, '')
+        .trim();
+      return cleaned
+        .split(' ')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ') || 'Magazine';
+    }
+    case 'origin':
+      return 'Origin Trait';
+    case 'perk':
+      return `Perk ${traitIndex}`;
   }
-
-  // 2–3 pure trait sockets (barrel & mag already in their own categories)
-  if (totalSlots === 1) return 'Perk';
-  return `Perk ${slotIndex + 1}`;
 }
 
 function isEnhancedPerk(name: string): boolean {
@@ -181,19 +216,24 @@ function shortenSeasonName(name: string): string {
     .trim() || name;
 }
 
+interface SeasonInfo { name: string; number: number; }
+
 /**
- * Build a map from season hash → short season name.
+ * Build a map from season hash → { name, number }.
  * Every DestinyInventoryItemDefinition has a seasonHash field that points
  * directly to its DestinySeasonDefinition entry.
  */
 function buildSeasonHashMap(
   seasonDefs: Record<string, BungieSeasonDefinition>
-): Map<number, string> {
-  const map = new Map<number, string>();
+): Map<number, SeasonInfo> {
+  const map = new Map<number, SeasonInfo>();
   for (const season of Object.values(seasonDefs)) {
     const name = season.displayProperties?.name;
     if (season.hash && name && name.trim()) {
-      map.set(season.hash, shortenSeasonName(name));
+      map.set(season.hash, {
+        name: shortenSeasonName(name),
+        number: season.seasonNumber ?? 0,
+      });
     }
   }
   return map;
@@ -210,6 +250,7 @@ function deduplicateColumnNames(columns: PerkColumn[]): PerkColumn[] {
     const count = seen.get(col.name) ?? 0;
     seen.set(col.name, count + 1);
     if (count === 0) return col;
+    // Append a numeric suffix to avoid key collisions in the Zustand store
     return { ...col, name: `${col.name} ${count + 1}` };
   });
 }
@@ -266,6 +307,8 @@ export function parseWeapons(
 
     const rawColumns: PerkColumn[] = [];
     let intrinsicTrait: Perk | null = null;
+    // Running count of 'perk' (trait) columns emitted for this weapon — used for "Perk N" labels
+    let traitColumnCount = 0;
 
     if (item.sockets?.socketCategories && item.sockets?.socketEntries) {
       for (const category of item.sockets.socketCategories) {
@@ -377,12 +420,16 @@ export function parseWeapons(
           if (isIntrinsic) {
             // Only store the first-seen intrinsic (frame perk)
             if (!intrinsicTrait) intrinsicTrait = perks[0];
-          } else if (isOriginTrait) {
-            // Origin trait always appears as its own clearly-labelled column
-            rawColumns.push({ name: 'Origin Trait', perks });
           } else {
+            const colType = isOriginTrait
+              ? 'origin' as const
+              : columnTypeFromCategory(catName, slotPos, socketIndexes.length);
+
+            if (colType === 'perk') traitColumnCount += 1;
+
             rawColumns.push({
-              name: columnLabel(catName, slotPos, socketIndexes.length),
+              columnType: colType,
+              name: columnLabel(colType, catName, traitColumnCount),
               perks,
             });
           }
@@ -403,12 +450,14 @@ export function parseWeapons(
       hasCraftedPattern: !!item.inventory?.recipeItemHash,
       icon: item.displayProperties.icon,
       iconWatermark: item.iconWatermark ? BUNGIE_ROOT + item.iconWatermark : null,
-      seasonName: item.seasonHash ? (seasonHashToName.get(item.seasonHash) ?? null) : null,
+      seasonName:   item.seasonHash ? (seasonHashToName.get(item.seasonHash)?.name   ?? null) : null,
+      seasonNumber: item.seasonHash ? (seasonHashToName.get(item.seasonHash)?.number ?? null) : null,
       screenshot: item.screenshot ? BUNGIE_ROOT + item.screenshot : null,
       flavorText: item.flavorText?.trim() || null,
       rarity: item.tierTypeName || null,
       itemTypeDisplayName: item.itemTypeDisplayName || 'Weapon',
       itemSubType,
+      ammoType: item.equippingBlock?.ammoType ?? 1,
       damageType,
       rpm,
       baseStats,

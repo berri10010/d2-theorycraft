@@ -30,8 +30,14 @@ export interface Perk {
   enhancedVersion: Perk | null;
 }
 
+/** Semantic slot type — used for column labelling and UI rendering */
+export type ColumnType = 'barrel' | 'mag' | 'perk' | 'origin';
+
 export interface PerkColumn {
+  /** Human-readable label shown in the UI (e.g. "Barrel", "Perk 1", "Origin Trait") */
   name: string;
+  /** Semantic slot type so the UI can treat barrels/mags differently from trait perks */
+  columnType: ColumnType;
   perks: Perk[];
 }
 
@@ -58,6 +64,11 @@ export interface Weapon {
    * "Episode: Echoes" → "Echoes". Null for base-game weapons.
    */
   seasonName: string | null;
+  /**
+   * Season number from DestinySeasonDefinition (1 = Red War, increases each season).
+   * Used for chronological sorting in the sidebar. Null for base-game weapons.
+   */
+  seasonNumber: number | null;
   /** Full-width weapon artwork image (from Bungie manifest screenshot field) */
   screenshot: string | null;
   /** Italicised lore/flavor text shown on the weapon card */
@@ -67,6 +78,8 @@ export interface Weapon {
   itemTypeDisplayName: string;
   itemSubType: number;
   damageType: DamageType;
+  /** 1 = Primary, 2 = Special, 3 = Heavy */
+  ammoType: number;
   rpm: number;
   baseStats: StatMap;
   /** Intrinsic frame perk (e.g. "Adaptive Frame") — separate from roll perks */

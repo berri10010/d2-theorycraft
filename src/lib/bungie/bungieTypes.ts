@@ -41,7 +41,7 @@ export interface BungieInventoryItem {
   iconWatermark?: string;
   seasonHash?: number;
   tierTypeName?: string;
-  equippingBlock?: { uniqueLabel?: string };
+  equippingBlock?: { uniqueLabel?: string; ammoType?: number };
   inventory?: { recipeItemHash?: number };
   stats?: {
     stats: Record<string, { statHash: number; value: number }>;

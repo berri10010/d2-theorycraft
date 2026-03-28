@@ -1,31 +1,77 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE, DamageBuff } from '../../lib/buffDatabase';
+import { Perk } from '../../types/weapon';
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+const BUNGIE_ROOT = 'https://www.bungie.net';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function pctStr(multiplier: number): string {
   return `+${(multiplier * 100 - 100).toFixed(0)}%`;
 }
 
-// ─── Individual buff button ───────────────────────────────────────────────────
+// ─── Icon resolvers ───────────────────────────────────────────────────────────
+
+/**
+ * For weapon_perk buffs: pull the 24×24 icon from the matching selected perk.
+ * For subclass/mod buffs: use buff.icon if it exists.
+ */
+function BuffIcon({
+  buff,
+  linkedPerk,
+}: {
+  buff: DamageBuff;
+  linkedPerk: Perk | null;
+}) {
+  const iconPath = buff.category === 'weapon_perk'
+    ? (linkedPerk?.icon ?? null)
+    : (buff.icon ?? null);
+
+  if (!iconPath) {
+    // Fallback: small category-coloured dot
+    const dotColor =
+      buff.category === 'subclass' ? 'bg-amber-400' :
+      buff.category === 'mod'      ? 'bg-purple-400' : 'bg-blue-400';
+    return <span className={`shrink-0 w-5 h-5 rounded ${dotColor}/20 border border-${dotColor}/30 flex items-center justify-center`} />;
+  }
+
+  const src = iconPath.startsWith('http') ? iconPath : BUNGIE_ROOT + iconPath;
+
+  return (
+    <div className="shrink-0 w-6 h-6 rounded overflow-hidden bg-white/5 border border-white/10">
+      <Image
+        src={src}
+        alt=""
+        width={24}
+        height={24}
+        className="w-full h-full object-cover"
+        unoptimized
+      />
+    </div>
+  );
+}
+
+// ─── Buff button ──────────────────────────────────────────────────────────────
 
 interface BuffButtonProps {
   buff: DamageBuff;
   isActive: boolean;
-  isLinkedToPerk: boolean; // buff was triggered by a selected perk
+  isLinkedToPerk: boolean;
+  linkedPerk: Perk | null;
   onToggle: () => void;
 }
 
-function BuffButton({ buff, isActive, isLinkedToPerk, onToggle }: BuffButtonProps) {
+function BuffButton({ buff, isActive, isLinkedToPerk, linkedPerk, onToggle }: BuffButtonProps) {
   return (
     <button
       onClick={onToggle}
       title={buff.description}
       className={[
-        'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 border text-left w-full',
+        'flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 border text-left w-full',
         isActive
           ? isLinkedToPerk
             ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-300'
@@ -33,20 +79,21 @@ function BuffButton({ buff, isActive, isLinkedToPerk, onToggle }: BuffButtonProp
           : 'bg-white/3 border-white/8 text-slate-400 hover:border-white/20 hover:text-slate-200',
       ].join(' ')}
     >
+      {/* Bungie icon */}
+      <BuffIcon buff={buff} linkedPerk={linkedPerk} />
+
       {/* Active indicator dot */}
       <span className={[
-        'shrink-0 w-2 h-2 rounded-full border',
+        'shrink-0 w-1.5 h-1.5 rounded-full',
         isActive
-          ? isLinkedToPerk
-            ? 'bg-emerald-400 border-emerald-400'
-            : 'bg-amber-400 border-amber-400'
-          : 'bg-transparent border-white/20',
+          ? isLinkedToPerk ? 'bg-emerald-400' : 'bg-amber-400'
+          : 'bg-white/15',
       ].join(' ')} />
 
-      <span className="flex-1 truncate">{buff.name}</span>
+      <span className="flex-1 truncate text-xs">{buff.name}</span>
 
       {isLinkedToPerk && isActive && (
-        <span className="shrink-0 text-[9px] font-bold text-emerald-400 bg-emerald-400/10 px-1 py-0.5 rounded border border-emerald-500/30 leading-none">
+        <span className="shrink-0 text-[8px] font-bold text-emerald-400 bg-emerald-400/10 px-1 py-0.5 rounded border border-emerald-500/30 leading-none">
           AUTO
         </span>
       )}
@@ -83,20 +130,29 @@ export const BuffToggle: React.FC = () => {
   const { activeBuffs, toggleBuff, selectedPerks, activeWeapon } = useWeaponStore();
   const [showOtherPerks, setShowOtherPerks] = useState(false);
 
-  // Collect buff keys linked to currently-selected perks
-  // Also handle enhanced perks: look at both base and enhanced version
+  // Build a map: buffKey → linked Perk (for icon resolution)
+  const linkedPerkByBuffKey = new Map<string, Perk>();
   const linkedBuffKeys = new Set<string>();
+
   if (activeWeapon) {
     for (const [colName, perkHash] of Object.entries(selectedPerks)) {
       const col = activeWeapon.perkSockets.find((c) => c.name === colName);
       if (!col) continue;
-      // Check base perk
+
       const basePerk = col.perks.find((p) => p.hash === perkHash);
-      if (basePerk?.buffKey) linkedBuffKeys.add(basePerk.buffKey);
-      // Check enhanced version (in case an enhanced perk is selected)
+      if (basePerk?.buffKey) {
+        linkedBuffKeys.add(basePerk.buffKey);
+        linkedPerkByBuffKey.set(basePerk.buffKey, basePerk);
+      }
+
+      // Enhanced version selected
       for (const p of col.perks) {
-        if (p.enhancedVersion?.hash === perkHash && p.enhancedVersion.buffKey) {
-          linkedBuffKeys.add(p.enhancedVersion.buffKey);
+        if (p.enhancedVersion?.hash === perkHash) {
+          const enh = p.enhancedVersion;
+          if (enh.buffKey) {
+            linkedBuffKeys.add(enh.buffKey);
+            linkedPerkByBuffKey.set(enh.buffKey, enh);
+          }
         }
       }
     }
@@ -104,23 +160,15 @@ export const BuffToggle: React.FC = () => {
 
   const allBuffs = Object.values(BUFF_DATABASE);
 
-  // Weapon perk buffs linked to current roll — surfaced prominently
   const linkedPerkBuffs = allBuffs.filter(
     (b) => b.category === 'weapon_perk' && linkedBuffKeys.has(b.hash)
   );
-
-  // Weapon perk buffs NOT linked to current roll — hidden behind "More" toggle
   const otherPerkBuffs = allBuffs.filter(
     (b) => b.category === 'weapon_perk' && !linkedBuffKeys.has(b.hash)
   );
-
-  // Subclass buffs — always shown
   const subclassBuffs = allBuffs.filter((b) => b.category === 'subclass');
+  const modBuffs      = allBuffs.filter((b) => b.category === 'mod');
 
-  // Mod buffs — always shown
-  const modBuffs = allBuffs.filter((b) => b.category === 'mod');
-
-  // Count active buffs for header
   const activeCount = activeBuffs.length;
 
   return (
@@ -136,8 +184,8 @@ export const BuffToggle: React.FC = () => {
 
       <div className="space-y-5">
 
-        {/* ── Weapon Perk Buffs (dynamic, perk-linked) ── */}
-        {linkedPerkBuffs.length > 0 && (
+        {/* ── Perk-linked buffs (dynamic) ── */}
+        {linkedPerkBuffs.length > 0 ? (
           <div>
             <SectionLabel label="Perk Buffs" count={linkedPerkBuffs.filter((b) => activeBuffs.includes(b.hash)).length} />
             <div className="space-y-1.5">
@@ -147,26 +195,22 @@ export const BuffToggle: React.FC = () => {
                   buff={buff}
                   isActive={activeBuffs.includes(buff.hash)}
                   isLinkedToPerk={true}
+                  linkedPerk={linkedPerkByBuffKey.get(buff.hash) ?? null}
                   onToggle={() => toggleBuff(buff.hash)}
                 />
               ))}
             </div>
-            {linkedPerkBuffs.length > 0 && (
-              <p className="text-[10px] text-slate-600 mt-1.5">
-                <span className="text-emerald-500">AUTO</span> = buff auto-toggled when perk is selected. Click to override.
-              </p>
-            )}
+            <p className="text-[10px] text-slate-600 mt-1.5">
+              <span className="text-emerald-500">AUTO</span> = buff auto-toggled when perk is selected.
+            </p>
           </div>
-        )}
-
-        {/* Placeholder when no perk buffs are linked */}
-        {linkedPerkBuffs.length === 0 && (
+        ) : (
           <div className="rounded-lg border border-dashed border-white/8 p-3 text-center">
-            <p className="text-xs text-slate-600">Select a damage-boosting perk in the roll editor to see it here.</p>
+            <p className="text-xs text-slate-600">Select a damage-boosting perk to see it here.</p>
           </div>
         )}
 
-        {/* ── Subclass / Empowering ── */}
+        {/* ── Subclass / Super ── */}
         <div>
           <SectionLabel label="Subclass & Super" />
           <div className="space-y-1.5">
@@ -176,6 +220,7 @@ export const BuffToggle: React.FC = () => {
                 buff={buff}
                 isActive={activeBuffs.includes(buff.hash)}
                 isLinkedToPerk={false}
+                linkedPerk={null}
                 onToggle={() => toggleBuff(buff.hash)}
               />
             ))}
@@ -192,13 +237,14 @@ export const BuffToggle: React.FC = () => {
                 buff={buff}
                 isActive={activeBuffs.includes(buff.hash)}
                 isLinkedToPerk={false}
+                linkedPerk={null}
                 onToggle={() => toggleBuff(buff.hash)}
               />
             ))}
           </div>
         </div>
 
-        {/* ── Other Weapon Perks (collapsible) ── */}
+        {/* ── Other weapon perk buffs (collapsible) ── */}
         {otherPerkBuffs.length > 0 && (
           <div>
             <button
@@ -221,6 +267,7 @@ export const BuffToggle: React.FC = () => {
                     buff={buff}
                     isActive={activeBuffs.includes(buff.hash)}
                     isLinkedToPerk={false}
+                    linkedPerk={null}
                     onToggle={() => toggleBuff(buff.hash)}
                   />
                 ))}
@@ -228,7 +275,6 @@ export const BuffToggle: React.FC = () => {
             )}
           </div>
         )}
-
       </div>
     </div>
   );

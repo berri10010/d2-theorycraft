@@ -6,7 +6,8 @@
     "type": "perk",
     "multiplier": 1.25,
     "description": "Reloading after a kill grants increased damage.",
-    "perkNames": ["Kill Clip", "Enhanced Kill Clip"]
+    "perkNames": ["Kill Clip", "Enhanced Kill Clip"],
+    "icon": null
   },
   "target_lock": {
     "hash": "target_lock",
@@ -15,7 +16,8 @@
     "type": "perk",
     "multiplier": 1.40,
     "description": "Continued damage increases output. Value shown at maximum stacks.",
-    "perkNames": ["Target Lock", "Enhanced Target Lock"]
+    "perkNames": ["Target Lock", "Enhanced Target Lock"],
+    "icon": null
   },
   "frenzy": {
     "hash": "frenzy",
@@ -24,7 +26,8 @@
     "type": "perk",
     "multiplier": 1.15,
     "description": "After 12s in combat, increases damage, handling, and reload.",
-    "perkNames": ["Frenzy", "Enhanced Frenzy"]
+    "perkNames": ["Frenzy", "Enhanced Frenzy"],
+    "icon": null
   },
   "surrounded": {
     "hash": "surrounded",
@@ -33,7 +36,8 @@
     "type": "perk",
     "multiplier": 1.40,
     "description": "Increased damage when three or more enemies are nearby.",
-    "perkNames": ["Surrounded", "Enhanced Surrounded"]
+    "perkNames": ["Surrounded", "Enhanced Surrounded"],
+    "icon": null
   },
   "golden_tricorn_x2": {
     "hash": "golden_tricorn_x2",
@@ -42,7 +46,8 @@
     "type": "perk",
     "multiplier": 1.15,
     "description": "After a weapon kill of matching damage type.",
-    "perkNames": []
+    "perkNames": [],
+    "icon": null
   },
   "golden_tricorn_x3": {
     "hash": "golden_tricorn_x3",
@@ -51,7 +56,8 @@
     "type": "perk",
     "multiplier": 1.50,
     "description": "After an ability kill of matching damage type.",
-    "perkNames": ["Golden Tricorn", "Enhanced Golden Tricorn"]
+    "perkNames": ["Golden Tricorn", "Enhanced Golden Tricorn"],
+    "icon": null
   },
   "explosive_light": {
     "hash": "explosive_light",
@@ -60,7 +66,8 @@
     "type": "perk",
     "multiplier": 1.25,
     "description": "Picking up an orb increases damage for the next shot.",
-    "perkNames": ["Explosive Light", "Enhanced Explosive Light"]
+    "perkNames": ["Explosive Light", "Enhanced Explosive Light"],
+    "icon": null
   },
   "bait_and_switch": {
     "hash": "bait_and_switch",
@@ -69,7 +76,8 @@
     "type": "perk",
     "multiplier": 1.35,
     "description": "Dealing damage with all three equipped weapons briefly grants increased damage.",
-    "perkNames": ["Bait and Switch", "Enhanced Bait and Switch"]
+    "perkNames": ["Bait and Switch", "Enhanced Bait and Switch"],
+    "icon": null
   },
   "one_two_punch": {
     "hash": "one_two_punch",
@@ -78,7 +86,8 @@
     "type": "perk",
     "multiplier": 1.50,
     "description": "Hitting an enemy with every pellet in a shot briefly increases melee damage. (Shotgun-only)",
-    "perkNames": ["One-Two Punch", "Enhanced One-Two Punch"]
+    "perkNames": ["One-Two Punch", "Enhanced One-Two Punch"],
+    "icon": null
   },
   "radiant": {
     "hash": "radiant",
@@ -87,7 +96,8 @@
     "type": "empowering",
     "multiplier": 1.10,
     "description": "Solar subclass buff. Increases weapon damage against all targets.",
-    "perkNames": []
+    "perkNames": [],
+    "icon": "/common/destiny2_content/icons/b64f3e4292e7ea33b41f9cb9f9fc0a3a.png"
   },
   "empowering_rift": {
     "hash": "empowering_rift",
@@ -96,7 +106,8 @@
     "type": "empowering",
     "multiplier": 1.20,
     "description": "Warlock empowering rift. Boosts weapon damage while active.",
-    "perkNames": []
+    "perkNames": [],
+    "icon": "/common/destiny2_content/icons/a5b95ab7a14611ccb09c388fecf33c2c.png"
   },
   "weapons_of_light": {
     "hash": "weapons_of_light",
@@ -105,7 +116,8 @@
     "type": "empowering",
     "multiplier": 1.25,
     "description": "Titan Ward of Dawn bubble perk. Increases weapon damage.",
-    "perkNames": []
+    "perkNames": [],
+    "icon": "/common/destiny2_content/icons/0e9a7c1e83ec40d4bf2f8699c0f89f9b.png"
   },
   "well_of_radiance": {
     "hash": "well_of_radiance",
@@ -114,7 +126,8 @@
     "type": "empowering",
     "multiplier": 1.25,
     "description": "Warlock Well of Radiance. Increases weapon damage while standing in it.",
-    "perkNames": []
+    "perkNames": [],
+    "icon": "/common/destiny2_content/icons/3b2f4c1e5f8e5d4f3a8b7c9d0e1f2a3b.png"
   },
   "high_energy_fire": {
     "hash": "high_energy_fire",
@@ -123,6 +136,7 @@
     "type": "surge",
     "multiplier": 1.20,
     "description": "While Charged with Light, gain a damage bonus. Consumes a stack on kill.",
-    "perkNames": []
+    "perkNames": [],
+    "icon": "/common/destiny2_content/icons/9a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d.png"
   }
 }
