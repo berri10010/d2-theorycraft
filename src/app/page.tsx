@@ -13,6 +13,7 @@ import { StatDisplay } from '../components/weapon/StatDisplay';
 import { BuffToggle } from '../components/ui/BuffToggle';
 import { TTKPanel } from '../components/ui/TTKPanel';
 import { ComparisonGrid } from '../components/compare/ComparisonGrid';
+import { GodRollPanel } from '../components/weapon/GodRollPanel';
 import { calculateTTK } from '../lib/damageMath';
 
 function MenuIcon({ open }: { open: boolean }) {
@@ -210,6 +211,7 @@ function Dashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-7 space-y-6">
                   <RollEditor />
+                  <GodRollPanel />
                   <EffectsPanel />
                   <BuffToggle />
                 </div>
