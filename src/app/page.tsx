@@ -20,6 +20,8 @@ import { MasterworkPanel } from '../components/weapon/MasterworkPanel';
 import { DamageFalloffGraph } from '../components/weapon/DamageFalloffGraph';
 import { WishlistPanel } from '../components/weapon/WishlistPanel';
 import { ArmorModPanel } from '../components/weapon/ArmorModPanel';
+import { SubclassVerbPanel } from '../components/weapon/SubclassVerbPanel';
+import { SimilarWeaponsPanel } from '../components/weapon/SimilarWeaponsPanel';
 import { calculateTTK } from '../lib/damageMath';
 
 function MenuIcon({ open }: { open: boolean }) {
@@ -330,6 +332,8 @@ function Dashboard() {
                   <MasterworkPanel />
                   <ArmorModPanel />
                   {mode === 'pvp' && <TTKPanel />}
+                  {mode === 'pve' && <SubclassVerbPanel />}
+                  <SimilarWeaponsPanel />
                 </div>
               </div>
             </div>
