@@ -83,6 +83,7 @@ export const StatDisplay: React.FC = () => {
       {NUMERIC_STAT_KEYS.some((k) => (calcStats[k] ?? baseStats[k]) !== undefined) && (
         <>
           <div className="border-t border-white/10 mt-2 pt-4">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Additional Stats</p>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               {NUMERIC_STAT_KEYS.map((statName) => {
                 const base    = baseStats[statName];

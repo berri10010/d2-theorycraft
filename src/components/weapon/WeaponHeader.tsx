@@ -195,7 +195,7 @@ export const WeaponHeader: React.FC = () => {
               })()}
 
               {/* Crafted toggle — only show if weapon has craftable pattern */}
-              {(activeWeapon.hasCraftedPattern || true) && (
+              {activeWeapon.hasCraftedPattern && (
                 <button
                   onClick={toggleCrafted}
                   title="Toggle crafted mode (+2 all stats, enables enhanced perks)"

@@ -58,14 +58,17 @@ function SnapshotCard({
         </div>
         <div className="min-w-0 flex-1">
           {editing ? (
-            <input
-              autoFocus
-              value={labelValue}
-              onChange={(e) => setLabel(e.target.value)}
-              onBlur={handleRename}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleRename(); if (e.key === 'Escape') setEditing(false); }}
-              className="w-full bg-white/5 text-white text-sm font-bold px-2 py-1 rounded border border-amber-500 focus:outline-none"
-            />
+            <div className="flex items-center gap-1">
+              <input
+                autoFocus
+                value={labelValue}
+                onChange={(e) => setLabel(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleRename(); if (e.key === 'Escape') setEditing(false); }}
+                className="flex-1 min-w-0 bg-white/5 text-white text-sm font-bold px-2 py-1 rounded border border-amber-500 focus:outline-none"
+              />
+              <button onClick={handleRename} className="text-emerald-400 hover:text-emerald-300 text-xs font-bold px-1" title="Save (Enter)">✓</button>
+              <button onClick={() => setEditing(false)} className="text-slate-500 hover:text-slate-300 text-xs font-bold px-1" title="Cancel (Esc)">✕</button>
+            </div>
           ) : (
             <button
               onClick={() => setEditing(true)}
@@ -73,6 +76,7 @@ function SnapshotCard({
               title="Click to rename"
             >
               {snapshot.label}
+              <span className="ml-1 text-[9px] text-slate-600 font-normal">✎</span>
             </button>
           )}
           <p className="text-xs text-slate-400">
@@ -164,9 +168,11 @@ export const ComparisonGrid: React.FC = () => {
           </span>
         </h2>
         <div className="flex items-center gap-3 text-[10px] text-slate-600">
-          <span><span className="text-green-300">■</span> +1–5 &nbsp; <span className="text-green-400">■</span> +6–15 &nbsp; <span className="text-green-400 font-bold">■</span> +16+</span>
+          <span title="Colors show each stat's delta above the lowest value across all snapshots">
+            Δ from min: <span className="text-green-300">■</span> +1–5 <span className="text-green-400">■</span> +6–15 <span className="text-green-400 font-bold">■</span> +16+ <span className="text-red-400">■</span> lower
+          </span>
           <button onClick={clearSnapshots} className="text-red-400 hover:text-red-300 transition-colors text-xs">
-            Clear
+            Clear all
           </button>
         </div>
       </div>

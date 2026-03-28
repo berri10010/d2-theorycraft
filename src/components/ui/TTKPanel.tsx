@@ -137,9 +137,7 @@ export const TTKPanel: React.FC = () => {
         </div>
       ) : (
         <div className="bg-black/40 p-4 rounded-lg border border-white/10 text-center text-slate-500 text-sm">
-          Archetype not yet mapped — TTK unavailable.
-          <br />
-          <span className="text-xs mt-1 block">Add data to src/data/archetypes.json to enable.</span>
+          TTK calculation not available for this weapon type.
         </div>
       )}
     </div>

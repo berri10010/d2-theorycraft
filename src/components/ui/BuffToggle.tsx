@@ -221,7 +221,7 @@ export const BuffToggle: React.FC = () => {
 
         {/* ── Subclass / Super ── */}
         <div>
-          <SectionLabel label="Subclass & Super" />
+          <SectionLabel label="Subclass & Super" count={subclassBuffs.filter((b) => activeBuffs.includes(b.hash)).length} />
           <div className="space-y-1.5">
             {subclassBuffs.map((buff) => (
               <BuffButton
@@ -238,7 +238,7 @@ export const BuffToggle: React.FC = () => {
 
         {/* ── Armor Mods ── */}
         <div>
-          <SectionLabel label="Armor Mods" />
+          <SectionLabel label="Armor Mods" count={modBuffs.filter((b) => activeBuffs.includes(b.hash)).length} />
           <div className="space-y-1.5">
             {modBuffs.map((buff) => (
               <BuffButton
@@ -258,13 +258,18 @@ export const BuffToggle: React.FC = () => {
           <div>
             <button
               onClick={() => setShowOtherPerks((v) => !v)}
-              className="flex items-center gap-2 w-full text-left group"
+              className="flex items-center gap-2 w-full text-left group rounded px-1 -mx-1 py-1 hover:bg-white/5 transition-colors"
             >
-              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest group-hover:text-slate-400 transition-colors">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">
                 Other Perk Buffs
               </span>
+              {otherPerkBuffs.filter((b) => activeBuffs.includes(b.hash)).length > 0 && (
+                <span className="text-[9px] font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full leading-none">
+                  {otherPerkBuffs.filter((b) => activeBuffs.includes(b.hash)).length}
+                </span>
+              )}
               <div className="flex-1 h-px bg-white/5" />
-              <span className="text-[10px] text-slate-600 group-hover:text-slate-400 transition-colors">
+              <span className="text-[10px] text-slate-500 group-hover:text-slate-300 transition-colors">
                 {showOtherPerks ? '▲' : '▼'} {otherPerkBuffs.length}
               </span>
             </button>

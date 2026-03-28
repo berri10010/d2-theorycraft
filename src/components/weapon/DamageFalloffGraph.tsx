@@ -68,7 +68,19 @@ export const DamageFalloffGraph: React.FC = () => {
     return interpolate(rangeCurve, rangeStat);
   }, [rangeCurve, rangeStat]);
 
-  if (!activeWeapon || !rangeCurve || hipFalloffStart === null || critDmg === 0) return null;
+  if (!activeWeapon) return null;
+
+  // Show a friendly empty state when archetype data is unavailable rather than vanishing silently
+  if (!rangeCurve || hipFalloffStart === null || critDmg === 0) {
+    return (
+      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+        <h2 className="text-xl font-bold text-white mb-2">Damage Falloff</h2>
+        <p className="text-sm text-slate-500">
+          Falloff data not available for this weapon archetype.
+        </p>
+      </div>
+    );
+  }
 
   const adsFalloffStart = hipFalloffStart * adsMultiplier(zoomStat);
   const maxDist = adsFalloffStart * 2.0;
@@ -176,6 +188,8 @@ export const DamageFalloffGraph: React.FC = () => {
         <svg
           width="100%"
           viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="xMidYMid meet"
+          style={{ display: 'block' }}
           className="overflow-visible"
           onMouseMove={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();

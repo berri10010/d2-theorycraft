@@ -124,12 +124,15 @@ export const VaultPanel: React.FC = () => {
             Connect your Bungie.net account to see which weapons from the database
             you already own in your vault.
           </p>
+          <p className="text-[10px] text-amber-500/80 bg-amber-500/5 border border-amber-500/15 rounded px-2 py-1.5 leading-snug">
+            Clicking below will navigate to Bungie.net to authorize — you&rsquo;ll be redirected back automatically.
+          </p>
           <a
             href="/api/auth/bungie"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 transition-colors text-white text-sm font-semibold"
           >
             <BungieIcon />
-            Sign in with Bungie.net
+            Sign in with Bungie.net ↗
           </a>
           <p className="text-[9px] text-slate-600 leading-relaxed">
             Read-only access · no write permissions requested ·

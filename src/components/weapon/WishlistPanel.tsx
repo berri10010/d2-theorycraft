@@ -28,6 +28,7 @@ function useWishlist() {
   const [wishlistDb, setWishlistDb]     = useState<WishlistDb | null>(null);
   const [wishlistName, setWishlistName] = useState<string>('');
   const [entryCount, setEntryCount]     = useState(0);
+  const [isLoading, setIsLoading]       = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -44,6 +45,7 @@ function useWishlist() {
   }, []);
 
   const loadFile = useCallback((file: File) => {
+    setIsLoading(true);
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
@@ -52,15 +54,16 @@ function useWishlist() {
       setWishlistDb(db);
       setWishlistName(file.name);
       setEntryCount(count);
+      setIsLoading(false);
       try {
         localStorage.setItem(LS_WISHLIST_KEY, JSON.stringify({ name: file.name, text }));
       } catch { /* ignore */ }
     };
     reader.onerror = () => {
-      // Surface read errors so the user isn't left wondering why nothing happened
       console.error('WishlistPanel: Failed to read file', file.name);
       setWishlistName('');
       setEntryCount(0);
+      setIsLoading(false);
     };
     reader.readAsText(file);
   }, []);
@@ -72,7 +75,7 @@ function useWishlist() {
     localStorage.removeItem(LS_WISHLIST_KEY);
   }, []);
 
-  return { wishlistDb, wishlistName, entryCount, loadFile, clear };
+  return { wishlistDb, wishlistName, entryCount, isLoading, loadFile, clear };
 }
 
 function usePersonalRolls() {
@@ -126,11 +129,14 @@ function usePersonalRolls() {
 
 // ─── WishlistPanel ─────────────────────────────────────────────────────────────
 
+const ROLLS_PREVIEW = 4; // number of personal rolls shown before "show all"
+
 export const WishlistPanel: React.FC = () => {
   const { activeWeapon, selectedPerks } = useWeaponStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showAllRolls, setShowAllRolls] = useState(false);
 
-  const { wishlistDb, wishlistName, entryCount, loadFile, clear } = useWishlist();
+  const { wishlistDb, wishlistName, entryCount, isLoading, loadFile, clear } = useWishlist();
   const { rolls, save: saveRoll, remove: removeRoll, exportFile } = usePersonalRolls();
 
   if (!activeWeapon) return null;
@@ -225,9 +231,10 @@ export const WishlistPanel: React.FC = () => {
           ) : (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-full border border-dashed border-white/15 rounded-lg py-3 text-center text-xs text-slate-500 hover:text-slate-300 hover:border-white/30 transition-all"
+              disabled={isLoading}
+              className="w-full border border-dashed border-white/15 rounded-lg py-3 text-center text-xs text-slate-500 hover:text-slate-300 hover:border-white/30 transition-all disabled:opacity-50 disabled:cursor-wait"
             >
-              Drop a DIM wishlist (.txt) here, or click to browse
+              {isLoading ? 'Parsing…' : 'Drop a DIM wishlist (.txt) here, or click to browse'}
             </button>
           )}
 
@@ -264,8 +271,8 @@ export const WishlistPanel: React.FC = () => {
                 Export ↓
               </button>
             </div>
-            <div className="space-y-1.5 max-h-40 overflow-y-auto">
-              {rolls.map((roll) => (
+            <div className="space-y-1.5">
+              {(showAllRolls ? rolls : rolls.slice(0, ROLLS_PREVIEW)).map((roll) => (
                 <div
                   key={`${roll.weaponHash}-${roll.perkHashes.join('-')}`}
                   className="flex items-center justify-between bg-black/30 rounded-lg border border-white/8 px-3 py-1.5 gap-2"
@@ -282,6 +289,14 @@ export const WishlistPanel: React.FC = () => {
                   </button>
                 </div>
               ))}
+              {rolls.length > ROLLS_PREVIEW && (
+                <button
+                  onClick={() => setShowAllRolls((v) => !v)}
+                  className="w-full text-center text-[10px] font-semibold text-slate-500 hover:text-slate-300 transition-colors pt-1"
+                >
+                  {showAllRolls ? 'Show fewer' : `Show all ${rolls.length} rolls →`}
+                </button>
+              )}
             </div>
           </div>
         )}

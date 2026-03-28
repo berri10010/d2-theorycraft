@@ -71,8 +71,11 @@ function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProp
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export const ArmorModPanel: React.FC = () => {
-  const { armorMods, setArmorMods } = useWeaponStore();
+  const { activeWeapon, armorMods, setArmorMods } = useWeaponStore();
   const { targeting, loader, dexterity, unflinching } = armorMods;
+
+  // Don't render the panel until a weapon is loaded
+  if (!activeWeapon) return null;
 
   const hasAny = targeting > 0 || loader > 0 || dexterity > 0 || unflinching > 0;
 
