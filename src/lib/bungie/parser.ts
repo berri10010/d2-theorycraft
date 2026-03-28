@@ -43,60 +43,99 @@ const DAMAGE_TYPE_MAP: Record<number, Weapon['damageType']> = {
   3949783978: 'strand',
 };
 
-// Socket category name patterns for selectable perk columns (barrels, magazines, traits)
-const PERK_CATEGORY_PATTERNS = [
-  'barrel', 'bowstring', 'blade', 'battery', 'guard',
-  'magazine', 'arrow', 'projectile', 'perk', 'trait',
-];
+// ──────────────────────────────────────────────────
+// Socket category classifiers
+// ──────────────────────────────────────────────────
 
-function isPerkCategory(name: string): boolean {
-  const lower = name.toLowerCase();
-  return PERK_CATEGORY_PATTERNS.some((p) => lower.includes(p));
+const BARREL_PATTERNS = ['barrel', 'bowstring', 'blade', 'battery', 'guard', 'sight'];
+const MAG_PATTERNS    = ['magazine', 'arrow', 'projectile'];
+const PERK_PATTERNS   = ['perk', 'trait'];
+
+function isBarrelCategory(name: string): boolean {
+  const l = name.toLowerCase();
+  return BARREL_PATTERNS.some((p) => l.includes(p));
 }
-
+function isMagCategory(name: string): boolean {
+  const l = name.toLowerCase();
+  return MAG_PATTERNS.some((p) => l.includes(p));
+}
+function isPerkCategory(name: string): boolean {
+  const l = name.toLowerCase();
+  return isBarrelCategory(name) || isMagCategory(name) || PERK_PATTERNS.some((p) => l.includes(p));
+}
 function isIntrinsicCategory(name: string): boolean {
   return name.toLowerCase().includes('intrinsic');
 }
-
 function isOriginTraitCategory(name: string): boolean {
-  return name.toLowerCase().includes('origin');
+  const l = name.toLowerCase();
+  return l.includes('origin') || l.includes('source');
 }
-
 function isTrackerCategory(name: string): boolean {
-  return name.toLowerCase().includes('tracker');
+  const l = name.toLowerCase();
+  return l.includes('tracker') || l.includes('tracking');
 }
 
-// Known tracker plug names — belt-and-suspenders filter if the category name slips through
+// ──────────────────────────────────────────────────
+// Tracker plug-level blocklist — belt-and-suspenders
+// ──────────────────────────────────────────────────
+
 const TRACKER_PLUG_NAMES = new Set([
   'Crucible Tracker', 'Vanguard Tracker', 'Gambit Tracker', 'Trials Tracker',
   'Valor Tracker', 'Glory Tracker', 'Infamy Tracker', 'Competitive Tracker',
   'Kill Tracker', 'Defeat Tracker', 'Invasion Tracker', 'Nightmare Tracker',
+  'Season Kill Tracker', 'Legacy Kill Tracker', 'PvE Kill Tracker', 'PvP Kill Tracker',
+  'No Tracker',
 ]);
 
-/** Map a socket category name to a human-readable column label */
-function columnLabel(catName: string, slotIndex: number, totalSlots: number): string {
-  const lower = catName.toLowerCase();
-  if (lower.includes('barrel') || lower.includes('sight') || lower.includes('bowstring') ||
-      lower.includes('blade') || lower.includes('guard') || lower.includes('battery')) {
-    return formatCategoryName(catName.replace(/^weapon\s+/i, ''));
-  }
-  if (lower.includes('magazine') || lower.includes('arrow') || lower.includes('projectile')) {
-    return formatCategoryName(catName.replace(/^weapon\s+/i, ''));
-  }
-  // Weapon perk slots (the two trait columns) → "Trait 1", "Trait 2"
-  if (totalSlots > 1) return `Trait ${slotIndex + 1}`;
-  return formatCategoryName(catName);
+function isTrackerPlug(name: string): boolean {
+  if (TRACKER_PLUG_NAMES.has(name)) return true;
+  return name.toLowerCase().includes('tracker');
 }
 
+// ──────────────────────────────────────────────────
+// Column label helpers
+// ──────────────────────────────────────────────────
+
 function formatCategoryName(raw: string): string {
-  return raw.split(' ')
+  return raw
+    .replace(/^weapon\s+/i, '')
+    .split(' ')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(' ');
+}
+
+/** Human-readable label for a perk socket column */
+function columnLabel(catName: string, slotIndex: number, totalSlots: number): string {
+  if (isBarrelCategory(catName)) return formatCategoryName(catName);
+  if (isMagCategory(catName))    return formatCategoryName(catName);
+  // Multi-slot perk categories → "Trait 1", "Trait 2", …
+  if (totalSlots > 1) return `Trait ${slotIndex + 1}`;
+  // Single-slot perk category
+  return 'Trait 1';
 }
 
 function isEnhancedPerk(name: string): boolean {
   return name.startsWith('Enhanced ');
 }
+
+// ──────────────────────────────────────────────────
+// Column-name deduplication
+// Prevents two columns sharing the same Zustand key
+// ──────────────────────────────────────────────────
+
+function deduplicateColumnNames(columns: PerkColumn[]): PerkColumn[] {
+  const seen = new Map<string, number>();
+  return columns.map((col) => {
+    const count = seen.get(col.name) ?? 0;
+    seen.set(col.name, count + 1);
+    if (count === 0) return col;
+    return { ...col, name: `${col.name} ${count + 1}` };
+  });
+}
+
+// ──────────────────────────────────────────────────
+// Main parser
+// ──────────────────────────────────────────────────
 
 export function parseWeapons(
   items: Record<string, BungieInventoryItem>,
@@ -129,21 +168,21 @@ export function parseWeapons(
 
     if (Object.keys(baseStats).length === 0) continue;
 
-    const itemSubType = item.itemSubType ?? 0;
-    const damageType = DAMAGE_TYPE_MAP[item.defaultDamageTypeHash] ?? 'kinetic';
-
-    // Inject stat curves from archetypes.json at parse time
-    const curves = getCurves(itemSubType);
+    const itemSubType  = item.itemSubType ?? 0;
+    const damageType   = DAMAGE_TYPE_MAP[item.defaultDamageTypeHash] ?? 'kinetic';
+    const curves       = getCurves(itemSubType);
     const statCurves: Record<string, { stat: number; value: number }[]> = {};
     if (curves.Range)    statCurves['Range']    = curves.Range;
     if (curves.Handling) statCurves['Handling'] = curves.Handling;
     if (curves.Reload)   statCurves['Reload']   = curves.Reload;
 
-    const perkSockets: PerkColumn[] = [];
-    let intrinsicTrait: Perk | null = null;
+    // Stats that support perk stat-modifier deltas
+    const BAR_STATS = new Set([
+      'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
+    ]);
 
-    // Bar stats that support perk stat-modifier deltas
-    const BAR_STATS = new Set(['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance']);
+    const rawColumns: PerkColumn[] = [];
+    let intrinsicTrait: Perk | null = null;
 
     if (item.sockets?.socketCategories && item.sockets?.socketEntries) {
       for (const category of item.sockets.socketCategories) {
@@ -151,31 +190,36 @@ export function parseWeapons(
         if (!catDef) continue;
         const catName = catDef.displayProperties.name;
 
-        // Skip origin traits and tracker sockets
-        if (isOriginTraitCategory(catName)) continue;
+        // ── Hard-skip tracker socket categories ────────
         if (isTrackerCategory(catName)) continue;
 
-        const isIntrinsic = isIntrinsicCategory(catName);
-        if (!isIntrinsic && !isPerkCategory(catName)) continue;
+        const isIntrinsic   = isIntrinsicCategory(catName);
+        const isOriginTrait = isOriginTraitCategory(catName);
+
+        // Accept: intrinsic, origin-trait, and regular perk categories only
+        if (!isIntrinsic && !isOriginTrait && !isPerkCategory(catName)) continue;
 
         const { socketIndexes } = category;
 
-        // One PerkColumn per socket index — each index is one physical slot on the weapon.
-        // "WEAPON PERKS" has two indexes (Trait 1, Trait 2); barrel/magazine categories
-        // typically have one. Putting both traits in the same list was the original bug.
+        // One PerkColumn per physical socket slot in this category.
+        // "WEAPON PERKS" has 2 indexes → Trait 1 / Trait 2 each become their own column.
         socketIndexes.forEach((socketIndex, slotPos) => {
           const socket = item.sockets!.socketEntries[socketIndex];
           if (!socket) return;
 
+          // Collect plug hashes, preferring randomised rolls over fixed
           let plugHashes: number[] = [];
-
           if (socket.reusablePlugSetHash) {
             const ps = plugSetDefs[socket.reusablePlugSetHash.toString()];
-            if (ps) plugHashes = ps.reusablePlugItems.filter((p) => p.currentlyCanRoll).map((p) => p.plugItemHash);
+            if (ps) plugHashes = ps.reusablePlugItems
+              .filter((p) => p.currentlyCanRoll)
+              .map((p) => p.plugItemHash);
           }
           if (plugHashes.length === 0 && socket.randomizedPlugSetHash) {
             const ps = plugSetDefs[socket.randomizedPlugSetHash.toString()];
-            if (ps) plugHashes = ps.reusablePlugItems.filter((p) => p.currentlyCanRoll).map((p) => p.plugItemHash);
+            if (ps) plugHashes = ps.reusablePlugItems
+              .filter((p) => p.currentlyCanRoll)
+              .map((p) => p.plugItemHash);
           }
           if (plugHashes.length === 0 && socket.reusablePlugItems?.length) {
             plugHashes = socket.reusablePlugItems.map((p) => p.plugItemHash);
@@ -198,9 +242,8 @@ export function parseWeapons(
 
             const perkName = plugItem.displayProperties.name;
 
-            // Belt-and-suspenders: skip any tracker plugs that slipped through
-            if (TRACKER_PLUG_NAMES.has(perkName)) continue;
-            if (perkName.toLowerCase().includes('tracker')) continue;
+            // ── Tracker plug guard ──────────────────────
+            if (isTrackerPlug(perkName)) continue;
 
             const statModifiers = (plugItem.investmentStats ?? [])
               .filter((s) => !s.isConditionallyActive && s.value !== 0)
@@ -227,10 +270,13 @@ export function parseWeapons(
           if (perks.length === 0) return;
 
           if (isIntrinsic) {
-            // Grab the first perk as the intrinsic frame trait
-            intrinsicTrait = perks[0];
+            // Only store the first-seen intrinsic (frame perk)
+            if (!intrinsicTrait) intrinsicTrait = perks[0];
+          } else if (isOriginTrait) {
+            // Origin trait always appears as its own clearly-labelled column
+            rawColumns.push({ name: 'Origin Trait', perks });
           } else {
-            perkSockets.push({
+            rawColumns.push({
               name: columnLabel(catName, slotPos, socketIndexes.length),
               perks,
             });
@@ -238,6 +284,9 @@ export function parseWeapons(
         });
       }
     }
+
+    // Guard: deduplicate column names so selectedPerks keys never collide
+    const perkSockets = deduplicateColumnNames(rawColumns);
 
     weapons.push({
       hash: item.hash.toString(),

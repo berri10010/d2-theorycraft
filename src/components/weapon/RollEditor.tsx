@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { useGodRolls } from '../../lib/useGodRolls';
-import { godRollFieldForColumn } from '../../lib/godRolls';
+import { godRollFieldForColumn, GodRollEntry } from '../../lib/godRolls';
 
 const BUNGIE_URL = 'https://www.bungie.net';
 
@@ -50,7 +50,13 @@ export const RollEditor: React.FC = () => {
         {activeWeapon.perkSockets.map((column) => {
           // Determine which god roll list applies to this column
           const godRollField = godRollFieldForColumn(column.name);
-          const recommendedPerks = godRoll && godRollField ? godRoll[godRollField] as string[] : [];
+          const recommendedPerks: string[] = (() => {
+            if (!godRoll || !godRollField) return [];
+            const val = godRoll[godRollField as keyof GodRollEntry];
+            if (Array.isArray(val)) return val as string[];
+            // originTrait is a single string | null
+            return val ? [val as string] : [];
+          })();
 
           return (
             <div key={column.name} className="flex flex-col gap-3 min-w-[64px] items-center">
