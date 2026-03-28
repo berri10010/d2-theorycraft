@@ -8,6 +8,7 @@ import {
   BungieInventoryItem,
   BungieSocketCategoryDefinition,
   BungiePlugSetDefinition,
+  BungieSeasonDefinition,
 } from './bungieTypes';
 
 const gzipAsync   = promisify(gzip);
@@ -85,14 +86,15 @@ export async function syncManifest(): Promise<SyncResult> {
 
   console.log('Syncing Bungie manifest v' + currentVersion + '...');
 
-  const [items, socketCategoryDefs, plugSetDefs] = await Promise.all([
+  const [items, socketCategoryDefs, plugSetDefs, seasonDefs] = await Promise.all([
     fetchTable(paths.DestinyInventoryItemDefinition) as Promise<Record<string, BungieInventoryItem>>,
     fetchTable(paths.DestinySocketCategoryDefinition) as Promise<Record<string, BungieSocketCategoryDefinition>>,
     fetchTable(paths.DestinyPlugSetDefinition) as Promise<Record<string, BungiePlugSetDefinition>>,
+    fetchTable(paths.DestinySeasonDefinition) as Promise<Record<string, BungieSeasonDefinition>>,
   ]);
 
   console.log('  Parsing weapons...');
-  const weapons = parseWeapons(items, socketCategoryDefs, plugSetDefs);
+  const weapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs);
 
   console.log('  Compressing...');
   const encoded = await compress(weapons);

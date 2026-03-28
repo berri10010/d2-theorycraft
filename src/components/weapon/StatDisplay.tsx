@@ -24,8 +24,8 @@ export const StatDisplay: React.FC = () => {
   const calcStats  = getCalculatedStats();
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-slate-800">
-      <h2 className="text-xl font-bold mb-6 text-slate-100">Weapon Stats</h2>
+    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+      <h2 className="text-xl font-bold mb-6 text-white">Weapon Stats</h2>
       <div className="flex flex-col gap-4">
         {BAR_STAT_KEYS.map((statName) => {
           const base    = baseStats[statName] ?? 0;
@@ -39,7 +39,7 @@ export const StatDisplay: React.FC = () => {
             <div key={statName} className="flex items-center text-sm md:text-base">
               <div className="w-28 md:w-32 font-medium text-slate-300 shrink-0">{statName}</div>
 
-              <div className="flex-1 h-3 bg-slate-950 rounded-full overflow-hidden relative mx-4">
+              <div className="flex-1 h-3 bg-black rounded-full overflow-hidden relative mx-4">
                 <div
                   className="absolute top-0 left-0 h-full bg-slate-300 transition-all duration-300"
                   style={{ width: `${Math.min(base, 100)}%` }}
@@ -61,7 +61,7 @@ export const StatDisplay: React.FC = () => {
               <div className="w-20 text-right font-mono flex flex-col justify-center items-end">
                 <span className={
                   'font-bold ' +
-                  (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-slate-100')
+                  (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-white')
                 }>
                   {current}
                   {diff !== 0 && (
@@ -82,7 +82,7 @@ export const StatDisplay: React.FC = () => {
       {/* Numeric-only stats */}
       {NUMERIC_STAT_KEYS.some((k) => (calcStats[k] ?? baseStats[k]) !== undefined) && (
         <>
-          <div className="border-t border-slate-800 mt-2 pt-4">
+          <div className="border-t border-white/10 mt-2 pt-4">
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               {NUMERIC_STAT_KEYS.map((statName) => {
                 const base    = baseStats[statName];
@@ -94,7 +94,7 @@ export const StatDisplay: React.FC = () => {
                     <span className="text-slate-400">{statName}</span>
                     <span className={
                       'font-mono font-bold ' +
-                      (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-slate-100')
+                      (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-white')
                     }>
                       {current}
                       {diff !== 0 && (

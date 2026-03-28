@@ -5,12 +5,39 @@ import {
   BungieInventoryItem,
   BungieSocketCategoryDefinition,
   BungiePlugSetDefinition,
+  BungieSeasonDefinition,
 } from './bungieTypes';
 import { getCurves } from '../archetypes';
 import { getBuffKeyForPerk } from '../buffDatabase';
 import { getPerkTier } from '../perkTierDatabase';
 
 const WEAPON_ITEM_TYPE = 3;
+
+// ──────────────────────────────────────────────────
+// Variant / family detection
+// ──────────────────────────────────────────────────
+
+/** Ordered from highest to lowest priority for default selection */
+const VARIANT_SUFFIXES = ['(Adept)', '(Timelost)', '(Harrowed)', '(Brave)'] as const;
+type VariantLabel = typeof VARIANT_SUFFIXES[number] extends `(${infer L})` ? L : never;
+
+function extractBaseName(name: string): string {
+  for (const suffix of VARIANT_SUFFIXES) {
+    if (name.endsWith(' ' + suffix)) return name.slice(0, name.length - suffix.length - 1);
+  }
+  return name;
+}
+
+function extractVariantLabel(name: string): string | null {
+  for (const suffix of VARIANT_SUFFIXES) {
+    if (name.endsWith(' ' + suffix)) return suffix.slice(1, -1); // strip parens
+  }
+  return null;
+}
+
+function isAdeptVariant(name: string): boolean {
+  return VARIANT_SUFFIXES.some((s) => name.endsWith(' ' + s));
+}
 
 const STAT_HASH_MAP: Record<number, string> = {
   4043523819: 'Impact',
@@ -104,18 +131,72 @@ function formatCategoryName(raw: string): string {
     .join(' ');
 }
 
-/** Human-readable label for a perk socket column */
+/**
+ * Human-readable label for a perk socket column.
+ *
+ * Bungie's manifest often bundles ALL weapon sockets into one catch-all
+ * "WEAPON PERKS" category whose name doesn't tell us which slot is which.
+ * For those cases we use the standard D2 slot ordering by position:
+ *   [0] Barrel  [1] Magazine  [2] Perk 1  [3] Perk 2  ...
+ *
+ * When the category name IS specific (e.g. "Barrels", "Magazines"), we
+ * use the formatted category name instead.
+ */
 function columnLabel(catName: string, slotIndex: number, totalSlots: number): string {
   if (isBarrelCategory(catName)) return formatCategoryName(catName);
   if (isMagCategory(catName))    return formatCategoryName(catName);
-  // Multi-slot perk categories → "Trait 1", "Trait 2", …
-  if (totalSlots > 1) return `Trait ${slotIndex + 1}`;
-  // Single-slot perk category
-  return 'Trait 1';
+
+  // Catch-all "WEAPON PERKS" category (4+ sockets = barrel, mag, perk1, perk2, origin)
+  if (totalSlots >= 4) {
+    const POSITIONAL_LABELS = ['Barrel', 'Magazine', 'Perk 1', 'Perk 2', 'Origin Trait'];
+    return POSITIONAL_LABELS[slotIndex] ?? 'Origin Trait';
+  }
+
+  // 2–3 pure trait sockets (barrel & mag already in their own categories)
+  if (totalSlots === 1) return 'Perk';
+  return `Perk ${slotIndex + 1}`;
 }
 
 function isEnhancedPerk(name: string): boolean {
   return name.startsWith('Enhanced ');
+}
+
+// ──────────────────────────────────────────────────
+// Season name helpers
+// ──────────────────────────────────────────────────
+
+/**
+ * Strip verbose prefixes so season names are compact pill labels.
+ *   "Season of the Haunted"  → "Haunted"
+ *   "Season of Arrivals"     → "Arrivals"
+ *   "Season of Dawn"         → "Dawn"
+ *   "Episode: Echoes"        → "Echoes"
+ *   "Season Pass"            → "Season Pass" (unchanged)
+ */
+function shortenSeasonName(name: string): string {
+  return name
+    .replace(/^Episode:\s*/i, '')
+    .replace(/^Season of the\s+/i, '')
+    .replace(/^Season of\s+/i, '')
+    .trim() || name;
+}
+
+/**
+ * Build a map from season hash → short season name.
+ * Every DestinyInventoryItemDefinition has a seasonHash field that points
+ * directly to its DestinySeasonDefinition entry.
+ */
+function buildSeasonHashMap(
+  seasonDefs: Record<string, BungieSeasonDefinition>
+): Map<number, string> {
+  const map = new Map<number, string>();
+  for (const season of Object.values(seasonDefs)) {
+    const name = season.displayProperties?.name;
+    if (season.hash && name && name.trim()) {
+      map.set(season.hash, shortenSeasonName(name));
+    }
+  }
+  return map;
 }
 
 // ──────────────────────────────────────────────────
@@ -140,8 +221,10 @@ function deduplicateColumnNames(columns: PerkColumn[]): PerkColumn[] {
 export function parseWeapons(
   items: Record<string, BungieInventoryItem>,
   socketCategoryDefs: Record<string, BungieSocketCategoryDefinition>,
-  plugSetDefs: Record<string, BungiePlugSetDefinition>
+  plugSetDefs: Record<string, BungiePlugSetDefinition>,
+  seasonDefs: Record<string, BungieSeasonDefinition> = {}
 ): Weapon[] {
+  const seasonHashToName = buildSeasonHashMap(seasonDefs);
   const weapons: Weapon[] = [];
 
   for (const item of Object.values(items)) {
@@ -228,7 +311,7 @@ export function parseWeapons(
             plugHashes = [socket.singleInitialItemHash];
           }
 
-          const perks: Perk[] = [];
+          const rawPerks: Perk[] = [];
           const seenPlugs = new Set<string>();
 
           for (const plugHash of plugHashes) {
@@ -255,7 +338,7 @@ export function parseWeapons(
               .filter((s): s is { statName: string; value: number } => s !== null);
 
             const tierEntry = getPerkTier(perkName);
-            perks.push({
+            rawPerks.push({
               hash: hashStr,
               name: perkName,
               icon: plugItem.displayProperties.icon,
@@ -264,7 +347,29 @@ export function parseWeapons(
               isEnhanced: isEnhancedPerk(perkName),
               buffKey: getBuffKeyForPerk(perkName),
               tier: tierEntry?.tier ?? null,
+              enhancedVersion: null, // filled in below
             });
+          }
+
+          if (rawPerks.length === 0) return;
+
+          // ── Pair enhanced perks with their base versions ──
+          // Build a map: baseName → enhanced perk
+          const enhancedMap = new Map<string, Perk>();
+          for (const p of rawPerks) {
+            if (p.isEnhanced) {
+              const baseName = p.name.replace(/^Enhanced\s+/i, '');
+              enhancedMap.set(baseName.toLowerCase(), p);
+            }
+          }
+
+          // Attach enhancedVersion to base perks, then drop standalone enhanced perks
+          // (they remain accessible via enhancedVersion for the "upgrade" button in the UI)
+          const perks: Perk[] = [];
+          for (const p of rawPerks) {
+            if (p.isEnhanced) continue; // deduplicated into base perk
+            const enhanced = enhancedMap.get(p.name.toLowerCase()) ?? null;
+            perks.push({ ...p, enhancedVersion: enhanced });
           }
 
           if (perks.length === 0) return;
@@ -288,10 +393,17 @@ export function parseWeapons(
     // Guard: deduplicate column names so selectedPerks keys never collide
     const perkSockets = deduplicateColumnNames(rawColumns);
 
+    const weaponName = item.displayProperties.name;
     weapons.push({
       hash: item.hash.toString(),
-      name: item.displayProperties.name,
+      name: weaponName,
+      baseName: extractBaseName(weaponName),
+      variantLabel: extractVariantLabel(weaponName),
+      isAdept: isAdeptVariant(weaponName),
+      hasCraftedPattern: !!item.inventory?.recipeItemHash,
       icon: item.displayProperties.icon,
+      iconWatermark: item.iconWatermark ? BUNGIE_ROOT + item.iconWatermark : null,
+      seasonName: item.seasonHash ? (seasonHashToName.get(item.seasonHash) ?? null) : null,
       screenshot: item.screenshot ? BUNGIE_ROOT + item.screenshot : null,
       flavorText: item.flavorText?.trim() || null,
       rarity: item.tierTypeName || null,

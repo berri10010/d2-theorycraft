@@ -9,7 +9,7 @@ const WEAPON_TIER_CONFIG: Record<string, { bg: string; text: string; label: stri
   S: { bg: 'bg-amber-400', text: 'text-slate-950', label: 'S-Tier' },
   A: { bg: 'bg-green-400', text: 'text-slate-950', label: 'A-Tier' },
   B: { bg: 'bg-blue-400',  text: 'text-slate-950', label: 'B-Tier' },
-  C: { bg: 'bg-slate-500', text: 'text-slate-100', label: 'C-Tier' },
+  C: { bg: 'bg-slate-500', text: 'text-white', label: 'C-Tier' },
   D: { bg: 'bg-slate-600', text: 'text-slate-300', label: 'D-Tier' },
 };
 
@@ -50,8 +50,8 @@ export const GodRollPanel: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-slate-900/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-slate-800">
-        <h2 className="text-xl font-bold mb-4 text-slate-100">PvE God Roll</h2>
+      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+        <h2 className="text-xl font-bold mb-4 text-white">PvE God Roll</h2>
         <p className="text-slate-600 text-sm text-center py-6 animate-pulse">Loading community analysis…</p>
       </div>
     );
@@ -61,8 +61,8 @@ export const GodRollPanel: React.FC = () => {
 
   if (!entry) {
     return (
-      <div className="bg-slate-900/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-slate-800">
-        <h2 className="text-xl font-bold mb-4 text-slate-100">PvE God Roll</h2>
+      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+        <h2 className="text-xl font-bold mb-4 text-white">PvE God Roll</h2>
         <p className="text-slate-600 text-sm text-center py-6">
           No community data found for <span className="text-slate-400">{activeWeapon.name}</span>.
         </p>
@@ -73,11 +73,11 @@ export const GodRollPanel: React.FC = () => {
   const tierCfg = entry.tier ? WEAPON_TIER_CONFIG[entry.tier] : null;
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-slate-800">
+    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-xl font-bold text-slate-100">PvE God Roll</h2>
+          <h2 className="text-xl font-bold text-white">PvE God Roll</h2>
           <p className="text-xs text-slate-500 mt-0.5">
             Community analysis · Season {entry.season ?? '?'} · Rank #{entry.rank ?? '?'} in {entry.weaponType}s
           </p>
@@ -107,7 +107,7 @@ export const GodRollPanel: React.FC = () => {
 
       {/* Analyst notes */}
       {entry.notes && (
-        <div className="mt-4 pt-4 border-t border-slate-800">
+        <div className="mt-4 pt-4 border-t border-white/10">
           <p className="text-xs text-slate-500 uppercase tracking-wide mb-1.5">Analyst Notes</p>
           <p className="text-sm text-slate-300 leading-relaxed italic">{entry.notes}</p>
         </div>

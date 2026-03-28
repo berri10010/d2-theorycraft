@@ -4,119 +4,156 @@ import React from 'react';
 import Image from 'next/image';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
-import { useGodRolls } from '../../lib/useGodRolls';
-import { godRollFieldForColumn, GodRollEntry } from '../../lib/godRolls';
+import { isLegacyVariant } from '../../lib/weaponGroups';
+import { WeaponGroup, Perk } from '../../types/weapon';
 
 const BUNGIE_URL = 'https://www.bungie.net';
 
-/** Border colour for an unselected perk based on its tier */
-function tierBorderClass(tier: string | null): string {
-  if (!tier || !(tier in TIER_CONFIG)) return 'border-slate-700 hover:border-slate-500';
-  const cfg = TIER_CONFIG[tier as PerkTier];
-  return cfg.border + ' opacity-70 hover:opacity-100';
-}
-
 export const RollEditor: React.FC = () => {
-  const { activeWeapon, selectedPerks, selectPerk, clearPerk } = useWeaponStore();
-  const { data: godRollDb } = useGodRolls();
-
+  const {
+    activeWeapon, selectedPerks, selectPerk, clearPerk,
+    isCrafted, variantGroup, mode,
+  } = useWeaponStore();
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
-  // Look up god roll entry for this weapon
-  const godRoll = godRollDb ? godRollDb[activeWeapon.name] : null;
+  // Legacy detection (suppresses Origin Trait column)
+  const tempGroup: WeaponGroup = {
+    baseName: activeWeapon.baseName,
+    variants: variantGroup,
+    default: variantGroup[0] ?? activeWeapon,
+  };
+  const isLegacy = isLegacyVariant(activeWeapon, tempGroup);
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-slate-800">
+    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-slate-100">Weapon Perks</h2>
-        {godRoll && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">PvE Roll Guide</span>
-            {godRoll.tier && (
-              <span className={`text-xs font-black px-2 py-0.5 rounded leading-none ${
-                godRoll.tier === 'S' ? 'bg-amber-400 text-slate-950' :
-                godRoll.tier === 'A' ? 'bg-green-400 text-slate-950' :
-                godRoll.tier === 'B' ? 'bg-blue-400 text-slate-950' :
-                'bg-slate-600 text-slate-200'
-              }`}>
-                {godRoll.tier}-Tier
-              </span>
-            )}
-          </div>
+        <h2 className="text-xl font-bold text-white">Weapon Perks</h2>
+        {isCrafted && (
+          <span className="text-xs text-emerald-400 font-semibold">
+            Crafted — tap ⚡ to upgrade perk
+          </span>
         )}
       </div>
 
       <div className="flex overflow-x-auto pb-4 md:grid md:grid-cols-4 lg:grid-cols-5 gap-6 md:pb-0">
         {activeWeapon.perkSockets.map((column) => {
-          // Determine which god roll list applies to this column
-          const godRollField = godRollFieldForColumn(column.name);
-          const recommendedPerks: string[] = (() => {
-            if (!godRoll || !godRollField) return [];
-            const val = godRoll[godRollField as keyof GodRollEntry];
-            if (Array.isArray(val)) return val as string[];
-            // originTrait is a single string | null
-            return val ? [val as string] : [];
-          })();
+          const isOriginTraitCol = column.name === 'Origin Trait';
+          const columnDisabled = isOriginTraitCol && isLegacy;
 
           return (
-            <div key={column.name} className="flex flex-col gap-3 min-w-[64px] items-center">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 whitespace-nowrap">
+            <div
+              key={column.name}
+              className={[
+                'flex flex-col gap-3 min-w-[64px] items-center',
+                columnDisabled ? 'opacity-30 pointer-events-none' : '',
+              ].join(' ')}
+            >
+              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 whitespace-nowrap flex items-center gap-1">
                 {column.name}
+                {columnDisabled && (
+                  <span className="text-[9px] text-slate-600 normal-case tracking-normal">(legacy)</span>
+                )}
               </h3>
+
               {column.perks.map((perk) => {
-                const isActive = selectedPerks[column.name] === perk.hash;
+                const selectedHash = selectedPerks[column.name];
+                // Determine which perk is currently "active" — could be base or enhanced version
+                const isBaseActive     = selectedHash === perk.hash;
+                const isEnhancedActive = perk.enhancedVersion
+                  ? selectedHash === perk.enhancedVersion.hash
+                  : false;
+                const isActive = isBaseActive || isEnhancedActive;
+
+                // The displayed perk: enhanced version when crafted & upgraded, otherwise base
+                const displayPerk: Perk = (isCrafted && isEnhancedActive && perk.enhancedVersion)
+                  ? perk.enhancedVersion
+                  : perk;
+
                 const tierCfg = perk.tier ? TIER_CONFIG[perk.tier as PerkTier] : null;
-                // A perk is "god roll recommended" if its name appears in the recommendations list
-                const isRecommended = recommendedPerks.some(
-                  (r) => r.toLowerCase() === perk.name.toLowerCase() ||
-                    (perk.isEnhanced && r.toLowerCase() === perk.name.toLowerCase().replace(/^enhanced\s+/, ''))
-                );
+                const canUpgrade = isCrafted && !!perk.enhancedVersion && isBaseActive;
+                const isUpgraded = isCrafted && isEnhancedActive;
 
                 return (
                   <div key={perk.hash} className="relative flex flex-col items-center gap-1">
                     <button
-                      onClick={() => isActive ? clearPerk(column.name) : selectPerk(column.name, perk.hash)}
-                      title={`${perk.name}${perk.isEnhanced ? ' (Enhanced)' : ''}${perk.tier ? ` [${perk.tier}]` : ''}${isRecommended ? ' ★ God Roll' : ''}: ${perk.description}`}
+                      onClick={() => {
+                        if (isActive) {
+                          clearPerk(column.name);
+                        } else {
+                          // Select base version by default; enhanced via upgrade button
+                          selectPerk(column.name, perk.hash);
+                        }
+                      }}
+                      title={`${displayPerk.name}${perk.tier ? ` [${perk.tier}]` : ''}: ${displayPerk.description}`}
                       aria-pressed={isActive}
                       className={[
                         'relative w-12 h-12 md:w-14 md:h-14 rounded-full border-2 transition-all duration-200 overflow-hidden',
                         isActive
-                          ? 'border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.4)] scale-110 opacity-100'
+                          ? isUpgraded
+                            ? 'border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.5)] scale-110 opacity-100'
+                            : 'border-white/70 shadow-[0_0_12px_rgba(255,255,255,0.2)] scale-110 opacity-100'
                           : tierCfg
                             ? `${tierCfg.border} opacity-60 hover:opacity-100`
-                            : 'border-slate-700 hover:border-slate-500 opacity-60 hover:opacity-100',
+                            : 'border-white/20 hover:border-white/40 opacity-60 hover:opacity-100',
                       ].join(' ')}
                     >
                       <Image
-                        src={BUNGIE_URL + perk.icon}
-                        alt={perk.name}
+                        src={BUNGIE_URL + displayPerk.icon}
+                        alt={displayPerk.name}
                         fill
                         sizes="(max-width: 768px) 48px, 56px"
                         className="object-cover"
                         unoptimized
                       />
-                      {/* Enhanced perk indicator — bottom-right */}
-                      {perk.isEnhanced && (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-amber-400 rounded-full border border-slate-900" />
+                      {/* Auto-buff indicator */}
+                      {displayPerk.buffKey && (
+                        <div className="absolute top-0 left-0 w-2.5 h-2.5 bg-green-400 rounded-full border border-black" />
                       )}
-                      {/* Auto-buff indicator — top-left */}
-                      {perk.buffKey && (
-                        <div className="absolute top-0 left-0 w-2.5 h-2.5 bg-green-400 rounded-full border border-slate-900" />
-                      )}
-                      {/* God Roll recommended indicator — top-right star */}
-                      {isRecommended && (
-                        <div className="absolute top-0 right-0 w-4 h-4 bg-yellow-400 rounded-full border border-slate-900 flex items-center justify-center">
-                          <svg viewBox="0 0 20 20" fill="currentColor" className="w-2.5 h-2.5 text-slate-900">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
+                      {/* Enhanced active indicator */}
+                      {isUpgraded && (
+                        <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-amber-400 rounded-full border border-black flex items-center justify-center">
+                          <span className="text-[7px] font-black text-black leading-none">E</span>
                         </div>
                       )}
                     </button>
 
-                    {/* Tier badge below the icon */}
-                    {tierCfg && (
+                    {/* Upgrade button (crafted mode, perk selected, enhanced available) */}
+                    {canUpgrade && perk.enhancedVersion && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          selectPerk(column.name, perk.enhancedVersion!.hash);
+                        }}
+                        title={`Upgrade to ${perk.enhancedVersion.name}`}
+                        className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 hover:bg-amber-500/30 transition-colors leading-none"
+                      >
+                        ⚡ ENH
+                      </button>
+                    )}
+
+                    {/* Downgrade button (enhanced selected, crafted mode) */}
+                    {isUpgraded && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          selectPerk(column.name, perk.hash);
+                        }}
+                        title="Downgrade to base version"
+                        className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10 hover:border-white/20 transition-colors leading-none"
+                      >
+                        Base
+                      </button>
+                    )}
+
+                    {/* Tier badge — PvE only */}
+                    {mode === 'pve' && tierCfg && !isUpgraded && (
                       <span className={`text-[10px] font-black leading-none px-1 py-0.5 rounded ${tierCfg.badge}`}>
                         {tierCfg.label}
+                      </span>
+                    )}
+                    {mode === 'pve' && isUpgraded && (
+                      <span className="text-[9px] font-bold leading-none px-1 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                        ENH
                       </span>
                     )}
                   </div>
@@ -128,16 +165,10 @@ export const RollEditor: React.FC = () => {
       </div>
 
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4 text-xs text-slate-600">
-        <span>Click a selected perk to deselect.</span>
-        <span><span className="text-yellow-400">★</span> = god roll pick.</span>
-        <span><span className="text-green-500">●</span> = auto-activates buff.</span>
-        <span><span className="text-amber-400">●</span> = enhanced.</span>
-        <span>
-          Tier badges: <span className="text-amber-400 font-bold">S</span>{' '}
-          <span className="text-green-400 font-bold">A</span>{' '}
-          <span className="text-blue-400 font-bold">B</span>{' '}
-          <span className="text-slate-400 font-bold">C↓</span> = PvE perk ranking.
-        </span>
+        <span>Click selected perk to deselect.</span>
+        <span><span className="text-green-500">●</span> = auto-buff.</span>
+        {mode === 'pve' && <span>Tier: <span className="text-amber-400 font-bold">S</span> <span className="text-green-400 font-bold">A</span> <span className="text-blue-400 font-bold">B</span> <span className="text-slate-400 font-bold">C↓</span></span>}
+        {isCrafted && <span className="text-emerald-500">⚡ ENH = upgrades perk to enhanced tier.</span>}
       </div>
     </div>
   );

@@ -13,7 +13,11 @@ import { StatDisplay } from '../components/weapon/StatDisplay';
 import { BuffToggle } from '../components/ui/BuffToggle';
 import { TTKPanel } from '../components/ui/TTKPanel';
 import { ComparisonGrid } from '../components/compare/ComparisonGrid';
+import { groupWeapons } from '../lib/weaponGroups';
 import { GodRollPanel } from '../components/weapon/GodRollPanel';
+import { AmmoPanel } from '../components/weapon/AmmoPanel';
+import { MasterworkPanel } from '../components/weapon/MasterworkPanel';
+import { DamageFalloffGraph } from '../components/weapon/DamageFalloffGraph';
 import { calculateTTK } from '../lib/damageMath';
 
 function MenuIcon({ open }: { open: boolean }) {
@@ -46,7 +50,9 @@ function Dashboard() {
 
   useEffect(() => {
     if (weapons.length > 0 && !activeWeapon && !searchParams.get('w')) {
-      loadWeapon(weapons[0]);
+      const groups = groupWeapons(weapons);
+      const firstGroup = groups[0];
+      if (firstGroup) loadWeapon(firstGroup.default, firstGroup.variants);
     }
   }, [weapons, activeWeapon, loadWeapon, searchParams]);
 
@@ -56,7 +62,10 @@ function Dashboard() {
     if (!weaponHash || weapons.length === 0) return;
     const found = weapons.find((w) => w.hash === weaponHash);
     if (!found) return;
-    loadWeapon(found);
+    // Pass the variant group so WeaponHeader can show the picker
+    const groups = groupWeapons(weapons);
+    const group = groups.find((g) => g.variants.some((v) => v.hash === weaponHash));
+    loadWeapon(found, group?.variants);
     if (perkParam) {
       const hashes = perkParam.split(',');
       found.perkSockets.forEach((col) =>
@@ -80,7 +89,7 @@ function Dashboard() {
 
   const handleAddToCompare = () => {
     if (!activeWeapon) return;
-    const ttkResult = calculateTTK(mode, activeWeapon.itemSubType, activeWeapon.rpm, getDamageMultiplier(), 0, 336);
+    const ttkResult = calculateTTK(mode, activeWeapon.itemSubType, activeWeapon.rpm, getDamageMultiplier(), 192, 336);
     addSnapshot({
       label: activeWeapon.name,
       weapon: activeWeapon,
@@ -93,7 +102,7 @@ function Dashboard() {
 
   if (!activeWeapon) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4 text-slate-500 p-8">
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-slate-500 p-8">
         {isLoading && <p role="status" className="text-lg">Loading weapon database...</p>}
         {error && (
           <div className="text-center space-y-3 max-w-md">
@@ -117,7 +126,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="h-screen bg-slate-950 text-slate-200 font-sans flex overflow-hidden">
+    <div className="h-screen bg-black text-slate-200 font-sans flex overflow-hidden">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-amber-500 focus:text-slate-950 focus:font-bold focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:outline-none"
@@ -133,7 +142,7 @@ function Dashboard() {
         'fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         'md:static md:translate-x-0 md:z-auto md:transition-none',
-        'border-r border-slate-800 shrink-0 overflow-hidden',
+        'border-r border-white/10 shrink-0 overflow-hidden',
       ].join(' ')}>
         <SearchSidebar />
       </div>
@@ -154,13 +163,13 @@ function Dashboard() {
                 aria-label={sidebarOpen ? 'Close weapon database' : 'Open weapon database'}
                 aria-expanded={sidebarOpen}
                 onClick={() => setSidebarOpen((o) => !o)}
-                className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors shrink-0 border border-slate-700"
+                className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-colors shrink-0 border border-white/10"
               >
                 <MenuIcon open={sidebarOpen} />
               </button>
 
               {/* Editor / Compare tabs */}
-              <div role="tablist" aria-label="View mode" className="flex bg-slate-900 rounded-lg p-1 border border-slate-800">
+              <div role="tablist" aria-label="View mode" className="flex bg-white/5 rounded-lg p-1 border border-white/10">
                 {(['editor', 'compare'] as const).map((tab) => (
                   <button
                     key={tab}
@@ -169,7 +178,7 @@ function Dashboard() {
                     onClick={() => setActiveTab(tab)}
                     className={
                       'px-3 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] flex items-center gap-1.5 capitalize ' +
-                      (activeTab === tab ? 'bg-slate-800 text-amber-400' : 'text-slate-400 hover:text-slate-200')
+                      (activeTab === tab ? 'bg-white/10 text-amber-400' : 'text-slate-400 hover:text-slate-200')
                     }
                   >
                     {tab}
@@ -222,7 +231,7 @@ function Dashboard() {
                 <button
                   onClick={handleShare}
                   aria-label="Copy share link to clipboard"
-                  className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border border-slate-700 min-h-[44px]"
+                  className="bg-white/5 hover:bg-white/10 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border border-white/10 min-h-[44px]"
                 >
                   {copied ? 'Copied!' : 'Share'}
                 </button>
@@ -269,8 +278,9 @@ function Dashboard() {
                 {/* ── Right column ───────────────────────── */}
                 <div className="lg:col-span-5 space-y-6">
                   <StatDisplay />
-
-                  {/* TTK calculator only makes sense in PvP */}
+                  <AmmoPanel />
+                  <DamageFalloffGraph />
+                  <MasterworkPanel />
                   {mode === 'pvp' && <TTKPanel />}
                 </div>
               </div>

@@ -23,6 +23,11 @@ export interface Perk {
   buffKey: string | null;
   /** PvE tier from community analysis: S/A/B/C/D/E/F/G, or null if unrated */
   tier: string | null;
+  /**
+   * If this is a base perk that has an enhanced counterpart in the same column,
+   * this holds the enhanced perk so the UI can offer an "upgrade" button in Crafted mode.
+   */
+  enhancedVersion: Perk | null;
 }
 
 export interface PerkColumn {
@@ -33,7 +38,26 @@ export interface PerkColumn {
 export interface Weapon {
   hash: string;
   name: string;
+  /** Base name with variant suffix stripped, e.g. "Igneous Hammer" for all variants */
+  baseName: string;
+  /** Variant label, e.g. "Adept", "Timelost", "Harrowed" — null for base version */
+  variantLabel: string | null;
+  /** True if this is an Adept/Timelost/Harrowed variant (better stats, Adept mods) */
+  isAdept: boolean;
+  /** True if this weapon has a craftable pattern in the game */
+  hasCraftedPattern: boolean;
   icon: string;
+  /**
+   * Season watermark icon path from Bungie manifest (iconWatermark field).
+   * Weapons from the same season share the same watermark path, enabling season grouping.
+   */
+  iconWatermark: string | null;
+  /**
+   * Short season name derived from DestinySeasonDefinition at parse time.
+   * "Season of the Haunted" → "Haunted", "Season of Arrivals" → "Arrivals",
+   * "Episode: Echoes" → "Echoes". Null for base-game weapons.
+   */
+  seasonName: string | null;
   /** Full-width weapon artwork image (from Bungie manifest screenshot field) */
   screenshot: string | null;
   /** Italicised lore/flavor text shown on the weapon card */
@@ -50,6 +74,15 @@ export interface Weapon {
   perkSockets: PerkColumn[];
   /** Populated from archetypes.json at parse time */
   statCurves: Record<string, StatCurveNode[]>;
+}
+
+/** A named group of weapon variants sharing the same base name */
+export interface WeaponGroup {
+  baseName: string;
+  /** Sorted best-first: Adept > Timelost > Harrowed > base */
+  variants: Weapon[];
+  /** The variant shown by default (first in sorted list) */
+  default: Weapon;
 }
 
 export interface CompareSnapshot {

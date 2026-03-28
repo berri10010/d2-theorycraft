@@ -1,5 +1,5 @@
 import { GameMode } from '../types/weapon';
-import { getArchetype, RESILIENCE_HP, ArchetypeDamage } from './archetypes';
+import { getArchetype, ArchetypeDamage } from './archetypes';
 
 export interface TTKResult {
   ttk: number;
@@ -25,20 +25,20 @@ export function calculateShotsToKill(damagePerShot: number, targetHealth: number
 }
 
 /**
- * Calculates PvP TTK against a guardian at the given resilience tier.
+ * Calculates PvP TTK against a guardian at the given HP value.
+ * hp is passed directly (use the RESILIENCE_HP table in the UI layer, not here).
  * Returns null if the archetype is unknown.
  */
 export function calculatePvpTTK(
   subType: number,
   rpm: number,
-  resilience: number,
+  hp: number,
   damageMultiplier: number
 ): TTKResult | null {
   const archetype = getArchetype(subType, rpm);
   if (!archetype) return null;
 
   const { crit, body, burstSize } = archetype.pvp;
-  const hp = RESILIENCE_HP[String(resilience)] ?? 192;
 
   const scaledCrit = crit * damageMultiplier;
   const scaledBody = body * damageMultiplier;
@@ -103,11 +103,12 @@ export function calculateTTK(
   subType: number,
   rpm: number,
   damageMultiplier: number,
-  resilience: number,
+  /** PvP: direct guardian HP (192–230). PvE: unused. */
+  guardianHpOrResilience: number,
   enemyHealth: number
 ): TTKResult | null {
   if (mode === 'pvp') {
-    return calculatePvpTTK(subType, rpm, resilience, damageMultiplier);
+    return calculatePvpTTK(subType, rpm, guardianHpOrResilience, damageMultiplier);
   }
   return calculatePveTTK(subType, rpm, enemyHealth, damageMultiplier);
 }

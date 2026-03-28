@@ -7,8 +7,18 @@ export interface BungieManifestResponse {
         DestinyStatDefinition: string;
         DestinySocketCategoryDefinition: string;
         DestinyPlugSetDefinition: string;
+        DestinySeasonDefinition: string;
       };
     };
+  };
+}
+
+export interface BungieSeasonDefinition {
+  hash: number;
+  seasonNumber: number;
+  displayProperties: {
+    name: string;
+    icon: string;
   };
 }
 
@@ -29,8 +39,10 @@ export interface BungieInventoryItem {
   flavorText?: string;
   screenshot?: string;
   iconWatermark?: string;
+  seasonHash?: number;
   tierTypeName?: string;
   equippingBlock?: { uniqueLabel?: string };
+  inventory?: { recipeItemHash?: number };
   stats?: {
     stats: Record<string, { statHash: number; value: number }>;
   };

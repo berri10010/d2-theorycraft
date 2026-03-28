@@ -1,8 +1,12 @@
 import buffData from '../data/buffs.json';
 
+export type BuffCategory = 'weapon_perk' | 'subclass' | 'mod';
+
 export interface DamageBuff {
   hash: string;
   name: string;
+  /** UI grouping: weapon_perk | subclass | mod */
+  category: BuffCategory;
   type: 'empowering' | 'perk' | 'surge';
   multiplier: number;
   description: string;

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE } from '../../lib/buffDatabase';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
+import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 
 const BUNGIE_URL = 'https://www.bungie.net';
 
@@ -25,6 +26,7 @@ function StatDelta({ value }: { value: number }) {
 
 export const EffectsPanel: React.FC = () => {
   const { activeWeapon, selectedPerks, activeBuffs, clearPerk, toggleBuff } = useWeaponStore();
+  const { data: compendiumData } = useCompendiumPerks();
 
   if (!activeWeapon) return null;
 
@@ -58,8 +60,8 @@ export const EffectsPanel: React.FC = () => {
   const isEmpty = activePerkEntries.length === 0 && manualBuffEntries.length === 0;
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-slate-800">
-      <h2 className="text-xl font-bold mb-4 text-slate-100">Effects</h2>
+    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+      <h2 className="text-xl font-bold mb-4 text-white">Effects</h2>
 
       {isEmpty ? (
         <p className="text-slate-600 text-sm text-center py-6">
@@ -71,7 +73,7 @@ export const EffectsPanel: React.FC = () => {
           {activePerkEntries.map(({ columnName, perkHash, name, icon, description, isEnhanced, buffKey, statModifiers }) => (
             <div
               key={perkHash}
-              className="flex gap-3 p-3 bg-slate-950 rounded-lg border border-slate-800 group"
+              className="flex gap-3 p-3 bg-black/40 rounded-lg border border-white/10 group"
             >
               {/* Icon */}
               <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-amber-400 shrink-0">
@@ -134,9 +136,38 @@ export const EffectsPanel: React.FC = () => {
                   )}
                 </div>
 
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-3">
-                  {description}
-                </p>
+                {/* Description — prefer Compendium precise text over Bungie manifest */}
+                {(() => {
+                  const compEntry = compendiumData?.[name];
+                  if (compEntry) {
+                    return (
+                      <div className="mt-1">
+                        <p className="text-xs text-slate-300 leading-relaxed">
+                          {isEnhanced ? compEntry.description.replace(/↑/g, '') : compEntry.baseDescription}
+                        </p>
+                        {isEnhanced && compEntry.enhancedBonuses.length > 0 && (
+                          <div className="mt-1.5 flex flex-wrap gap-1">
+                            {compEntry.enhancedBonuses.map((bonus, i) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center gap-1 text-[11px] font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded"
+                              >
+                                <span className="text-amber-400 font-bold">↑</span>
+                                {bonus}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <span className="text-[10px] text-slate-600 mt-1 block">via Data Compendium</span>
+                      </div>
+                    );
+                  }
+                  return (
+                    <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-3">
+                      {description}
+                    </p>
+                  );
+                })()}
 
                 {/* Auto-buff indicator */}
                 {buffKey && BUFF_DATABASE[buffKey] && (
@@ -167,7 +198,7 @@ export const EffectsPanel: React.FC = () => {
           {manualBuffEntries.map((buff) => (
             <div
               key={buff.hash}
-              className="flex gap-3 p-3 bg-slate-950 rounded-lg border border-slate-800 group"
+              className="flex gap-3 p-3 bg-black/40 rounded-lg border border-white/10 group"
             >
               <div className="w-10 h-10 rounded-full bg-slate-800 border-2 border-blue-400 flex items-center justify-center shrink-0">
                 <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-blue-400">
