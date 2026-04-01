@@ -10,13 +10,13 @@ import {
   BungiePlugSetDefinition,
   BungieSeasonDefinition,
 } from './bungieTypes';
+import { BUNGIE_URL as BUNGIE_ROOT } from '../bungieUrl';
 
 const gzipAsync   = promisify(gzip);
 const gunzipAsync = promisify(gunzip);
 
-const BUNGIE_ROOT       = 'https://www.bungie.net';
-const CACHE_VERSION_KEY = 'd2:manifest-version';
-const CACHE_WEAPONS_KEY = 'd2:weapons-gz'; // new key — avoids reading old uncompressed data
+const CACHE_VERSION_KEY = 'd2:manifest-version-v4'; // bumped — cross-socket enhanced perk pairing for Adept weapons
+const CACHE_WEAPONS_KEY = 'd2:weapons-gz-v4';       // bumped — v3 didn't pair enhanced perks across separate sockets
 const TTL               = 60 * 60 * 24 * 7; // 7 days
 
 function getRedis(): Redis {

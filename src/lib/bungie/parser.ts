@@ -1,6 +1,5 @@
 import { Weapon, Perk, PerkColumn, ColumnType, StatMap } from '../../types/weapon';
-
-const BUNGIE_ROOT = 'https://www.bungie.net';
+import { BUNGIE_URL as BUNGIE_ROOT } from '../bungieUrl';
 import {
   BungieInventoryItem,
   BungieSocketCategoryDefinition,
@@ -163,27 +162,30 @@ function columnLabel(
 ): string {
   switch (colType) {
     case 'barrel': {
-      // Use the category name to get the weapon-type-appropriate label
-      // e.g. "Barrels" → "Barrel", "Bowstrings" → "Bowstring", "Blades" → "Blade"
+      // Use the category name to get the weapon-type-appropriate label.
+      // e.g. "Weapon Barrels" → "Barrel", "Bowstrings" → "Bowstring", "Blades" → "Blade".
+      // When Bungie uses a catch-all "WEAPON PERKS" category the derived label would be
+      // "Perk" — treat that as generic and fall back to "Barrel".
       const cleaned = catName
         .replace(/^weapon\s+/i, '')
         .replace(/s$/i, '') // strip trailing 's' (Barrels→Barrel, etc.)
         .trim();
-      // Capitalize first letter of each word
-      return cleaned
+      const label = cleaned
         .split(' ')
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-        .join(' ') || 'Barrel';
+        .join(' ');
+      return label && label.toLowerCase() !== 'perk' ? label : 'Barrel';
     }
     case 'mag': {
       const cleaned = catName
         .replace(/^weapon\s+/i, '')
         .replace(/s$/i, '')
         .trim();
-      return cleaned
+      const label = cleaned
         .split(' ')
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-        .join(' ') || 'Magazine';
+        .join(' ');
+      return label && label.toLowerCase() !== 'perk' ? label : 'Magazine';
     }
     case 'origin':
       return 'Origin Trait';
@@ -334,19 +336,32 @@ export function parseWeapons(
           const socket = item.sockets!.socketEntries[socketIndex];
           if (!socket) return;
 
-          // Collect plug hashes, preferring randomised rolls over fixed
+          // Collect plug hashes, preferring randomised rolls over fixed.
+          // If none pass the currentlyCanRoll filter (e.g. enhanced-only sockets on Adept
+          // weapons where enhanced perks are marked currentlyCanRoll:false), fall back to
+          // the full unfiltered list so those perks aren't silently dropped.
           let plugHashes: number[] = [];
           if (socket.reusablePlugSetHash) {
             const ps = plugSetDefs[socket.reusablePlugSetHash.toString()];
-            if (ps) plugHashes = ps.reusablePlugItems
-              .filter((p) => p.currentlyCanRoll)
-              .map((p) => p.plugItemHash);
+            if (ps) {
+              const rollable = ps.reusablePlugItems
+                .filter((p) => p.currentlyCanRoll)
+                .map((p) => p.plugItemHash);
+              plugHashes = rollable.length > 0
+                ? rollable
+                : ps.reusablePlugItems.map((p) => p.plugItemHash);
+            }
           }
           if (plugHashes.length === 0 && socket.randomizedPlugSetHash) {
             const ps = plugSetDefs[socket.randomizedPlugSetHash.toString()];
-            if (ps) plugHashes = ps.reusablePlugItems
-              .filter((p) => p.currentlyCanRoll)
-              .map((p) => p.plugItemHash);
+            if (ps) {
+              const rollable = ps.reusablePlugItems
+                .filter((p) => p.currentlyCanRoll)
+                .map((p) => p.plugItemHash);
+              plugHashes = rollable.length > 0
+                ? rollable
+                : ps.reusablePlugItems.map((p) => p.plugItemHash);
+            }
           }
           if (plugHashes.length === 0 && socket.reusablePlugItems?.length) {
             plugHashes = socket.reusablePlugItems.map((p) => p.plugItemHash);
@@ -447,6 +462,57 @@ export function parseWeapons(
       }
     }
 
+    // ── Cross-socket enhanced perk pairing ────────────────────────────────
+    // Some weapons (e.g. Adept) store enhanced perks in SEPARATE socket slots
+    // from their base-perk counterparts.  After per-socket pairing, any perk
+    // column whose perks are ALL enhanced is an "enhanced-only" column that
+    // should be merged into a sibling base column instead of shown separately.
+    {
+      const enhancedOnlyIdxs: number[] = [];
+      rawColumns.forEach((col, idx) => {
+        if (
+          col.columnType === 'perk' &&
+          col.perks.length > 0 &&
+          col.perks.every((p) => p.isEnhanced)
+        ) {
+          enhancedOnlyIdxs.push(idx);
+        }
+      });
+
+      if (enhancedOnlyIdxs.length > 0) {
+        // Build a map: baseName (lowercase) → enhanced Perk
+        const crossEnhancedMap = new Map<string, Perk>();
+        for (const idx of enhancedOnlyIdxs) {
+          for (const enhPerk of rawColumns[idx].perks) {
+            const baseName = enhPerk.name.replace(/^Enhanced\s+/i, '').toLowerCase();
+            if (!crossEnhancedMap.has(baseName)) {
+              crossEnhancedMap.set(baseName, enhPerk);
+            }
+          }
+        }
+
+        // Attach enhanced versions to base perks in non-enhanced columns
+        const enhancedOnlySet = new Set(enhancedOnlyIdxs);
+        for (let i = 0; i < rawColumns.length; i++) {
+          if (enhancedOnlySet.has(i)) continue;
+          const col = rawColumns[i];
+          if (col.columnType !== 'perk') continue;
+
+          const updatedPerks = col.perks.map((p): Perk => {
+            if (p.isEnhanced || p.enhancedVersion) return p;
+            const enh = crossEnhancedMap.get(p.name.toLowerCase()) ?? null;
+            return enh ? { ...p, enhancedVersion: enh } : p;
+          });
+          rawColumns[i] = { ...col, perks: updatedPerks };
+        }
+
+        // Remove the now-merged enhanced-only columns (highest index first)
+        for (let i = enhancedOnlyIdxs.length - 1; i >= 0; i--) {
+          rawColumns.splice(enhancedOnlyIdxs[i], 1);
+        }
+      }
+    }
+
     // Guard: deduplicate column names so selectedPerks keys never collide
     const perkSockets = deduplicateColumnNames(rawColumns);
 
@@ -464,7 +530,7 @@ export function parseWeapons(
       seasonNumber: item.seasonHash ? (seasonHashToName.get(item.seasonHash)?.number ?? null) : null,
       screenshot: item.screenshot ? BUNGIE_ROOT + item.screenshot : null,
       flavorText: item.flavorText?.trim() || null,
-      rarity: item.tierTypeName || null,
+      rarity: item.inventory?.tierTypeName || null,
       itemTypeDisplayName: item.itemTypeDisplayName || 'Weapon',
       itemSubType,
       ammoType: item.equippingBlock?.ammoType ?? 1,

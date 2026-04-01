@@ -1,36 +1,54 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
+import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { isLegacyVariant } from '../../lib/weaponGroups';
-import { WeaponGroup, Perk } from '../../types/weapon';
-
-const BUNGIE_URL = 'https://www.bungie.net';
+import { Perk } from '../../types/weapon';
+import { BUNGIE_URL } from '../../lib/bungieUrl';
 
 export const RollEditor: React.FC = () => {
   const {
     activeWeapon, selectedPerks, selectPerk, clearPerk,
     isCrafted, variantGroup, mode,
-  } = useWeaponStore();
-  if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
+  } = useWeaponStore(
+    useShallow((s) => ({
+      activeWeapon:  s.activeWeapon,
+      selectedPerks: s.selectedPerks,
+      selectPerk:    s.selectPerk,
+      clearPerk:     s.clearPerk,
+      isCrafted:     s.isCrafted,
+      variantGroup:  s.variantGroup,
+      mode:          s.mode,
+    }))
+  );
 
-  // Legacy detection (suppresses Origin Trait column)
-  const tempGroup: WeaponGroup = {
-    baseName: activeWeapon.baseName,
-    variants: variantGroup,
-    default: variantGroup[0] ?? activeWeapon,
-  };
-  const isLegacy = isLegacyVariant(activeWeapon, tempGroup);
+  // Memoize derived values so they're not recomputed on every unrelated state change.
+  const isLegacy = useMemo(() => {
+    if (!activeWeapon) return false;
+    return isLegacyVariant(activeWeapon, {
+      baseName: activeWeapon.baseName,
+      variants: variantGroup,
+      default:  variantGroup[0] ?? activeWeapon,
+    });
+  }, [activeWeapon, variantGroup]);
+
+  const hasEnhanceable = useMemo(
+    () => !!activeWeapon?.perkSockets.some((col) => col.perks.some((p) => !!p.enhancedVersion)),
+    [activeWeapon]
+  );
+
+  if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-white">Weapon Perks</h2>
-        {isCrafted && (
-          <span className="text-xs text-emerald-400 font-semibold">
-            Crafted — tap ⚡ to upgrade perk
+        {hasEnhanceable && (
+          <span className="text-xs text-amber-500/70 font-semibold">
+            Click perk twice to enhance ⚡
           </span>
         )}
       </div>
@@ -64,27 +82,39 @@ export const RollEditor: React.FC = () => {
                   : false;
                 const isActive = isBaseActive || isEnhancedActive;
 
-                // The displayed perk: enhanced version when crafted & upgraded, otherwise base
-                const displayPerk: Perk = (isCrafted && isEnhancedActive && perk.enhancedVersion)
+                // Show enhanced icon/name whenever enhanced is selected (no crafted gate)
+                const displayPerk: Perk = (isEnhancedActive && perk.enhancedVersion)
                   ? perk.enhancedVersion
                   : perk;
 
                 const tierCfg = perk.tier ? TIER_CONFIG[perk.tier as PerkTier] : null;
-                const canUpgrade = isCrafted && !!perk.enhancedVersion && isBaseActive;
-                const isUpgraded = isCrafted && isEnhancedActive;
+                // canUpgrade: base is selected and an enhanced version exists — no crafted gate
+                const canUpgrade = !!perk.enhancedVersion && isBaseActive;
+                const isUpgraded = isEnhancedActive;
+
+                // Click cycle: none → base → enhanced (if available) → none
+                const handleClick = () => {
+                  if (!isActive) {
+                    selectPerk(column.name, perk.hash);
+                  } else if (isBaseActive && perk.enhancedVersion) {
+                    selectPerk(column.name, perk.enhancedVersion.hash);
+                  } else {
+                    clearPerk(column.name);
+                  }
+                };
+
+                // Tooltip hints the next action on click
+                const nextAction = !isActive
+                  ? displayPerk.name
+                  : isBaseActive && perk.enhancedVersion
+                    ? `Enhance → ${perk.enhancedVersion.name}`
+                    : `Deselect ${displayPerk.name}`;
 
                 return (
                   <div key={perk.hash} className="relative flex flex-col items-center gap-1">
                     <button
-                      onClick={() => {
-                        if (isActive) {
-                          clearPerk(column.name);
-                        } else {
-                          // Select base version by default; enhanced via upgrade button
-                          selectPerk(column.name, perk.hash);
-                        }
-                      }}
-                      title={`${displayPerk.name}${perk.tier ? ` [${perk.tier}]` : ''}: ${displayPerk.description}`}
+                      onClick={handleClick}
+                      title={`${nextAction}${perk.tier ? ` [${perk.tier}]` : ''}: ${displayPerk.description}`}
                       aria-pressed={isActive}
                       className={[
                         'relative w-12 h-12 md:w-14 md:h-14 rounded-full border-2 transition-all duration-200 overflow-hidden',
@@ -109,41 +139,17 @@ export const RollEditor: React.FC = () => {
                       {displayPerk.buffKey && (
                         <div className="absolute top-0 left-0 w-2.5 h-2.5 bg-green-400 rounded-full border border-black" />
                       )}
-                      {/* Enhanced active indicator */}
+                      {/* Enhanced active indicator — amber E badge */}
                       {isUpgraded && (
                         <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-amber-400 rounded-full border border-black flex items-center justify-center">
                           <span className="text-[7px] font-black text-black leading-none">E</span>
                         </div>
                       )}
+                      {/* "Click to enhance" hint dot — crafted, base selected, enhanced available */}
+                      {canUpgrade && (
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-amber-500/60 rounded-full border border-amber-400/60 animate-pulse" />
+                      )}
                     </button>
-
-                    {/* Upgrade button (crafted mode, perk selected, enhanced available) */}
-                    {canUpgrade && perk.enhancedVersion && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          selectPerk(column.name, perk.enhancedVersion!.hash);
-                        }}
-                        title={`Upgrade to ${perk.enhancedVersion.name}`}
-                        className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40 hover:bg-amber-500/30 transition-colors leading-none"
-                      >
-                        ⚡ ENH
-                      </button>
-                    )}
-
-                    {/* Downgrade button (enhanced selected, crafted mode) */}
-                    {isUpgraded && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          selectPerk(column.name, perk.hash);
-                        }}
-                        title="Downgrade to base version"
-                        className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10 hover:border-white/20 transition-colors leading-none"
-                      >
-                        Base
-                      </button>
-                    )}
 
                     {/* Tier badge — PvE only */}
                     {mode === 'pve' && tierCfg && !isUpgraded && (
@@ -165,10 +171,9 @@ export const RollEditor: React.FC = () => {
       </div>
 
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4 text-xs text-slate-600">
-        <span>Click selected perk to deselect.</span>
+        <span>Click to select · click again to enhance · click once more to deselect.</span>
         <span><span className="text-green-500">●</span> = auto-buff.</span>
         {mode === 'pve' && <span>Tier: <span className="text-amber-400 font-bold">S</span> <span className="text-green-400 font-bold">A</span> <span className="text-blue-400 font-bold">B</span> <span className="text-slate-400 font-bold">C↓</span></span>}
-        {isCrafted && <span className="text-emerald-500">⚡ ENH = upgrades perk to enhanced tier.</span>}
       </div>
     </div>
   );

@@ -1,26 +1,51 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { useState } from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
-import { useState } from 'react';
 
 // PvP guardian HP is fixed at 230 in the current armor rework.
 const PVP_GUARDIAN_HP = 230;
 
+// Stable list so Object.keys() isn't called on every render
+const PVE_TIERS_KEYS = Object.keys(PVE_HEALTH_TIERS);
+
 export const TTKPanel: React.FC = () => {
+  // Narrow subscription: getDamageMultiplier depends on activeBuffs, activeMod,
+  // surgeStacks, mode, and weaponsStat — nothing else.
   const {
     activeWeapon,
     getDamageMultiplier,
     mode,
     weaponsStat, setWeaponsStat,
-  } = useWeaponStore();
+    activeBuffs,
+    activeMod,
+    surgeStacks,
+  } = useWeaponStore(
+    useShallow((s) => ({
+      activeWeapon:       s.activeWeapon,
+      getDamageMultiplier: s.getDamageMultiplier,
+      mode:               s.mode,
+      weaponsStat:        s.weaponsStat,
+      setWeaponsStat:     s.setWeaponsStat,
+      activeBuffs:        s.activeBuffs,
+      activeMod:          s.activeMod,
+      surgeStacks:        s.surgeStacks,
+    }))
+  );
 
-  const [enemyTier, setEnemyTier] = useState(Object.keys(PVE_HEALTH_TIERS)[0]);
+  const [enemyTier, setEnemyTier] = useState(PVE_TIERS_KEYS[0]);
+
+  // Memoize the multiplier so it only recomputes when buff/mod/surge/mode inputs change.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const multiplier = useMemo(() => getDamageMultiplier(), [
+    activeBuffs, activeMod, surgeStacks, mode, weaponsStat,
+  ]);
 
   if (!activeWeapon) return null;
 
-  const multiplier  = getDamageMultiplier();
   const enemyHealth = PVE_HEALTH_TIERS[enemyTier] ?? 336;
 
   const result = calculateTTK(

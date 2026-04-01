@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import { useCompareStore } from '../../store/useCompareStore';
 import { CompareSnapshot } from '../../types/weapon';
-
-const BUNGIE_ROOT = 'https://www.bungie.net';
+import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 const STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance'];
 
 // ─── Delta color scale ─────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ function SnapshotCard({
       <div className="flex items-center gap-3 pr-6">
         <div className="w-12 h-12 bg-white/5 rounded overflow-hidden flex-shrink-0 border border-white/10">
           {snapshot.weapon.icon && (
-            <img src={BUNGIE_ROOT + snapshot.weapon.icon} alt="" className="w-full h-full object-cover" />
+            <Image src={BUNGIE_ROOT + snapshot.weapon.icon} alt="" width={48} height={48} className="w-full h-full object-cover" unoptimized />
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -149,14 +149,18 @@ export const ComparisonGrid: React.FC = () => {
     );
   }
 
-  // Min and max per stat across all snapshots — used for delta colouring
-  const statMins: Record<string, number> = {};
-  const statMaxes: Record<string, number> = {};
-  STAT_KEYS.forEach((key) => {
-    const vals = snapshots.map((s) => s.calculatedStats[key] ?? 0);
-    statMins[key]  = Math.min(...vals);
-    statMaxes[key] = Math.max(...vals);
-  });
+  // Min and max per stat across all snapshots — used for delta colouring.
+  // Memoized so it only recomputes when the snapshot list changes.
+  const { statMins, statMaxes } = useMemo(() => {
+    const mins: Record<string, number> = {};
+    const maxes: Record<string, number> = {};
+    STAT_KEYS.forEach((key) => {
+      const vals = snapshots.map((s) => s.calculatedStats[key] ?? 0);
+      mins[key]  = Math.min(...vals);
+      maxes[key] = Math.max(...vals);
+    });
+    return { statMins: mins, statMaxes: maxes };
+  }, [snapshots]);
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">

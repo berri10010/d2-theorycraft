@@ -6,6 +6,8 @@
  * Responses are cached for 24 hours via Next.js fetch cache.
  */
 
+import { parseCSV } from './parseCSV';
+
 const COMPENDIUM_ID = '1WaxvbLx7UoSZaBqdFr1u32F2uWVLo-CJunJB4nlGUE4';
 const BASE = `https://docs.google.com/spreadsheets/d/${COMPENDIUM_ID}/gviz/tq?tqx=out:csv&sheet=`;
 
@@ -20,28 +22,6 @@ export interface PerkDescription {
 }
 
 export type PerkDescriptionDatabase = Record<string, PerkDescription>;
-
-// ── CSV parser ────────────────────────────────────────────────────────
-
-function parseCSV(text: string): string[][] {
-  const rows: string[][] = [];
-  let row: string[] = [], field = '', inQ = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i], nx = text[i + 1];
-    if (inQ) {
-      if (ch === '"' && nx === '"') { field += '"'; i++; }
-      else if (ch === '"') { inQ = false; }
-      else { field += ch; }
-    } else {
-      if (ch === '"') { inQ = true; }
-      else if (ch === ',') { row.push(field); field = ''; }
-      else if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
-      else if (ch !== '\r') { field += ch; }
-    }
-  }
-  if (field || row.length) { row.push(field); rows.push(row); }
-  return rows;
-}
 
 const SKIP_NAMES = new Set([
   'Weapon Traits', 'Weapon Mods', 'Intrinsic Traits', 'Origin Traits',

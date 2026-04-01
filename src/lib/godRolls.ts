@@ -22,6 +22,8 @@ export interface GodRollEntry {
 
 export type GodRollDatabase = Record<string, GodRollEntry>;
 
+import { parseCSV } from './parseCSV';
+
 const SHEET_ID = '1JM-0SlxVDAi-C6rGVlLxa-J1WGewEeL8Qvq4htWZHhY';
 
 const WEAPON_TABS = [
@@ -53,31 +55,6 @@ const TAB_TO_TYPE: Record<string, string> = {
   Other: 'Other',
   'Exotic Weapons': 'Exotic',
 };
-
-/** Minimal RFC-4180-compliant CSV parser that handles newlines inside quoted fields. */
-function parseCSV(text: string): string[][] {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let field = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    const next = text[i + 1];
-    if (inQuotes) {
-      if (ch === '"' && next === '"') { field += '"'; i++; }
-      else if (ch === '"') { inQuotes = false; }
-      else { field += ch; }
-    } else {
-      if (ch === '"') { inQuotes = true; }
-      else if (ch === ',') { row.push(field); field = ''; }
-      else if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
-      else if (ch !== '\r') { field += ch; }
-    }
-  }
-  if (field || row.length) { row.push(field); rows.push(row); }
-  return rows;
-}
 
 /**
  * Fetches PvE god roll data from the community Google Sheets spreadsheet.

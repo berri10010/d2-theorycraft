@@ -1,12 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
+import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE, DamageBuff } from '../../lib/buffDatabase';
 import { Perk } from '../../types/weapon';
+import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 
-const BUNGIE_ROOT = 'https://www.bungie.net';
+// Pre-computed buff lists — these are module-level since BUFF_DATABASE is static.
+// Avoids re-running Object.values() + filter on every render.
+const _allBuffs         = Object.values(BUFF_DATABASE);
+const _subclassBuffs    = _allBuffs.filter((b) => b.category === 'subclass');
+const _modBuffs         = _allBuffs.filter((b) => b.category === 'mod');
+const _weaponPerkBuffs  = _allBuffs.filter((b) => b.category === 'weapon_perk');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -130,54 +137,54 @@ function SectionLabel({ label, count }: { label: string; count?: number }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export const BuffToggle: React.FC = () => {
-  const { activeBuffs, toggleBuff, selectedPerks, activeWeapon } = useWeaponStore();
+  const { activeBuffs, toggleBuff, selectedPerks, activeWeapon } = useWeaponStore(
+    useShallow((s) => ({
+      activeBuffs:  s.activeBuffs,
+      toggleBuff:   s.toggleBuff,
+      selectedPerks: s.selectedPerks,
+      activeWeapon: s.activeWeapon,
+    }))
+  );
   const [showOtherPerks, setShowOtherPerks] = useState(false);
 
-  // Build a map: buffKey → linked Perk (for icon resolution)
-  const linkedPerkByBuffKey = new Map<string, Perk>();
-  const linkedBuffKeys = new Set<string>();
+  // Memoize the perk→buff linking so it only rebuilds when selections change.
+  const { linkedPerkByBuffKey, linkedBuffKeys } = useMemo(() => {
+    const byKey = new Map<string, Perk>();
+    const keys  = new Set<string>();
+    if (!activeWeapon) return { linkedPerkByBuffKey: byKey, linkedBuffKeys: keys };
 
-  if (activeWeapon) {
     for (const [colName, perkHash] of Object.entries(selectedPerks)) {
       const col = activeWeapon.perkSockets.find((c) => c.name === colName);
       if (!col) continue;
 
       const basePerk = col.perks.find((p) => p.hash === perkHash);
       if (basePerk?.buffKey) {
-        linkedBuffKeys.add(basePerk.buffKey);
-        linkedPerkByBuffKey.set(basePerk.buffKey, basePerk);
+        keys.add(basePerk.buffKey);
+        byKey.set(basePerk.buffKey, basePerk);
       }
 
-      // Enhanced version selected — use the BASE perk for icon/buffKey since
-      // enhanced perks share the same visual icon and the buffKey lives on the base.
+      // Enhanced version selected — buffKey lives on the base perk.
       for (const p of col.perks) {
         if (p.enhancedVersion?.hash === perkHash) {
-          // p is the base perk; its buffKey and icon are the canonical ones
-          if (p.buffKey) {
-            linkedBuffKeys.add(p.buffKey);
-            linkedPerkByBuffKey.set(p.buffKey, p);
-          }
-          // Also check if the enhanced version itself has a distinct buffKey
+          if (p.buffKey) { keys.add(p.buffKey); byKey.set(p.buffKey, p); }
           if (p.enhancedVersion.buffKey && p.enhancedVersion.buffKey !== p.buffKey) {
-            linkedBuffKeys.add(p.enhancedVersion.buffKey);
-            linkedPerkByBuffKey.set(p.enhancedVersion.buffKey, p);
+            keys.add(p.enhancedVersion.buffKey);
+            byKey.set(p.enhancedVersion.buffKey, p);
           }
         }
       }
     }
-  }
+    return { linkedPerkByBuffKey: byKey, linkedBuffKeys: keys };
+  }, [activeWeapon, selectedPerks]);
 
-  const allBuffs = Object.values(BUFF_DATABASE);
+  // Memoize split buff lists — only changes when selectedPerks changes.
+  const { linkedPerkBuffs, otherPerkBuffs } = useMemo(() => ({
+    linkedPerkBuffs: _weaponPerkBuffs.filter((b) =>  linkedBuffKeys.has(b.hash)),
+    otherPerkBuffs:  _weaponPerkBuffs.filter((b) => !linkedBuffKeys.has(b.hash)),
+  }), [linkedBuffKeys]);
 
-  const linkedPerkBuffs = allBuffs.filter(
-    (b) => b.category === 'weapon_perk' && linkedBuffKeys.has(b.hash)
-  );
-  const otherPerkBuffs = allBuffs.filter(
-    (b) => b.category === 'weapon_perk' && !linkedBuffKeys.has(b.hash)
-  );
-  const subclassBuffs = allBuffs.filter((b) => b.category === 'subclass');
-  const modBuffs      = allBuffs.filter((b) => b.category === 'mod');
-
+  // Memoize active counts to avoid repeated .includes() on every render.
+  const activeSet = useMemo(() => new Set(activeBuffs), [activeBuffs]);
   const activeCount = activeBuffs.length;
 
   return (
@@ -196,13 +203,13 @@ export const BuffToggle: React.FC = () => {
         {/* ── Perk-linked buffs (dynamic) ── */}
         {linkedPerkBuffs.length > 0 ? (
           <div>
-            <SectionLabel label="Perk Buffs" count={linkedPerkBuffs.filter((b) => activeBuffs.includes(b.hash)).length} />
+            <SectionLabel label="Perk Buffs" count={linkedPerkBuffs.filter((b) => activeSet.has(b.hash)).length} />
             <div className="space-y-1.5">
               {linkedPerkBuffs.map((buff) => (
                 <BuffButton
                   key={buff.hash}
                   buff={buff}
-                  isActive={activeBuffs.includes(buff.hash)}
+                  isActive={activeSet.has(buff.hash)}
                   isLinkedToPerk={true}
                   linkedPerk={linkedPerkByBuffKey.get(buff.hash) ?? null}
                   onToggle={() => toggleBuff(buff.hash)}
@@ -221,13 +228,13 @@ export const BuffToggle: React.FC = () => {
 
         {/* ── Subclass / Super ── */}
         <div>
-          <SectionLabel label="Subclass & Super" count={subclassBuffs.filter((b) => activeBuffs.includes(b.hash)).length} />
+          <SectionLabel label="Subclass & Super" count={_subclassBuffs.filter((b) => activeSet.has(b.hash)).length} />
           <div className="space-y-1.5">
-            {subclassBuffs.map((buff) => (
+            {_subclassBuffs.map((buff) => (
               <BuffButton
                 key={buff.hash}
                 buff={buff}
-                isActive={activeBuffs.includes(buff.hash)}
+                isActive={activeSet.has(buff.hash)}
                 isLinkedToPerk={false}
                 linkedPerk={null}
                 onToggle={() => toggleBuff(buff.hash)}
@@ -238,13 +245,13 @@ export const BuffToggle: React.FC = () => {
 
         {/* ── Armor Mods ── */}
         <div>
-          <SectionLabel label="Armor Mods" count={modBuffs.filter((b) => activeBuffs.includes(b.hash)).length} />
+          <SectionLabel label="Armor Mods" count={_modBuffs.filter((b) => activeSet.has(b.hash)).length} />
           <div className="space-y-1.5">
-            {modBuffs.map((buff) => (
+            {_modBuffs.map((buff) => (
               <BuffButton
                 key={buff.hash}
                 buff={buff}
-                isActive={activeBuffs.includes(buff.hash)}
+                isActive={activeSet.has(buff.hash)}
                 isLinkedToPerk={false}
                 linkedPerk={null}
                 onToggle={() => toggleBuff(buff.hash)}
@@ -256,30 +263,35 @@ export const BuffToggle: React.FC = () => {
         {/* ── Other weapon perk buffs (collapsible) ── */}
         {otherPerkBuffs.length > 0 && (
           <div>
-            <button
-              onClick={() => setShowOtherPerks((v) => !v)}
-              className="flex items-center gap-2 w-full text-left group rounded px-1 -mx-1 py-1 hover:bg-white/5 transition-colors"
-            >
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">
-                Other Perk Buffs
-              </span>
-              {otherPerkBuffs.filter((b) => activeBuffs.includes(b.hash)).length > 0 && (
-                <span className="text-[9px] font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full leading-none">
-                  {otherPerkBuffs.filter((b) => activeBuffs.includes(b.hash)).length}
-                </span>
-              )}
-              <div className="flex-1 h-px bg-white/5" />
-              <span className="text-[10px] text-slate-500 group-hover:text-slate-300 transition-colors">
-                {showOtherPerks ? '▲' : '▼'} {otherPerkBuffs.length}
-              </span>
-            </button>
+            {(() => {
+              const otherActiveCount = otherPerkBuffs.filter((b) => activeSet.has(b.hash)).length;
+              return (
+                <button
+                  onClick={() => setShowOtherPerks((v) => !v)}
+                  className="flex items-center gap-2 w-full text-left group rounded px-1 -mx-1 py-1 hover:bg-white/5 transition-colors"
+                >
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">
+                    Other Perk Buffs
+                  </span>
+                  {otherActiveCount > 0 && (
+                    <span className="text-[9px] font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full leading-none">
+                      {otherActiveCount}
+                    </span>
+                  )}
+                  <div className="flex-1 h-px bg-white/5" />
+                  <span className="text-[10px] text-slate-500 group-hover:text-slate-300 transition-colors">
+                    {showOtherPerks ? '▲' : '▼'} {otherPerkBuffs.length}
+                  </span>
+                </button>
+              );
+            })()}
             {showOtherPerks && (
               <div className="space-y-1.5 mt-2">
                 {otherPerkBuffs.map((buff) => (
                   <BuffButton
                     key={buff.hash}
                     buff={buff}
-                    isActive={activeBuffs.includes(buff.hash)}
+                    isActive={activeSet.has(buff.hash)}
                     isLinkedToPerk={false}
                     linkedPerk={null}
                     onToggle={() => toggleBuff(buff.hash)}

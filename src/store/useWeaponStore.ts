@@ -261,9 +261,23 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       if (!state.activeWeapon) return state;
 
       const column = state.activeWeapon.perkSockets.find((c) => c.name === columnName);
-      const oldPerkHash = state.selectedPerks[columnName];
-      const oldPerk = column?.perks.find((p) => p.hash === oldPerkHash);
-      const newPerk = column?.perks.find((p) => p.hash === perkHash);
+
+      /**
+       * Resolve a perk hash to the perk that owns the buffKey.
+       * Enhanced version hashes are NOT in column.perks directly — they live on
+       * basePerk.enhancedVersion.  In that case we return the base perk so that
+       * buffKey (which always lives on the base) is correctly found.
+       */
+      const resolvePerk = (hash: string) => {
+        if (!column) return null;
+        const direct = column.perks.find((p) => p.hash === hash);
+        if (direct) return direct;
+        // Hash belongs to an enhanced version → return the base perk
+        return column.perks.find((p) => p.enhancedVersion?.hash === hash) ?? null;
+      };
+
+      const oldPerk = resolvePerk(state.selectedPerks[columnName]);
+      const newPerk = resolvePerk(perkHash);
 
       let activeBuffs = [...state.activeBuffs];
       if (oldPerk?.buffKey && activeBuffs.includes(oldPerk.buffKey)) {
@@ -281,7 +295,13 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       if (!state.activeWeapon) return state;
       const column = state.activeWeapon.perkSockets.find((c) => c.name === columnName);
       const oldPerkHash = state.selectedPerks[columnName];
-      const oldPerk = column?.perks.find((p) => p.hash === oldPerkHash);
+
+      // Resolve enhanced hashes the same way as selectPerk
+      const oldPerk = oldPerkHash
+        ? (column?.perks.find((p) => p.hash === oldPerkHash)
+            ?? column?.perks.find((p) => p.enhancedVersion?.hash === oldPerkHash)
+            ?? null)
+        : null;
 
       let activeBuffs = [...state.activeBuffs];
       if (oldPerk?.buffKey) activeBuffs = activeBuffs.filter((b) => b !== oldPerk.buffKey);
@@ -311,11 +331,18 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
 
     const finalStats: StatMap = { ...activeWeapon.baseStats };
 
-    // Perk stat modifiers
+    // Perk stat modifiers.
+    // Enhanced perk hashes are stored on basePerk.enhancedVersion — they don't appear
+    // directly in column.perks.  When the direct lookup misses, fall back to the
+    // enhancedVersion object so its statModifiers are always applied.
     for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
       const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
       if (!column) continue;
-      const perk = column.perks.find((p) => p.hash === perkHash);
+      let perk = column.perks.find((p) => p.hash === perkHash) ?? null;
+      if (!perk) {
+        const base = column.perks.find((p) => p.enhancedVersion?.hash === perkHash);
+        perk = base?.enhancedVersion ?? null;
+      }
       if (!perk) continue;
       for (const mod of perk.statModifiers) {
         if (finalStats[mod.statName] !== undefined) {
@@ -341,24 +368,20 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       }
     }
 
-    // Crafted weapons with Enhanced perks selected get +2 only on the stats those
-    // enhanced perks boost (same stats as the base perk but with an extra +2 bonus).
-    // A crafted weapon with NO enhanced perks selected provides no blanket bonus.
-    if (isCrafted) {
-      for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
-        const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
-        if (!column) continue;
-        // Find the base perk whose enhancedVersion hash matches the selected hash
-        for (const basePerk of column.perks) {
-          if (basePerk.enhancedVersion?.hash === perkHash) {
-            // This perk is in its enhanced state — apply +2 to its stat mods
-            for (const mod of basePerk.statModifiers) {
-              if (finalStats[mod.statName] !== undefined) {
-                finalStats[mod.statName] = Math.min(100, finalStats[mod.statName] + 2);
-              }
+    // Enhanced perks grant an additional +2 on each stat they affect, regardless of
+    // whether the weapon is in crafted mode.  This matches D2 behaviour where any
+    // weapon that can roll enhanced perks benefits from the stat bonus.
+    for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+      const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+      if (!column) continue;
+      for (const basePerk of column.perks) {
+        if (basePerk.enhancedVersion?.hash === perkHash) {
+          for (const mod of basePerk.statModifiers) {
+            if (finalStats[mod.statName] !== undefined) {
+              finalStats[mod.statName] = Math.min(100, finalStats[mod.statName] + 2);
             }
-            break; // only one perk can own this enhanced hash
           }
+          break;
         }
       }
     }

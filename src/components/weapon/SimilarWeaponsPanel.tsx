@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
 import { Weapon } from '../../types/weapon';
+import { groupWeapons } from '../../lib/weaponGroups';
 
 // ─── Scoring ──────────────────────────────────────────────────────────────────
 
@@ -109,6 +110,9 @@ export const SimilarWeaponsPanel: React.FC = () => {
   const { weapons } = useWeaponDb();
   const [showAll, setShowAll] = useState(false);
 
+  // Pre-compute groups so we can pass the correct variant group when loading
+  const groups = useMemo(() => groupWeapons(weapons), [weapons]);
+
   const recommendations = useMemo<{ weapon: Weapon; score: number }[]>(() => {
     if (!activeWeapon || !weapons?.length) return [];
 
@@ -163,7 +167,10 @@ export const SimilarWeaponsPanel: React.FC = () => {
           key={weapon.hash}
           weapon={weapon}
           activeTotal={activeTotal}
-          onLoad={(w) => loadWeapon(w)}
+          onLoad={(w) => {
+            const group = groups.find((g) => g.variants.some((v) => v.hash === w.hash));
+            loadWeapon(w, group?.variants);
+          }}
         />
       ))}
 

@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { interpolateStat } from '../../lib/math';
 
@@ -17,11 +18,38 @@ const BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Ai
 const NUMERIC_STAT_KEYS = ['Zoom', 'Airborne Effectiveness', 'Inventory Size', 'Recoil Direction', 'Magazine'];
 
 export const StatDisplay: React.FC = () => {
-  const { activeWeapon, getCalculatedStats } = useWeaponStore();
+  // Narrow subscription: only re-render when stat-affecting state changes.
+  // Mode, activeBuffs, surgeStacks do NOT affect getCalculatedStats — excluding
+  // them prevents spurious re-renders when the user toggles PvE/PvP or buffs.
+  const {
+    activeWeapon,
+    getCalculatedStats,
+    selectedPerks,
+    masterworkStat,
+    isCrafted,
+    activeMod,
+    armorMods,
+  } = useWeaponStore(
+    useShallow((s) => ({
+      activeWeapon:       s.activeWeapon,
+      getCalculatedStats: s.getCalculatedStats,
+      selectedPerks:      s.selectedPerks,
+      masterworkStat:     s.masterworkStat,
+      isCrafted:          s.isCrafted,
+      activeMod:          s.activeMod,
+      armorMods:          s.armorMods,
+    }))
+  );
+
+  // Memoize so the computation only reruns when its inputs actually change.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const calcStats = useMemo(() => getCalculatedStats(), [
+    activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods,
+  ]);
+
   if (!activeWeapon) return null;
 
-  const baseStats  = activeWeapon.baseStats;
-  const calcStats  = getCalculatedStats();
+  const baseStats = activeWeapon.baseStats;
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">

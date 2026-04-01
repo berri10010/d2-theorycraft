@@ -1,13 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
+import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE } from '../../lib/buffDatabase';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
-
-const BUNGIE_URL = 'https://www.bungie.net';
+import { BUNGIE_URL } from '../../lib/bungieUrl';
 
 function StatDelta({ value }: { value: number }) {
   if (value === 0) return null;
@@ -25,37 +25,60 @@ function StatDelta({ value }: { value: number }) {
 }
 
 export const EffectsPanel: React.FC = () => {
-  const { activeWeapon, selectedPerks, activeBuffs, clearPerk, toggleBuff } = useWeaponStore();
+  const { activeWeapon, selectedPerks, activeBuffs, clearPerk, toggleBuff } = useWeaponStore(
+    useShallow((s) => ({
+      activeWeapon:  s.activeWeapon,
+      selectedPerks: s.selectedPerks,
+      activeBuffs:   s.activeBuffs,
+      clearPerk:     s.clearPerk,
+      toggleBuff:    s.toggleBuff,
+    }))
+  );
   const { data: compendiumData } = useCompendiumPerks();
 
-  if (!activeWeapon) return null;
+  // Memoize active perk resolution — only recomputes when selections change.
+  const activePerkEntries = useMemo(() => {
+    if (!activeWeapon) return [];
+    const entries: Array<{
+      columnName: string;
+      perkHash: string;
+      name: string;
+      icon: string;
+      description: string;
+      isEnhanced: boolean;
+      buffKey: string | null;
+      statModifiers: Array<{ statName: string; value: number }>;
+    }> = [];
 
-  // Collect active perks
-  const activePerkEntries: Array<{
-    columnName: string;
-    perkHash: string;
-    name: string;
-    icon: string;
-    description: string;
-    isEnhanced: boolean;
-    buffKey: string | null;
-    statModifiers: Array<{ statName: string; value: number }>;
-  }> = [];
+    for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+      const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+      if (!column) continue;
 
-  for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
-    const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
-    const perk = column?.perks.find((p) => p.hash === perkHash);
-    if (perk) {
-      activePerkEntries.push({ columnName, perkHash, ...perk });
+      let perk = column.perks.find((p) => p.hash === perkHash) ?? null;
+
+      if (!perk) {
+        const basePerk = column.perks.find((p) => p.enhancedVersion?.hash === perkHash);
+        if (basePerk?.enhancedVersion) {
+          const enhanced = basePerk.enhancedVersion;
+          perk = enhanced.buffKey ? enhanced : { ...enhanced, buffKey: basePerk.buffKey };
+        }
+      }
+
+      if (perk) entries.push({ columnName, perkHash, ...perk });
     }
-  }
+    return entries;
+  }, [activeWeapon, selectedPerks]);
 
-  // Active manual buffs (not auto-activated by perks — those already appear in perks section)
-  const autoBuff = new Set(activePerkEntries.map((p) => p.buffKey).filter(Boolean));
-  const manualBuffEntries = activeBuffs
-    .filter((hash) => !autoBuff.has(hash))
-    .map((hash) => BUFF_DATABASE[hash])
-    .filter(Boolean);
+  // Memoize manual buff list — only changes when activeBuffs or perk entries change.
+  const manualBuffEntries = useMemo(() => {
+    const autoBuff = new Set(activePerkEntries.map((p) => p.buffKey).filter(Boolean));
+    return activeBuffs
+      .filter((hash) => !autoBuff.has(hash))
+      .map((hash) => BUFF_DATABASE[hash])
+      .filter(Boolean);
+  }, [activePerkEntries, activeBuffs]);
+
+  if (!activeWeapon) return null;
 
   const isEmpty = activePerkEntries.length === 0 && manualBuffEntries.length === 0;
 

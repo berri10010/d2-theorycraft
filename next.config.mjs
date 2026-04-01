@@ -5,7 +5,7 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'www.bungie.net',
-        pathname: '/common/destiny2_content/icons/**',
+        pathname: '/**',
       },
     ],
   },

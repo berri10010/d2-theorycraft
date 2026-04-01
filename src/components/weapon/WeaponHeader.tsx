@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
+import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { isLegacyVariant } from '../../lib/weaponGroups';
-import { WeaponGroup } from '../../types/weapon';
-
-const BUNGIE_URL = 'https://www.bungie.net';
+import { BUNGIE_URL } from '../../lib/bungieUrl';
 
 const DAMAGE_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
   kinetic: { bg: 'bg-slate-700',      text: 'text-slate-200',   dot: 'bg-slate-400'   },
@@ -32,9 +31,41 @@ const VARIANT_COLORS: Record<string, string> = {
   Brave:    'bg-blue-500/20 text-blue-300 border-blue-500/40',
 };
 
+/** Card border changes based on crafted state, variant type, or rarity */
+function cardBorderClass(
+  weapon: { rarity: string | null; variantLabel: string | null; isAdept: boolean },
+  isCrafted: boolean,
+): string {
+  if (isCrafted)                        return 'border-red-500/60';
+  if (weapon.rarity === 'Exotic')       return 'border-yellow-500/50';
+  if (weapon.variantLabel === 'Adept' || weapon.isAdept) return 'border-amber-500/40';
+  if (weapon.variantLabel === 'Timelost') return 'border-purple-500/40';
+  if (weapon.variantLabel === 'Harrowed') return 'border-rose-500/40';
+  if (weapon.variantLabel === 'Brave')    return 'border-blue-500/40';
+  return 'border-white/10';
+}
+
 export const WeaponHeader: React.FC = () => {
-  const { activeWeapon, variantGroup, loadWeapon, isCrafted, toggleCrafted } = useWeaponStore();
+  const { activeWeapon, variantGroup, loadWeapon, isCrafted, toggleCrafted } = useWeaponStore(
+    useShallow((s) => ({
+      activeWeapon:  s.activeWeapon,
+      variantGroup:  s.variantGroup,
+      loadWeapon:    s.loadWeapon,
+      isCrafted:     s.isCrafted,
+      toggleCrafted: s.toggleCrafted,
+    }))
+  );
   const [imgError, setImgError] = useState(false);
+
+  // Memoize derived values so they don't recompute on every unrelated store change.
+  const isLegacy = useMemo(() => {
+    if (!activeWeapon) return false;
+    return isLegacyVariant(activeWeapon, {
+      baseName: activeWeapon.baseName,
+      variants: variantGroup,
+      default:  variantGroup[0] ?? activeWeapon,
+    });
+  }, [activeWeapon, variantGroup]);
 
   if (!activeWeapon) return null;
 
@@ -42,14 +73,6 @@ export const WeaponHeader: React.FC = () => {
   const rarityClass = activeWeapon.rarity ? (RARITY_COLORS[activeWeapon.rarity] ?? RARITY_COLORS.Common) : '';
   const hasScreenshot = !!activeWeapon.screenshot && !imgError;
   const hasVariants = variantGroup.length > 1;
-
-  // Build a temporary group object for legacy detection
-  const tempGroup: WeaponGroup = {
-    baseName: activeWeapon.baseName,
-    variants: variantGroup,
-    default: variantGroup[0] ?? activeWeapon,
-  };
-  const isLegacy = isLegacyVariant(activeWeapon, tempGroup);
 
   return (
     <div className="relative rounded-xl overflow-hidden border border-white/10">
@@ -74,8 +97,8 @@ export const WeaponHeader: React.FC = () => {
       {/* Content — sits below the banner, no negative-margin overlap */}
       <div className="relative bg-black/90 backdrop-blur-sm p-4 md:p-6">
         <div className="flex gap-4 items-start">
-          {/* Weapon icon */}
-          <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 border-white/20 shrink-0 bg-white/5">
+          {/* Weapon icon — border color matches card border */}
+          <div className={`relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 shrink-0 bg-white/5 transition-colors duration-300 ${cardBorderClass(activeWeapon, isCrafted)}`}>
             <Image
               src={BUNGIE_URL + activeWeapon.icon}
               alt={activeWeapon.name}
@@ -114,12 +137,6 @@ export const WeaponHeader: React.FC = () => {
               {isLegacy && (
                 <span className="text-xs font-bold px-2 py-0.5 rounded border bg-slate-700/40 text-slate-400 border-slate-600/40">
                   Legacy Frame
-                </span>
-              )}
-              {/* Crafted badge */}
-              {isCrafted && (
-                <span className="text-xs font-bold px-2 py-0.5 rounded border bg-emerald-500/20 text-emerald-400 border-emerald-500/40">
-                  Crafted
                 </span>
               )}
             </div>
@@ -194,24 +211,33 @@ export const WeaponHeader: React.FC = () => {
                 );
               })()}
 
-              {/* Crafted toggle — only show if weapon has craftable pattern */}
+              {/* Crafted — only shown for weapons with a craftable pattern */}
               {activeWeapon.hasCraftedPattern && (
-                <button
-                  onClick={toggleCrafted}
-                  title="Toggle crafted mode (+2 all stats, enables enhanced perks)"
-                  className={[
-                    'text-xs font-semibold px-2 py-1 rounded-md border transition-all flex items-center gap-1.5',
-                    isCrafted
-                      ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50'
-                      : 'bg-white/5 text-slate-500 border-white/10 hover:border-white/20 hover:text-slate-300',
-                  ].join(' ')}
-                >
-                  {/* Hammer icon */}
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
-                    <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
-                  </svg>
-                  Crafted {isCrafted ? 'ON' : 'OFF'}
-                </button>
+                isCrafted ? (
+                  // Active: red button — click to turn off
+                  <button
+                    onClick={toggleCrafted}
+                    title="Crafted mode active — click to disable"
+                    className="text-xs font-semibold px-2 py-1 rounded-md border transition-all flex items-center gap-1.5 bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 shrink-0">
+                      <path fillRule="evenodd" d="M8.34 1.804A1 1 0 019.32 1h1.36a1 1 0 01.98.804l.295 1.473c.497.144.971.342 1.416.587l1.25-.834a1 1 0 011.262.125l.962.962a1 1 0 01.125 1.262l-.834 1.25c.245.445.443.919.587 1.416l1.473.294a1 1 0 01.804.98v1.361a1 1 0 01-.804.98l-1.473.295a6.95 6.95 0 01-.587 1.416l.834 1.25a1 1 0 01-.125 1.262l-.962.962a1 1 0 01-1.262.125l-1.25-.834a6.953 6.953 0 01-1.416.587l-.294 1.473a1 1 0 01-.98.804H9.32a1 1 0 01-.98-.804l-.295-1.473a6.957 6.957 0 01-1.416-.587l-1.25.834a1 1 0 01-1.262-.125l-.962-.962a1 1 0 01-.125-1.262l.834-1.25a6.957 6.957 0 01-.587-1.416l-1.473-.294A1 1 0 011 10.68V9.32a1 1 0 01.804-.98l1.473-.295c.144-.497.342-.971.587-1.416l-.834-1.25a1 1 0 01.125-1.262l.962-.962A1 1 0 015.38 2.03l1.25.834a6.957 6.957 0 011.416-.587l.294-1.473zM13 10a3 3 0 11-6 0 3 3 0 016 0z" clipRule="evenodd" />
+                    </svg>
+                    Crafted
+                  </button>
+                ) : (
+                  // Inactive: subtle pill — click to enable crafted mode
+                  <button
+                    onClick={toggleCrafted}
+                    title="This weapon has a craftable pattern — click to enable crafted mode (+2 stats, enhanced perks)"
+                    className="text-xs font-medium px-2 py-1 rounded-md border transition-all flex items-center gap-1.5 bg-white/3 text-slate-500 border-white/8 hover:border-red-500/30 hover:text-red-400 hover:bg-red-500/8"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 shrink-0">
+                      <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
+                    </svg>
+                    Craftable
+                  </button>
+                )
               )}
 
               {/* Legacy warning note */}
@@ -227,7 +253,7 @@ export const WeaponHeader: React.FC = () => {
         {/* Intrinsic trait */}
         {activeWeapon.intrinsicTrait && (
           <div className="mt-4 flex gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-amber-600/40 shrink-0 bg-white/5">
+            <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-amber-600/40 shrink-0 bg-white/5">
               <Image
                 src={BUNGIE_URL + activeWeapon.intrinsicTrait.icon}
                 alt={activeWeapon.intrinsicTrait.name}

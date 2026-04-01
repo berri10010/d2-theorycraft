@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useWeaponStore, MASTERWORK_STATS } from '../store/useWeaponStore';
 import { useCompareStore } from '../store/useCompareStore';
@@ -22,7 +22,6 @@ import { WishlistPanel } from '../components/weapon/WishlistPanel';
 import { ArmorModPanel } from '../components/weapon/ArmorModPanel';
 import { SubclassVerbPanel } from '../components/weapon/SubclassVerbPanel';
 import { SimilarWeaponsPanel } from '../components/weapon/SimilarWeaponsPanel';
-import { VaultPanel } from '../components/weapon/VaultPanel';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../lib/damageMath';
 import { MasterworkStat } from '../store/useWeaponStore';
 
@@ -43,6 +42,7 @@ function Dashboard() {
     loadWeapon, activeWeapon, selectedPerks, selectPerk,
     getCalculatedStats, getDamageMultiplier, mode, setMode,
     masterworkStat, activeBuffs, setWeaponsStat, weaponsStat,
+    setMasterworkStat, toggleBuff,
   } = useWeaponStore();
   const { addSnapshot, snapshots } = useCompareStore();
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
@@ -52,16 +52,18 @@ function Dashboard() {
   const [copied, setCopied] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Memoize grouped weapons — only recompute when the weapons array changes.
+  const weaponGroups = useMemo(() => groupWeapons(weapons), [weapons]);
+
   useEffect(() => { fetchWeapons(); }, [fetchWeapons]);
   useEffect(() => { setSidebarOpen(false); }, [activeWeapon?.hash]);
 
   useEffect(() => {
     if (weapons.length > 0 && !activeWeapon && !searchParams.get('w')) {
-      const groups = groupWeapons(weapons);
-      const firstGroup = groups[0];
+      const firstGroup = weaponGroups[0];
       if (firstGroup) loadWeapon(firstGroup.default, firstGroup.variants);
     }
-  }, [weapons, activeWeapon, loadWeapon, searchParams]);
+  }, [weapons, activeWeapon, loadWeapon, searchParams, weaponGroups]);
 
   useEffect(() => {
     const weaponHash  = searchParams.get('w');
@@ -75,8 +77,7 @@ function Dashboard() {
     const found = weapons.find((w) => w.hash === weaponHash);
     if (!found) return;
 
-    const groups = groupWeapons(weapons);
-    const group  = groups.find((g) => g.variants.some((v) => v.hash === weaponHash));
+    const group = weaponGroups.find((g) => g.variants.some((v) => v.hash === weaponHash));
     loadWeapon(found, group?.variants);
 
     // Restore selected perks
@@ -98,7 +99,6 @@ function Dashboard() {
 
     // Restore masterwork stat — validate against known stat list before casting
     if (mwParam && (MASTERWORK_STATS as readonly string[]).includes(mwParam)) {
-      const { setMasterworkStat } = useWeaponStore.getState();
       setMasterworkStat(mwParam as MasterworkStat);
     }
 
@@ -107,10 +107,10 @@ function Dashboard() {
 
     // Restore active buffs
     if (buffsParam) {
-      const { toggleBuff, activeBuffs: currentBuffs } = useWeaponStore.getState();
       const toActivate = buffsParam.split(',').filter(Boolean);
+      // activeBuffs from the hook is current at effect run time
       toActivate.forEach((hash) => {
-        if (!currentBuffs.includes(hash)) toggleBuff(hash);
+        if (!activeBuffs.includes(hash)) toggleBuff(hash);
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -252,7 +252,7 @@ function Dashboard() {
                     className={[
                       'px-5 py-2 text-sm font-bold transition-all min-h-[44px]',
                       mode === 'pve'
-                        ? 'bg-green-500/20 text-green-400 border-r border-green-700/40'
+                        ? 'bg-blue-500/20 text-blue-400 border-r border-blue-700/40'
                         : 'bg-slate-900 text-slate-500 hover:text-slate-300 hover:bg-slate-800 border-r border-slate-700',
                     ].join(' ')}
                   >
@@ -264,7 +264,7 @@ function Dashboard() {
                     className={[
                       'px-5 py-2 text-sm font-bold transition-all min-h-[44px]',
                       mode === 'pvp'
-                        ? 'bg-blue-500/20 text-blue-400'
+                        ? 'bg-red-500/20 text-red-400'
                         : 'bg-slate-900 text-slate-500 hover:text-slate-300 hover:bg-slate-800',
                     ].join(' ')}
                   >
@@ -335,7 +335,6 @@ function Dashboard() {
                   {mode === 'pvp' && <TTKPanel />}
                   {mode === 'pve' && <SubclassVerbPanel />}
                   <SimilarWeaponsPanel />
-                  <VaultPanel />
                 </div>
               </div>
             </div>
