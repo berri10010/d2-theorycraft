@@ -134,7 +134,7 @@ export const TTKPanel: React.FC = () => {
           <select
             value={enemyTier}
             onChange={(e) => setEnemyTier(e.target.value)}
-            className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-green-500"
+            className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500"
           >
             {Object.entries(PVE_HEALTH_TIERS).map(([tier, hp]) => (
               <option key={tier} value={tier}>{tier} ({hp} HP)</option>
@@ -150,7 +150,7 @@ export const TTKPanel: React.FC = () => {
             <span className={
               'text-3xl font-mono font-bold ' + (multiplier > 1 ? 'text-amber-400' : 'text-white')
             }>
-              {result.ttk.toFixed(2)}s
+              {result.ttk === 0 ? '1st shot' : `${result.ttk.toFixed(2)}s`}
             </span>
             <span className="text-xs text-slate-500 mt-2">{result.optimalPattern}</span>
           </div>

@@ -53,7 +53,7 @@ export const StatDisplay: React.FC = () => {
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-      <h2 className="text-xl font-bold mb-6 text-white">Weapon Stats</h2>
+      <h2 className="text-xl font-bold mb-4 text-white">Weapon Stats</h2>
       <div className="flex flex-col gap-4">
         {BAR_STAT_KEYS.map((statName) => {
           const base    = baseStats[statName] ?? 0;

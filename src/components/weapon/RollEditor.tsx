@@ -44,7 +44,7 @@ export const RollEditor: React.FC = () => {
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-white">Weapon Perks</h2>
         {hasEnhanceable && (
           <span className="text-xs text-amber-500/70 font-semibold">

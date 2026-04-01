@@ -51,7 +51,7 @@ export const GodRollPanel: React.FC = () => {
   if (loading) {
     return (
       <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-        <h2 className="text-xl font-bold mb-4 text-white">PvE God Roll</h2>
+        <h2 className="text-xl font-bold mb-4 text-white">God Roll</h2>
         <p className="text-slate-600 text-sm text-center py-6 animate-pulse">Loading community analysis…</p>
       </div>
     );
@@ -62,7 +62,7 @@ export const GodRollPanel: React.FC = () => {
   if (!entry) {
     return (
       <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-        <h2 className="text-xl font-bold mb-4 text-white">PvE God Roll</h2>
+        <h2 className="text-xl font-bold mb-4 text-white">God Roll</h2>
         <p className="text-slate-600 text-sm text-center py-6">
           No community data found for <span className="text-slate-400">{activeWeapon.name}</span>.
         </p>
@@ -72,15 +72,21 @@ export const GodRollPanel: React.FC = () => {
 
   const tierCfg = entry.tier ? WEAPON_TIER_CONFIG[entry.tier] : null;
 
+  // Build a clean subtitle: only include season/rank when present, handle "Other" type
+  const weaponTypeLabel = entry.weaponType === 'Other' ? 'other weapons' : `${entry.weaponType}s`;
+  const subtitleParts = [
+    'Community analysis',
+    entry.season ? `Season ${entry.season}` : null,
+    entry.rank != null ? `Rank #${entry.rank} in ${weaponTypeLabel}` : null,
+  ].filter(Boolean).join(' · ');
+
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl font-bold text-white">PvE God Roll</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Community analysis · Season {entry.season ?? '?'} · Rank #{entry.rank ?? '?'} in {entry.weaponType}s
-          </p>
+          <h2 className="text-xl font-bold text-white">God Roll</h2>
+          <p className="text-xs text-slate-500 mt-0.5">{subtitleParts}</p>
         </div>
         <div className="flex flex-col items-end gap-1">
           {tierCfg && (

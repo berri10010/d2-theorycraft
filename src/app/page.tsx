@@ -244,16 +244,16 @@ function Dashboard() {
                 <div
                   role="group"
                   aria-label="Game mode"
-                  className="flex rounded-xl border border-slate-700 overflow-hidden"
+                  className="flex bg-white/5 rounded-lg p-1 border border-white/10"
                 >
                   <button
                     onClick={() => setMode('pve')}
                     aria-pressed={mode === 'pve'}
                     className={[
-                      'px-5 py-2 text-sm font-bold transition-all min-h-[44px]',
+                      'px-4 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px]',
                       mode === 'pve'
-                        ? 'bg-blue-500/20 text-blue-400 border-r border-blue-700/40'
-                        : 'bg-slate-900 text-slate-500 hover:text-slate-300 hover:bg-slate-800 border-r border-slate-700',
+                        ? 'bg-white/10 text-amber-400'
+                        : 'text-slate-400 hover:text-slate-200',
                     ].join(' ')}
                   >
                     PvE
@@ -262,10 +262,10 @@ function Dashboard() {
                     onClick={() => setMode('pvp')}
                     aria-pressed={mode === 'pvp'}
                     className={[
-                      'px-5 py-2 text-sm font-bold transition-all min-h-[44px]',
+                      'px-4 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px]',
                       mode === 'pvp'
-                        ? 'bg-red-500/20 text-red-400'
-                        : 'bg-slate-900 text-slate-500 hover:text-slate-300 hover:bg-slate-800',
+                        ? 'bg-white/10 text-amber-400'
+                        : 'text-slate-400 hover:text-slate-200',
                     ].join(' ')}
                   >
                     PvP

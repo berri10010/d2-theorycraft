@@ -235,7 +235,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
   variantGroup: [],
   selectedPerks: {},
   activeBuffs: [],
-  mode: 'pvp',
+  mode: 'pve',
 
   masterworkStat: null,
   isCrafted: false,

@@ -190,7 +190,7 @@ export const BuffToggle: React.FC = () => {
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white">Active Buffs</h2>
+        <h2 className="text-xl font-bold text-white">Damage Buffs</h2>
         {activeCount > 0 && (
           <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-500/30">
             {activeCount} active
