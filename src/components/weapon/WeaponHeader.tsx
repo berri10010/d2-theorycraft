@@ -253,7 +253,7 @@ export const WeaponHeader: React.FC = () => {
         {/* Intrinsic trait */}
         {activeWeapon.intrinsicTrait && (
           <div className="mt-4 flex gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
-            <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-amber-600/40 shrink-0 bg-white/5">
+            <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
               <Image
                 src={BUNGIE_URL + activeWeapon.intrinsicTrait.icon}
                 alt={activeWeapon.intrinsicTrait.name}
