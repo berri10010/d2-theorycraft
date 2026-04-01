@@ -116,58 +116,74 @@ export const WEAPON_MODS: WeaponMod[] = [
 ];
 
 // ─── Armor Mods ──────────────────────────────────────────────────────────────
+//
+// All mods have 3 effective tiers (1 copy, 2 copies, 3 copies).
+// Tier 0 = none equipped.
 
-export type ArmorModTier = 0 | 1 | 2 | 3 | 4 | 5;
+export type ArmorModTier = 0 | 1 | 2 | 3;
+
+// Per-tier values sourced from in-game mod descriptions.
+const TARGETING_AA:    [number, number, number, number] = [0,  5,  8, 10];
+const LOADER_RELOAD:   [number, number, number, number] = [0, 10, 15, 18];
+const DEXTERITY_MULT:  [string, string, string, string] = ['', '0.80×', '0.75×', '0.70×'];
+const UNFLINCHING_PCT: [number, number, number, number] = [0, 25, 30, 35];
+const INFLIGHT_AE:     [number, number, number, number] = [0, 15, 25, 30];
+const AMMO_GEN:        [number, number, number, number] = [0, 20, 40, 50];
+
+// Dexterity → approximate flat Handling bonus for the stat bar.
+// The real effect is a 0.8x/0.75x/0.7x ready/stow duration multiplier,
+// but we map it to Handling so changes show in the stat display.
+const DEXTERITY_HANDLING: [number, number, number, number] = [0, 8, 10, 12];
 
 export interface ArmorModState {
-  /** Targeting (Aim Assistance): 0-5 stacks, each +10 Aim Assist */
+  /** Targeting: +5 | +8 | +10 Aim Assist (after ~1s, element-matching) */
   targeting: ArmorModTier;
-  /** Loader (Reload): 0-5 stacks, each +10 Reload */
+  /** Loader: +10 | +15 | +18 Reload Speed + 0.85× duration (after ~0.5s, element-matching) */
   loader: ArmorModTier;
-  /**
-   * Dexterity (Handling / ready+stow speed): 0-5 stacks.
-   * D2 frame data: each tier reduces ready+stow frames by ~3 frames (at 60fps).
-   * Tier 5 ≈ -15 frames total ≈ -0.25s at 60fps.
-   * We model this as +6 Handling per tier (approximate; real effect is animation-frame based).
-   */
+  /** Dexterity: 0.80× | 0.75× | 0.70× Ready/Stow Duration (element-matching) */
   dexterity: ArmorModTier;
-  /**
-   * Unflinching (flinch resistance): 0-5 stacks.
-   * Reduces flinch received — no stat bar equivalent, shown as a readout only.
-   * Each tier ≈ 10% flinch reduction, max -50%.
-   */
+  /** Unflinching Aim: 25% | 30% | 35% Flinch Resistance while ADS (element-matching) */
   unflinching: ArmorModTier;
+  /** In-Flight Compensator: +15 | +25 | +30 Airborne Effectiveness (3-energy each) */
+  inFlight: ArmorModTier;
+  /** Ammo Generation: +20 | +40 | +50 Ammo Generation stat (element-matching) */
+  ammoGeneration: ArmorModTier;
 }
 
 export const DEFAULT_ARMOR_MODS: ArmorModState = {
-  targeting: 0,
-  loader: 0,
-  dexterity: 0,
-  unflinching: 0,
+  targeting: 0, loader: 0, dexterity: 0,
+  unflinching: 0, inFlight: 0, ammoGeneration: 0,
 };
 
-/** Compute stat bonuses from armor mods */
+/** Compute stat bonuses from armor mods (reflected in stat bars) */
 export function armorModStatDeltas(mods: ArmorModState): Partial<Record<string, number>> {
   return {
-    'Aim Assistance': mods.targeting * 10,
-    'Reload':         mods.loader    * 10,
-    'Handling':       mods.dexterity * 6,
+    'Aim Assistance':        TARGETING_AA[mods.targeting],
+    'Reload':                LOADER_RELOAD[mods.loader],
+    'Handling':              DEXTERITY_HANDLING[mods.dexterity],
+    'Airborne Effectiveness': INFLIGHT_AE[mods.inFlight],
   };
 }
 
-/** Human-readable summary of Dexterity frame reduction */
-export function dexterityFrameReduction(tier: ArmorModTier): string {
-  if (tier === 0) return '';
-  const frames = tier * 3;
-  const ms     = ((frames / 60) * 1000).toFixed(0);
-  return `-${frames} frames (−${ms}ms ready/stow)`;
+/** Human-readable Dexterity multiplier */
+export function dexterityReadout(tier: ArmorModTier): string {
+  return tier === 0 ? '' : `${DEXTERITY_MULT[tier]} ready/stow`;
 }
 
-/** Human-readable summary of Unflinching flinch reduction */
+/** Human-readable Unflinching flinch resistance */
 export function unflinchingReduction(tier: ArmorModTier): string {
   if (tier === 0) return '';
-  return `-${tier * 10}% flinch received`;
+  return `${UNFLINCHING_PCT[tier]}% flinch resist`;
 }
+
+/** Ammo Generation stat value for current tier */
+export function ammoGenReadout(tier: ArmorModTier): string {
+  if (tier === 0) return '';
+  return `+${AMMO_GEN[tier]} ammo gen`;
+}
+
+// Re-export tier tables for use in UI components
+export { TARGETING_AA, LOADER_RELOAD, DEXTERITY_MULT, UNFLINCHING_PCT, INFLIGHT_AE, AMMO_GEN };
 
 // ─── Masterwork stats ────────────────────────────────────────────────────────
 
@@ -178,13 +194,10 @@ export const MASTERWORK_STATS = [
 
 export type MasterworkStat = typeof MASTERWORK_STATS[number];
 
-/** Surge stack → approximate damage multiplier (stacks multiplicatively, ~6% each) */
-const SURGE_MULTIPLIERS: Record<number, number> = {
-  0: 1.0,
-  1: 1.06,
-  2: 1.1236,
-  3: 1.191,
-};
+// Weapon Surge multipliers — actual in-game values from Weapon Surge mod description.
+// Stacks 1-3 available from regular armor; stack 4 only via Artifact or Exotic Armor.
+export const SURGE_PVE: Record<number, number> = { 0: 1.00, 1: 1.10, 2: 1.17, 3: 1.22, 4: 1.25 };
+export const SURGE_PVP: Record<number, number> = { 0: 1.00, 1: 1.03, 2: 1.045, 3: 1.055, 4: 1.06 };
 
 // ─── Store interface ─────────────────────────────────────────────────────────
 
@@ -200,7 +213,7 @@ interface WeaponState {
   masterworkStat: MasterworkStat | null;
   isCrafted: boolean;
   activeMod: WeaponMod;
-  surgeStacks: 0 | 1 | 2 | 3;
+  surgeStacks: 0 | 1 | 2 | 3 | 4;
   /**
    * Guardian "Weapons" armor stat (formerly Mobility), range 1–200.
    * PvE only — scales weapon damage vs combatants.
@@ -221,7 +234,7 @@ interface WeaponState {
   setMasterworkStat: (stat: MasterworkStat | null) => void;
   toggleCrafted: () => void;
   setActiveMod: (mod: WeaponMod) => void;
-  setSurgeStacks: (stacks: 0 | 1 | 2 | 3) => void;
+  setSurgeStacks: (stacks: 0 | 1 | 2 | 3 | 4) => void;
   setWeaponsStat: (stat: number) => void;
   setArmorMods: (mods: Partial<ArmorModState>) => void;
 
@@ -413,8 +426,8 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
     multiplier *= activeMod.damageMultiplier;
 
     if (mode === 'pve') {
-      // PvE surge stacks
-      multiplier *= SURGE_MULTIPLIERS[surgeStacks];
+      // PvE Weapon Surge (element-matching armor surge mod)
+      multiplier *= SURGE_PVE[surgeStacks] ?? 1;
       // Weapons stat PvE bonus (formerly Mobility):
       //   1–100:   0–15% vs minors/majors (Primary/Special)
       //   101–200: additional 0–15% vs bosses
@@ -422,6 +435,8 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       const tier2 = Math.max(0, weaponsStat - 100) / 100;
       multiplier *= (1 + tier1 * 0.15 + tier2 * 0.15);
     } else if (mode === 'pvp') {
+      // PvP Weapon Surge (lower values — 3%/4.5%/5.5%/6%)
+      multiplier *= SURGE_PVP[surgeStacks] ?? 1;
       // Weapons stat PvP bonus:
       //   1–100:   no bonus vs Guardians (PvE targets only)
       //   101–200: 0–5% bonus damage vs Guardians

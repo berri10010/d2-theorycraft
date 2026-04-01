@@ -4,26 +4,30 @@ import React from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import {
   ArmorModTier,
-  dexterityFrameReduction,
+  dexterityReadout,
   unflinchingReduction,
+  ammoGenReadout,
+  TARGETING_AA,
+  LOADER_RELOAD,
+  INFLIGHT_AE,
 } from '../../store/useWeaponStore';
 
-// ─── Tier dot selector ────────────────────────────────────────────────────────
+// ─── Tier dot selector (0 = none, 1–3 = tier) ────────────────────────────────
 
 interface TierSelectorProps {
   value: ArmorModTier;
   onChange: (t: ArmorModTier) => void;
-  color: string; // tailwind bg-* class for active dots
+  color: string; // tailwind bg-* class for filled dots
 }
 
 function TierSelector({ value, onChange, color }: TierSelectorProps) {
   return (
     <div className="flex items-center gap-1.5">
-      {([0, 1, 2, 3, 4, 5] as ArmorModTier[]).map((t) => (
+      {([0, 1, 2, 3] as ArmorModTier[]).map((t) => (
         <button
           key={t}
           onClick={() => onChange(t === value ? 0 : t)}
-          title={`Tier ${t}`}
+          title={t === 0 ? 'None' : `Tier ${t}`}
           className={[
             'w-5 h-5 rounded-full border transition-all text-[9px] font-bold leading-none flex items-center justify-center',
             t === 0 && value === 0
@@ -50,7 +54,7 @@ interface ModRowProps {
   value: ArmorModTier;
   onChange: (t: ArmorModTier) => void;
   color: string;
-  readout?: string; // extra annotation (frame reduction, flinch %)
+  readout?: string;
 }
 
 function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProps) {
@@ -62,7 +66,7 @@ function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProp
       </div>
       <TierSelector value={value} onChange={onChange} color={color} />
       {readout && (
-        <span className="text-[10px] text-slate-500 tabular-nums">{readout}</span>
+        <span className="text-[10px] text-slate-400 tabular-nums">{readout}</span>
       )}
     </div>
   );
@@ -72,12 +76,12 @@ function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProp
 
 export const ArmorModPanel: React.FC = () => {
   const { activeWeapon, armorMods, setArmorMods } = useWeaponStore();
-  const { targeting, loader, dexterity, unflinching } = armorMods;
+  const { targeting, loader, dexterity, unflinching, inFlight, ammoGeneration } = armorMods;
 
-  // Don't render the panel until a weapon is loaded
   if (!activeWeapon) return null;
 
-  const hasAny = targeting > 0 || loader > 0 || dexterity > 0 || unflinching > 0;
+  const hasAny = targeting > 0 || loader > 0 || dexterity > 0
+    || unflinching > 0 || inFlight > 0 || ammoGeneration > 0;
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
@@ -85,9 +89,10 @@ export const ArmorModPanel: React.FC = () => {
         <h2 className="text-xl font-bold text-white">Armor Mods</h2>
         {hasAny && (
           <button
-            onClick={() =>
-              setArmorMods({ targeting: 0, loader: 0, dexterity: 0, unflinching: 0 })
-            }
+            onClick={() => setArmorMods({
+              targeting: 0, loader: 0, dexterity: 0,
+              unflinching: 0, inFlight: 0, ammoGeneration: 0,
+            })}
             className="text-[10px] font-bold text-slate-500 hover:text-red-400 transition-colors"
           >
             Reset
@@ -99,50 +104,72 @@ export const ArmorModPanel: React.FC = () => {
         {/* Targeting */}
         <ModRow
           label="Targeting"
-          subLabel={`+${targeting * 10} Aim Assistance`}
+          subLabel={targeting > 0 ? `+${TARGETING_AA[targeting]} Aim Assist` : '+0 Aim Assist'}
           value={targeting}
           onChange={(t) => setArmorMods({ targeting: t })}
           color="bg-sky-400"
-          readout={targeting > 0 ? `+${targeting * 10} AA` : undefined}
+          readout={targeting > 0 ? `+${TARGETING_AA[targeting]} AA` : undefined}
         />
 
         {/* Loader */}
         <ModRow
           label="Loader"
-          subLabel={`+${loader * 10} Reload`}
+          subLabel={loader > 0 ? `+${LOADER_RELOAD[loader]} Reload` : '+0 Reload'}
           value={loader}
           onChange={(t) => setArmorMods({ loader: t })}
           color="bg-orange-400"
-          readout={loader > 0 ? `+${loader * 10} Reload` : undefined}
+          readout={loader > 0 ? `+${LOADER_RELOAD[loader]} · 0.85× duration` : undefined}
         />
 
         {/* Dexterity */}
         <ModRow
           label="Dexterity"
-          subLabel={`+${dexterity * 6} Handling`}
+          subLabel="Ready/Stow speed"
           value={dexterity}
           onChange={(t) => setArmorMods({ dexterity: t })}
           color="bg-emerald-400"
-          readout={dexterityFrameReduction(dexterity) || undefined}
+          readout={dexterityReadout(dexterity) || undefined}
         />
 
-        {/* Unflinching */}
+        {/* In-Flight Compensator */}
         <ModRow
-          label="Unflinching"
-          subLabel="Flinch resistance"
+          label="In-Flight Comp."
+          subLabel={inFlight > 0 ? `+${INFLIGHT_AE[inFlight]} Airborne Eff.` : '+0 Airborne Eff.'}
+          value={inFlight}
+          onChange={(t) => setArmorMods({ inFlight: t })}
+          color="bg-cyan-400"
+          readout={inFlight > 0 ? `+${INFLIGHT_AE[inFlight]} AE` : undefined}
+        />
+
+        {/* Unflinching Aim */}
+        <ModRow
+          label="Unflinching Aim"
+          subLabel="Flinch resistance (ADS)"
           value={unflinching}
           onChange={(t) => setArmorMods({ unflinching: t })}
           color="bg-purple-400"
           readout={unflinchingReduction(unflinching) || undefined}
         />
+
+        {/* Ammo Generation */}
+        <ModRow
+          label="Ammo Generation"
+          subLabel="Ammo generation stat"
+          value={ammoGeneration}
+          onChange={(t) => setArmorMods({ ammoGeneration: t })}
+          color="bg-yellow-400"
+          readout={ammoGenReadout(ammoGeneration) || undefined}
+        />
       </div>
 
-      {/* Legend */}
-      <div className="mt-4 pt-3 border-t border-white/5">
+      <div className="mt-4 pt-3 border-t border-white/5 space-y-1">
         <p className="text-[10px] text-slate-600 leading-relaxed">
-          Each tier = one armor mod of that type. Max 5 per stat.
-          Targeting / Loader / Dexterity are reflected in stat bars.
-          Unflinching has no stat bar — readout only.
+          Tier 1 | 2 | 3 = 1, 2, or 3 copies of the mod equipped.
+          All mods require element-matching weapon except In-Flight Compensator.
+        </p>
+        <p className="text-[10px] text-slate-600 leading-relaxed">
+          Targeting, Loader, Dexterity, and In-Flight are reflected in stat bars.
+          Unflinching and Ammo Generation have no stat bar.
         </p>
       </div>
     </div>
