@@ -13,28 +13,45 @@ function archetypeOf(w: Weapon): string {
   return w.intrinsicTrait?.name ?? '';
 }
 
+/** Collect all trait perk names from perk/origin columns (excludes barrel & mag). */
+function perkPool(w: Weapon): Set<string> {
+  const names = new Set<string>();
+  for (const col of w.perkSockets) {
+    if (col.columnType !== 'perk' && col.columnType !== 'origin') continue;
+    for (const p of col.perks) {
+      if (!p.isEnhanced) names.add(p.name);
+    }
+  }
+  return names;
+}
+
+/** Jaccard index: |intersection| / |union|. Returns 1 if both sets are empty. */
+function jaccard(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 && b.size === 0) return 1;
+  let inter = 0;
+  for (const name of a) if (b.has(name)) inter++;
+  const union = a.size + b.size - inter;
+  return union === 0 ? 1 : inter / union;
+}
+
 /**
- * Manhattan distance across every shared base stat.
- * Lower = more similar. Returns null if the weapon is not comparable.
+ * Combined 0–1 similarity (higher = more similar).
+ * 50% stat closeness + 50% perk pool Jaccard overlap.
+ * Returns null if the candidate is not comparable to the active weapon.
  */
 function similarityScore(active: Weapon, candidate: Weapon): number | null {
   if (candidate.hash === active.hash) return null;
   if (archetypeOf(candidate) !== archetypeOf(active)) return null;
   if (candidate.itemTypeDisplayName !== active.itemTypeDisplayName) return null;
 
-  const keys = Object.keys(active.baseStats) as (keyof typeof active.baseStats)[];
-  const dist = keys.reduce((sum, k) => {
-    return sum + Math.abs((active.baseStats[k] ?? 0) - (candidate.baseStats[k] ?? 0));
-  }, 0);
-  return dist;
-}
+  const statKeys = Object.keys(active.baseStats) as (keyof typeof active.baseStats)[];
+  const statDist = statKeys.reduce((sum, k) =>
+    sum + Math.abs((active.baseStats[k] ?? 0) - (candidate.baseStats[k] ?? 0)), 0);
+  const statSim = statKeys.length > 0 ? 1 - statDist / (statKeys.length * 100) : 1;
 
-/** 0–100 match percentage derived from the Manhattan distance. */
-function matchPct(distance: number, numStats: number): number {
-  if (numStats === 0) return 100;
-  // Treat 100 as the maximum possible range per stat
-  const maxDist = numStats * 100;
-  return Math.round(Math.max(0, 1 - distance / maxDist) * 100);
+  const perkSim = jaccard(perkPool(active), perkPool(candidate));
+
+  return 0.5 * statSim + 0.5 * perkSim;
 }
 
 // ─── Result row ───────────────────────────────────────────────────────────────
@@ -42,15 +59,13 @@ function matchPct(distance: number, numStats: number): number {
 function SimilarRow({
   weapon,
   score,
-  numStats,
   onLoad,
 }: {
   weapon: Weapon;
   score: number;
-  numStats: number;
   onLoad: (w: Weapon) => void;
 }) {
-  const pct = matchPct(score, numStats);
+  const pct = Math.round(score * 100);
   const pctClass =
     pct >= 80 ? 'text-green-400'
     : pct >= 60 ? 'text-amber-400'
@@ -104,11 +119,6 @@ export const SimilarWeaponsPanel: React.FC = () => {
   // Pre-compute groups so we can pass the correct variant group when loading
   const groups = useMemo(() => groupWeapons(weapons), [weapons]);
 
-  const numStats = useMemo(
-    () => Object.keys(activeWeapon?.baseStats ?? {}).length,
-    [activeWeapon],
-  );
-
   const recommendations = useMemo<{ weapon: Weapon; score: number }[]>(() => {
     if (!activeWeapon || !weapons?.length) return [];
 
@@ -121,9 +131,9 @@ export const SimilarWeaponsPanel: React.FC = () => {
       if (score !== null) scored.push({ weapon: w, score });
     }
 
-    // Most similar first (lowest distance), then newest season as tiebreak
+    // Most similar first (highest combined score), then newest season as tiebreak
     scored.sort((a, b) => {
-      if (a.score !== b.score) return a.score - b.score;
+      if (a.score !== b.score) return b.score - a.score;
       return (b.weapon.seasonNumber ?? 0) - (a.weapon.seasonNumber ?? 0);
     });
 
@@ -160,7 +170,6 @@ export const SimilarWeaponsPanel: React.FC = () => {
           key={weapon.hash}
           weapon={weapon}
           score={score}
-          numStats={numStats}
           onLoad={(w) => {
             const group = groups.find((g) => g.variants.some((v) => v.hash === w.hash));
             loadWeapon(w, group?.variants);
