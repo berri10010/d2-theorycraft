@@ -28,8 +28,7 @@ function perkPool(w: Weapon): Set<string> {
 /** Jaccard index: |intersection| / |union|. Returns 1 if both sets are empty. */
 function jaccard(a: Set<string>, b: Set<string>): number {
   if (a.size === 0 && b.size === 0) return 1;
-  let inter = 0;
-  for (const name of a) if (b.has(name)) inter++;
+  const inter = Array.from(a).filter((name) => b.has(name)).length;
   const union = a.size + b.size - inter;
   return union === 0 ? 1 : inter / union;
 }
