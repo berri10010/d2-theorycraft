@@ -56,8 +56,8 @@ export const RollEditor: React.FC = () => {
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl font-bold text-white">Weapon Perks</h2>
         {hasEnhanceable && (
-          <span className="text-xs text-amber-500/70 font-semibold tracking-wide">
-            ⚡ Click twice to enhance
+          <span className="text-xs text-slate-500 font-normal tracking-wide">
+            Click twice to enhance
           </span>
         )}
       </div>
@@ -122,57 +122,50 @@ export const RollEditor: React.FC = () => {
                       : `Deselect ${displayPerk.name}`;
 
                   return (
-                    <button
-                      key={perk.hash}
-                      onClick={handleClick}
-                      title={`${nextAction}${perk.tier ? ` [${perk.tier}]` : ''}: ${displayPerk.description}`}
-                      aria-pressed={isActive}
-                      className={[
-                        'relative w-12 h-12 md:w-13 md:h-13 rounded-full border-2 transition-all duration-150 overflow-hidden shrink-0',
-                        isActive
-                          ? isUpgraded
-                            ? 'border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.45)] scale-110 opacity-100'
-                            : 'border-white/80 shadow-[0_0_10px_rgba(255,255,255,0.15)] scale-105 opacity-100'
-                          : isActive
-                            ? ''
-                            : tierCfg
-                              ? `${tierCfg.border} opacity-55 hover:opacity-90 hover:scale-105`
-                              : 'border-white/15 opacity-50 hover:opacity-85 hover:scale-105 hover:border-white/35',
-                      ].join(' ')}
-                    >
-                      <Image
-                        src={BUNGIE_URL + displayPerk.icon}
-                        alt={displayPerk.name}
-                        fill
-                        sizes="52px"
-                        className="object-cover"
-                        unoptimized
-                      />
+                    // Wrapper gives the tier/ENH badge a clipping-free anchor
+                    <div key={perk.hash} className="relative shrink-0">
+                      <button
+                        onClick={handleClick}
+                        title={`${nextAction}${perk.tier ? ` [${perk.tier}]` : ''}: ${displayPerk.description}`}
+                        aria-pressed={isActive}
+                        className={[
+                          'relative w-12 h-12 md:w-13 md:h-13 rounded-full border-2 transition-all duration-150 overflow-hidden block',
+                          isActive
+                            ? isUpgraded
+                              ? 'border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.45)] scale-110 opacity-100'
+                              : 'border-white/80 shadow-[0_0_10px_rgba(255,255,255,0.15)] scale-105 opacity-100'
+                            : 'border-white/15 opacity-50 hover:opacity-85 hover:scale-105 hover:border-white/35',
+                        ].join(' ')}
+                      >
+                        <Image
+                          src={BUNGIE_URL + displayPerk.icon}
+                          alt={displayPerk.name}
+                          fill
+                          sizes="52px"
+                          className="object-cover"
+                          unoptimized
+                        />
 
-                      {/* Tier badge — corner chip inside icon, PvE only */}
+                        {/* Auto-buff dot — top-left, inside for natural clipping */}
+                        {displayPerk.buffKey && (
+                          <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-green-400 rounded-full border border-black/60" />
+                        )}
+                      </button>
+
+                      {/* Tier badge — outside button so overflow:hidden doesn't clip it */}
                       {mode === 'pve' && tierCfg && !isUpgraded && (
-                        <span className={`absolute bottom-0 right-0 text-[8px] font-black leading-none px-1 py-px rounded-tl-md rounded-br-full ${tierCfg.badge}`}>
+                        <span className={`absolute -bottom-1 -right-1 text-[8px] font-black leading-none px-1 py-px rounded-full z-10 ${tierCfg.badge}`}>
                           {tierCfg.label}
                         </span>
                       )}
 
-                      {/* ENH chip when enhanced is active */}
+                      {/* ENH chip — same treatment */}
                       {isUpgraded && (
-                        <span className="absolute bottom-0 right-0 text-[7px] font-black leading-none px-1 py-px rounded-tl-md rounded-br-full bg-amber-400 text-black">
+                        <span className="absolute -bottom-1 -right-1 text-[7px] font-black leading-none px-1 py-px rounded-full z-10 bg-amber-400 text-black">
                           ENH
                         </span>
                       )}
-
-                      {/* Auto-buff dot — top-left */}
-                      {displayPerk.buffKey && (
-                        <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-green-400 rounded-full border border-black/60" />
-                      )}
-
-                      {/* Pulse dot when base selected + can enhance */}
-                      {canUpgrade && (
-                        <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-amber-400 rounded-full border border-black/60 animate-pulse" />
-                      )}
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -181,24 +174,6 @@ export const RollEditor: React.FC = () => {
         })}
       </div>
 
-      {/* Footer hints */}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-5 pt-3 border-t border-white/5 text-[11px] text-slate-600">
-        <span>Click to select · again to enhance · again to deselect</span>
-        <span className="text-slate-700">·</span>
-        <span><span className="text-green-500">●</span> auto-buff</span>
-        {mode === 'pve' && (
-          <>
-            <span className="text-slate-700">·</span>
-            <span>
-              Tier:&nbsp;
-              <span className="text-amber-400 font-bold">S</span>&nbsp;
-              <span className="text-green-400 font-bold">A</span>&nbsp;
-              <span className="text-blue-400 font-bold">B</span>&nbsp;
-              <span className="text-slate-500 font-bold">C↓</span>
-            </span>
-          </>
-        )}
-      </div>
     </div>
   );
 };
