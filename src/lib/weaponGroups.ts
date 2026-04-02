@@ -1,12 +1,13 @@
 import { Weapon, WeaponGroup } from '../types/weapon';
 
-/** Variant priority for default selection (index 0 = highest priority) */
+/** Variant priority for default selection (index 0 = highest priority = loaded first) */
 const VARIANT_PRIORITY = ['Adept', 'Timelost', 'Harrowed', 'Brave'];
 
 function variantPriority(w: Weapon): number {
-  if (!w.variantLabel) return VARIANT_PRIORITY.length; // base = lowest
+  // Base (no variantLabel) always loads first — user can toggle to Adept in the header.
+  if (!w.variantLabel) return -1;
   const idx = VARIANT_PRIORITY.indexOf(w.variantLabel);
-  return idx === -1 ? VARIANT_PRIORITY.length - 1 : idx;
+  return idx === -1 ? VARIANT_PRIORITY.length : idx;
 }
 
 /**

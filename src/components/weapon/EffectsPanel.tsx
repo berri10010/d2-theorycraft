@@ -163,14 +163,20 @@ export const EffectsPanel: React.FC = () => {
                 {(() => {
                   const compEntry = compendiumData?.[name];
                   if (compEntry) {
+                    // Always show baseDescription — it has ↑ markers stripped so only
+                    // the base values appear.  When enhanced, show upgrade chips below
+                    // (also strip any internal ↑ from bonus strings to avoid doubling).
+                    const bonuses = isEnhanced
+                      ? compEntry.enhancedBonuses.map((b) => b.replace(/↑/g, '').trim()).filter(Boolean)
+                      : [];
                     return (
                       <div className="mt-1">
                         <p className="text-xs text-slate-300 leading-relaxed">
-                          {isEnhanced ? compEntry.description.replace(/↑/g, '') : compEntry.baseDescription}
+                          {compEntry.baseDescription}
                         </p>
-                        {isEnhanced && compEntry.enhancedBonuses.length > 0 && (
+                        {bonuses.length > 0 && (
                           <div className="mt-1.5 flex flex-wrap gap-1">
-                            {compEntry.enhancedBonuses.map((bonus, i) => (
+                            {bonuses.map((bonus, i) => (
                               <span
                                 key={i}
                                 className="inline-flex items-center gap-1 text-[11px] font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded"

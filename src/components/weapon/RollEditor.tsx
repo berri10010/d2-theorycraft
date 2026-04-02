@@ -42,138 +42,162 @@ export const RollEditor: React.FC = () => {
 
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
+  // Column type → subtle accent colour used on the column header underline
+  const COL_ACCENT: Record<string, string> = {
+    barrel: 'bg-orange-500/40',
+    mag:    'bg-blue-500/40',
+    perk:   'bg-slate-500/40',
+    origin: 'bg-emerald-500/40',
+  };
+
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-      <div className="flex items-center justify-between mb-4">
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl font-bold text-white">Weapon Perks</h2>
         {hasEnhanceable && (
-          <span className="text-xs text-amber-500/70 font-semibold">
-            Click perk twice to enhance ⚡
+          <span className="text-xs text-amber-500/70 font-semibold tracking-wide">
+            ⚡ Click twice to enhance
           </span>
         )}
       </div>
 
-      <div className="flex overflow-x-auto pb-4 md:grid md:grid-cols-4 lg:grid-cols-5 gap-6 md:pb-0">
-        {activeWeapon.perkSockets.map((column) => {
+      <div className="flex overflow-x-auto pb-4 md:grid md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 md:pb-0">
+        {activeWeapon.perkSockets.map((column, colIdx) => {
           const isOriginTraitCol = column.columnType === 'origin';
           const columnDisabled = isOriginTraitCol && isLegacy;
+          const accentBar = COL_ACCENT[column.columnType] ?? 'bg-slate-500/40';
+          const isLast = colIdx === activeWeapon.perkSockets.length - 1;
 
           return (
             <div
               key={column.name}
               className={[
-                'flex flex-col gap-3 min-w-[64px] items-center',
+                'flex flex-col items-center min-w-[60px]',
                 columnDisabled ? 'opacity-30 pointer-events-none' : '',
+                // subtle right divider between columns except last
+                !isLast ? 'border-r border-white/5 pr-3 md:pr-4' : '',
               ].join(' ')}
             >
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 whitespace-nowrap flex items-center gap-1">
-                {column.name}
-                {columnDisabled && (
-                  <span className="text-[9px] text-slate-600 normal-case tracking-normal">(legacy)</span>
-                )}
-              </h3>
+              {/* Column header with coloured underline accent */}
+              <div className="w-full flex flex-col items-center gap-1 mb-3">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                  {columnDisabled ? `${column.name} ·` : column.name}
+                </span>
+                <div className={`h-0.5 w-8 rounded-full ${accentBar}`} />
+              </div>
 
-              {column.perks.map((perk) => {
-                const selectedHash = selectedPerks[column.name];
-                // Determine which perk is currently "active" — could be base or enhanced version
-                const isBaseActive     = selectedHash === perk.hash;
-                const isEnhancedActive = perk.enhancedVersion
-                  ? selectedHash === perk.enhancedVersion.hash
-                  : false;
-                const isActive = isBaseActive || isEnhancedActive;
+              {/* Perk icons */}
+              <div className="flex flex-col gap-2.5 items-center">
+                {column.perks.map((perk) => {
+                  const selectedHash    = selectedPerks[column.name];
+                  const isBaseActive    = selectedHash === perk.hash;
+                  const isEnhancedActive = perk.enhancedVersion
+                    ? selectedHash === perk.enhancedVersion.hash
+                    : false;
+                  const isActive   = isBaseActive || isEnhancedActive;
+                  const isUpgraded = isEnhancedActive;
+                  const canUpgrade = !!perk.enhancedVersion && isBaseActive;
 
-                // Show enhanced icon/name whenever enhanced is selected (no crafted gate)
-                const displayPerk: Perk = (isEnhancedActive && perk.enhancedVersion)
-                  ? perk.enhancedVersion
-                  : perk;
+                  const displayPerk: Perk = (isEnhancedActive && perk.enhancedVersion)
+                    ? perk.enhancedVersion
+                    : perk;
 
-                const tierCfg = perk.tier ? TIER_CONFIG[perk.tier as PerkTier] : null;
-                // canUpgrade: base is selected and an enhanced version exists — no crafted gate
-                const canUpgrade = !!perk.enhancedVersion && isBaseActive;
-                const isUpgraded = isEnhancedActive;
+                  const tierCfg = perk.tier ? TIER_CONFIG[perk.tier as PerkTier] : null;
 
-                // Click cycle: none → base → enhanced (if available) → none
-                const handleClick = () => {
-                  if (!isActive) {
-                    selectPerk(column.name, perk.hash);
-                  } else if (isBaseActive && perk.enhancedVersion) {
-                    selectPerk(column.name, perk.enhancedVersion.hash);
-                  } else {
-                    clearPerk(column.name);
-                  }
-                };
+                  const handleClick = () => {
+                    if (!isActive) {
+                      selectPerk(column.name, perk.hash);
+                    } else if (isBaseActive && perk.enhancedVersion) {
+                      selectPerk(column.name, perk.enhancedVersion.hash);
+                    } else {
+                      clearPerk(column.name);
+                    }
+                  };
 
-                // Tooltip hints the next action on click
-                const nextAction = !isActive
-                  ? displayPerk.name
-                  : isBaseActive && perk.enhancedVersion
-                    ? `Enhance → ${perk.enhancedVersion.name}`
-                    : `Deselect ${displayPerk.name}`;
+                  const nextAction = !isActive
+                    ? displayPerk.name
+                    : isBaseActive && perk.enhancedVersion
+                      ? `Enhance → ${perk.enhancedVersion.name}`
+                      : `Deselect ${displayPerk.name}`;
 
-                return (
-                  <div key={perk.hash} className="relative flex flex-col items-center gap-1">
+                  return (
                     <button
+                      key={perk.hash}
                       onClick={handleClick}
                       title={`${nextAction}${perk.tier ? ` [${perk.tier}]` : ''}: ${displayPerk.description}`}
                       aria-pressed={isActive}
                       className={[
-                        'relative w-12 h-12 md:w-14 md:h-14 rounded-full border-2 transition-all duration-200 overflow-hidden',
+                        'relative w-12 h-12 md:w-13 md:h-13 rounded-full border-2 transition-all duration-150 overflow-hidden shrink-0',
                         isActive
                           ? isUpgraded
-                            ? 'border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.5)] scale-110 opacity-100'
-                            : 'border-white/70 shadow-[0_0_12px_rgba(255,255,255,0.2)] scale-110 opacity-100'
-                          : tierCfg
-                            ? `${tierCfg.border} opacity-60 hover:opacity-100`
-                            : 'border-white/20 hover:border-white/40 opacity-60 hover:opacity-100',
+                            ? 'border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.45)] scale-110 opacity-100'
+                            : 'border-white/80 shadow-[0_0_10px_rgba(255,255,255,0.15)] scale-105 opacity-100'
+                          : isActive
+                            ? ''
+                            : tierCfg
+                              ? `${tierCfg.border} opacity-55 hover:opacity-90 hover:scale-105`
+                              : 'border-white/15 opacity-50 hover:opacity-85 hover:scale-105 hover:border-white/35',
                       ].join(' ')}
                     >
                       <Image
                         src={BUNGIE_URL + displayPerk.icon}
                         alt={displayPerk.name}
                         fill
-                        sizes="(max-width: 768px) 48px, 56px"
+                        sizes="52px"
                         className="object-cover"
                         unoptimized
                       />
-                      {/* Auto-buff indicator */}
-                      {displayPerk.buffKey && (
-                        <div className="absolute top-0 left-0 w-2.5 h-2.5 bg-green-400 rounded-full border border-black" />
+
+                      {/* Tier badge — corner chip inside icon, PvE only */}
+                      {mode === 'pve' && tierCfg && !isUpgraded && (
+                        <span className={`absolute bottom-0 right-0 text-[8px] font-black leading-none px-1 py-px rounded-tl-md rounded-br-full ${tierCfg.badge}`}>
+                          {tierCfg.label}
+                        </span>
                       )}
-                      {/* Enhanced active indicator — amber E badge */}
+
+                      {/* ENH chip when enhanced is active */}
                       {isUpgraded && (
-                        <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-amber-400 rounded-full border border-black flex items-center justify-center">
-                          <span className="text-[7px] font-black text-black leading-none">E</span>
-                        </div>
+                        <span className="absolute bottom-0 right-0 text-[7px] font-black leading-none px-1 py-px rounded-tl-md rounded-br-full bg-amber-400 text-black">
+                          ENH
+                        </span>
                       )}
-                      {/* "Click to enhance" hint dot — crafted, base selected, enhanced available */}
+
+                      {/* Auto-buff dot — top-left */}
+                      {displayPerk.buffKey && (
+                        <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-green-400 rounded-full border border-black/60" />
+                      )}
+
+                      {/* Pulse dot when base selected + can enhance */}
                       {canUpgrade && (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-amber-500/60 rounded-full border border-amber-400/60 animate-pulse" />
+                        <div className="absolute top-0.5 right-0.5 w-2 h-2 bg-amber-400 rounded-full border border-black/60 animate-pulse" />
                       )}
                     </button>
-
-                    {/* Tier badge — PvE only */}
-                    {mode === 'pve' && tierCfg && !isUpgraded && (
-                      <span className={`text-[10px] font-black leading-none px-1 py-0.5 rounded ${tierCfg.badge}`}>
-                        {tierCfg.label}
-                      </span>
-                    )}
-                    {mode === 'pve' && isUpgraded && (
-                      <span className="text-[9px] font-bold leading-none px-1 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                        ENH
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           );
         })}
       </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4 text-xs text-slate-600">
-        <span>Click to select · click again to enhance · click once more to deselect.</span>
-        <span><span className="text-green-500">●</span> = auto-buff.</span>
-        {mode === 'pve' && <span>Tier: <span className="text-amber-400 font-bold">S</span> <span className="text-green-400 font-bold">A</span> <span className="text-blue-400 font-bold">B</span> <span className="text-slate-400 font-bold">C↓</span></span>}
+      {/* Footer hints */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-5 pt-3 border-t border-white/5 text-[11px] text-slate-600">
+        <span>Click to select · again to enhance · again to deselect</span>
+        <span className="text-slate-700">·</span>
+        <span><span className="text-green-500">●</span> auto-buff</span>
+        {mode === 'pve' && (
+          <>
+            <span className="text-slate-700">·</span>
+            <span>
+              Tier:&nbsp;
+              <span className="text-amber-400 font-bold">S</span>&nbsp;
+              <span className="text-green-400 font-bold">A</span>&nbsp;
+              <span className="text-blue-400 font-bold">B</span>&nbsp;
+              <span className="text-slate-500 font-bold">C↓</span>
+            </span>
+          </>
+        )}
       </div>
     </div>
   );
