@@ -11,61 +11,58 @@ async function fetchTable(path: string) {
 
 export async function GET() {
   try {
-    // 1. Fetch manifest index
     const manifestRes = await fetch(`${BUNGIE_ROOT}/Platform/Destiny2/Manifest/`, {
       headers: { 'X-API-Key': API_KEY },
     });
     const manifest = await manifestRes.json();
     const paths = manifest.Response.jsonWorldComponentContentPaths.en;
 
-    // 2. Report which season-related tables exist
-    const seasonKeys = Object.keys(paths).filter(k =>
-      k.toLowerCase().includes('season') || k.toLowerCase().includes('episode')
-    );
+    const [seasonDefs, items] = await Promise.all([
+      fetchTable(paths.DestinySeasonDefinition),
+      fetchTable(paths.DestinyInventoryItemDefinition),
+    ]);
 
-    // 3. Fetch DestinySeasonDefinition if present
-    let seasonSample: unknown[] = [];
-    if (paths.DestinySeasonDefinition) {
-      const seasonDefs = await fetchTable(paths.DestinySeasonDefinition);
-      seasonSample = Object.values(seasonDefs).slice(0, 10);
-    }
-
-    // 4. Fetch a small slice of items and look for seasonHash + iconWatermark
-    const items = await fetchTable(paths.DestinyInventoryItemDefinition);
-    const WEAPON_ITEM_TYPE = 3;
-
-    const weaponSamples: unknown[] = [];
-    for (const item of Object.values(items) as any[]) {
-      if (item.itemType !== WEAPON_ITEM_TYPE) continue;
-      if (!item.displayProperties?.name?.trim()) continue;
-      weaponSamples.push({
-        name: item.displayProperties.name,
-        seasonHash: item.seasonHash ?? null,
-        iconWatermark: item.iconWatermark ?? null,
+    // Test the artifact approach: for each season with artifactItemHash,
+    // look up that item and check its iconWatermark
+    const artifactResults: unknown[] = [];
+    for (const season of Object.values(seasonDefs) as any[]) {
+      const name = season.displayProperties?.name?.trim();
+      if (!name || !season.artifactItemHash) continue;
+      const artifact = items[season.artifactItemHash.toString()];
+      artifactResults.push({
+        seasonName: name,
+        seasonNumber: season.seasonNumber,
+        artifactItemHash: season.artifactItemHash,
+        artifactFound: !!artifact,
+        artifactName: artifact?.displayProperties?.name ?? null,
+        artifactIconWatermark: artifact?.iconWatermark ?? null,
       });
-      if (weaponSamples.length >= 20) break;
     }
 
-    // 5. Count how many weapons have seasonHash vs iconWatermark
-    let withSeasonHash = 0, withWatermark = 0, withBoth = 0, withNeither = 0, totalWeapons = 0;
+    // Show a few weapon watermarks to compare against artifact watermarks
+    const WEAPON_ITEM_TYPE = 3;
+    const weaponWatermarks = new Set<string>();
     for (const item of Object.values(items) as any[]) {
       if (item.itemType !== WEAPON_ITEM_TYPE) continue;
       if (!item.displayProperties?.name?.trim()) continue;
-      totalWeapons++;
-      const hasSH = !!item.seasonHash;
-      const hasWM = !!item.iconWatermark;
-      if (hasSH) withSeasonHash++;
-      if (hasWM) withWatermark++;
-      if (hasSH && hasWM) withBoth++;
-      if (!hasSH && !hasWM) withNeither++;
+      if (item.iconWatermark) weaponWatermarks.add(item.iconWatermark);
     }
+
+    // Check how many artifact watermarks actually appear on weapons
+    const artifactWatermarks = new Set(
+      artifactResults
+        .map((r: any) => r.artifactIconWatermark)
+        .filter(Boolean)
+    );
+    const matchCount = [...artifactWatermarks].filter(w => weaponWatermarks.has(w)).length;
 
     return NextResponse.json({
-      seasonRelatedTableKeys: seasonKeys,
-      hasDestinySeasonDefinition: !!paths.DestinySeasonDefinition,
-      seasonDefinitionSample: seasonSample,
-      weaponCoverage: { totalWeapons, withSeasonHash, withWatermark, withBoth, withNeither },
-      weaponSamples,
+      totalSeasons: Object.keys(seasonDefs).length,
+      seasonsWithArtifact: artifactResults.length,
+      artifactResults: artifactResults.slice(0, 15),
+      totalWeaponWatermarks: weaponWatermarks.size,
+      artifactWatermarksMatchingWeapons: matchCount,
+      sampleWeaponWatermarks: [...weaponWatermarks].slice(0, 5),
     });
   } catch (e: unknown) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
