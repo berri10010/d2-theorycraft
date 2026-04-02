@@ -3,10 +3,22 @@
 import React, { useMemo, useState } from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
-import { Weapon } from '../../types/weapon';
+import { Weapon, WeaponGroup } from '../../types/weapon';
 import { groupWeapons } from '../../lib/weaponGroups';
 
 // ─── Scoring ──────────────────────────────────────────────────────────────────
+
+/**
+ * Scan all variants in the group for the first non-null season name/number.
+ * Base weapons often lack seasonHash in the manifest; adept/variant copies usually have it.
+ */
+function bestSeasonLabel(group: WeaponGroup): string | null {
+  const name = group.variants.map((v) => v.seasonName).find(Boolean);
+  if (name) return name;
+  const num = group.variants.map((v) => v.seasonNumber).find((n) => n != null);
+  if (num != null) return `Season ${num}`;
+  return null;
+}
 
 /** Archetype label from intrinsic trait name (e.g. "Adaptive Frame"). */
 function archetypeOf(w: Weapon): string {
@@ -58,10 +70,12 @@ function similarityScore(active: Weapon, candidate: Weapon): number | null {
 function SimilarRow({
   weapon,
   score,
+  seasonLabel,
   onLoad,
 }: {
   weapon: Weapon;
   score: number;
+  seasonLabel: string | null;
   onLoad: (w: Weapon) => void;
 }) {
   const pct = Math.round(score * 100);
@@ -89,7 +103,7 @@ function SimilarRow({
           {weapon.name}
         </p>
         <p className="text-[10px] text-slate-500 leading-tight">
-          {weapon.seasonName ?? `S${weapon.seasonNumber ?? '?'}`} · {weapon.intrinsicTrait?.name ?? weapon.itemTypeDisplayName}
+          {seasonLabel ?? 'Unknown season'} · {weapon.intrinsicTrait?.name ?? weapon.itemTypeDisplayName}
         </p>
       </div>
 
@@ -116,7 +130,16 @@ export const SimilarWeaponsPanel: React.FC = () => {
   const [showAll, setShowAll] = useState(false);
 
   // Pre-compute groups so we can pass the correct variant group when loading
+  // and resolve season labels (base weapons often lack seasonHash directly).
   const groups = useMemo(() => groupWeapons(weapons), [weapons]);
+
+  const hashToGroup = useMemo(() => {
+    const map = new Map<string, WeaponGroup>();
+    for (const g of groups) {
+      for (const v of g.variants) map.set(v.hash, g);
+    }
+    return map;
+  }, [groups]);
 
   const recommendations = useMemo<{ weapon: Weapon; score: number }[]>(() => {
     if (!activeWeapon || !weapons?.length) return [];
@@ -164,17 +187,18 @@ export const SimilarWeaponsPanel: React.FC = () => {
         <span className="w-8 shrink-0" />
       </div>
 
-      {visible.map(({ weapon, score }) => (
-        <SimilarRow
-          key={weapon.hash}
-          weapon={weapon}
-          score={score}
-          onLoad={(w) => {
-            const group = groups.find((g) => g.variants.some((v) => v.hash === w.hash));
-            loadWeapon(w, group?.variants);
-          }}
-        />
-      ))}
+      {visible.map(({ weapon, score }) => {
+        const group = hashToGroup.get(weapon.hash);
+        return (
+          <SimilarRow
+            key={weapon.hash}
+            weapon={weapon}
+            score={score}
+            seasonLabel={group ? bestSeasonLabel(group) : null}
+            onLoad={(w) => loadWeapon(w, group?.variants)}
+          />
+        );
+      })}
 
       {recommendations.length > 5 && (
         <button

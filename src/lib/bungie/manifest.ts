@@ -15,8 +15,8 @@ import { BUNGIE_URL as BUNGIE_ROOT } from '../bungieUrl';
 const gzipAsync   = promisify(gzip);
 const gunzipAsync = promisify(gunzip);
 
-const CACHE_VERSION_KEY = 'd2:manifest-version-v5'; // bumped — merge both plug sets so base+enhanced always pair within-socket
-const CACHE_WEAPONS_KEY = 'd2:weapons-gz-v5';       // bumped — v4 still missed base perks when reusablePlugSetHash was checked first
+const CACHE_VERSION_KEY = 'd2:manifest-version-v6'; // bumped — force re-parse with season data populated
+const CACHE_WEAPONS_KEY = 'd2:weapons-gz-v6';       // bumped — season name/number were null in v5 cache
 const TTL               = 60 * 60 * 24 * 7; // 7 days
 
 function getRedis(): Redis {
