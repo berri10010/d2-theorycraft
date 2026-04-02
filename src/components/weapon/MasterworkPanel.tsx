@@ -126,7 +126,7 @@ export const MasterworkPanel: React.FC = () => {
 
           <input
             type="range"
-            min={1}
+            min={0}
             max={200}
             value={weaponsStat}
             onChange={(e) => setWeaponsStat(Number(e.target.value))}

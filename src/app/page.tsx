@@ -127,7 +127,7 @@ function Dashboard() {
     // Masterwork stat
     if (masterworkStat) params.set('mw', masterworkStat);
     // Weapons stat (only if non-default)
-    if (weaponsStat !== 70) params.set('ws', String(weaponsStat));
+    if (weaponsStat !== 0) params.set('ws', String(weaponsStat));
     // Active buffs
     if (activeBuffs.length) params.set('b', activeBuffs.join(','));
     navigator.clipboard

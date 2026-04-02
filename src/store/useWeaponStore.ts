@@ -254,7 +254,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
   isCrafted: false,
   activeMod: WEAPON_MODS[0], // 'none'
   surgeStacks: 0,
-  weaponsStat: 70, // ~equivalent to old Mobility 100, a reasonable default
+  weaponsStat: 0,
   armorMods: DEFAULT_ARMOR_MODS,
 
   loadWeapon: (weapon, group) =>
@@ -335,7 +335,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
   toggleCrafted: () => set((s) => ({ isCrafted: !s.isCrafted })),
   setActiveMod: (mod) => set({ activeMod: mod }),
   setSurgeStacks: (stacks) => set({ surgeStacks: stacks }),
-  setWeaponsStat: (stat) => set({ weaponsStat: Math.max(1, Math.min(200, stat)) }),
+  setWeaponsStat: (stat) => set({ weaponsStat: Math.max(0, Math.min(200, stat)) }),
   setArmorMods: (mods) => set((s) => ({ armorMods: { ...s.armorMods, ...mods } })),
 
   getCalculatedStats: () => {
