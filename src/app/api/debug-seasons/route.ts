@@ -54,7 +54,7 @@ export async function GET() {
         .map((r: any) => r.artifactIconWatermark)
         .filter(Boolean)
     );
-    const matchCount = [...artifactWatermarks].filter(w => weaponWatermarks.has(w)).length;
+    const matchCount = Array.from(artifactWatermarks).filter(w => weaponWatermarks.has(w)).length;
 
     return NextResponse.json({
       totalSeasons: Object.keys(seasonDefs).length,
@@ -62,7 +62,7 @@ export async function GET() {
       artifactResults: artifactResults.slice(0, 15),
       totalWeaponWatermarks: weaponWatermarks.size,
       artifactWatermarksMatchingWeapons: matchCount,
-      sampleWeaponWatermarks: [...weaponWatermarks].slice(0, 5),
+      sampleWeaponWatermarks: Array.from(weaponWatermarks).slice(0, 5),
     });
   } catch (e: unknown) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
