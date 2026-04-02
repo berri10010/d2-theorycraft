@@ -194,8 +194,21 @@ function columnLabel(
   }
 }
 
-function isEnhancedPerk(name: string): boolean {
-  return name.startsWith('Enhanced ');
+/**
+ * Determine whether a plug item is an enhanced perk.
+ *
+ * In modern D2 manifests (post-Witch Queen crafting), enhanced perks share the
+ * EXACT SAME displayProperties.name as their base counterpart (e.g. both are
+ * named "Kill Clip").  The only reliable distinguisher is itemTypeDisplayName,
+ * which is "Enhanced Weapon Perk" / "Enhanced Weapon Trait" for the enhanced
+ * variant.  We also keep the legacy name-prefix check ("Enhanced X") as a
+ * fallback for any older content that still uses that convention.
+ */
+function isEnhancedPerkItem(item: BungieInventoryItem): boolean {
+  return (
+    item.displayProperties.name.startsWith('Enhanced ') ||
+    (item.itemTypeDisplayName ?? '').toLowerCase().includes('enhanced')
+  );
 }
 
 // ──────────────────────────────────────────────────
@@ -336,38 +349,36 @@ export function parseWeapons(
           const socket = item.sockets!.socketEntries[socketIndex];
           if (!socket) return;
 
-          // Collect plug hashes, preferring randomised rolls over fixed.
-          // If none pass the currentlyCanRoll filter (e.g. enhanced-only sockets on Adept
-          // weapons where enhanced perks are marked currentlyCanRoll:false), fall back to
-          // the full unfiltered list so those perks aren't silently dropped.
-          let plugHashes: number[] = [];
-          if (socket.reusablePlugSetHash) {
-            const ps = plugSetDefs[socket.reusablePlugSetHash.toString()];
-            if (ps) {
-              const rollable = ps.reusablePlugItems
-                .filter((p) => p.currentlyCanRoll)
-                .map((p) => p.plugItemHash);
-              plugHashes = rollable.length > 0
-                ? rollable
-                : ps.reusablePlugItems.map((p) => p.plugItemHash);
-            }
-          }
-          if (plugHashes.length === 0 && socket.randomizedPlugSetHash) {
-            const ps = plugSetDefs[socket.randomizedPlugSetHash.toString()];
-            if (ps) {
-              const rollable = ps.reusablePlugItems
-                .filter((p) => p.currentlyCanRoll)
-                .map((p) => p.plugItemHash);
-              plugHashes = rollable.length > 0
-                ? rollable
-                : ps.reusablePlugItems.map((p) => p.plugItemHash);
+          // Collect plug hashes from BOTH plug sets and merge by hash uniqueness.
+          // Craftable weapons store base perks in randomizedPlugSetHash and enhanced
+          // perks in reusablePlugSetHash; Adept weapons do the same but with
+          // currentlyCanRoll:false on the enhanced entries.  By collecting from both
+          // sets up-front we ensure base+enhanced land in the same rawPerks array so
+          // the within-socket dedup can pair them — preventing duplicate icon rows.
+          const plugHashSet = new Set<number>();
+          const plugHashes: number[] = [];
+
+          for (const setHashKey of [
+            socket.reusablePlugSetHash?.toString(),
+            socket.randomizedPlugSetHash?.toString(),
+          ].filter((k): k is string => !!k)) {
+            const ps = plugSetDefs[setHashKey];
+            if (!ps) continue;
+            const rollable = ps.reusablePlugItems
+              .filter((p) => p.currentlyCanRoll)
+              .map((p) => p.plugItemHash);
+            const hashes = rollable.length > 0
+              ? rollable
+              : ps.reusablePlugItems.map((p) => p.plugItemHash);
+            for (const h of hashes) {
+              if (!plugHashSet.has(h)) { plugHashSet.add(h); plugHashes.push(h); }
             }
           }
           if (plugHashes.length === 0 && socket.reusablePlugItems?.length) {
-            plugHashes = socket.reusablePlugItems.map((p) => p.plugItemHash);
+            plugHashes.push(...socket.reusablePlugItems.map((p) => p.plugItemHash));
           }
           if (plugHashes.length === 0 && socket.singleInitialItemHash) {
-            plugHashes = [socket.singleInitialItemHash];
+            plugHashes.push(socket.singleInitialItemHash);
           }
 
           const rawPerks: Perk[] = [];
@@ -396,6 +407,7 @@ export function parseWeapons(
               })
               .filter((s): s is { statName: string; value: number } => s !== null);
 
+            const enhanced = isEnhancedPerkItem(plugItem);
             const tierEntry = getPerkTier(perkName);
             rawPerks.push({
               hash: hashStr,
@@ -403,9 +415,9 @@ export function parseWeapons(
               icon: plugItem.displayProperties.icon,
               description: plugItem.displayProperties.description ?? '',
               statModifiers,
-              isEnhanced: isEnhancedPerk(perkName),
-              buffKey: getBuffKeyForPerk(perkName),
-              tier: tierEntry?.tier ?? null,
+              isEnhanced: enhanced,
+              buffKey: enhanced ? null : getBuffKeyForPerk(perkName),
+              tier: enhanced ? null : (tierEntry?.tier ?? null),
               enhancedVersion: null, // filled in below
             });
           }
@@ -413,12 +425,14 @@ export function parseWeapons(
           if (rawPerks.length === 0) return;
 
           // ── Pair enhanced perks with their base versions ──
-          // Build a map: baseName → enhanced perk
+          // Key on the canonical perk name (strip legacy "Enhanced " prefix if present;
+          // for modern identical-name perks this is a no-op).  Both old-style
+          // "Enhanced Kill Clip" and new-style "Kill Clip" (enhanced) map to "kill clip".
           const enhancedMap = new Map<string, Perk>();
           for (const p of rawPerks) {
             if (p.isEnhanced) {
-              const baseName = p.name.replace(/^Enhanced\s+/i, '');
-              enhancedMap.set(baseName.toLowerCase(), p);
+              const key = p.name.replace(/^Enhanced\s+/i, '').toLowerCase();
+              enhancedMap.set(key, p);
             }
           }
 
@@ -428,15 +442,16 @@ export function parseWeapons(
           const perks: Perk[] = [];
           for (const p of rawPerks) {
             if (p.isEnhanced) {
-              // Only include if there's no base perk with the same base-name
-              const baseName = p.name.replace(/^Enhanced\s+/i, '');
+              // Drop if a base perk with the same canonical name exists in this socket.
+              const key = p.name.replace(/^Enhanced\s+/i, '').toLowerCase();
               const hasBase = rawPerks.some(
-                (b) => !b.isEnhanced && b.name.toLowerCase() === baseName.toLowerCase()
+                (b) => !b.isEnhanced && b.name.replace(/^Enhanced\s+/i, '').toLowerCase() === key
               );
               if (!hasBase) perks.push({ ...p, enhancedVersion: null });
               continue;
             }
-            const enhanced = enhancedMap.get(p.name.toLowerCase()) ?? null;
+            const key = p.name.replace(/^Enhanced\s+/i, '').toLowerCase();
+            const enhanced = enhancedMap.get(key) ?? null;
             perks.push({ ...p, enhancedVersion: enhanced });
           }
 
@@ -480,13 +495,13 @@ export function parseWeapons(
       });
 
       if (enhancedOnlyIdxs.length > 0) {
-        // Build a map: baseName (lowercase) → enhanced Perk
+        // Build a map: canonical perk name (lowercase) → enhanced Perk
         const crossEnhancedMap = new Map<string, Perk>();
         for (const idx of enhancedOnlyIdxs) {
           for (const enhPerk of rawColumns[idx].perks) {
-            const baseName = enhPerk.name.replace(/^Enhanced\s+/i, '').toLowerCase();
-            if (!crossEnhancedMap.has(baseName)) {
-              crossEnhancedMap.set(baseName, enhPerk);
+            const key = enhPerk.name.replace(/^Enhanced\s+/i, '').toLowerCase();
+            if (!crossEnhancedMap.has(key)) {
+              crossEnhancedMap.set(key, enhPerk);
             }
           }
         }
@@ -500,7 +515,8 @@ export function parseWeapons(
 
           const updatedPerks = col.perks.map((p): Perk => {
             if (p.isEnhanced || p.enhancedVersion) return p;
-            const enh = crossEnhancedMap.get(p.name.toLowerCase()) ?? null;
+            const key = p.name.replace(/^Enhanced\s+/i, '').toLowerCase();
+            const enh = crossEnhancedMap.get(key) ?? null;
             return enh ? { ...p, enhancedVersion: enh } : p;
           });
           rawColumns[i] = { ...col, perks: updatedPerks };

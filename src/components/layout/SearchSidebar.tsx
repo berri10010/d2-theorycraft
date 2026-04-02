@@ -21,7 +21,7 @@ const AMMO_COLORS: Record<number, string> = {
 
 const DAMAGE_OPTIONS = ['kinetic', 'solar', 'arc', 'void', 'stasis', 'strand'];
 const AMMO_OPTIONS = [1, 2, 3];
-const RARITY_OPTIONS = ['Legendary', 'Exotic'];
+const RARITY_OPTIONS = ['Exotic', 'Legendary', 'Rare', 'Uncommon', 'Common'];
 
 type SortMode = 'alpha' | 'season';
 
