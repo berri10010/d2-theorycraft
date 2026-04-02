@@ -20,6 +20,8 @@ export interface BungieSeasonDefinition {
     name: string;
     icon: string;
   };
+  artifactItemHash?: number;
+  startDate?: string;
 }
 
 export interface BungieDisplayProperties {

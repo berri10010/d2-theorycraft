@@ -15,8 +15,8 @@ import { BUNGIE_URL as BUNGIE_ROOT } from '../bungieUrl';
 const gzipAsync   = promisify(gzip);
 const gunzipAsync = promisify(gunzip);
 
-const CACHE_VERSION_KEY = 'd2:manifest-version-v7'; // bumped — watermark-fallback season resolution
-const CACHE_WEAPONS_KEY = 'd2:weapons-gz-v7';       // bumped — use iconWatermark to populate season when seasonHash absent
+const CACHE_VERSION_KEY = 'd2:manifest-version-v8'; // bumped — artifact-based watermark→season mapping
+const CACHE_WEAPONS_KEY = 'd2:weapons-gz-v8';       // bumped — weapons have no seasonHash; bridge via season artifact iconWatermark
 const TTL               = 60 * 60 * 24 * 7; // 7 days
 
 function getRedis(): Redis {
