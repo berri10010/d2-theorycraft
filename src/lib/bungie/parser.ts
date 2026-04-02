@@ -281,6 +281,20 @@ export function parseWeapons(
   seasonDefs: Record<string, BungieSeasonDefinition> = {}
 ): Weapon[] {
   const seasonHashToName = buildSeasonHashMap(seasonDefs);
+
+  // Many DestinyInventoryItemDefinition entries lack seasonHash entirely.
+  // iconWatermark is unique per season and present on virtually every item.
+  // First pass: scan ALL items to build a watermark → SeasonInfo map, seeded
+  // from items that do have seasonHash. This lets us resolve the season for any
+  // item that has iconWatermark even when seasonHash is absent.
+  const watermarkToSeason = new Map<string, SeasonInfo>();
+  for (const item of Object.values(items)) {
+    if (!item.iconWatermark || !item.seasonHash) continue;
+    if (watermarkToSeason.has(item.iconWatermark)) continue;
+    const info = seasonHashToName.get(item.seasonHash);
+    if (info) watermarkToSeason.set(item.iconWatermark, info);
+  }
+
   const weapons: Weapon[] = [];
 
   for (const item of Object.values(items)) {
@@ -542,8 +556,8 @@ export function parseWeapons(
       hasCraftedPattern: !!item.inventory?.recipeItemHash,
       icon: item.displayProperties.icon,
       iconWatermark: item.iconWatermark ? BUNGIE_ROOT + item.iconWatermark : null,
-      seasonName:   item.seasonHash ? (seasonHashToName.get(item.seasonHash)?.name   ?? null) : null,
-      seasonNumber: item.seasonHash ? (seasonHashToName.get(item.seasonHash)?.number ?? null) : null,
+      seasonName:   (seasonHashToName.get(item.seasonHash!)?.name   ?? watermarkToSeason.get(item.iconWatermark ?? '')?.name   ?? null),
+      seasonNumber: (seasonHashToName.get(item.seasonHash!)?.number ?? watermarkToSeason.get(item.iconWatermark ?? '')?.number ?? null),
       screenshot: item.screenshot ? BUNGIE_ROOT + item.screenshot : null,
       flavorText: item.flavorText?.trim() || null,
       rarity: item.inventory?.tierTypeName || null,
