@@ -145,6 +145,13 @@ export const WeaponHeader: React.FC = () => {
               {activeWeapon.baseName}
             </h2>
             <p className="text-slate-400 text-sm">{activeWeapon.itemTypeDisplayName}</p>
+            {(activeWeapon.seasonName || activeWeapon.seasonNumber) && (
+              <p className="text-xs text-slate-500">
+                {activeWeapon.seasonName
+                  ? activeWeapon.seasonName
+                  : `Season ${activeWeapon.seasonNumber}`}
+              </p>
+            )}
 
             {/* Variant selector + crafted toggle row */}
             <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -204,11 +211,19 @@ export const WeaponHeader: React.FC = () => {
                     }}
                     className="text-xs font-semibold px-2 py-1 rounded-lg bg-white/5 text-slate-300 border border-white/10 focus:outline-none focus:border-amber-500 transition-colors"
                   >
-                    {variantGroup.map((variant) => (
-                      <option key={variant.hash} value={variant.hash}>
-                        {variant.variantLabel ?? 'Base'}
-                      </option>
-                    ))}
+                    {variantGroup.map((variant) => {
+                      const label = variant.variantLabel ?? 'Base';
+                      const season = variant.seasonName
+                        ? variant.seasonName
+                        : variant.seasonNumber
+                        ? `Season ${variant.seasonNumber}`
+                        : null;
+                      return (
+                        <option key={variant.hash} value={variant.hash}>
+                          {season ? `${season} · ${label}` : label}
+                        </option>
+                      );
+                    })}
                   </select>
                 );
               })()}
