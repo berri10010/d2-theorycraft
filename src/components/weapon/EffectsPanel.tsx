@@ -7,8 +7,52 @@ import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE } from '../../lib/buffDatabase';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
+import { useClarityPerks } from '../../lib/useClarityPerks';
+import { ClarityEntry } from '../../lib/clarity';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 
+// ── Element / className → colour mapping ─────────────────────────────────────
+const ELEMENT_COLOURS: Record<string, string> = {
+  strand:    'text-emerald-400 bg-emerald-400/15 border-emerald-500/30',
+  void:      'text-violet-400  bg-violet-400/15  border-violet-500/30',
+  solar:     'text-orange-400  bg-orange-400/15  border-orange-500/30',
+  arc:       'text-sky-400     bg-sky-400/15     border-sky-500/30',
+  stasis:    'text-cyan-400    bg-cyan-400/15    border-cyan-500/30',
+  kinetic:   'text-slate-300   bg-slate-300/15   border-slate-400/30',
+  darkness:  'text-purple-400  bg-purple-400/15  border-purple-500/30',
+  light:     'text-yellow-300  bg-yellow-300/15  border-yellow-400/30',
+};
+
+/**
+ * Renders a Clarity description as React nodes, replacing { classNames }
+ * segments with small coloured element badges.
+ */
+function renderClarityDesc(entry: ClarityEntry): React.ReactNode {
+  const segments = entry.descriptions.en.flatMap((group, gi) =>
+    group.linesContent.map((seg, si) => ({ seg, key: `${gi}-${si}` }))
+  );
+
+  return segments.map(({ seg, key }) => {
+    if (seg.text) {
+      return <React.Fragment key={key}>{seg.text}</React.Fragment>;
+    }
+    if (seg.classNames?.length) {
+      const name    = seg.classNames[0];
+      const colours = ELEMENT_COLOURS[name] ?? 'text-slate-400 bg-slate-400/15 border-slate-500/30';
+      return (
+        <span
+          key={key}
+          className={`inline-flex items-center px-1.5 py-px rounded text-[10px] font-bold mx-0.5 border ${colours}`}
+        >
+          {name.charAt(0).toUpperCase() + name.slice(1)}
+        </span>
+      );
+    }
+    return null;
+  });
+}
+
+// ── StatDelta helper ──────────────────────────────────────────────────────────
 function StatDelta({ value }: { value: number }) {
   if (value === 0) return null;
   const positive = value > 0;
@@ -24,6 +68,7 @@ function StatDelta({ value }: { value: number }) {
   );
 }
 
+// ── Main component ────────────────────────────────────────────────────────────
 export const EffectsPanel: React.FC = () => {
   const { activeWeapon, selectedPerks, activeBuffs, clearPerk, toggleBuff } = useWeaponStore(
     useShallow((s) => ({
@@ -34,6 +79,8 @@ export const EffectsPanel: React.FC = () => {
       toggleBuff:    s.toggleBuff,
     }))
   );
+
+  const { data: clarityData  } = useClarityPerks();
   const { data: compendiumData } = useCompendiumPerks();
 
   // Memoize active perk resolution — only recomputes when selections change.
@@ -159,13 +206,27 @@ export const EffectsPanel: React.FC = () => {
                   )}
                 </div>
 
-                {/* Description — prefer Compendium precise text over Bungie manifest */}
+                {/* Description priority:
+                    1. Clarity (hash lookup — most accurate, community-maintained)
+                    2. Data Compendium (name lookup — fallback)
+                    3. Bungie manifest description (last resort) */}
                 {(() => {
+                  // ① Clarity — keyed by perk hash string
+                  const clarityEntry = clarityData?.[perkHash];
+                  if (clarityEntry) {
+                    return (
+                      <div className="mt-1">
+                        <p className="text-xs text-slate-300 leading-relaxed">
+                          {renderClarityDesc(clarityEntry)}
+                        </p>
+                        <span className="text-[10px] text-slate-600 mt-1 block">via Clarity</span>
+                      </div>
+                    );
+                  }
+
+                  // ② Data Compendium — keyed by perk name
                   const compEntry = compendiumData?.[name];
                   if (compEntry) {
-                    // Always show baseDescription — it has ↑ markers stripped so only
-                    // the base values appear.  When enhanced, show upgrade chips below
-                    // (also strip any internal ↑ from bonus strings to avoid doubling).
                     const bonuses = isEnhanced
                       ? compEntry.enhancedBonuses.map((b) => b.replace(/↑/g, '').trim()).filter(Boolean)
                       : [];
@@ -191,6 +252,8 @@ export const EffectsPanel: React.FC = () => {
                       </div>
                     );
                   }
+
+                  // ③ Bungie manifest fallback
                   return (
                     <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-3">
                       {description}
