@@ -26,19 +26,13 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   if (searchParams.get('mode') === 'probe') {
     const urls: Record<string, string> = {
-      // Clarity — try common branch/path combinations
-      clarity_master_output:     'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/output/descriptions.json',
-      clarity_main_output:       'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/main/output/descriptions.json',
-      clarity_master_data:       'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/data/descriptions.json',
-      clarity_main_data:         'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/main/data/descriptions.json',
-      clarity_master_root:       'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/descriptions.json',
-      clarity_main_root:         'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/main/descriptions.json',
-      // destiny-icons — try package.json to confirm branch/structure
-      icons_master_pkg:          'https://raw.githubusercontent.com/justrealmilk/destiny-icons/master/package.json',
-      icons_main_pkg:            'https://raw.githubusercontent.com/justrealmilk/destiny-icons/main/package.json',
-      icons_master_general_list: 'https://api.github.com/repos/justrealmilk/destiny-icons/contents/general',
-      clarity_repo_contents:     'https://api.github.com/repos/Database-Clarity/Live-Clarity-Database/contents',
-      clarity_repo_output:       'https://api.github.com/repos/Database-Clarity/Live-Clarity-Database/contents/output',
+      // Clarity — probe the descriptions subdirectory
+      clarity_descriptions_dir:  'https://api.github.com/repos/Database-Clarity/Live-Clarity-Database/contents/descriptions',
+      clarity_versions:          'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/versions.json',
+      // dim-custom-symbols — probe repo structure
+      dim_symbols_root:          'https://api.github.com/repos/DestinyItemManager/dim-custom-symbols/contents',
+      dim_symbols_master_pkg:    'https://raw.githubusercontent.com/DestinyItemManager/dim-custom-symbols/master/package.json',
+      dim_symbols_main_pkg:      'https://raw.githubusercontent.com/DestinyItemManager/dim-custom-symbols/main/package.json',
     };
 
     const results: Record<string, unknown> = {};
@@ -47,13 +41,19 @@ export async function GET(req: Request) {
         try {
           const res = await fetch(url);
           if (!res.ok) { results[key] = `HTTP ${res.status}`; return; }
-          const data = await res.json();
-          // For directory listings (GitHub API), just return file names
-          if (Array.isArray(data)) {
-            results[key] = (data as any[]).map((f: any) => f.name);
+          const contentType = res.headers.get('content-type') ?? '';
+          if (contentType.includes('json')) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+              results[key] = (data as any[]).map((f: any) => f.name ?? f);
+            } else {
+              const entries = Object.entries(data as Record<string, unknown>).slice(0, 3);
+              results[key] = Object.fromEntries(entries);
+            }
           } else {
-            const entries = Object.entries(data as Record<string, unknown>).slice(0, 2);
-            results[key] = Object.fromEntries(entries);
+            // SVG or plain text — return first 300 chars
+            const text = await res.text();
+            results[key] = text.slice(0, 300);
           }
         } catch (e) {
           results[key] = String(e);
