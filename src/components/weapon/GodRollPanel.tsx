@@ -94,30 +94,48 @@ export const GodRollPanel: React.FC = () => {
               {tierCfg.label}
             </span>
           )}
-          {entry.frame && (
+          {entry.frame && !/^\d+$/.test(entry.frame.trim()) && (
             <span className="text-xs text-slate-500">{entry.frame}</span>
           )}
         </div>
       </div>
 
       {/* Roll recommendations */}
-      <div className="space-y-3 mb-4">
-        <RollRow label="Barrel" options={entry.barrel} />
-        <RollRow label="Mag"    options={entry.mag} />
-        <RollRow label="Perk 1" options={entry.perk1} />
-        <RollRow label="Perk 2" options={entry.perk2} />
-        {entry.originTrait && entry.originTrait !== 'None' && (
-          <RollRow label="Origin" options={[entry.originTrait]} />
-        )}
-      </div>
+      {(() => {
+        // originTrait is sometimes a free-text analyst note rather than a real perk name.
+        // Treat it as a note when it reads like a sentence (longer than 40 chars).
+        const originIsNote = !!entry.originTrait &&
+          entry.originTrait !== 'None' &&
+          entry.originTrait.length > 40;
+        const originAsPerk = !originIsNote && entry.originTrait && entry.originTrait !== 'None';
 
-      {/* Analyst notes */}
-      {entry.notes && (
-        <div className="mt-4 pt-4 border-t border-white/10">
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1.5">Analyst Notes</p>
-          <p className="text-sm text-slate-300 leading-relaxed italic">{entry.notes}</p>
-        </div>
-      )}
+        // notes field is sometimes a bare number (spreadsheet artefact) — skip those.
+        const validNotes = entry.notes && !/^\d+$/.test(entry.notes.trim()) ? entry.notes : null;
+
+        // Combine origin-as-note and analyst notes into one block
+        const noteLines = [originIsNote ? entry.originTrait : null, validNotes].filter(Boolean) as string[];
+
+        return (
+          <>
+            <div className="space-y-3 mb-4">
+              <RollRow label="Barrel" options={entry.barrel} />
+              <RollRow label="Mag"    options={entry.mag} />
+              <RollRow label="Perk 1" options={entry.perk1} />
+              <RollRow label="Perk 2" options={entry.perk2} />
+              {originAsPerk && <RollRow label="Origin" options={[entry.originTrait!]} />}
+            </div>
+
+            {noteLines.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <p className="text-xs text-slate-500 uppercase tracking-wide mb-1.5">Analyst Notes</p>
+                {noteLines.map((note, i) => (
+                  <p key={i} className="text-sm text-slate-300 leading-relaxed italic">{note}</p>
+                ))}
+              </div>
+            )}
+          </>
+        );
+      })()}
 
       {/* Source attribution */}
       <p className="text-[10px] text-slate-700 mt-4 text-right">
