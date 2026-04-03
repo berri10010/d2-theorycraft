@@ -28,8 +28,8 @@ const ELEMENT_COLOURS: Record<string, string> = {
  * segments with small coloured element badges.
  */
 function renderClarityDesc(entry: ClarityEntry): React.ReactNode {
-  const segments = entry.descriptions.en.flatMap((group, gi) =>
-    group.linesContent.map((seg, si) => ({ seg, key: `${gi}-${si}` }))
+  const segments = (entry.descriptions?.en ?? []).flatMap((group, gi) =>
+    (group.linesContent ?? []).map((seg, si) => ({ seg, key: `${gi}-${si}` }))
   );
 
   return segments.map(({ seg, key }) => {
