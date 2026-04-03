@@ -1,8 +1,45 @@
 'use client';
 
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { BUNGIE_URL } from '../lib/bungieUrl';
+
+// ── Minimal weapon type for search ───────────────────────────────────────────
+
+interface WeaponResult {
+  hash: string;
+  name: string;
+  icon: string;
+  damageType: string;
+  ammoType: number;
+  rarity: string | null;
+  itemTypeDisplayName: string;
+  seasonName: string | null;
+}
+
+// ── Colour helpers ────────────────────────────────────────────────────────────
+
+const DAMAGE_COLORS: Record<string, string> = {
+  kinetic: 'text-slate-300',
+  solar:   'text-orange-400',
+  arc:     'text-blue-400',
+  void:    'text-purple-400',
+  stasis:  'text-cyan-400',
+  strand:  'text-emerald-400',
+};
+
+const AMMO_LABELS: Record<number, string> = { 1: 'Primary', 2: 'Special', 3: 'Heavy' };
+const AMMO_COLORS: Record<number, string> = {
+  1: 'text-green-400',
+  2: 'text-purple-400',
+  3: 'text-yellow-400',
+};
+
+const RARITY_COLORS: Record<string, string> = {
+  Exotic:    'text-yellow-400',
+  Legendary: 'text-purple-400',
+};
 
 // ── Feature cards ─────────────────────────────────────────────────────────────
 
@@ -10,20 +47,11 @@ const FEATURES = [
   {
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-      </svg>
-    ),
-    title: '1,180+ Weapons',
-    desc: 'Every weapon in Destiny 2, pulled live from Bungie\'s API and updated automatically whenever the manifest changes.',
-  },
-  {
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
       </svg>
     ),
     title: 'TTK Math',
-    desc: 'Precise time-to-kill calculations for PvE and PvP. Stack damage buffs, tune resilience, and find the fastest kill pattern.',
+    desc: 'Precise time-to-kill for PvE and PvP. Stack damage buffs, tune resilience, and find the fastest kill pattern.',
   },
   {
     icon: (
@@ -32,7 +60,17 @@ const FEATURES = [
       </svg>
     ),
     title: 'God Rolls',
-    desc: 'S/A/B/C tier perk ratings and community roll recommendations, so you always know what to chase.',
+    desc: 'S/A/B/C tier perk ratings and community roll recommendations via TheAegisRelic.',
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-6 h-6">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+    title: 'Roll Editor',
+    desc: 'Select perks, masterwork, and mods. See live stat changes and enhanced perk upgrades instantly.',
   },
   {
     icon: (
@@ -50,14 +88,153 @@ const FEATURES = [
 function ShareLinkRedirector() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   useEffect(() => {
     if (searchParams.get('w')) {
       router.replace(`/editor?${searchParams.toString()}`);
     }
   }, [searchParams, router]);
-
   return null;
+}
+
+// ── Weapon search component ───────────────────────────────────────────────────
+
+function WeaponSearch() {
+  const router = useRouter();
+  const [query, setQuery]         = useState('');
+  const [weapons, setWeapons]     = useState<WeaponResult[]>([]);
+  const [loaded, setLoaded]       = useState(false);
+  const [open, setOpen]           = useState(false);
+  const [focused, setFocused]     = useState(-1);
+  const inputRef                  = useRef<HTMLInputElement>(null);
+  const listRef                   = useRef<HTMLUListElement>(null);
+
+  // Fetch weapons once on mount
+  useEffect(() => {
+    fetch('/api/weapons')
+      .then(r => r.json())
+      .then((data: WeaponResult[]) => { setWeapons(data); setLoaded(true); })
+      .catch(() => setLoaded(true));
+  }, []);
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q || !loaded) return [];
+    return weapons.filter(w => w.name.toLowerCase().includes(q)).slice(0, 8);
+  }, [query, weapons, loaded]);
+
+  useEffect(() => {
+    setOpen(results.length > 0);
+    setFocused(-1);
+  }, [results]);
+
+  const go = (w: WeaponResult) => {
+    router.push(`/editor?w=${w.hash}`);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocused(f => Math.min(f + 1, results.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocused(f => Math.max(f - 1, 0));
+    } else if (e.key === 'Enter' && focused >= 0) {
+      e.preventDefault();
+      go(results[focused]);
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+    }
+  };
+
+  return (
+    <div className="relative w-full max-w-xl mx-auto">
+      {/* Search input */}
+      <div className="relative">
+        <svg
+          viewBox="0 0 20 20" fill="currentColor"
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none"
+        >
+          <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+        </svg>
+        <input
+          ref={inputRef}
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => results.length > 0 && setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          placeholder={loaded ? 'Search 1,180+ weapons…' : 'Loading weapons…'}
+          disabled={!loaded}
+          className="w-full bg-white/8 border border-white/15 rounded-xl pl-12 pr-4 py-4 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/60 focus:bg-white/10 transition-all disabled:opacity-40"
+          autoComplete="off"
+        />
+        {!loaded && (
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-slate-600 border-t-amber-500 rounded-full animate-spin" />
+        )}
+      </div>
+
+      {/* Results dropdown */}
+      {open && (
+        <ul
+          ref={listRef}
+          className="absolute z-50 left-0 right-0 top-full mt-2 bg-[#0d0d0d] border border-white/10 rounded-xl overflow-hidden shadow-2xl"
+        >
+          {results.map((w, i) => (
+            <li key={w.hash}>
+              <button
+                onMouseDown={() => go(w)}
+                onMouseEnter={() => setFocused(i)}
+                className={[
+                  'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors',
+                  focused === i ? 'bg-white/8' : 'hover:bg-white/5',
+                ].join(' ')}
+              >
+                {/* Icon */}
+                <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/5 shrink-0 border border-white/10">
+                  <img
+                    src={BUNGIE_URL + w.icon}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Name + meta */}
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-semibold truncate ${w.rarity === 'Exotic' ? 'text-yellow-400' : w.rarity === 'Legendary' ? 'text-slate-100' : 'text-slate-200'}`}>
+                    {w.name}
+                  </p>
+                  <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+                    <span className={DAMAGE_COLORS[w.damageType] ?? 'text-slate-400'}>
+                      {w.damageType.charAt(0).toUpperCase() + w.damageType.slice(1)}
+                    </span>
+                    <span className="text-slate-700">·</span>
+                    <span className={AMMO_COLORS[w.ammoType] ?? 'text-slate-400'}>
+                      {AMMO_LABELS[w.ammoType] ?? ''}
+                    </span>
+                    <span className="text-slate-700">·</span>
+                    <span>{w.itemTypeDisplayName}</span>
+                    {w.seasonName && (
+                      <>
+                        <span className="text-slate-700">·</span>
+                        <span>{w.seasonName}</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+
+                {/* Arrow */}
+                <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-slate-600 shrink-0">
+                  <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
 // ── Landing page ──────────────────────────────────────────────────────────────
@@ -71,73 +248,58 @@ export default function HomePage() {
         <ShareLinkRedirector />
       </Suspense>
 
-      {/* ── Ambient glow ──────────────────────────────── */}
+      {/* Ambient glow */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 z-0"
         style={{
           background:
-            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245,158,11,0.12) 0%, transparent 70%)',
+            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245,158,11,0.10) 0%, transparent 70%)',
         }}
       />
 
-      {/* ── Nav ───────────────────────────────────────── */}
+      {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/5">
-        <span className="font-bold text-base tracking-tight text-white">
-          D2 Theorycraft
-        </span>
+        <span className="font-bold text-base tracking-tight text-white">D2 Theorycraft</span>
         <Link
           href="/editor"
-          className="text-sm font-semibold px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors"
+          className="text-sm font-semibold px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-colors"
         >
-          Launch App →
+          Open Editor
         </Link>
       </nav>
 
-      {/* ── Hero ──────────────────────────────────────── */}
-      <section className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pt-24 pb-16">
+      {/* Hero + search */}
+      <section className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 flex-1">
 
-        {/* Eyebrow */}
-        <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-500 mb-6 px-3 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-          Destiny 2 Weapon Theory
-        </span>
-
-        {/* Title */}
-        <h1 className="text-5xl md:text-7xl font-black tracking-tight text-white leading-none mb-6">
-          Build the{' '}
-          <span className="text-amber-400">perfect</span>
-          <br />
-          weapon roll.
+        <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-none mb-4">
+          Build the <span className="text-amber-400">perfect</span><br />weapon roll.
         </h1>
 
-        {/* Subtitle */}
-        <p className="text-lg md:text-xl text-slate-400 max-w-xl leading-relaxed mb-10">
-          Browse every weapon, calculate time-to-kill, stack buffs,
-          and share your rolls — all backed by live Bungie API data.
+        <p className="text-base md:text-lg text-slate-500 max-w-md mb-10">
+          Search for any weapon to get started.
         </p>
 
-        {/* CTA */}
-        <Link
-          href="/editor"
-          className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-lg px-8 py-4 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_40px_rgba(245,158,11,0.25)]"
-        >
-          Launch App
-          <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-            <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clipRule="evenodd" />
-          </svg>
-        </Link>
+        {/* Weapon search */}
+        <Suspense fallback={null}>
+          <WeaponSearch />
+        </Suspense>
 
-        <p className="text-xs text-slate-600 mt-4">Free to use · No login required</p>
+        <p className="text-xs text-slate-700 mt-5">
+          Or{' '}
+          <Link href="/editor" className="text-slate-500 hover:text-amber-400 transition-colors underline underline-offset-2">
+            browse all weapons in the editor →
+          </Link>
+        </p>
       </section>
 
-      {/* ── Feature cards ─────────────────────────────── */}
-      <section className="relative z-10 px-6 pb-24">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Feature cards */}
+      <section className="relative z-10 px-6 pb-20">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {FEATURES.map((f) => (
             <div
               key={f.title}
-              className="bg-white/5 border border-white/10 rounded-xl p-5 backdrop-blur-sm hover:bg-white/8 hover:border-white/15 transition-colors"
+              className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/8 hover:border-white/15 transition-colors"
             >
               <div className="w-10 h-10 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4">
                 {f.icon}
@@ -147,19 +309,9 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-
-        {/* Second CTA below cards */}
-        <div className="flex justify-center mt-12">
-          <Link
-            href="/editor"
-            className="inline-flex items-center gap-2 text-sm font-bold px-6 py-3 rounded-xl border border-amber-500/40 text-amber-400 hover:bg-amber-500/10 transition-colors"
-          >
-            Open the weapon editor →
-          </Link>
-        </div>
       </section>
 
-      {/* ── Footer ────────────────────────────────────── */}
+      {/* Footer */}
       <footer className="relative z-10 border-t border-white/5 px-6 py-6 text-center space-y-1">
         <p className="text-xs text-slate-600">
           Weapon data via{' '}
@@ -171,9 +323,7 @@ export default function HomePage() {
             TheAegisRelic
           </a>
         </p>
-        <p className="text-xs text-slate-700">
-          Not affiliated with or endorsed by Bungie, Inc.
-        </p>
+        <p className="text-xs text-slate-700">Not affiliated with or endorsed by Bungie, Inc.</p>
       </footer>
 
     </div>
