@@ -10,13 +10,65 @@ import { BUNGIE_URL } from '../lib/bungieUrl';
 interface WeaponResult {
   hash: string;
   name: string;
+  baseName: string;
+  variantLabel: string | null;
   icon: string;
   damageType: string;
   ammoType: number;
   rarity: string | null;
   itemTypeDisplayName: string;
   seasonName: string | null;
+  seasonNumber: number | null;
 }
+
+interface WeaponGroupResult {
+  baseName: string;
+  /** Best variant first (base > Adept > Timelost > Harrowed) */
+  default: WeaponResult;
+  variants: WeaponResult[];
+}
+
+// ── Variant priority (lower = shown first) ────────────────────────────────────
+const VARIANT_PRIORITY = ['Adept', 'Timelost', 'Harrowed', 'Brave'];
+function variantPriority(v: WeaponResult): number {
+  if (!v.variantLabel) return -1;
+  const idx = VARIANT_PRIORITY.indexOf(v.variantLabel);
+  return idx === -1 ? VARIANT_PRIORITY.length : idx;
+}
+
+// ── Group flat weapon list into families ──────────────────────────────────────
+function groupWeapons(weapons: WeaponResult[]): WeaponGroupResult[] {
+  const map = new Map<string, WeaponResult[]>();
+  for (const w of weapons) {
+    const bucket = map.get(w.baseName);
+    if (bucket) bucket.push(w);
+    else map.set(w.baseName, [w]);
+  }
+  const groups: WeaponGroupResult[] = [];
+  map.forEach((variants, baseName) => {
+    variants.sort((a, b) => variantPriority(a) - variantPriority(b));
+    groups.push({ baseName, default: variants[0], variants });
+  });
+  return groups;
+}
+
+// ── Ranked search over groups ─────────────────────────────────────────────────
+// 0 = name starts with query (best), 1 = any word starts with, 2 = substring
+function rankGroup(g: WeaponGroupResult, q: string): number {
+  const name = g.baseName.toLowerCase();
+  if (name.startsWith(q)) return 0;
+  if (name.split(/\s+/).some(word => word.startsWith(q))) return 1;
+  if (name.includes(q)) return 2;
+  return 999;
+}
+
+// ── Variant pill colours ──────────────────────────────────────────────────────
+const VARIANT_COLOURS: Record<string, string> = {
+  Adept:     'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/35',
+  Timelost:  'bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/35',
+  Harrowed:  'bg-rose-500/20 text-rose-300 border-rose-500/30 hover:bg-rose-500/35',
+  Brave:     'bg-sky-500/20 text-sky-300 border-sky-500/30 hover:bg-sky-500/35',
+};
 
 // ── Colour helpers ────────────────────────────────────────────────────────────
 
@@ -101,35 +153,41 @@ function ShareLinkRedirector() {
 function WeaponSearch() {
   const router = useRouter();
   const [query, setQuery]         = useState('');
-  const [weapons, setWeapons]     = useState<WeaponResult[]>([]);
+  const [groups, setGroups]       = useState<WeaponGroupResult[]>([]);
   const [loaded, setLoaded]       = useState(false);
   const [open, setOpen]           = useState(false);
   const [focused, setFocused]     = useState(-1);
   const inputRef                  = useRef<HTMLInputElement>(null);
   const listRef                   = useRef<HTMLUListElement>(null);
 
-  // Fetch weapons once on mount
+  // Fetch weapons once on mount, then group them
   useEffect(() => {
     fetch('/api/weapons')
       .then(r => r.json())
-      .then((data: { weapons?: WeaponResult[] }) => { setWeapons(data.weapons ?? []); setLoaded(true); })
+      .then((data: { weapons?: WeaponResult[] }) => {
+        setGroups(groupWeapons(data.weapons ?? []));
+        setLoaded(true);
+      })
       .catch(() => setLoaded(true));
   }, []);
 
+  // Ranked search: starts-with > word-starts-with > contains
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q || !loaded) return [];
-    return weapons.filter(w => w.name.toLowerCase().includes(q)).slice(0, 6);
-  }, [query, weapons, loaded]);
+    const scored = groups
+      .map(g => ({ g, rank: rankGroup(g, q) }))
+      .filter(({ rank }) => rank < 999);
+    scored.sort((a, b) => a.rank - b.rank || a.g.baseName.localeCompare(b.g.baseName));
+    return scored.slice(0, 8).map(({ g }) => g);
+  }, [query, groups, loaded]);
 
   useEffect(() => {
     setOpen(results.length > 0);
     setFocused(-1);
   }, [results]);
 
-  const go = (w: WeaponResult) => {
-    router.push(`/editor?w=${w.hash}`);
-  };
+  const go = (hash: string) => router.push(`/editor?w=${hash}`);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!open) return;
@@ -141,7 +199,7 @@ function WeaponSearch() {
       setFocused(f => Math.max(f - 1, 0));
     } else if (e.key === 'Enter' && focused >= 0) {
       e.preventDefault();
-      go(results[focused]);
+      go(results[focused].default.hash);
     } else if (e.key === 'Escape') {
       setOpen(false);
     }
@@ -165,7 +223,7 @@ function WeaponSearch() {
           onKeyDown={handleKeyDown}
           onFocus={() => results.length > 0 && setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder={loaded ? 'Search 1,180+ weapons…' : 'Loading weapons…'}
+          placeholder={loaded ? `Search ${groups.length}+ weapons…` : 'Loading weapons…'}
           disabled={!loaded}
           className="w-full bg-white/8 border border-white/15 rounded-xl pl-12 pr-4 py-4 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/60 focus:bg-white/10 transition-all disabled:opacity-40"
           autoComplete="off"
@@ -179,58 +237,76 @@ function WeaponSearch() {
       {open && (
         <ul
           ref={listRef}
-          className="absolute z-[100] left-0 right-0 top-full mt-2 bg-[#0d0d0d] border border-white/10 rounded-xl overflow-y-auto shadow-2xl max-h-[360px]"
+          className="absolute z-[100] left-0 right-0 top-full mt-2 bg-[#0d0d0d] border border-white/10 rounded-xl overflow-y-auto shadow-2xl max-h-[420px]"
         >
-          {results.map((w, i) => (
-            <li key={w.hash}>
-              <button
-                onMouseDown={() => go(w)}
-                onMouseEnter={() => setFocused(i)}
-                className={[
-                  'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors',
-                  focused === i ? 'bg-white/8' : 'hover:bg-white/5',
-                ].join(' ')}
-              >
-                {/* Icon */}
-                <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/5 shrink-0 border border-white/10">
-                  <img
-                    src={BUNGIE_URL + w.icon}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+          {results.map((group, i) => {
+            const w = group.default;
+            // Non-default variants (Adept, Timelost, etc.)
+            const altVariants = group.variants.filter(v => v.variantLabel);
 
-                {/* Name + meta */}
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-semibold truncate ${w.rarity === 'Exotic' ? 'text-yellow-400' : w.rarity === 'Legendary' ? 'text-slate-100' : 'text-slate-200'}`}>
-                    {w.name}
-                  </p>
-                  <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                    <span className={DAMAGE_COLORS[w.damageType] ?? 'text-slate-400'}>
-                      {w.damageType.charAt(0).toUpperCase() + w.damageType.slice(1)}
-                    </span>
-                    <span className="text-slate-700">·</span>
-                    <span className={AMMO_COLORS[w.ammoType] ?? 'text-slate-400'}>
-                      {AMMO_LABELS[w.ammoType] ?? ''}
-                    </span>
-                    <span className="text-slate-700">·</span>
-                    <span>{w.itemTypeDisplayName}</span>
-                    {w.seasonName && (
-                      <>
-                        <span className="text-slate-700">·</span>
-                        <span>{w.seasonName}</span>
-                      </>
-                    )}
-                  </p>
-                </div>
+            return (
+              <li key={group.baseName}>
+                <button
+                  onMouseDown={() => go(w.hash)}
+                  onMouseEnter={() => setFocused(i)}
+                  className={[
+                    'w-full flex items-center gap-3 px-4 py-3 text-left transition-colors',
+                    focused === i ? 'bg-white/8' : 'hover:bg-white/5',
+                  ].join(' ')}
+                >
+                  {/* Icon */}
+                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/5 shrink-0 border border-white/10">
+                    <img
+                      src={BUNGIE_URL + w.icon}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
 
-                {/* Arrow */}
-                <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-slate-600 shrink-0">
-                  <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </li>
-          ))}
+                  {/* Name + meta */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className={`text-sm font-semibold truncate ${w.rarity === 'Exotic' ? 'text-yellow-400' : 'text-slate-100'}`}>
+                        {group.baseName}
+                      </p>
+                      {/* Variant pills */}
+                      {altVariants.map(v => (
+                        <button
+                          key={v.hash}
+                          onMouseDown={e => { e.stopPropagation(); go(v.hash); }}
+                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded border transition-colors ${VARIANT_COLOURS[v.variantLabel!] ?? 'bg-white/10 text-slate-400 border-white/20 hover:bg-white/20'}`}
+                        >
+                          {v.variantLabel}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+                      <span className={DAMAGE_COLORS[w.damageType] ?? 'text-slate-400'}>
+                        {w.damageType.charAt(0).toUpperCase() + w.damageType.slice(1)}
+                      </span>
+                      <span className="text-slate-700">·</span>
+                      <span className={AMMO_COLORS[w.ammoType] ?? 'text-slate-400'}>
+                        {AMMO_LABELS[w.ammoType] ?? ''}
+                      </span>
+                      <span className="text-slate-700">·</span>
+                      <span>{w.itemTypeDisplayName}</span>
+                      {w.seasonName && (
+                        <>
+                          <span className="text-slate-700">·</span>
+                          <span>{w.seasonName}</span>
+                        </>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Arrow */}
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-slate-600 shrink-0">
+                    <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
