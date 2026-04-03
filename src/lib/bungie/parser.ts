@@ -233,29 +233,16 @@ function shortenSeasonName(name: string): string {
 
 interface SeasonInfo { name: string; number: number; }
 
-/**
- * Build a map from iconWatermark path → { name, number }.
- *
- * Weapons in the Bungie manifest never have seasonHash set, but every item
- * (including weapons) carries an iconWatermark that is unique per season.
- * Each DestinySeasonDefinition has an artifactItemHash pointing to the season
- * artifact item. That artifact shares the same iconWatermark as all other items
- * from that season, giving us the bridge we need.
- */
-function buildWatermarkSeasonMap(
+/** Build a map from season number → season name from DestinySeasonDefinition. */
+function buildSeasonNumberToName(
   seasonDefs: Record<string, BungieSeasonDefinition>,
-  items: Record<string, BungieInventoryItem>,
-): Map<string, SeasonInfo> {
-  const map = new Map<string, SeasonInfo>();
+): Map<number, string> {
+  const map = new Map<number, string>();
   for (const season of Object.values(seasonDefs)) {
     const name = season.displayProperties?.name?.trim();
-    if (!name || !season.artifactItemHash) continue;
-    const artifact = items[season.artifactItemHash.toString()];
-    if (!artifact?.iconWatermark) continue;
-    map.set(artifact.iconWatermark, {
-      name: shortenSeasonName(name),
-      number: season.seasonNumber ?? 0,
-    });
+    if (name && season.seasonNumber) {
+      map.set(season.seasonNumber, shortenSeasonName(name));
+    }
   }
   return map;
 }
@@ -284,13 +271,13 @@ export function parseWeapons(
   items: Record<string, BungieInventoryItem>,
   socketCategoryDefs: Record<string, BungieSocketCategoryDefinition>,
   plugSetDefs: Record<string, BungiePlugSetDefinition>,
-  seasonDefs: Record<string, BungieSeasonDefinition> = {}
+  seasonDefs: Record<string, BungieSeasonDefinition> = {},
+  // Community-maintained map from DIM: iconWatermark path → season number.
+  // Bungie does not populate seasonHash on weapons, so this is the only
+  // reliable source covering all seasons, raids, dungeons, and events.
+  dimWatermarkToSeason: Record<string, number> = {},
 ): Weapon[] {
-  // Weapons never have seasonHash in the Bungie manifest.
-  // Instead we map iconWatermark → season using each season's artifact item
-  // (DestinySeasonDefinition.artifactItemHash). The artifact shares the same
-  // iconWatermark as all items from that season, bridging the two tables.
-  const watermarkToSeason = buildWatermarkSeasonMap(seasonDefs, items);
+  const seasonNumberToName = buildSeasonNumberToName(seasonDefs);
 
   const weapons: Weapon[] = [];
 
@@ -553,8 +540,8 @@ export function parseWeapons(
       hasCraftedPattern: !!item.inventory?.recipeItemHash,
       icon: item.displayProperties.icon,
       iconWatermark: item.iconWatermark ? BUNGIE_ROOT + item.iconWatermark : null,
-      seasonName:   watermarkToSeason.get(item.iconWatermark ?? '')?.name   ?? null,
-      seasonNumber: watermarkToSeason.get(item.iconWatermark ?? '')?.number ?? null,
+      seasonNumber: item.iconWatermark ? (dimWatermarkToSeason[item.iconWatermark] ?? null) : null,
+      seasonName:   item.iconWatermark ? (seasonNumberToName.get(dimWatermarkToSeason[item.iconWatermark]) ?? null) : null,
       screenshot: item.screenshot ? BUNGIE_ROOT + item.screenshot : null,
       flavorText: item.flavorText?.trim() || null,
       rarity: item.inventory?.tierTypeName || null,

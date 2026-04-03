@@ -15,8 +15,8 @@ import { BUNGIE_URL as BUNGIE_ROOT } from '../bungieUrl';
 const gzipAsync   = promisify(gzip);
 const gunzipAsync = promisify(gunzip);
 
-const CACHE_VERSION_KEY = 'd2:manifest-version-v8'; // bumped — artifact-based watermark→season mapping
-const CACHE_WEAPONS_KEY = 'd2:weapons-gz-v8';       // bumped — weapons have no seasonHash; bridge via season artifact iconWatermark
+const CACHE_VERSION_KEY = 'd2:manifest-version-v9'; // bumped — DIM watermark-to-season community map
+const CACHE_WEAPONS_KEY = 'd2:weapons-gz-v9';       // bumped — use d2-additional-info watermark→seasonNumber for reliable season data
 const TTL               = 60 * 60 * 24 * 7; // 7 days
 
 function getRedis(): Redis {
@@ -86,15 +86,20 @@ export async function syncManifest(): Promise<SyncResult> {
 
   console.log('Syncing Bungie manifest v' + currentVersion + '...');
 
-  const [items, socketCategoryDefs, plugSetDefs, seasonDefs] = await Promise.all([
+  const [items, socketCategoryDefs, plugSetDefs, seasonDefs, dimWatermarkMap] = await Promise.all([
     fetchTable(paths.DestinyInventoryItemDefinition) as Promise<Record<string, BungieInventoryItem>>,
     fetchTable(paths.DestinySocketCategoryDefinition) as Promise<Record<string, BungieSocketCategoryDefinition>>,
     fetchTable(paths.DestinyPlugSetDefinition) as Promise<Record<string, BungiePlugSetDefinition>>,
     fetchTable(paths.DestinySeasonDefinition) as Promise<Record<string, BungieSeasonDefinition>>,
+    // Community-maintained map of iconWatermark path → season number.
+    // Bungie never sets seasonHash on weapons, so this is the only reliable source.
+    fetch('https://raw.githubusercontent.com/DestinyItemManager/d2-additional-info/master/output/watermark-to-season.json')
+      .then(r => r.json() as Promise<Record<string, number>>)
+      .catch(() => ({} as Record<string, number>)),
   ]);
 
   console.log('  Parsing weapons...');
-  const weapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs);
+  const weapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs, dimWatermarkMap);
 
   console.log('  Compressing...');
   const encoded = await compress(weapons);
