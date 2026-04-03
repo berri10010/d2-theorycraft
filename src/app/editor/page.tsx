@@ -2,28 +2,28 @@
 
 import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useWeaponStore, MASTERWORK_STATS } from '../store/useWeaponStore';
-import { useCompareStore } from '../store/useCompareStore';
-import { useWeaponDb } from '../store/useWeaponDb';
-import { SearchSidebar } from '../components/layout/SearchSidebar';
-import { WeaponHeader } from '../components/weapon/WeaponHeader';
-import { RollEditor } from '../components/weapon/RollEditor';
-import { EffectsPanel } from '../components/weapon/EffectsPanel';
-import { StatDisplay } from '../components/weapon/StatDisplay';
-import { BuffToggle } from '../components/ui/BuffToggle';
-import { TTKPanel } from '../components/ui/TTKPanel';
-import { ComparisonGrid } from '../components/compare/ComparisonGrid';
-import { groupWeapons } from '../lib/weaponGroups';
-import { GodRollPanel } from '../components/weapon/GodRollPanel';
-import { AmmoPanel } from '../components/weapon/AmmoPanel';
-import { MasterworkPanel } from '../components/weapon/MasterworkPanel';
-import { DamageFalloffGraph } from '../components/weapon/DamageFalloffGraph';
-import { WishlistPanel } from '../components/weapon/WishlistPanel';
-import { ArmorModPanel } from '../components/weapon/ArmorModPanel';
-import { SubclassVerbPanel } from '../components/weapon/SubclassVerbPanel';
-import { SimilarWeaponsPanel } from '../components/weapon/SimilarWeaponsPanel';
-import { calculateTTK, PVE_HEALTH_TIERS } from '../lib/damageMath';
-import { MasterworkStat } from '../store/useWeaponStore';
+import { useWeaponStore, MASTERWORK_STATS } from '../../store/useWeaponStore';
+import { useCompareStore } from '../../store/useCompareStore';
+import { useWeaponDb } from '../../store/useWeaponDb';
+import { SearchSidebar } from '../../components/layout/SearchSidebar';
+import { WeaponHeader } from '../../components/weapon/WeaponHeader';
+import { RollEditor } from '../../components/weapon/RollEditor';
+import { EffectsPanel } from '../../components/weapon/EffectsPanel';
+import { StatDisplay } from '../../components/weapon/StatDisplay';
+import { BuffToggle } from '../../components/ui/BuffToggle';
+import { TTKPanel } from '../../components/ui/TTKPanel';
+import { ComparisonGrid } from '../../components/compare/ComparisonGrid';
+import { groupWeapons } from '../../lib/weaponGroups';
+import { GodRollPanel } from '../../components/weapon/GodRollPanel';
+import { AmmoPanel } from '../../components/weapon/AmmoPanel';
+import { MasterworkPanel } from '../../components/weapon/MasterworkPanel';
+import { DamageFalloffGraph } from '../../components/weapon/DamageFalloffGraph';
+import { WishlistPanel } from '../../components/weapon/WishlistPanel';
+import { ArmorModPanel } from '../../components/weapon/ArmorModPanel';
+import { SubclassVerbPanel } from '../../components/weapon/SubclassVerbPanel';
+import { SimilarWeaponsPanel } from '../../components/weapon/SimilarWeaponsPanel';
+import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
+import { MasterworkStat } from '../../store/useWeaponStore';
 
 function MenuIcon({ open }: { open: boolean }) {
   return (
