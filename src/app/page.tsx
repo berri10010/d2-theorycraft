@@ -119,7 +119,7 @@ function WeaponSearch() {
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q || !loaded) return [];
-    return weapons.filter(w => w.name.toLowerCase().includes(q)).slice(0, 8);
+    return weapons.filter(w => w.name.toLowerCase().includes(q)).slice(0, 6);
   }, [query, weapons, loaded]);
 
   useEffect(() => {
@@ -179,7 +179,7 @@ function WeaponSearch() {
       {open && (
         <ul
           ref={listRef}
-          className="absolute z-50 left-0 right-0 top-full mt-2 bg-[#0d0d0d] border border-white/10 rounded-xl overflow-hidden shadow-2xl"
+          className="absolute z-[100] left-0 right-0 top-full mt-2 bg-[#0d0d0d] border border-white/10 rounded-xl overflow-y-auto shadow-2xl max-h-[360px]"
         >
           {results.map((w, i) => (
             <li key={w.hash}>
@@ -270,7 +270,7 @@ export default function HomePage() {
       </nav>
 
       {/* Hero + search */}
-      <section className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 flex-1">
+      <section className="relative z-20 flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 flex-1">
 
         <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-none mb-4">
           Build the <span className="text-amber-400">perfect</span><br />weapon roll.
