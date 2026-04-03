@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
@@ -56,6 +56,10 @@ export const WeaponHeader: React.FC = () => {
     }))
   );
   const [imgError, setImgError] = useState(false);
+
+  // Reset image error state whenever the weapon changes, so a broken screenshot
+  // on one weapon doesn't permanently hide the banner for all subsequent weapons.
+  useEffect(() => { setImgError(false); }, [activeWeapon?.hash]);
 
   // Memoize derived values so they don't recompute on every unrelated store change.
   const isLegacy = useMemo(() => {

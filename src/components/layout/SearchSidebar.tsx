@@ -26,7 +26,7 @@ const RARITY_OPTIONS = ['Exotic', 'Legendary', 'Rare', 'Uncommon', 'Common'];
 type SortMode = 'alpha' | 'season';
 type SortDir  = 'asc'   | 'desc';
 // Natural default direction per sort mode
-const DEFAULT_DIR: Record<SortMode, SortDir> = { alpha: 'asc', season: 'desc' };
+const DEFAULT_DIR: Record<SortMode, SortDir> = { alpha: 'asc', season: 'asc' };
 
 // ─── Filter state ─────────────────────────────────────────────────────────────
 

@@ -98,8 +98,24 @@ export async function syncManifest(): Promise<SyncResult> {
       .catch(() => ({} as Record<string, number>)),
   ]);
 
+  // Build an artifact watermark → season number map directly from Bungie's season definitions.
+  // Every season has a unique artifact whose iconWatermark matches that season's weapons.
+  // This covers new episodes/seasons that the DIM community map hasn't been updated for yet.
+  const artifactWatermarkMap: Record<string, number> = {};
+  for (const season of Object.values(seasonDefs)) {
+    if (!season.artifactItemHash || !season.seasonNumber) continue;
+    const artifact = items[season.artifactItemHash.toString()];
+    if (artifact?.iconWatermark) {
+      artifactWatermarkMap[artifact.iconWatermark] = season.seasonNumber;
+    }
+  }
+  // Merge: artifact map fills gaps for new seasons; DIM map overwrites with
+  // community-verified entries where it has them (DIM takes priority).
+  const combinedWatermarkMap: Record<string, number> = { ...artifactWatermarkMap, ...dimWatermarkMap };
+  console.log(`  Watermark map: ${Object.keys(dimWatermarkMap).length} DIM + ${Object.keys(artifactWatermarkMap).length} artifact entries.`);
+
   console.log('  Parsing weapons...');
-  const weapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs, dimWatermarkMap);
+  const weapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs, combinedWatermarkMap);
 
   console.log('  Compressing...');
   const encoded = await compress(weapons);
