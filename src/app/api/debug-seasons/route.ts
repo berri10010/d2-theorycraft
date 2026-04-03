@@ -25,13 +25,42 @@ async function fetchTable(path: string) {
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   if (searchParams.get('mode') === 'probe') {
-    // Probe Clarity and destiny-icons to understand their data structures
-    const [clarityMain, clarityDescriptions, dimIcons] = await Promise.all([
-      probeJson('https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/output/descriptions.json'),
-      probeJson('https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/output/enhanced-descriptions.json'),
-      probeJson('https://raw.githubusercontent.com/justrealmilk/destiny-icons/master/package.json'),
-    ]);
-    return NextResponse.json({ clarityMain, clarityDescriptions, dimIcons });
+    const urls: Record<string, string> = {
+      // Clarity — try common branch/path combinations
+      clarity_master_output:     'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/output/descriptions.json',
+      clarity_main_output:       'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/main/output/descriptions.json',
+      clarity_master_data:       'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/data/descriptions.json',
+      clarity_main_data:         'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/main/data/descriptions.json',
+      clarity_master_root:       'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/descriptions.json',
+      clarity_main_root:         'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/main/descriptions.json',
+      // destiny-icons — try package.json to confirm branch/structure
+      icons_master_pkg:          'https://raw.githubusercontent.com/justrealmilk/destiny-icons/master/package.json',
+      icons_main_pkg:            'https://raw.githubusercontent.com/justrealmilk/destiny-icons/main/package.json',
+      icons_master_general_list: 'https://api.github.com/repos/justrealmilk/destiny-icons/contents/general',
+      clarity_repo_contents:     'https://api.github.com/repos/Database-Clarity/Live-Clarity-Database/contents',
+      clarity_repo_output:       'https://api.github.com/repos/Database-Clarity/Live-Clarity-Database/contents/output',
+    };
+
+    const results: Record<string, unknown> = {};
+    await Promise.all(
+      Object.entries(urls).map(async ([key, url]) => {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) { results[key] = `HTTP ${res.status}`; return; }
+          const data = await res.json();
+          // For directory listings (GitHub API), just return file names
+          if (Array.isArray(data)) {
+            results[key] = (data as any[]).map((f: any) => f.name);
+          } else {
+            const entries = Object.entries(data as Record<string, unknown>).slice(0, 2);
+            results[key] = Object.fromEntries(entries);
+          }
+        } catch (e) {
+          results[key] = String(e);
+        }
+      })
+    );
+    return NextResponse.json(results);
   }
 
   try {
