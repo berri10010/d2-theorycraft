@@ -13,12 +13,9 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   if (searchParams.get('mode') === 'probe') {
     const urls: Record<string, string> = {
-      // Clarity — fetch a few entries from clarity.json to see the perk data structure
-      clarity_json_sample:       'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/descriptions/clarity.json',
-      // dim-custom-symbols — see what's in output/ and data/
-      dim_output_dir:            'https://api.github.com/repos/DestinyItemManager/dim-custom-symbols/contents/output',
-      dim_data_dir:              'https://api.github.com/repos/DestinyItemManager/dim-custom-symbols/contents/data',
-      dim_svg_dir:               'https://api.github.com/repos/DestinyItemManager/dim-custom-symbols/contents/svg',
+      clarity_full_entry: 'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/descriptions/clarity.json',
+      dim_glyphs_output:  'https://raw.githubusercontent.com/DestinyItemManager/dim-custom-symbols/master/output/d2-font-glyphs.ts',
+      dim_glyphs_data:    'https://raw.githubusercontent.com/DestinyItemManager/dim-custom-symbols/master/data/d2-font-glyphs.ts',
     };
 
     const results: Record<string, unknown> = {};
@@ -30,16 +27,13 @@ export async function GET(req: Request) {
           const contentType = res.headers.get('content-type') ?? '';
           if (contentType.includes('json')) {
             const data = await res.json();
-            if (Array.isArray(data)) {
-              results[key] = (data as any[]).map((f: any) => f.name ?? f);
-            } else {
-              const entries = Object.entries(data as Record<string, unknown>).slice(0, 3);
-              results[key] = Object.fromEntries(entries);
-            }
+            // Return full first entry so we can see complete structure
+            const firstEntry = Object.values(data as Record<string, unknown>)[0];
+            results[key] = { _firstEntry: firstEntry, _totalKeys: Object.keys(data).length };
           } else {
-            // SVG or plain text — return first 300 chars
+            // TypeScript file — return first 1500 chars
             const text = await res.text();
-            results[key] = text.slice(0, 300);
+            results[key] = text.slice(0, 1500);
           }
         } catch (e) {
           results[key] = String(e);
