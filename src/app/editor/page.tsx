@@ -58,8 +58,12 @@ function Dashboard() {
   useEffect(() => { fetchWeapons(); }, [fetchWeapons]);
   useEffect(() => { setSidebarOpen(false); }, [activeWeapon?.hash]);
 
-  // Intentionally no auto-load: users arrive here via the landing page search
-  // with a ?w= param, or by browsing the sidebar. Don't force a weapon on them.
+  useEffect(() => {
+    if (weapons.length > 0 && !activeWeapon && !searchParams.get('w')) {
+      const firstGroup = weaponGroups[0];
+      if (firstGroup) loadWeapon(firstGroup.default, firstGroup.variants);
+    }
+  }, [weapons, activeWeapon, loadWeapon, searchParams, weaponGroups]);
 
   useEffect(() => {
     const weaponHash  = searchParams.get('w');
@@ -164,18 +168,7 @@ function Dashboard() {
             </button>
           </div>
         )}
-        {!isLoading && !error && (
-          <div className="text-center space-y-4 max-w-sm">
-            <p className="text-slate-400 text-lg font-semibold">No weapon selected</p>
-            <p className="text-slate-600 text-sm">Search for a weapon in the sidebar, or go back to the homepage to pick one.</p>
-            <a
-              href="/"
-              className="inline-block bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-5 py-2.5 rounded-lg text-sm transition-colors"
-            >
-              ← Back to search
-            </a>
-          </div>
-        )}
+        {!isLoading && !error && <p className="text-slate-600 text-sm">No weapons found.</p>}
       </div>
     );
   }

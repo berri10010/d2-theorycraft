@@ -112,7 +112,7 @@ function WeaponSearch() {
   useEffect(() => {
     fetch('/api/weapons')
       .then(r => r.json())
-      .then((data: WeaponResult[]) => { setWeapons(data); setLoaded(true); })
+      .then((data: { weapons?: WeaponResult[] }) => { setWeapons(data.weapons ?? []); setLoaded(true); })
       .catch(() => setLoaded(true));
   }, []);
 
