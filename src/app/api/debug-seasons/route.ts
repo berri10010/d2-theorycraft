@@ -13,13 +13,12 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   if (searchParams.get('mode') === 'probe') {
     const urls: Record<string, string> = {
-      // Clarity — probe the descriptions subdirectory
-      clarity_descriptions_dir:  'https://api.github.com/repos/Database-Clarity/Live-Clarity-Database/contents/descriptions',
-      clarity_versions:          'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/versions.json',
-      // dim-custom-symbols — probe repo structure
-      dim_symbols_root:          'https://api.github.com/repos/DestinyItemManager/dim-custom-symbols/contents',
-      dim_symbols_master_pkg:    'https://raw.githubusercontent.com/DestinyItemManager/dim-custom-symbols/master/package.json',
-      dim_symbols_main_pkg:      'https://raw.githubusercontent.com/DestinyItemManager/dim-custom-symbols/main/package.json',
+      // Clarity — fetch a few entries from clarity.json to see the perk data structure
+      clarity_json_sample:       'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/descriptions/clarity.json',
+      // dim-custom-symbols — see what's in output/ and data/
+      dim_output_dir:            'https://api.github.com/repos/DestinyItemManager/dim-custom-symbols/contents/output',
+      dim_data_dir:              'https://api.github.com/repos/DestinyItemManager/dim-custom-symbols/contents/data',
+      dim_svg_dir:               'https://api.github.com/repos/DestinyItemManager/dim-custom-symbols/contents/svg',
     };
 
     const results: Record<string, unknown> = {};
