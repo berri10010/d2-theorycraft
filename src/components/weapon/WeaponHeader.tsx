@@ -16,6 +16,13 @@ const DAMAGE_COLORS: Record<string, { bg: string; text: string; dot: string }> =
   strand:  { bg: 'bg-emerald-900/60', text: 'text-emerald-300', dot: 'bg-emerald-400' },
 };
 
+const AMMO_LABELS: Record<number, string> = { 1: 'Primary', 2: 'Special', 3: 'Heavy' };
+const AMMO_COLORS: Record<number, { bg: string; text: string }> = {
+  1: { bg: 'bg-slate-700/60',   text: 'text-slate-300'   },
+  2: { bg: 'bg-green-900/50',   text: 'text-green-300'   },
+  3: { bg: 'bg-purple-900/50',  text: 'text-purple-300'  },
+};
+
 const RARITY_COLORS: Record<string, string> = {
   Exotic:    'text-amber-400 border-amber-400/40 bg-amber-400/10',
   Legendary: 'text-purple-400 border-purple-400/40 bg-purple-400/10',
@@ -126,6 +133,14 @@ export const WeaponHeader: React.FC = () => {
                 <span className={`w-2 h-2 rounded-full ${dmg.dot}`} />
                 {activeWeapon.damageType.charAt(0).toUpperCase() + activeWeapon.damageType.slice(1)}
               </span>
+              {AMMO_LABELS[activeWeapon.ammoType] && (() => {
+                const ammo = AMMO_COLORS[activeWeapon.ammoType];
+                return (
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded ${ammo.bg} ${ammo.text}`}>
+                    {AMMO_LABELS[activeWeapon.ammoType]}
+                  </span>
+                );
+              })()}
               {activeWeapon.rpm > 0 && (
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">
                   {activeWeapon.rpm} RPM

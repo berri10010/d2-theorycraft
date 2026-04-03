@@ -21,9 +21,9 @@ const CLASS_COLOURS: Record<string, string> = {
   kinetic: '#cbd5e1', // slate-300
   pvp:     '#f472b6', // pink-400
   pve:     '#4ade80', // green-400
-  primary: '#86efac', // green-300
-  special: '#c4b5fd', // violet-300
-  heavy:   '#fde68a', // amber-200
+  primary: '#cbd5e1', // slate-300
+  special: '#86efac', // green-300
+  heavy:   '#c4b5fd', // violet-300
 };
 
 /**

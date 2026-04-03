@@ -287,31 +287,46 @@ export const SearchSidebar: React.FC = () => {
   const filteredGroups = useMemo(() => {
     const q = query.toLowerCase().trim();
 
-    let result = groups.filter((g) => {
-      const d = g.default;
-      const nameMatch  = !q || g.variants.some(v => v.name.toLowerCase().includes(q));
-      const dmgMatch   = matchesMF(filters.damage,     d.damageType);
-      const ammoMatch  = matchesMF(filters.ammo,       String(d.ammoType));
-      const rarMatch   = matchesMF(filters.rarity,     d.rarity ?? '');
-      const typeMatch  = matchesMF(filters.weaponType, d.itemTypeDisplayName);
-      const adeptMatch = !filters.adeptOnly     || g.variants.some(v => v.isAdept);
-      const craftMatch = !filters.craftableOnly || g.variants.some(v => v.hasCraftedPattern);
-      return nameMatch && dmgMatch && ammoMatch && rarMatch && typeMatch && adeptMatch && craftMatch;
-    });
+    // Rank by match quality: 0 = starts-with, 1 = word starts-with, 2 = contains
+    const nameRank = (name: string): number => {
+      if (!q) return 0;
+      if (name.startsWith(q)) return 0;
+      if (name.split(/\s+/).some(w => w.startsWith(q))) return 1;
+      if (name.includes(q)) return 2;
+      return 999;
+    };
 
-    // Apply sort
-    result = [...result].sort((a, b) => {
+    let result = groups
+      .map((g) => {
+        const rank = q ? Math.min(...g.variants.map(v => nameRank(v.name.toLowerCase()))) : 0;
+        return { g, rank };
+      })
+      .filter(({ g, rank }) => {
+        if (rank === 999) return false;
+        const d = g.default;
+        const dmgMatch   = matchesMF(filters.damage,     d.damageType);
+        const ammoMatch  = matchesMF(filters.ammo,       String(d.ammoType));
+        const rarMatch   = matchesMF(filters.rarity,     d.rarity ?? '');
+        const typeMatch  = matchesMF(filters.weaponType, d.itemTypeDisplayName);
+        const adeptMatch = !filters.adeptOnly     || g.variants.some(v => v.isAdept);
+        const craftMatch = !filters.craftableOnly || g.variants.some(v => v.hasCraftedPattern);
+        return dmgMatch && ammoMatch && rarMatch && typeMatch && adeptMatch && craftMatch;
+      });
+
+    // Apply sort — when there's a query, rank takes priority; otherwise pure sort
+    result.sort((a, b) => {
+      if (q && a.rank !== b.rank) return a.rank - b.rank;
       let diff: number;
       if (sortMode === 'season') {
-        const sa = bestSeasonNumber(a), sb = bestSeasonNumber(b);
-        diff = sa !== sb ? sb - sa : a.baseName.localeCompare(b.baseName);
+        const sa = bestSeasonNumber(a.g), sb = bestSeasonNumber(b.g);
+        diff = sa !== sb ? sb - sa : a.g.baseName.localeCompare(b.g.baseName);
       } else {
-        diff = a.baseName.localeCompare(b.baseName);
+        diff = a.g.baseName.localeCompare(b.g.baseName);
       }
       return sortDir === 'asc' ? diff : -diff;
     });
 
-    return result;
+    return result.map(({ g }) => g);
   }, [groups, query, filters, sortMode, sortDir]);
 
   // Active dismissible chips
