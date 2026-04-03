@@ -102,18 +102,29 @@ export const GodRollPanel: React.FC = () => {
 
       {/* Roll recommendations */}
       {(() => {
-        // originTrait is sometimes a free-text analyst note rather than a real perk name.
-        // Treat it as a note when it reads like a sentence (longer than 40 chars).
-        const originIsNote = !!entry.originTrait &&
-          entry.originTrait !== 'None' &&
-          entry.originTrait.length > 40;
-        const originAsPerk = !originIsNote && entry.originTrait && entry.originTrait !== 'None';
+        const ot = entry.originTrait;
+
+        // Three cases for originTrait:
+        // 1. Contains \n → multiple perk options (split into pills)
+        // 2. Long sentence with no \n → analyst note about the origin slot
+        // 3. Short single name (or "None") → single perk pill as normal
+        let originPills: string[] = [];
+        let originNote: string | null = null;
+        if (ot && ot !== 'None') {
+          if (ot.includes('\n')) {
+            originPills = ot.split('\n').map(s => s.trim()).filter(Boolean);
+          } else if (ot.length > 40) {
+            originNote = ot;
+          } else {
+            originPills = [ot];
+          }
+        }
 
         // notes field is sometimes a bare number (spreadsheet artefact) — skip those.
         const validNotes = entry.notes && !/^\d+$/.test(entry.notes.trim()) ? entry.notes : null;
 
         // Combine origin-as-note and analyst notes into one block
-        const noteLines = [originIsNote ? entry.originTrait : null, validNotes].filter(Boolean) as string[];
+        const noteLines = [originNote, validNotes].filter(Boolean) as string[];
 
         return (
           <>
@@ -122,7 +133,7 @@ export const GodRollPanel: React.FC = () => {
               <RollRow label="Mag"    options={entry.mag} />
               <RollRow label="Perk 1" options={entry.perk1} />
               <RollRow label="Perk 2" options={entry.perk2} />
-              {originAsPerk && <RollRow label="Origin" options={[entry.originTrait!]} />}
+              {originPills.length > 0 && <RollRow label="Origin" options={originPills} />}
             </div>
 
             {noteLines.length > 0 && (
