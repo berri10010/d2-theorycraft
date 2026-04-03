@@ -3,19 +3,6 @@ import { NextResponse } from 'next/server';
 const API_KEY = process.env.BUNGIE_API_KEY!;
 const BUNGIE_ROOT = 'https://www.bungie.net';
 
-// Quick probe — returns first 3 entries of a JSON file so we can inspect its structure
-async function probeJson(url: string): Promise<unknown> {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return { error: `HTTP ${res.status}` };
-    const data = await res.json();
-    const entries = Object.entries(data as Record<string, unknown>).slice(0, 3);
-    return Object.fromEntries(entries);
-  } catch (e) {
-    return { error: String(e) };
-  }
-}
-
 async function fetchTable(path: string) {
   const res = await fetch(BUNGIE_ROOT + path);
   if (!res.ok) throw new Error('Failed: ' + res.status);
