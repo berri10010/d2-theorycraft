@@ -399,6 +399,16 @@ export default function HomePage() {
             TheAegisRelic
           </a>
         </p>
+        <p className="text-xs text-slate-600">
+          Perk descriptions from{' '}
+          <a href="https://d2clarity.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors underline underline-offset-2">
+            Clarity
+          </a>
+          {' · '}Description feedback via{' '}
+          <a href="https://d2clarity.com/discord" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors underline underline-offset-2">
+            Clarity Discord
+          </a>
+        </p>
         <p className="text-xs text-slate-700">Not affiliated with or endorsed by Bungie, Inc.</p>
       </footer>
 

@@ -221,7 +221,28 @@ export const EffectsPanel: React.FC = () => {
                         <p className="text-xs text-slate-300 leading-relaxed">
                           {renderClarityDesc(clarityEntry)}
                         </p>
-                        <span className="text-[10px] text-slate-600 mt-1 block">via Clarity</span>
+                        <span className="text-[10px] text-slate-600 mt-1 flex items-center gap-2">
+                          <span>
+                            via{' '}
+                            <a
+                              href="https://d2clarity.com"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-slate-500 hover:text-slate-300 underline underline-offset-2 transition-colors"
+                            >
+                              Clarity
+                            </a>
+                          </span>
+                          <span className="text-slate-800">·</span>
+                          <a
+                            href="https://d2clarity.com/discord"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-slate-600 hover:text-slate-400 transition-colors"
+                          >
+                            Feedback on this description ↗
+                          </a>
+                        </span>
                       </div>
                     );
                   }
