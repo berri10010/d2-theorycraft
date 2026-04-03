@@ -11,21 +11,35 @@ import { useClarityPerks } from '../../lib/useClarityPerks';
 import { ClarityEntry } from '../../lib/clarity';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 
-// ── Element / className → colour mapping ─────────────────────────────────────
-const ELEMENT_COLOURS: Record<string, string> = {
-  strand:    'text-emerald-400 bg-emerald-400/15 border-emerald-500/30',
-  void:      'text-violet-400  bg-violet-400/15  border-violet-500/30',
-  solar:     'text-orange-400  bg-orange-400/15  border-orange-500/30',
-  arc:       'text-sky-400     bg-sky-400/15     border-sky-500/30',
-  stasis:    'text-cyan-400    bg-cyan-400/15    border-cyan-500/30',
-  kinetic:   'text-slate-300   bg-slate-300/15   border-slate-400/30',
-  darkness:  'text-purple-400  bg-purple-400/15  border-purple-500/30',
-  light:     'text-yellow-300  bg-yellow-300/15  border-yellow-400/30',
+// ── Element glyph map ─────────────────────────────────────────────────────────
+// Code points sourced from DIM's d2-font-glyphs.ts and dim-custom-symbols.ts
+// DestinySymbols font: arc=57667, void=57668, stasis=57657, thermal(solar)=57664, strand_kill=61198
+// DIMSymbols font:     damage_kinetic=983311
+interface ElementGlyph { char: string; font: string; colour: string; }
+const ELEMENT_GLYPHS: Record<string, ElementGlyph> = {
+  arc:     { char: String.fromCodePoint(57667),  font: 'DestinySymbols', colour: '#7dd3fc' }, // sky-300
+  void:    { char: String.fromCodePoint(57668),  font: 'DestinySymbols', colour: '#c4b5fd' }, // violet-300
+  stasis:  { char: String.fromCodePoint(57657),  font: 'DestinySymbols', colour: '#67e8f9' }, // cyan-300
+  solar:   { char: String.fromCodePoint(57664),  font: 'DestinySymbols', colour: '#fdba74' }, // orange-300
+  strand:  { char: String.fromCodePoint(61198),  font: 'DestinySymbols', colour: '#6ee7b7' }, // emerald-300
+  kinetic: { char: String.fromCodePoint(983311), font: 'DIMSymbols',     colour: '#cbd5e1' }, // slate-300
+};
+
+// Non-element classNames: coloured text labels (pvp, pve, heavy, etc.)
+const CLASS_COLOURS: Record<string, string> = {
+  pvp:     '#f472b6', // pink-400
+  pve:     '#4ade80', // green-400
+  primary: '#86efac', // green-300
+  special: '#c4b5fd', // violet-300
+  heavy:   '#fde68a', // amber-200
 };
 
 /**
- * Renders a Clarity description as React nodes, replacing { classNames }
- * segments with small coloured element badges.
+ * Renders a Clarity description as React nodes.
+ * – Element classNames (arc, void, solar, stasis, strand, kinetic) → actual
+ *   game icon glyph via Bungie/DIM symbol fonts.
+ * – Mode classNames (pvp, pve, heavy…) → small coloured text labels.
+ * – Text segments → plain text fragments.
  */
 function renderClarityDesc(entry: ClarityEntry): React.ReactNode {
   const segments = (entry.descriptions?.en ?? []).flatMap((group, gi) =>
@@ -37,14 +51,38 @@ function renderClarityDesc(entry: ClarityEntry): React.ReactNode {
       return <React.Fragment key={key}>{seg.text}</React.Fragment>;
     }
     if (seg.classNames?.length) {
-      const name    = seg.classNames[0];
-      const colours = ELEMENT_COLOURS[name] ?? 'text-slate-400 bg-slate-400/15 border-slate-500/30';
+      const name  = seg.classNames[0];
+      const glyph = ELEMENT_GLYPHS[name];
+
+      if (glyph) {
+        return (
+          <span
+            key={key}
+            aria-label={name}
+            style={{
+              fontFamily: `'${glyph.font}', sans-serif`,
+              color: glyph.colour,
+              fontSize: '1.15em',
+              lineHeight: 1,
+              display: 'inline-block',
+              verticalAlign: 'middle',
+              marginInline: '0.1em',
+            }}
+          >
+            {glyph.char}
+          </span>
+        );
+      }
+
+      // Fallback: small coloured label for pvp/pve/heavy/etc.
+      const colour = CLASS_COLOURS[name] ?? '#94a3b8';
       return (
         <span
           key={key}
-          className={`inline-flex items-center px-1.5 py-px rounded text-[10px] font-bold mx-0.5 border ${colours}`}
+          style={{ color: colour }}
+          className="text-[10px] font-bold uppercase mx-0.5 opacity-80"
         >
-          {name.charAt(0).toUpperCase() + name.slice(1)}
+          [{name}]
         </span>
       );
     }
