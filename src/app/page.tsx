@@ -155,21 +155,27 @@ function WeaponSearch() {
   const [query, setQuery]         = useState('');
   const [groups, setGroups]       = useState<WeaponGroupResult[]>([]);
   const [loaded, setLoaded]       = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [open, setOpen]           = useState(false);
   const [focused, setFocused]     = useState(-1);
   const inputRef                  = useRef<HTMLInputElement>(null);
   const listRef                   = useRef<HTMLUListElement>(null);
 
-  // Fetch weapons once on mount, then group them
-  useEffect(() => {
+  const loadWeapons = () => {
+    setLoadError(false);
+    setLoaded(false);
     fetch('/data/weapons.json')
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then((weapons: WeaponResult[]) => {
         setGroups(groupWeapons(weapons ?? []));
         setLoaded(true);
       })
-      .catch(() => setLoaded(true));
-  }, []);
+      .catch(() => { setLoaded(true); setLoadError(true); });
+  };
+
+  // Fetch weapons once on mount, then group them
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { loadWeapons(); }, []);
 
   // Ranked search: starts-with > word-starts-with > contains
   const results = useMemo(() => {
@@ -223,15 +229,31 @@ function WeaponSearch() {
           onKeyDown={handleKeyDown}
           onFocus={() => results.length > 0 && setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder={loaded ? `Search ${groups.length}+ weapons…` : 'Loading weapons…'}
-          disabled={!loaded}
-          className="w-full bg-white/8 border border-white/15 rounded-xl pl-12 pr-4 py-4 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/60 focus:bg-white/10 transition-all disabled:opacity-40"
+          placeholder={loadError ? 'Failed to load weapons' : loaded ? `Search ${groups.length}+ weapons…` : 'Loading weapons…'}
+          disabled={!loaded || loadError}
+          className={[
+            'w-full bg-white/8 border rounded-xl pl-12 pr-4 py-4 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:bg-white/10 transition-all disabled:opacity-40',
+            loadError ? 'border-red-500/40 focus:border-red-500/60' : 'border-white/15 focus:border-amber-500/60',
+          ].join(' ')}
           autoComplete="off"
         />
-        {!loaded && (
+        {!loaded && !loadError && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-slate-600 border-t-amber-500 rounded-full animate-spin" />
         )}
       </div>
+
+      {/* Error state */}
+      {loadError && (
+        <div className="mt-3 flex items-center justify-between gap-3 bg-red-950/40 border border-red-500/20 rounded-xl px-4 py-3">
+          <p className="text-sm text-red-400">Couldn&apos;t load weapon data. The site may need to be redeployed.</p>
+          <button
+            onClick={loadWeapons}
+            className="shrink-0 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors border border-amber-500/30 hover:border-amber-400/50 px-3 py-1.5 rounded-lg"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Results dropdown */}
       {open && (

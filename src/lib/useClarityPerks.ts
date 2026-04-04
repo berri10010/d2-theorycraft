@@ -13,25 +13,27 @@ function load(): Promise<ClarityDatabase> {
         if (!r.ok) throw new Error('clarity fetch failed');
         return r.json() as Promise<ClarityDatabase>;
       })
-      .then((d) => { _cache = d; return d; })
-      .catch(() => {
-        _promise = null; // allow retry on next render
-        return {} as ClarityDatabase;
-      });
+      .then((d) => { _cache = d; return d; });
   }
   return _promise;
 }
 
-export function useClarityPerks(): { data: ClarityDatabase | null; loading: boolean } {
+export function useClarityPerks(): { data: ClarityDatabase | null; loading: boolean; error: boolean } {
   const [data, setData] = useState<ClarityDatabase | null>(_cache);
   const [loading, setLoading] = useState(!_cache);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (_cache) { setData(_cache); setLoading(false); return; }
     let mounted = true;
-    load().then((d) => { if (mounted) { setData(d); setLoading(false); } });
+    load()
+      .then((d) => { if (mounted) { setData(d); setLoading(false); } })
+      .catch(() => {
+        _promise = null; // allow retry
+        if (mounted) { setLoading(false); setError(true); }
+      });
     return () => { mounted = false; };
   }, []);
 
-  return { data, loading };
+  return { data, loading, error };
 }

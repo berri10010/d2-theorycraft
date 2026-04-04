@@ -26,9 +26,10 @@ function loadGodRolls(): Promise<GodRollDatabase> {
  * The first call triggers a fetch of /data/god-rolls.json; subsequent renders
  * return from the module-level cache instantly.
  */
-export function useGodRolls(): { data: GodRollDatabase | null; loading: boolean } {
+export function useGodRolls(): { data: GodRollDatabase | null; loading: boolean; error: boolean } {
   const [data, setData] = useState<GodRollDatabase | null>(_cache);
   const [loading, setLoading] = useState(!_cache);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (_cache) {
@@ -37,13 +38,16 @@ export function useGodRolls(): { data: GodRollDatabase | null; loading: boolean 
       return;
     }
     let mounted = true;
-    loadGodRolls().then((d) => {
-      if (mounted) { setData(d); setLoading(false); }
-    }).catch(() => {
-      if (mounted) setLoading(false);
-    });
+    loadGodRolls()
+      .then((d) => {
+        if (mounted) { setData(d); setLoading(false); }
+      })
+      .catch(() => {
+        _promise = null; // allow retry
+        if (mounted) { setLoading(false); setError(true); }
+      });
     return () => { mounted = false; };
   }, []);
 
-  return { data, loading };
+  return { data, loading, error };
 }
