@@ -1,4 +1,4 @@
-name = "d2-theorycraft"
+name = "d2theorycraft"
 compatibility_date = "2024-09-23"
 
 # Serve the fully static Next.js export from the out/ directory.
