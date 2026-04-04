@@ -157,8 +157,8 @@ function Dashboard() {
             <p className="text-red-400 font-bold text-lg">Failed to load weapons</p>
             <p className="text-slate-400 text-sm font-mono bg-slate-900 p-3 rounded-lg break-all">{error}</p>
             <p className="text-slate-500 text-sm">
-              Check that BUNGIE_API_KEY, UPSTASH_REDIS_REST_URL, and UPSTASH_REDIS_REST_TOKEN
-              are set in your environment variables.
+              Weapon data is loaded from the static build. Try refreshing — if the problem
+              persists the site may need to be redeployed.
             </p>
             <button
               onClick={() => fetchWeapons()}
