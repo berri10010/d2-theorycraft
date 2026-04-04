@@ -4,15 +4,16 @@ import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
-import { BUFF_DATABASE, DamageBuff } from '../../lib/buffDatabase';
+import { BUFF_DATABASE, DamageBuff, getBuffMultiplier } from '../../lib/buffDatabase';
 import { Perk } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
+import { useClarityPerks } from '../../lib/useClarityPerks';
+import { ClarityDatabase } from '../../lib/clarity';
 
 // Pre-computed buff lists — static since BUFF_DATABASE is module-level.
-const _allBuffs         = Object.values(BUFF_DATABASE);
-const _weaponPerkBuffs  = _allBuffs.filter((b) => b.stackType === 'multiplicative');
-const _empoweringBuffs  = _allBuffs.filter((b) => b.stackType === 'empowering');
-const _debuffBuffs      = _allBuffs.filter((b) => b.stackType === 'debuff');
+const _allBuffs        = Object.values(BUFF_DATABASE);
+const _empoweringBuffs = _allBuffs.filter((b) => b.stackType === 'empowering');
+const _debuffBuffs     = _allBuffs.filter((b) => b.stackType === 'debuff');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -21,6 +22,22 @@ function pctStr(multiplier: number): string {
 }
 function multStr(multiplier: number): string {
   return `×${multiplier.toFixed(2)}`;
+}
+
+/** Pull the first plain-text line from a Clarity entry as a short description. */
+function getClarityText(clarityData: ClarityDatabase | null, perkHash: string | number): string | null {
+  if (!clarityData) return null;
+  const entry = clarityData[String(perkHash)];
+  if (!entry?.descriptions?.en?.length) return null;
+  const parts: string[] = [];
+  for (const group of entry.descriptions.en) {
+    for (const seg of group.linesContent) {
+      if (seg.text) parts.push(seg.text);
+    }
+    // Only take the first group (one line)
+    if (parts.length) break;
+  }
+  return parts.join('').trim() || null;
 }
 
 // ─── Icon ─────────────────────────────────────────────────────────────────────
@@ -33,12 +50,12 @@ function BuffIcon({ buff, linkedPerk }: { buff: DamageBuff; linkedPerk: Perk | n
   if (!iconPath) {
     const dotClass =
       buff.stackType === 'empowering'
-        ? 'bg-amber-400/20 border-amber-400/30'
+        ? 'bg-amber-400/20 border-amber-400/40'
         : buff.stackType === 'debuff'
-        ? 'bg-red-400/20 border-red-400/30'
-        : 'bg-blue-400/20 border-blue-400/30';
+        ? 'bg-red-400/20 border-red-400/40'
+        : 'bg-blue-400/20 border-blue-400/40';
     return (
-      <span className={`shrink-0 w-5 h-5 rounded border flex items-center justify-center ${dotClass}`} />
+      <span className={`shrink-0 w-6 h-6 rounded border flex items-center justify-center ${dotClass}`} />
     );
   }
 
@@ -50,71 +67,131 @@ function BuffIcon({ buff, linkedPerk }: { buff: DamageBuff; linkedPerk: Perk | n
   );
 }
 
-// ─── Buff button ──────────────────────────────────────────────────────────────
+// ─── Stack selector ───────────────────────────────────────────────────────────
 
-interface BuffButtonProps {
+interface StackSelectorProps {
   buff: DamageBuff;
-  isActive: boolean;
-  isLinkedToPerk: boolean;
-  linkedPerk: Perk | null;
-  isOverridden: boolean;
-  onToggle: () => void;
+  activeStackIndex: number;
+  onSelect: (idx: number) => void;
 }
 
-function BuffButton({ buff, isActive, isLinkedToPerk, linkedPerk, isOverridden, onToggle }: BuffButtonProps) {
-  const isDebuff = buff.stackType === 'debuff';
+function StackSelector({ buff, activeStackIndex, onSelect }: StackSelectorProps) {
+  if (!buff.stacks?.length) return null;
+  return (
+    <div className="flex items-center gap-1 mt-1.5 ml-8 flex-wrap">
+      {buff.stacks.map((stack, idx) => (
+        <button
+          key={stack.count}
+          onClick={(e) => { e.stopPropagation(); onSelect(idx); }}
+          className={[
+            'text-[10px] font-bold px-2 py-0.5 rounded border transition-colors leading-none',
+            idx === activeStackIndex
+              ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+              : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-200 hover:border-white/20',
+          ].join(' ')}
+        >
+          {stack.label}
+          <span className="ml-1 text-[9px] font-normal opacity-70">
+            {pctStr(stack.multiplier)}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ─── Buff row ─────────────────────────────────────────────────────────────────
+
+interface BuffRowProps {
+  buff: DamageBuff;
+  isActive: boolean;
+  isOverridden: boolean;
+  linkedPerk: Perk | null;
+  clarityDesc: string | null;
+  activeStackIndex: number;
+  onToggle: () => void;
+  onSelectStack: (idx: number) => void;
+}
+
+function BuffRow({
+  buff, isActive, isOverridden, linkedPerk, clarityDesc,
+  activeStackIndex, onToggle, onSelectStack,
+}: BuffRowProps) {
+  const isDebuff  = buff.stackType === 'debuff';
+  const isPerk    = buff.stackType === 'multiplicative';
+
+  // Effective multiplier at the current stack level
+  const effectiveMult = isActive
+    ? getBuffMultiplier(buff, buff.stacks?.length ? activeStackIndex : undefined)
+    : buff.multiplier;
+
+  const activeColor = isPerk ? 'emerald' : isDebuff ? 'red' : 'amber';
+
+  const buttonClass = [
+    'flex items-start gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 border text-left w-full',
+    isActive
+      ? activeColor === 'emerald'
+        ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-300'
+        : activeColor === 'red'
+        ? 'bg-red-500/15 border-red-500/50 text-red-300'
+        : 'bg-amber-500/15 border-amber-500/50 text-amber-300'
+      : 'bg-white/3 border-white/8 text-slate-400 hover:border-white/20 hover:text-slate-200',
+  ].join(' ');
+
+  const desc = clarityDesc ?? buff.description;
 
   return (
-    <button
-      onClick={onToggle}
-      title={buff.description}
-      className={[
-        'flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 border text-left w-full',
-        isActive
-          ? isLinkedToPerk
-            ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-300'
-            : isDebuff
-            ? 'bg-red-500/15 border-red-500/50 text-red-300'
-            : 'bg-amber-500/15 border-amber-500/50 text-amber-300'
-          : 'bg-white/3 border-white/8 text-slate-400 hover:border-white/20 hover:text-slate-200',
-      ].join(' ')}
-    >
-      {/* Icon */}
-      <BuffIcon buff={buff} linkedPerk={linkedPerk} />
+    <div>
+      <button onClick={onToggle} title={desc} className={buttonClass}>
+        {/* Icon */}
+        <BuffIcon buff={buff} linkedPerk={linkedPerk} />
 
-      {/* Active dot */}
-      <span className={[
-        'shrink-0 w-1.5 h-1.5 rounded-full',
-        isActive
-          ? isLinkedToPerk ? 'bg-emerald-400' : isDebuff ? 'bg-red-400' : 'bg-amber-400'
-          : 'bg-white/15',
-      ].join(' ')} />
+        {/* Name + subtitle */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            {/* Active dot */}
+            <span className={[
+              'shrink-0 w-1.5 h-1.5 rounded-full',
+              isActive
+                ? activeColor === 'emerald' ? 'bg-emerald-400'
+                : activeColor === 'red'     ? 'bg-red-400'
+                :                            'bg-amber-400'
+                : 'bg-white/15',
+            ].join(' ')} />
+            <span className="text-xs font-semibold truncate">{buff.name}</span>
+            {isActive && isOverridden && (
+              <span className="shrink-0 text-[8px] text-slate-500 bg-slate-900 px-1 py-0.5 rounded border border-slate-700 leading-none">
+                overridden
+              </span>
+            )}
+          </div>
+          <p className="text-[10px] text-slate-500 leading-snug mt-0.5 line-clamp-2 pr-1">
+            {desc}
+          </p>
+        </div>
 
-      {/* Name */}
-      <span className="flex-1 truncate text-xs">{buff.name}</span>
-
-      {/* Badges */}
-      {isLinkedToPerk && isActive && (
-        <span className="shrink-0 text-[8px] font-bold text-emerald-400 bg-emerald-400/10 px-1 py-0.5 rounded border border-emerald-500/30 leading-none">
-          AUTO
+        {/* Percentage */}
+        <span className={[
+          'shrink-0 text-xs font-bold tabular-nums self-center',
+          isActive && !isOverridden
+            ? activeColor === 'emerald' ? 'text-emerald-400'
+            : activeColor === 'red'     ? 'text-red-400'
+            :                            'text-amber-400'
+            : 'text-slate-600',
+        ].join(' ')}>
+          {pctStr(effectiveMult)}
         </span>
-      )}
-      {isActive && isOverridden && (
-        <span className="shrink-0 text-[8px] text-slate-500 bg-slate-900 px-1 py-0.5 rounded border border-slate-700 leading-none">
-          overridden
-        </span>
-      )}
+      </button>
 
-      {/* Percentage */}
-      <span className={[
-        'shrink-0 text-xs font-bold tabular-nums',
-        isActive && !isOverridden
-          ? isLinkedToPerk ? 'text-emerald-400' : isDebuff ? 'text-red-400' : 'text-amber-400'
-          : 'text-slate-600',
-      ].join(' ')}>
-        {pctStr(buff.multiplier)}
-      </span>
-    </button>
+      {/* Stack selector — shown only when active and buff has stacks */}
+      {isActive && buff.stacks?.length ? (
+        <StackSelector
+          buff={buff}
+          activeStackIndex={activeStackIndex}
+          onSelect={onSelectStack}
+        />
+      ) : null}
+    </div>
   );
 }
 
@@ -139,7 +216,13 @@ function SectionLabel({ label, count, note }: { label: string; count?: number; n
 
 // ─── Combined multiplier breakdown ───────────────────────────────────────────
 
-function MultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] }) {
+function MultiplierBreakdown({
+  activeBuffs,
+  buffStacks,
+}: {
+  activeBuffs: string[];
+  buffStacks: Record<string, number>;
+}) {
   const { perkMult, empoweringMult, debuffMult, total } = useMemo(() => {
     let perkMult       = 1;
     let empoweringMult = 1;
@@ -148,24 +231,25 @@ function MultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] }) {
     activeBuffs.forEach((hash) => {
       const buff = BUFF_DATABASE[hash];
       if (!buff) return;
+      const mult = getBuffMultiplier(buff, buffStacks[hash]);
       if (buff.stackType === 'multiplicative') {
-        perkMult *= buff.multiplier;
+        perkMult *= mult;
       } else if (buff.stackType === 'empowering') {
-        if (buff.multiplier > empoweringMult) empoweringMult = buff.multiplier;
+        if (mult > empoweringMult) empoweringMult = mult;
       } else if (buff.stackType === 'debuff') {
-        if (buff.multiplier > debuffMult) debuffMult = buff.multiplier;
+        if (mult > debuffMult) debuffMult = mult;
       }
     });
 
     return { perkMult, empoweringMult, debuffMult, total: perkMult * empoweringMult * debuffMult };
-  }, [activeBuffs]);
+  }, [activeBuffs, buffStacks]);
 
   if (total === 1) return null;
 
   const parts: { label: string; value: number; color: string }[] = [];
-  if (perkMult      > 1) parts.push({ label: 'Perks',       value: perkMult,       color: 'text-amber-400' });
-  if (empoweringMult > 1) parts.push({ label: 'Empowering', value: empoweringMult, color: 'text-blue-400'  });
-  if (debuffMult    > 1) parts.push({ label: 'Debuff',      value: debuffMult,     color: 'text-red-400'   });
+  if (perkMult       > 1) parts.push({ label: 'Perks',      value: perkMult,       color: 'text-emerald-400' });
+  if (empoweringMult > 1) parts.push({ label: 'Empowering', value: empoweringMult, color: 'text-amber-400'   });
+  if (debuffMult     > 1) parts.push({ label: 'Debuff',     value: debuffMult,     color: 'text-red-400'     });
 
   return (
     <div className="mb-5 p-3 bg-black/40 rounded-lg border border-white/10">
@@ -193,16 +277,23 @@ function MultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export const BuffToggle: React.FC = () => {
-  const { activeBuffs, toggleBuff, selectedPerks, activeWeapon } = useWeaponStore(
+  const {
+    activeBuffs, toggleBuff, setBuffStack, buffStacks,
+    selectedPerks, activeWeapon,
+  } = useWeaponStore(
     useShallow((s) => ({
       activeBuffs:   s.activeBuffs,
       toggleBuff:    s.toggleBuff,
+      setBuffStack:  s.setBuffStack,
+      buffStacks:    s.buffStacks,
       selectedPerks: s.selectedPerks,
       activeWeapon:  s.activeWeapon,
     }))
   );
 
-  // Memoize perk → buff linking so it only rebuilds when selections change.
+  const { data: clarityData } = useClarityPerks();
+
+  // ── Derive which perk buffs are visible (only equipped perks) ──────────────
   const { linkedPerkByBuffKey, linkedBuffKeys } = useMemo(() => {
     const byKey = new Map<string, Perk>();
     const keys  = new Set<string>();
@@ -218,10 +309,13 @@ export const BuffToggle: React.FC = () => {
         byKey.set(basePerk.buffKey, basePerk);
       }
 
-      // Enhanced version selected — buffKey lives on the base perk.
+      // Enhanced version selected — buffKey lives on the base perk
       for (const p of col.perks) {
         if (p.enhancedVersion?.hash === perkHash) {
-          if (p.buffKey) { keys.add(p.buffKey); byKey.set(p.buffKey, p); }
+          if (p.buffKey) {
+            keys.add(p.buffKey);
+            byKey.set(p.buffKey, p);
+          }
           if (p.enhancedVersion.buffKey && p.enhancedVersion.buffKey !== p.buffKey) {
             keys.add(p.enhancedVersion.buffKey);
             byKey.set(p.enhancedVersion.buffKey, p);
@@ -232,10 +326,16 @@ export const BuffToggle: React.FC = () => {
     return { linkedPerkByBuffKey: byKey, linkedBuffKeys: keys };
   }, [activeWeapon, selectedPerks]);
 
+  // Only show weapon perk buffs that the player has equipped
+  const visiblePerkBuffs = useMemo(
+    () => _allBuffs.filter((b) => b.stackType === 'multiplicative' && linkedBuffKeys.has(b.hash)),
+    [linkedBuffKeys],
+  );
+
   const activeSet   = useMemo(() => new Set(activeBuffs), [activeBuffs]);
   const activeCount = activeBuffs.length;
 
-  // Identify which empowering buff is the "winner" (highest multiplier among active ones).
+  // Winning (highest) empowering buff among active ones
   const winningEmpowering = useMemo(() => {
     let winner: string | null = null;
     let best = 0;
@@ -249,7 +349,7 @@ export const BuffToggle: React.FC = () => {
     return winner;
   }, [activeBuffs]);
 
-  // Same for debuffs.
+  // Winning debuff
   const winningDebuff = useMemo(() => {
     let winner: string | null = null;
     let best = 0;
@@ -276,33 +376,43 @@ export const BuffToggle: React.FC = () => {
       </div>
 
       {/* Combined multiplier breakdown */}
-      <MultiplierBreakdown activeBuffs={activeBuffs} />
+      <MultiplierBreakdown activeBuffs={activeBuffs} buffStacks={buffStacks} />
 
       <div className="space-y-5">
 
-        {/* ── Weapon Perks (all multiplicative) ── */}
+        {/* ── Weapon Perks — only visible when a perk with a buff is equipped ── */}
         <div>
           <SectionLabel
             label="Weapon Perks"
-            count={_weaponPerkBuffs.filter((b) => activeSet.has(b.hash)).length}
+            count={visiblePerkBuffs.filter((b) => activeSet.has(b.hash)).length}
           />
-          <div className="space-y-1.5">
-            {_weaponPerkBuffs.map((buff) => (
-              <BuffButton
-                key={buff.hash}
-                buff={buff}
-                isActive={activeSet.has(buff.hash)}
-                isLinkedToPerk={linkedBuffKeys.has(buff.hash)}
-                linkedPerk={linkedPerkByBuffKey.get(buff.hash) ?? null}
-                isOverridden={false}
-                onToggle={() => toggleBuff(buff.hash)}
-              />
-            ))}
-          </div>
-          {linkedBuffKeys.size > 0 && (
-            <p className="text-[10px] text-slate-600 mt-1.5">
-              <span className="text-emerald-500">AUTO</span> = buff auto-toggled when perk is selected.
+          {visiblePerkBuffs.length === 0 ? (
+            <p className="text-xs text-slate-600 italic py-2">
+              Equip weapon perks to see their damage buffs here.
             </p>
+          ) : (
+            <div className="space-y-1.5">
+              {visiblePerkBuffs.map((buff) => {
+                const linkedPerk = linkedPerkByBuffKey.get(buff.hash) ?? null;
+                const clarityDesc = linkedPerk
+                  ? getClarityText(clarityData, linkedPerk.hash)
+                  : null;
+                const stackIndex = buffStacks[buff.hash] ?? (buff.stacks ? buff.stacks.length - 1 : 0);
+                return (
+                  <BuffRow
+                    key={buff.hash}
+                    buff={buff}
+                    isActive={activeSet.has(buff.hash)}
+                    isOverridden={false}
+                    linkedPerk={linkedPerk}
+                    clarityDesc={clarityDesc}
+                    activeStackIndex={stackIndex}
+                    onToggle={() => toggleBuff(buff.hash)}
+                    onSelectStack={(idx) => setBuffStack(buff.hash, idx)}
+                  />
+                );
+              })}
+            </div>
           )}
         </div>
 
@@ -315,18 +425,19 @@ export const BuffToggle: React.FC = () => {
           />
           <div className="space-y-1.5">
             {_empoweringBuffs.map((buff) => {
-              const isActive = activeSet.has(buff.hash);
-              const hasAnyActive = winningEmpowering !== null;
-              const isOverridden = isActive && hasAnyActive && buff.hash !== winningEmpowering;
+              const isActive    = activeSet.has(buff.hash);
+              const isOverridden = isActive && winningEmpowering !== null && buff.hash !== winningEmpowering;
               return (
-                <BuffButton
+                <BuffRow
                   key={buff.hash}
                   buff={buff}
                   isActive={isActive}
-                  isLinkedToPerk={false}
-                  linkedPerk={null}
                   isOverridden={isOverridden}
+                  linkedPerk={null}
+                  clarityDesc={null}
+                  activeStackIndex={0}
                   onToggle={() => toggleBuff(buff.hash)}
+                  onSelectStack={() => {}}
                 />
               );
             })}
@@ -342,18 +453,19 @@ export const BuffToggle: React.FC = () => {
           />
           <div className="space-y-1.5">
             {_debuffBuffs.map((buff) => {
-              const isActive = activeSet.has(buff.hash);
-              const hasAnyActive = winningDebuff !== null;
-              const isOverridden = isActive && hasAnyActive && buff.hash !== winningDebuff;
+              const isActive    = activeSet.has(buff.hash);
+              const isOverridden = isActive && winningDebuff !== null && buff.hash !== winningDebuff;
               return (
-                <BuffButton
+                <BuffRow
                   key={buff.hash}
                   buff={buff}
                   isActive={isActive}
-                  isLinkedToPerk={false}
-                  linkedPerk={null}
                   isOverridden={isOverridden}
+                  linkedPerk={null}
+                  clarityDesc={null}
+                  activeStackIndex={0}
                   onToggle={() => toggleBuff(buff.hash)}
+                  onSelectStack={() => {}}
                 />
               );
             })}

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Weapon, StatMap, GameMode, WeaponGroup } from '../types/weapon';
-import { BUFF_DATABASE } from '../lib/buffDatabase';
+import { BUFF_DATABASE, getBuffMultiplier } from '../lib/buffDatabase';
 
 // ─── Weapon Mods ────────────────────────────────────────────────────────────
 
@@ -207,6 +207,8 @@ interface WeaponState {
   variantGroup: Weapon[];
   selectedPerks: Record<string, string>;
   activeBuffs: string[];
+  /** 0-based stack index per stackable buff hash (e.g. "rampage" → 2 = ×3) */
+  buffStacks: Record<string, number>;
   mode: GameMode;
 
   // Roll customisation
@@ -230,6 +232,8 @@ interface WeaponState {
   selectPerk: (columnName: string, perkHash: string) => void;
   clearPerk: (columnName: string) => void;
   toggleBuff: (buffHash: string) => void;
+  /** Set the active stack index (0-based) for a stackable buff */
+  setBuffStack: (buffHash: string, stackIndex: number) => void;
   setMode: (mode: GameMode) => void;
   setMasterworkStat: (stat: MasterworkStat | null) => void;
   toggleCrafted: () => void;
@@ -248,6 +252,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
   variantGroup: [],
   selectedPerks: {},
   activeBuffs: [],
+  buffStacks: {},
   mode: 'pve',
 
   masterworkStat: null,
@@ -263,6 +268,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       variantGroup: group ?? [weapon],
       selectedPerks: {},
       activeBuffs: [],
+      buffStacks: {},
       masterworkStat: null,
       isCrafted: false,
       activeMod: WEAPON_MODS[0],
@@ -293,14 +299,16 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       const newPerk = resolvePerk(perkHash);
 
       let activeBuffs = [...state.activeBuffs];
+      let buffStacks  = { ...state.buffStacks };
+      // When a perk is deselected/replaced, remove its buff from activeBuffs.
       if (oldPerk?.buffKey && activeBuffs.includes(oldPerk.buffKey)) {
         activeBuffs = activeBuffs.filter((b) => b !== oldPerk.buffKey);
+        const { [oldPerk.buffKey]: _removed, ...restStacks } = buffStacks;
+        buffStacks = restStacks;
       }
-      if (newPerk?.buffKey && !activeBuffs.includes(newPerk.buffKey)) {
-        activeBuffs = [...activeBuffs, newPerk.buffKey];
-      }
+      // Do NOT auto-enable the new perk's buff — user enables manually in Damage Buffs panel.
 
-      return { selectedPerks: { ...state.selectedPerks, [columnName]: perkHash }, activeBuffs };
+      return { selectedPerks: { ...state.selectedPerks, [columnName]: perkHash }, activeBuffs, buffStacks };
     }),
 
   clearPerk: (columnName) =>
@@ -317,17 +325,40 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
         : null;
 
       let activeBuffs = [...state.activeBuffs];
-      if (oldPerk?.buffKey) activeBuffs = activeBuffs.filter((b) => b !== oldPerk.buffKey);
+      let buffStacks  = { ...state.buffStacks };
+      if (oldPerk?.buffKey) {
+        activeBuffs = activeBuffs.filter((b) => b !== oldPerk.buffKey);
+        const { [oldPerk.buffKey]: _removed, ...restStacks } = buffStacks;
+        buffStacks = restStacks;
+      }
 
       const { [columnName]: _removed, ...rest } = state.selectedPerks;
-      return { selectedPerks: rest, activeBuffs };
+      return { selectedPerks: rest, activeBuffs, buffStacks };
     }),
 
   toggleBuff: (buffHash) =>
+    set((state) => {
+      const isActive = state.activeBuffs.includes(buffHash);
+      if (isActive) {
+        // Deactivate — also clear the saved stack index
+        const { [buffHash]: _removed, ...restStacks } = state.buffStacks;
+        return {
+          activeBuffs: state.activeBuffs.filter((h) => h !== buffHash),
+          buffStacks: restStacks,
+        };
+      }
+      // Activate — default stackable buffs to max stack (last index)
+      const buff = BUFF_DATABASE[buffHash];
+      const buffStacks = { ...state.buffStacks };
+      if (buff?.stacks?.length) {
+        buffStacks[buffHash] = buff.stacks.length - 1;
+      }
+      return { activeBuffs: [...state.activeBuffs, buffHash], buffStacks };
+    }),
+
+  setBuffStack: (buffHash, stackIndex) =>
     set((state) => ({
-      activeBuffs: state.activeBuffs.includes(buffHash)
-        ? state.activeBuffs.filter((h) => h !== buffHash)
-        : [...state.activeBuffs, buffHash],
+      buffStacks: { ...state.buffStacks, [buffHash]: stackIndex },
     })),
 
   setMode: (mode) => set({ mode }),
@@ -417,7 +448,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
   },
 
   getDamageMultiplier: () => {
-    const { activeBuffs, activeMod, surgeStacks, mode, weaponsStat } = get();
+    const { activeBuffs, buffStacks, activeMod, surgeStacks, mode, weaponsStat } = get();
 
     // Weapon perk buffs stack multiplicatively with each other.
     // Empowering buffs are mutually exclusive — only the highest applies.
@@ -429,12 +460,13 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
     for (const hash of activeBuffs) {
       const buff = BUFF_DATABASE[hash];
       if (!buff) continue;
+      const mult = getBuffMultiplier(buff, buffStacks[hash]);
       if (buff.stackType === 'multiplicative') {
-        multiplicative *= buff.multiplier;
+        multiplicative *= mult;
       } else if (buff.stackType === 'empowering') {
-        if (buff.multiplier > maxEmpowering) maxEmpowering = buff.multiplier;
+        if (mult > maxEmpowering) maxEmpowering = mult;
       } else if (buff.stackType === 'debuff') {
-        if (buff.multiplier > maxDebuff) maxDebuff = buff.multiplier;
+        if (mult > maxDebuff) maxDebuff = mult;
       }
     }
 

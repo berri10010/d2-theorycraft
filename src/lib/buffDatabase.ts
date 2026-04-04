@@ -10,6 +10,16 @@ export type BuffCategory = 'weapon_perk' | 'subclass' | 'debuff';
  */
 export type StackType = 'multiplicative' | 'empowering' | 'debuff';
 
+/** One level of a stackable perk buff (e.g. Rampage ×1, ×2, ×3) */
+export interface BuffStack {
+  /** Stack count shown in the game (e.g. 1, 2, 3 for Rampage) */
+  count: number;
+  /** Short display label (e.g. "×1", "×2") */
+  label: string;
+  /** Damage multiplier at this stack level */
+  multiplier: number;
+}
+
 export interface DamageBuff {
   hash: string;
   name: string;
@@ -17,16 +27,26 @@ export interface DamageBuff {
   category: BuffCategory;
   /** Stacking rule — see StackType */
   stackType: StackType;
+  /**
+   * Default / max multiplier.
+   * For stackable perks this is the max-stack value; the active stack is
+   * resolved via the `stacks` array + `buffStacks` in the weapon store.
+   */
   multiplier: number;
   description: string;
-  /** Perk names that auto-activate this buff when selected */
+  /** Perk names that link this buff when the perk is selected */
   perkNames: string[];
   /**
    * Bungie CDN icon path (relative, without root).
-   * For weapon_perk buffs this is typically null — the UI uses the live perk icon instead.
+   * For weapon_perk buffs this is null — the UI uses the live perk icon instead.
    * For subclass buffs this is the ability icon from the manifest.
    */
   icon?: string | null;
+  /**
+   * Discrete stack levels for perks that ramp (e.g. Rampage ×1/×2/×3).
+   * When present the UI shows a stack selector instead of a single toggle.
+   */
+  stacks?: BuffStack[];
 }
 
 export const BUFF_DATABASE = buffData as Record<string, DamageBuff>;
@@ -37,4 +57,15 @@ export function getBuffKeyForPerk(perkName: string): string | null {
     if (buff.perkNames.includes(perkName)) return key;
   }
   return null;
+}
+
+/**
+ * Returns the effective multiplier for a buff, accounting for the active stack level.
+ * @param buff        The buff definition
+ * @param stackIndex  0-based index into buff.stacks (from buffStacks store state). Defaults to last (max).
+ */
+export function getBuffMultiplier(buff: DamageBuff, stackIndex?: number): number {
+  if (!buff.stacks?.length) return buff.multiplier;
+  const idx = stackIndex ?? buff.stacks.length - 1;
+  return buff.stacks[Math.max(0, Math.min(idx, buff.stacks.length - 1))]?.multiplier ?? buff.multiplier;
 }

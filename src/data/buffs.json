@@ -51,7 +51,7 @@
   },
   "target_lock": {
     "hash": "target_lock",
-    "name": "Target Lock (Max)",
+    "name": "Target Lock",
     "category": "weapon_perk",
     "stackType": "multiplicative",
     "multiplier": 1.40,
@@ -59,55 +59,85 @@
     "perkNames": ["Target Lock", "Enhanced Target Lock"],
     "icon": null
   },
-  "golden_tricorn_x2": {
-    "hash": "golden_tricorn_x2",
-    "name": "Golden Tricorn ×2",
-    "category": "weapon_perk",
-    "stackType": "multiplicative",
-    "multiplier": 1.15,
-    "description": "×2 stack (weapon kill of matching element): +15% damage.",
-    "perkNames": [],
-    "icon": null
-  },
-  "golden_tricorn_x3": {
-    "hash": "golden_tricorn_x3",
-    "name": "Golden Tricorn ×3",
-    "category": "weapon_perk",
-    "stackType": "multiplicative",
-    "multiplier": 1.50,
-    "description": "×3 stack (ability kill of matching element): +50% damage.",
-    "perkNames": ["Golden Tricorn", "Enhanced Golden Tricorn"],
-    "icon": null
-  },
-  "rampage_x1": {
-    "hash": "rampage_x1",
-    "name": "Rampage ×1",
-    "category": "weapon_perk",
-    "stackType": "multiplicative",
-    "multiplier": 1.10,
-    "description": "1 stack (1 kill): +10% damage for a short duration.",
-    "perkNames": [],
-    "icon": null
-  },
-  "rampage_x2": {
-    "hash": "rampage_x2",
-    "name": "Rampage ×2",
-    "category": "weapon_perk",
-    "stackType": "multiplicative",
-    "multiplier": 1.20,
-    "description": "2 stacks (2 rapid kills): +20% damage.",
-    "perkNames": [],
-    "icon": null
-  },
-  "rampage_x3": {
-    "hash": "rampage_x3",
-    "name": "Rampage ×3",
+  "rampage": {
+    "hash": "rampage",
+    "name": "Rampage",
     "category": "weapon_perk",
     "stackType": "multiplicative",
     "multiplier": 1.30,
-    "description": "3 stacks (3 rapid kills): +30% damage.",
+    "description": "Kills grant a stacking damage bonus that resets on reload.",
     "perkNames": ["Rampage", "Enhanced Rampage"],
-    "icon": null
+    "icon": null,
+    "stacks": [
+      { "count": 1, "label": "×1", "multiplier": 1.10 },
+      { "count": 2, "label": "×2", "multiplier": 1.20 },
+      { "count": 3, "label": "×3", "multiplier": 1.30 }
+    ]
+  },
+  "golden_tricorn": {
+    "hash": "golden_tricorn",
+    "name": "Golden Tricorn",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.50,
+    "description": "×2 from a weapon kill of matching element (+15%). ×3 from an ability kill of matching element (+50%).",
+    "perkNames": ["Golden Tricorn", "Enhanced Golden Tricorn"],
+    "icon": null,
+    "stacks": [
+      { "count": 2, "label": "×2", "multiplier": 1.15 },
+      { "count": 3, "label": "×3", "multiplier": 1.50 }
+    ]
+  },
+  "swashbuckler": {
+    "hash": "swashbuckler",
+    "name": "Swashbuckler",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.33,
+    "description": "Melee kills or rapid weapon kills grant a stacking damage bonus up to ×5.",
+    "perkNames": ["Swashbuckler", "Enhanced Swashbuckler"],
+    "icon": null,
+    "stacks": [
+      { "count": 1, "label": "×1", "multiplier": 1.066 },
+      { "count": 2, "label": "×2", "multiplier": 1.132 },
+      { "count": 3, "label": "×3", "multiplier": 1.20 },
+      { "count": 4, "label": "×4", "multiplier": 1.266 },
+      { "count": 5, "label": "×5", "multiplier": 1.33 }
+    ]
+  },
+  "adrenaline_junkie": {
+    "hash": "adrenaline_junkie",
+    "name": "Adrenaline Junkie",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.25,
+    "description": "Grenade kills or rapid weapon kills grant a stacking damage bonus up to ×5.",
+    "perkNames": ["Adrenaline Junkie", "Enhanced Adrenaline Junkie"],
+    "icon": null,
+    "stacks": [
+      { "count": 1, "label": "×1", "multiplier": 1.05 },
+      { "count": 2, "label": "×2", "multiplier": 1.10 },
+      { "count": 3, "label": "×3", "multiplier": 1.15 },
+      { "count": 4, "label": "×4", "multiplier": 1.20 },
+      { "count": 5, "label": "×5", "multiplier": 1.25 }
+    ]
+  },
+  "successful_warm_up": {
+    "hash": "successful_warm_up",
+    "name": "Successful Warm-Up",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.33,
+    "description": "Rapid kills build stacks granting up to +33% damage on linear fusion rifles.",
+    "perkNames": ["Successful Warm-Up", "Enhanced Successful Warm-Up"],
+    "icon": null,
+    "stacks": [
+      { "count": 1, "label": "×1", "multiplier": 1.066 },
+      { "count": 2, "label": "×2", "multiplier": 1.132 },
+      { "count": 3, "label": "×3", "multiplier": 1.20 },
+      { "count": 4, "label": "×4", "multiplier": 1.266 },
+      { "count": 5, "label": "×5", "multiplier": 1.33 }
+    ]
   },
   "vorpal_weapon": {
     "hash": "vorpal_weapon",
@@ -127,16 +157,6 @@
     "multiplier": 1.25,
     "description": "+25% precision damage when near two or more allies aiming at the same target.",
     "perkNames": ["Firing Line", "Enhanced Firing Line"],
-    "icon": null
-  },
-  "swashbuckler_x5": {
-    "hash": "swashbuckler_x5",
-    "name": "Swashbuckler ×5",
-    "category": "weapon_perk",
-    "stackType": "multiplicative",
-    "multiplier": 1.33,
-    "description": "Max stacks (5 rapid kills or 4 kills + 1 melee): +33% damage.",
-    "perkNames": ["Swashbuckler", "Enhanced Swashbuckler"],
     "icon": null
   },
   "trench_barrel": {
@@ -169,26 +189,6 @@
     "perkNames": ["Desperado"],
     "icon": null
   },
-  "adrenaline_junkie_x5": {
-    "hash": "adrenaline_junkie_x5",
-    "name": "Adrenaline Junkie ×5",
-    "category": "weapon_perk",
-    "stackType": "multiplicative",
-    "multiplier": 1.25,
-    "description": "Max stacks (5 grenade kills or rapid weapon kills): +25% damage.",
-    "perkNames": ["Adrenaline Junkie", "Enhanced Adrenaline Junkie"],
-    "icon": null
-  },
-  "successful_warm_up": {
-    "hash": "successful_warm_up",
-    "name": "Successful Warm-Up (Max)",
-    "category": "weapon_perk",
-    "stackType": "multiplicative",
-    "multiplier": 1.33,
-    "description": "Max stacks (5 rapid kills): +33% damage on linear fusion rifles.",
-    "perkNames": ["Successful Warm-Up", "Enhanced Successful Warm-Up"],
-    "icon": null
-  },
   "high_ground": {
     "hash": "high_ground",
     "name": "High Ground",
@@ -205,7 +205,7 @@
     "category": "subclass",
     "stackType": "empowering",
     "multiplier": 1.10,
-    "description": "Solar subclass empowering buff. +10% weapon damage against all targets. Does not stack with other empowering buffs.",
+    "description": "Solar subclass buff. +10% weapon damage against all targets.",
     "perkNames": [],
     "icon": "/common/destiny2_content/icons/b64f3e4292e7ea33b41f9cb9f9fc0a3a.png"
   },
@@ -215,7 +215,7 @@
     "category": "subclass",
     "stackType": "empowering",
     "multiplier": 1.20,
-    "description": "Warlock empowering rift. +20% weapon damage while active. Does not stack with other empowering buffs.",
+    "description": "Warlock empowering rift. +20% weapon damage while active.",
     "perkNames": [],
     "icon": "/common/destiny2_content/icons/a5b95ab7a14611ccb09c388fecf33c2c.png"
   },
@@ -225,7 +225,7 @@
     "category": "subclass",
     "stackType": "empowering",
     "multiplier": 1.25,
-    "description": "Titan Ward of Dawn bubble perk. +25% weapon damage for all guardians inside. Does not stack with other empowering buffs.",
+    "description": "Titan Ward of Dawn. +25% weapon damage for all Guardians inside the bubble.",
     "perkNames": [],
     "icon": "/common/destiny2_content/icons/0e9a7c1e83ec40d4bf2f8699c0f89f9b.png"
   },
@@ -235,7 +235,7 @@
     "category": "subclass",
     "stackType": "empowering",
     "multiplier": 1.25,
-    "description": "Warlock Well of Radiance super. +25% weapon damage while standing in the well. Does not stack with other empowering buffs.",
+    "description": "Warlock Well of Radiance super. +25% weapon damage while standing in the well.",
     "perkNames": [],
     "icon": null
   },
@@ -245,7 +245,7 @@
     "category": "subclass",
     "stackType": "empowering",
     "multiplier": 1.35,
-    "description": "Titan Banner Shield super. +35% weapon damage for allies near the banner. Does not stack with other empowering buffs.",
+    "description": "Titan Banner Shield super. +35% weapon damage for allies near the banner.",
     "perkNames": [],
     "icon": null
   },
@@ -255,7 +255,7 @@
     "category": "subclass",
     "stackType": "empowering",
     "multiplier": 1.35,
-    "description": "Lumina exotic hand cannon. Allies receiving Noble Rounds get +35% weapon damage. Does not stack with other empowering buffs.",
+    "description": "Lumina exotic hand cannon. Allies receiving Noble Rounds gain +35% weapon damage.",
     "perkNames": [],
     "icon": null
   },
@@ -265,7 +265,7 @@
     "category": "debuff",
     "stackType": "debuff",
     "multiplier": 1.15,
-    "description": "Void debuff on the target. Weakened enemies take +15% damage from all sources. Applied by Hunter tether (partial), Volatile Rounds, and various exotic perks.",
+    "description": "Void debuff. Weakened enemies take +15% increased damage from all sources.",
     "perkNames": [],
     "icon": null
   },
@@ -275,7 +275,7 @@
     "category": "debuff",
     "stackType": "debuff",
     "multiplier": 1.30,
-    "description": "Void Hunter Shadowshot super. Tethered enemies take +30% damage from all sources.",
+    "description": "Void Hunter Shadowshot super. Tethered enemies take +30% increased damage from all sources.",
     "perkNames": [],
     "icon": null
   },
@@ -285,7 +285,7 @@
     "category": "debuff",
     "stackType": "debuff",
     "multiplier": 1.15,
-    "description": "Divinity exotic trace rifle. Targets caught in the cage take +15% damage and have a large, easily crittable weak point.",
+    "description": "Divinity exotic trace rifle. Targets caught in the cage take +15% increased damage.",
     "perkNames": [],
     "icon": null
   }
