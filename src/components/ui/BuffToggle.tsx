@@ -139,15 +139,15 @@ function SectionLabel({ label, count, note }: { label: string; count?: number; n
 
 // ─── Combined multiplier breakdown ───────────────────────────────────────────
 
-function MultiplierBreakdown({ activeSet }: { activeSet: Set<string> }) {
+function MultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] }) {
   const { perkMult, empoweringMult, debuffMult, total } = useMemo(() => {
-    let perkMult      = 1;
+    let perkMult       = 1;
     let empoweringMult = 1;
-    let debuffMult    = 1;
+    let debuffMult     = 1;
 
-    for (const hash of activeSet) {
+    activeBuffs.forEach((hash) => {
       const buff = BUFF_DATABASE[hash];
-      if (!buff) continue;
+      if (!buff) return;
       if (buff.stackType === 'multiplicative') {
         perkMult *= buff.multiplier;
       } else if (buff.stackType === 'empowering') {
@@ -155,10 +155,10 @@ function MultiplierBreakdown({ activeSet }: { activeSet: Set<string> }) {
       } else if (buff.stackType === 'debuff') {
         if (buff.multiplier > debuffMult) debuffMult = buff.multiplier;
       }
-    }
+    });
 
     return { perkMult, empoweringMult, debuffMult, total: perkMult * empoweringMult * debuffMult };
-  }, [activeSet]);
+  }, [activeBuffs]);
 
   if (total === 1) return null;
 
@@ -239,29 +239,29 @@ export const BuffToggle: React.FC = () => {
   const winningEmpowering = useMemo(() => {
     let winner: string | null = null;
     let best = 0;
-    for (const hash of activeSet) {
+    activeBuffs.forEach((hash) => {
       const buff = BUFF_DATABASE[hash];
       if (buff?.stackType === 'empowering' && buff.multiplier > best) {
         best = buff.multiplier;
         winner = hash;
       }
-    }
+    });
     return winner;
-  }, [activeSet]);
+  }, [activeBuffs]);
 
   // Same for debuffs.
   const winningDebuff = useMemo(() => {
     let winner: string | null = null;
     let best = 0;
-    for (const hash of activeSet) {
+    activeBuffs.forEach((hash) => {
       const buff = BUFF_DATABASE[hash];
       if (buff?.stackType === 'debuff' && buff.multiplier > best) {
         best = buff.multiplier;
         winner = hash;
       }
-    }
+    });
     return winner;
-  }, [activeSet]);
+  }, [activeBuffs]);
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
@@ -276,7 +276,7 @@ export const BuffToggle: React.FC = () => {
       </div>
 
       {/* Combined multiplier breakdown */}
-      <MultiplierBreakdown activeSet={activeSet} />
+      <MultiplierBreakdown activeBuffs={activeBuffs} />
 
       <div className="space-y-5">
 
