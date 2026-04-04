@@ -52,6 +52,45 @@ function cardBorderClass(
   return 'border-white/10';
 }
 
+/**
+ * Compute the Destiny 2 "Year" from a season number.
+ *   Seasons 1–3  → Year 1 (base game + first two DLCs)
+ *   Season 4+    → each group of 4 seasons = one year
+ *   e.g. S4–7 = Year 2, S8–11 = Year 3 … S24–27 = Year 7
+ */
+function d2Year(seasonNumber: number): number {
+  if (seasonNumber <= 3) return 1;
+  return Math.floor((seasonNumber - 4) / 4) + 2;
+}
+
+/**
+ * Build the full season label displayed under the weapon name.
+ * Examples:
+ *   S26, "Heresy"  → "Episode: Heresy (Season 26, Year 7)"
+ *   S17, "Haunted" → "Haunted (Season 17, Year 5)"
+ *   null, null     → null (nothing shown)
+ */
+function formatSeasonLabel(
+  seasonName: string | null,
+  seasonNumber: number | null,
+): string | null {
+  if (!seasonName && seasonNumber === null) return null;
+
+  // D2 switched from "Seasons" to "Episodes" starting with season 24.
+  const isEpisode = seasonNumber !== null && seasonNumber >= 24;
+  const displayName = isEpisode
+    ? `Episode: ${seasonName}`
+    : (seasonName ?? `Season ${seasonNumber}`);
+
+  const suffix: string[] = [];
+  if (seasonNumber !== null) {
+    suffix.push(`Season ${seasonNumber}`);
+    suffix.push(`Year ${d2Year(seasonNumber)}`);
+  }
+
+  return suffix.length ? `${displayName} (${suffix.join(', ')})` : displayName;
+}
+
 export const WeaponHeader: React.FC = () => {
   const { activeWeapon, variantGroup, loadWeapon, isCrafted, toggleCrafted } = useWeaponStore(
     useShallow((s) => ({
@@ -84,29 +123,35 @@ export const WeaponHeader: React.FC = () => {
   const rarityClass = activeWeapon.rarity ? (RARITY_COLORS[activeWeapon.rarity] ?? RARITY_COLORS.Common) : '';
   const hasScreenshot = !!activeWeapon.screenshot && !imgError;
   const hasVariants = variantGroup.length > 1;
+  const seasonLabel = formatSeasonLabel(activeWeapon.seasonName, activeWeapon.seasonNumber);
 
   return (
-    <div className="relative rounded-xl overflow-hidden border border-white/10">
-      {/* Weapon artwork banner — full width, natural aspect ratio, no cropping */}
+    <div className={`relative rounded-xl overflow-hidden border ${cardBorderClass(activeWeapon, isCrafted)}`}>
+
+      {/* ── Background banner ─────────────────────────────────────────────────
+          Positioned absolute so it fills the entire card behind all content.
+          Covers both top corners. Gradient fades to near-black at the bottom
+          so text content remains readable.                                    */}
       {hasScreenshot && (
-        <div className="relative w-full bg-black" style={{ aspectRatio: '16/6' }}>
+        <div className="absolute inset-0 pointer-events-none select-none">
           <Image
             src={activeWeapon.screenshot!}
-            alt={`${activeWeapon.name} artwork`}
+            alt=""
             fill
             sizes="(max-width: 768px) 100vw, 900px"
-            className="object-contain object-center"
+            className="object-cover object-center"
             unoptimized
             onError={() => setImgError(true)}
           />
-          {/* Fade edges so content below blends in */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/60" />
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black to-transparent" />
+          {/* Light uniform overlay — keeps the image visible but not distracting */}
+          <div className="absolute inset-0 bg-black/30" />
+          {/* Strong bottom fade — ensures text/UI at the bottom is always readable */}
+          <div className="absolute inset-x-0 bottom-0 h-4/5 bg-gradient-to-t from-black/95 via-black/70 to-transparent" />
         </div>
       )}
 
-      {/* Content — sits below the banner, no negative-margin overlap */}
-      <div className="relative bg-black/90 backdrop-blur-sm p-4 md:p-6">
+      {/* ── Card content — sits above the banner ──────────────────────────── */}
+      <div className={`relative p-4 md:p-6 min-h-[180px] ${!hasScreenshot ? 'bg-black/90 backdrop-blur-sm' : ''}`}>
         <div className="flex gap-4 items-start">
           {/* Weapon icon — border color matches card border */}
           <div className={`relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 shrink-0 bg-white/5 transition-colors duration-300 ${cardBorderClass(activeWeapon, isCrafted)}`}>
@@ -164,12 +209,10 @@ export const WeaponHeader: React.FC = () => {
               {activeWeapon.baseName}
             </h2>
             <p className="text-slate-400 text-sm">{activeWeapon.itemTypeDisplayName}</p>
-            {(activeWeapon.seasonName || activeWeapon.seasonNumber) && (
-              <p className="text-xs text-slate-500">
-                {activeWeapon.seasonName
-                  ? activeWeapon.seasonName
-                  : `Season ${activeWeapon.seasonNumber}`}
-              </p>
+
+            {/* Season / Episode label */}
+            {seasonLabel && (
+              <p className="text-xs text-slate-400/80">{seasonLabel}</p>
             )}
 
             {/* Variant selector + crafted toggle row */}
@@ -187,9 +230,7 @@ export const WeaponHeader: React.FC = () => {
                       onClick={() => {
                         if (isAdeptSelected) {
                           loadWeapon(baseVariant, variantGroup);
-                          // isCrafted already false after loadWeapon
                         } else {
-                          // Switching to Adept clears crafted (mutual exclusivity)
                           loadWeapon(adeptVariant, variantGroup);
                         }
                       }}
@@ -232,14 +273,10 @@ export const WeaponHeader: React.FC = () => {
                   >
                     {variantGroup.map((variant) => {
                       const label = variant.variantLabel ?? 'Base';
-                      const season = variant.seasonName
-                        ? variant.seasonName
-                        : variant.seasonNumber
-                        ? `Season ${variant.seasonNumber}`
-                        : null;
+                      const sn = formatSeasonLabel(variant.seasonName, variant.seasonNumber);
                       return (
                         <option key={variant.hash} value={variant.hash}>
-                          {season ? `${season} · ${label}` : label}
+                          {sn ? `${sn} · ${label}` : label}
                         </option>
                       );
                     })}
@@ -250,7 +287,6 @@ export const WeaponHeader: React.FC = () => {
               {/* Crafted — only shown for weapons with a craftable pattern */}
               {activeWeapon.hasCraftedPattern && (
                 isCrafted ? (
-                  // Active: red button — click to turn off
                   <button
                     onClick={toggleCrafted}
                     title="Crafted mode active — click to disable"
@@ -262,16 +298,11 @@ export const WeaponHeader: React.FC = () => {
                     Crafted
                   </button>
                 ) : (
-                  // Inactive: subtle pill — click to enable crafted mode
-                  // If currently on Adept, switch to base first (mutual exclusivity)
                   <button
                     onClick={() => {
                       if (activeWeapon.isAdept) {
                         const base = variantGroup.find((v) => !v.variantLabel && !v.isAdept);
-                        if (base) {
-                          loadWeapon(base, variantGroup);
-                          // loadWeapon resets isCrafted→false; toggleCrafted immediately flips it to true
-                        }
+                        if (base) loadWeapon(base, variantGroup);
                       }
                       toggleCrafted();
                     }}
@@ -298,7 +329,7 @@ export const WeaponHeader: React.FC = () => {
 
         {/* Intrinsic trait */}
         {activeWeapon.intrinsicTrait && (
-          <div className="mt-4 flex gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
+          <div className="mt-4 flex gap-3 p-3 bg-black/50 rounded-lg border border-white/10 backdrop-blur-sm">
             <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
               <Image
                 src={BUNGIE_URL + activeWeapon.intrinsicTrait.icon}

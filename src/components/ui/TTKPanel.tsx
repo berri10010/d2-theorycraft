@@ -144,20 +144,42 @@ export const TTKPanel: React.FC = () => {
       )}
 
       {result ? (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-black/40 p-4 rounded-lg border border-white/10 flex flex-col items-center">
-            <span className="text-sm text-slate-400 mb-1">TTK</span>
-            <span className={
-              'text-3xl font-mono font-bold ' + (multiplier > 1 ? 'text-amber-400' : 'text-white')
-            }>
-              {result.ttk === 0 ? '1st shot' : `${result.ttk.toFixed(2)}s`}
-            </span>
-            <span className="text-xs text-slate-500 mt-2">{result.optimalPattern}</span>
+        <div className="space-y-3">
+          {/* TTK + Shot count */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-black/40 p-4 rounded-lg border border-white/10 flex flex-col items-center">
+              <span className="text-sm text-slate-400 mb-1">TTK</span>
+              <span className={
+                'text-3xl font-mono font-bold ' + (multiplier > 1 ? 'text-amber-400' : 'text-white')
+              }>
+                {result.ttk === 0 ? '1st shot' : `${result.ttk.toFixed(2)}s`}
+              </span>
+            </div>
+            <div className="bg-black/40 p-4 rounded-lg border border-white/10 flex flex-col items-center">
+              <span className="text-sm text-slate-400 mb-1">Shots</span>
+              <span className="text-3xl font-mono font-bold text-white">{result.shotsToKill}</span>
+              <span className="text-xs text-slate-500 mt-2">to kill</span>
+            </div>
           </div>
-          <div className="bg-black/40 p-4 rounded-lg border border-white/10 flex flex-col items-center">
-            <span className="text-sm text-slate-400 mb-1">Shots</span>
-            <span className="text-3xl font-mono font-bold text-white">{result.shotsToKill}</span>
-            <span className="text-xs text-slate-500 mt-2">to kill</span>
+
+          {/* Optimal headshot / bodyshot breakdown */}
+          <div className="bg-black/30 px-4 py-2.5 rounded-lg border border-white/10 flex items-center justify-between gap-3">
+            <span className="text-xs text-slate-500 shrink-0">Optimal pattern</span>
+            <div className="flex items-center gap-2 font-mono font-semibold text-sm">
+              {result.crits > 0 && (
+                <span className="text-amber-400">
+                  {result.crits}× Head
+                </span>
+              )}
+              {result.crits > 0 && result.bodies > 0 && (
+                <span className="text-slate-600">+</span>
+              )}
+              {result.bodies > 0 && (
+                <span className="text-slate-300">
+                  {result.bodies}× Body
+                </span>
+              )}
+            </div>
           </div>
         </div>
       ) : (
