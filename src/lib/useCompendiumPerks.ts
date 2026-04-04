@@ -7,7 +7,7 @@ let _promise: Promise<PerkDescriptionDatabase> | null = null;
 
 function load(): Promise<PerkDescriptionDatabase> {
   if (!_promise) {
-    _promise = fetch('/api/perk-descriptions')
+    _promise = fetch('/data/perk-descriptions.json')
       .then((r) => { if (!r.ok) throw new Error('perk-descriptions fetch failed'); return r.json() as Promise<PerkDescriptionDatabase>; })
       .then((d) => { _cache = d; return d; })
       .catch(() => {

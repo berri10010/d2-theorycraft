@@ -162,10 +162,10 @@ function WeaponSearch() {
 
   // Fetch weapons once on mount, then group them
   useEffect(() => {
-    fetch('/api/weapons')
+    fetch('/data/weapons.json')
       .then(r => r.json())
-      .then((data: { weapons?: WeaponResult[] }) => {
-        setGroups(groupWeapons(data.weapons ?? []));
+      .then((weapons: WeaponResult[]) => {
+        setGroups(groupWeapons(weapons ?? []));
         setLoaded(true);
       })
       .catch(() => setLoaded(true));

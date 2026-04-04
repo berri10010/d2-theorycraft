@@ -8,7 +8,7 @@ let _promise: Promise<GodRollDatabase> | null = null;
 
 function loadGodRolls(): Promise<GodRollDatabase> {
   if (!_promise) {
-    _promise = fetch('/api/god-rolls')
+    _promise = fetch('/data/god-rolls.json')
       .then((r) => {
         if (!r.ok) throw new Error(`god-rolls fetch failed: ${r.status}`);
         return r.json() as Promise<GodRollDatabase>;
@@ -23,7 +23,7 @@ function loadGodRolls(): Promise<GodRollDatabase> {
 
 /**
  * Returns the full PvE god-roll database.
- * The first call triggers a fetch from /api/god-rolls; subsequent renders
+ * The first call triggers a fetch of /data/god-rolls.json; subsequent renders
  * return from the module-level cache instantly.
  */
 export function useGodRolls(): { data: GodRollDatabase | null; loading: boolean } {

@@ -8,7 +8,7 @@ let _promise: Promise<ClarityDatabase> | null = null;
 
 function load(): Promise<ClarityDatabase> {
   if (!_promise) {
-    _promise = fetch('/api/clarity')
+    _promise = fetch('/data/clarity.json')
       .then((r) => {
         if (!r.ok) throw new Error('clarity fetch failed');
         return r.json() as Promise<ClarityDatabase>;
