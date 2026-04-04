@@ -1,7 +1,12 @@
 name = "d2theorycraft"
 compatibility_date = "2024-09-23"
 
-# Serve the fully static Next.js export from the out/ directory.
-# No Worker code — pure static asset hosting via Cloudflare's asset pipeline.
+# Explicit main entry — prevents Wrangler from trying to auto-configure the
+# Next.js adapter (which would fail on Next.js < 14.2.35). The Worker itself
+# does nothing except forward every request to the static asset store.
+main = "src/worker.ts"
+
+# All site files come from the Next.js static export (next build → out/).
 [assets]
 directory = "./out"
+binding = "ASSETS"
