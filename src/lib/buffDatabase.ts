@@ -1,13 +1,22 @@
 import buffData from '../data/buffs.json';
 
-export type BuffCategory = 'weapon_perk' | 'subclass' | 'mod';
+export type BuffCategory = 'weapon_perk' | 'subclass' | 'debuff';
+
+/**
+ * How this buff stacks with others:
+ * - multiplicative: all active perk buffs multiply together
+ * - empowering:     only the highest empowering buff applies (mutually exclusive)
+ * - debuff:         only the highest debuff applies (mutually exclusive)
+ */
+export type StackType = 'multiplicative' | 'empowering' | 'debuff';
 
 export interface DamageBuff {
   hash: string;
   name: string;
-  /** UI grouping: weapon_perk | subclass | mod */
+  /** UI grouping: weapon_perk | subclass | debuff */
   category: BuffCategory;
-  type: 'empowering' | 'perk' | 'surge';
+  /** Stacking rule — see StackType */
+  stackType: StackType;
   multiplier: number;
   description: string;
   /** Perk names that auto-activate this buff when selected */
@@ -15,7 +24,7 @@ export interface DamageBuff {
   /**
    * Bungie CDN icon path (relative, without root).
    * For weapon_perk buffs this is typically null — the UI uses the live perk icon instead.
-   * For subclass / mod buffs this is the ability/mod icon from the manifest.
+   * For subclass buffs this is the ability icon from the manifest.
    */
   icon?: string | null;
 }

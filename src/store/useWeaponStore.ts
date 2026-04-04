@@ -418,10 +418,27 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
 
   getDamageMultiplier: () => {
     const { activeBuffs, activeMod, surgeStacks, mode, weaponsStat } = get();
-    let multiplier = activeBuffs.reduce((total, hash) => {
+
+    // Weapon perk buffs stack multiplicatively with each other.
+    // Empowering buffs are mutually exclusive — only the highest applies.
+    // Debuffs are mutually exclusive — only the highest applies.
+    let multiplicative = 1;
+    let maxEmpowering  = 1;
+    let maxDebuff      = 1;
+
+    for (const hash of activeBuffs) {
       const buff = BUFF_DATABASE[hash];
-      return buff ? total * buff.multiplier : total;
-    }, 1);
+      if (!buff) continue;
+      if (buff.stackType === 'multiplicative') {
+        multiplicative *= buff.multiplier;
+      } else if (buff.stackType === 'empowering') {
+        if (buff.multiplier > maxEmpowering) maxEmpowering = buff.multiplier;
+      } else if (buff.stackType === 'debuff') {
+        if (buff.multiplier > maxDebuff) maxDebuff = buff.multiplier;
+      }
+    }
+
+    let multiplier = multiplicative * maxEmpowering * maxDebuff;
     // Weapon mod damage bonus
     multiplier *= activeMod.damageMultiplier;
 
