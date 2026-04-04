@@ -28,30 +28,46 @@ const CLASS_COLOURS: Record<string, string> = {
 
 /**
  * Renders a Clarity description as React nodes.
- * – className-only segments render as coloured inline text (e.g. "Solar" in orange).
- * – Text segments render as plain text fragments.
+ *
+ * The Clarity format interleaves className-only segments (element/ammo icons)
+ * with text segments.  A className segment is NOT rendered as its own word —
+ * instead it sets a pending colour that is applied to the immediately following
+ * text segment.  This avoids the double-word artefact ("SolarScorch",
+ * "PrimaryPrimary Weapons") that occurred when the icon label and the text
+ * were both emitted as separate children.
+ *
+ * Example:  [{classNames:["solar"]}, {text:"Scorch"}]
+ *   → <span style="color:orange">Scorch</span>   (not "SolarScorch")
  */
 function renderClarityDesc(entry: ClarityEntry): React.ReactNode {
-  const segments = (entry.descriptions?.en ?? []).flatMap((group, gi) =>
+  const allSegs = (entry.descriptions?.en ?? []).flatMap((group, gi) =>
     (group.linesContent ?? []).map((seg, si) => ({ seg, key: `${gi}-${si}` }))
   );
 
-  return segments.map(({ seg, key }) => {
-    if (seg.text) {
-      return <React.Fragment key={key}>{seg.text}</React.Fragment>;
-    }
+  const nodes: React.ReactNode[] = [];
+  let pendingColour: string | null = null;
+
+  for (const { seg, key } of allSegs) {
     if (seg.classNames?.length) {
-      const name   = seg.classNames[0];
-      const colour = CLASS_COLOURS[name] ?? '#94a3b8';
-      const label  = name.charAt(0).toUpperCase() + name.slice(1);
-      return (
-        <span key={key} style={{ color: colour }} className="font-semibold">
-          {label}
-        </span>
-      );
+      // Queue this element/ammo colour for the next text segment.
+      // If multiple className segments appear in a row, the last one wins.
+      const name = seg.classNames[0];
+      pendingColour = CLASS_COLOURS[name] ?? null;
+    } else if (seg.text) {
+      if (pendingColour) {
+        nodes.push(
+          <span key={key} style={{ color: pendingColour }} className="font-semibold">
+            {seg.text}
+          </span>
+        );
+        pendingColour = null;
+      } else {
+        nodes.push(<React.Fragment key={key}>{seg.text}</React.Fragment>);
+      }
     }
-    return null;
-  });
+  }
+
+  return nodes;
 }
 
 // ── StatDelta helper ──────────────────────────────────────────────────────────
