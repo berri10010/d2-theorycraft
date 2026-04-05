@@ -14,11 +14,20 @@ const CLARITY_URL =
 
 export interface ClarityLineContent {
   text?: string;
+  /** Element/ammo/mode class names (e.g. "solar", "primary", "pve", "link") */
   classNames?: string[];
+  /** Present on link-class segments */
+  link?: string;
 }
 
 export interface ClarityDescriptionGroup {
-  linesContent: ClarityLineContent[];
+  /** Inline content segments for this line */
+  linesContent?: ClarityLineContent[];
+  /**
+   * Some groups have no linesContent and only a top-level classNames array.
+   * e.g. {"classNames":["spacer"]} inserts a blank line between sections.
+   */
+  classNames?: string[];
 }
 
 export interface ClarityEntry {

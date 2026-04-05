@@ -27,45 +27,91 @@ const CLASS_COLOURS: Record<string, string> = {
 };
 
 /**
- * Renders a Clarity description as React nodes.
+ * Renders a Clarity description as React nodes with proper line breaks and
+ * coloured keywords.
  *
- * The Clarity format interleaves className-only segments (element/ammo icons)
- * with text segments.  A className segment is NOT rendered as its own word —
- * instead it sets a pending colour that is applied to the immediately following
- * text segment.  This avoids the double-word artefact ("SolarScorch",
- * "PrimaryPrimary Weapons") that occurred when the icon label and the text
- * were both emitted as separate children.
+ * The Clarity JSON has three distinct segment shapes:
  *
- * Example:  [{classNames:["solar"]}, {text:"Scorch"}]
- *   → <span style="color:orange">Scorch</span>   (not "SolarScorch")
+ *   A) {text, classNames}  — text WITH a class applied (e.g. "20%" + "pve").
+ *      The text IS the visible content; classNames gives it colour.
+ *      Previously this was treated as shape B (classNames-only), causing the
+ *      text to be silently dropped and values like "20%" to disappear.
+ *
+ *   B) {classNames}        — icon placeholder with no text (e.g. ammo type icon
+ *      before "Primary Weapons:"). The colour is queued and applied to the
+ *      immediately following plain-text segment so the icon word isn't doubled.
+ *
+ *   C) {text}              — plain text, rendered as-is (with any queued colour).
+ *
+ * Additionally, some groups carry a top-level {classNames:["spacer"]} instead
+ * of linesContent — those insert a blank line between sections.
+ *
+ * Each group (line) is separated by a <br /> so bullet lists and multi-
+ * sentence descriptions don't collapse into an unreadable wall of text.
  */
 function renderClarityDesc(entry: ClarityEntry): React.ReactNode {
-  const allSegs = (entry.descriptions?.en ?? []).flatMap((group, gi) =>
-    (group.linesContent ?? []).map((seg, si) => ({ seg, key: `${gi}-${si}` }))
-  );
-
   const nodes: React.ReactNode[] = [];
-  let pendingColour: string | null = null;
+  const groups = entry.descriptions?.en ?? [];
 
-  for (const { seg, key } of allSegs) {
-    if (seg.classNames?.length) {
-      // Queue this element/ammo colour for the next text segment.
-      // If multiple className segments appear in a row, the last one wins.
-      const name = seg.classNames[0];
-      pendingColour = CLASS_COLOURS[name] ?? null;
-    } else if (seg.text) {
-      if (pendingColour) {
-        nodes.push(
-          <span key={key} style={{ color: pendingColour }} className="font-semibold">
-            {seg.text}
-          </span>
-        );
-        pendingColour = null;
-      } else {
-        nodes.push(<React.Fragment key={key}>{seg.text}</React.Fragment>);
+  groups.forEach((group, gi) => {
+    // ── Group-level spacer (no linesContent) ──────────────────────────────
+    if (!group.linesContent?.length) {
+      // Spacer adds an extra blank line; any other top-level class is ignored.
+      if (group.classNames?.includes('spacer')) {
+        nodes.push(<br key={`spacer-${gi}`} />);
       }
+      return; // no line-break added here — the next group's separator handles it
     }
-  }
+
+    // ── Line break before every group after the first ─────────────────────
+    if (gi > 0) nodes.push(<br key={`br-${gi}`} />);
+
+    // ── Render inline segments ─────────────────────────────────────────────
+    let pendingColour: string | null = null;
+
+    group.linesContent.forEach((seg, si) => {
+      const key = `${gi}-${si}`;
+
+      if (seg.text && seg.classNames?.length) {
+        // Shape A — text + classNames: render the text with the class colour.
+        // "link" class renders as underlined text.
+        const cls = seg.classNames[0];
+        if (cls === 'link') {
+          nodes.push(
+            <span key={key} className="underline decoration-slate-500 text-slate-200">
+              {seg.text}
+            </span>
+          );
+        } else {
+          const colour = CLASS_COLOURS[cls];
+          nodes.push(colour
+            ? <span key={key} style={{ color: colour }} className="font-semibold">{seg.text}</span>
+            : <React.Fragment key={key}>{seg.text}</React.Fragment>
+          );
+        }
+        pendingColour = null; // a coloured segment resets any queued colour
+
+      } else if (seg.classNames?.length) {
+        // Shape B — icon placeholder only: queue colour for the next text segment.
+        // Multiple consecutive icon segments → last one wins.
+        const cls = seg.classNames[0];
+        pendingColour = CLASS_COLOURS[cls] ?? null;
+
+      } else if (seg.text) {
+        // Shape C — plain text, apply queued colour if present.
+        if (pendingColour) {
+          nodes.push(
+            <span key={key} style={{ color: pendingColour }} className="font-semibold">
+              {seg.text}
+            </span>
+          );
+          pendingColour = null;
+        } else {
+          nodes.push(<React.Fragment key={key}>{seg.text}</React.Fragment>);
+        }
+      }
+    });
+  });
 
   return nodes;
 }
