@@ -128,30 +128,29 @@ export const WeaponHeader: React.FC = () => {
   return (
     <div className={`relative rounded-xl overflow-hidden border ${cardBorderClass(activeWeapon, isCrafted)}`}>
 
-      {/* ── Background banner ─────────────────────────────────────────────────
-          Positioned absolute so it fills the entire card behind all content.
-          Covers both top corners. Gradient fades to near-black at the bottom
-          so text content remains readable.                                    */}
+      {/* ── Banner ────────────────────────────────────────────────────────────
+          Fixed 16:6 aspect ratio + object-contain so the weapon art is shown
+          in full without cropping. A very light uniform overlay keeps it from
+          being too blown-out, and only the bottom ~half fades to black so the
+          content section below blends in. Both top corners are covered.       */}
       {hasScreenshot && (
-        <div className="absolute inset-0 pointer-events-none select-none">
+        <div className="relative w-full bg-black pointer-events-none select-none" style={{ aspectRatio: '16/6' }}>
           <Image
             src={activeWeapon.screenshot!}
             alt=""
             fill
             sizes="(max-width: 768px) 100vw, 900px"
-            className="object-cover object-center"
+            className="object-contain object-center"
             unoptimized
             onError={() => setImgError(true)}
           />
-          {/* Light uniform overlay — keeps the image visible but not distracting */}
-          <div className="absolute inset-0 bg-black/30" />
-          {/* Strong bottom fade — ensures text/UI at the bottom is always readable */}
-          <div className="absolute inset-x-0 bottom-0 h-4/5 bg-gradient-to-t from-black/95 via-black/70 to-transparent" />
+          {/* Bottom fade only — no flat overlay so the image stays bright */}
+          <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black to-transparent" />
         </div>
       )}
 
-      {/* ── Card content — sits above the banner ──────────────────────────── */}
-      <div className={`relative p-4 md:p-6 min-h-[180px] ${!hasScreenshot ? 'bg-black/90 backdrop-blur-sm' : ''}`}>
+      {/* ── Card content — overlaps the bottom of the banner ─────────────── */}
+      <div className={`relative p-4 md:p-6 ${hasScreenshot ? '-mt-10 bg-black/70' : 'bg-black/90 backdrop-blur-sm'}`}>
         <div className="flex gap-4 items-start">
           {/* Weapon icon — border color matches card border */}
           <div className={`relative w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 shrink-0 bg-white/5 transition-colors duration-300 ${cardBorderClass(activeWeapon, isCrafted)}`}>
