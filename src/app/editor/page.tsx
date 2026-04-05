@@ -11,17 +11,12 @@ import { RollEditor } from '../../components/weapon/RollEditor';
 import { EffectsPanel } from '../../components/weapon/EffectsPanel';
 import { StatDisplay } from '../../components/weapon/StatDisplay';
 import { BuffToggle } from '../../components/ui/BuffToggle';
-import { TTKPanel } from '../../components/ui/TTKPanel';
 import { ComparisonGrid } from '../../components/compare/ComparisonGrid';
 import { groupWeapons } from '../../lib/weaponGroups';
 import { GodRollPanel } from '../../components/weapon/GodRollPanel';
-import { AmmoPanel } from '../../components/weapon/AmmoPanel';
-import { MasterworkPanel } from '../../components/weapon/MasterworkPanel';
-import { DamageFalloffGraph } from '../../components/weapon/DamageFalloffGraph';
 import { WishlistPanel } from '../../components/weapon/WishlistPanel';
-import { ArmorModPanel } from '../../components/weapon/ArmorModPanel';
-import { SubclassVerbPanel } from '../../components/weapon/SubclassVerbPanel';
 import { SimilarWeaponsPanel } from '../../components/weapon/SimilarWeaponsPanel';
+import { WeaponDataPanel } from '../../components/weapon/WeaponDataPanel';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
 import { MasterworkStat } from '../../store/useWeaponStore';
 
@@ -328,12 +323,7 @@ function Dashboard() {
                 {/* ── Right column ───────────────────────── */}
                 <div className="lg:col-span-5 space-y-6">
                   <StatDisplay />
-                  <AmmoPanel />
-                  <DamageFalloffGraph />
-                  <MasterworkPanel />
-                  <ArmorModPanel />
-                  {mode === 'pvp' && <TTKPanel />}
-                  {mode === 'pve' && <SubclassVerbPanel />}
+                  <WeaponDataPanel />
                   <SimilarWeaponsPanel />
                 </div>
               </div>
