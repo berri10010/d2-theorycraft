@@ -31,7 +31,7 @@ function getClarityText(clarityData: ClarityDatabase | null, perkHash: string | 
   if (!entry?.descriptions?.en?.length) return null;
   const parts: string[] = [];
   for (const group of entry.descriptions.en) {
-    for (const seg of group.linesContent) {
+    for (const seg of group.linesContent ?? []) {
       if (seg.text) parts.push(seg.text);
     }
     // Only take the first group (one line)
