@@ -40,6 +40,31 @@ function write(name: string, data: unknown) {
   console.log(`  ✓ ${name} (${(bytes / 1024).toFixed(1)} KB)`);
 }
 
+// ── Manifest version cache ────────────────────────────────────────────────────
+//
+// The Bungie manifest DB is ~24 MB.  We cache the last-seen version string in
+// .next/cache/bungie-manifest-version (preserved between Vercel builds) and
+// skip the heavy table downloads when the version hasn't changed.
+//
+// Cache location: .next/cache/ — Vercel restores this directory before every
+// build, making it the ideal place for persistent build-time caches.
+
+const NEXT_CACHE_DIR     = path.join(ROOT, '.next', 'cache');
+const MANIFEST_VER_CACHE = path.join(NEXT_CACHE_DIR, 'bungie-manifest-version');
+
+function readCachedManifestVersion(): string | null {
+  try {
+    return fs.readFileSync(MANIFEST_VER_CACHE, 'utf-8').trim();
+  } catch {
+    return null; // cache file doesn't exist yet — first build
+  }
+}
+
+function writeCachedManifestVersion(version: string): void {
+  fs.mkdirSync(NEXT_CACHE_DIR, { recursive: true });
+  fs.writeFileSync(MANIFEST_VER_CACHE, version, 'utf-8');
+}
+
 // ── Bungie API helpers ────────────────────────────────────────────────────────
 
 const BUNGIE_ROOT = 'https://www.bungie.net';
@@ -67,10 +92,23 @@ async function fetchTable(relativePath: string) {
 async function buildWeapons() {
   console.log('\n[weapons] Fetching Bungie manifest...');
 
+  // Fetch the lightweight manifest metadata first (~2 KB, always fast).
   const manifest = await bungieGet(`${BUNGIE_ROOT}/Platform/Destiny2/Manifest/`);
   const version  = manifest.Response.version as string;
   const paths    = manifest.Response.jsonWorldComponentContentPaths.en as Record<string, string>;
   console.log(`  Manifest version: ${version}`);
+
+  // ── Cache check: skip the ~24 MB table download if version unchanged ──────
+  const cachedVersion = readCachedManifestVersion();
+  if (cachedVersion === version && fs.existsSync(outPath('weapons.json'))) {
+    console.log(`  ✓ Manifest unchanged since last build — skipping table download`);
+    console.log(`    (delete .next/cache/bungie-manifest-version to force a refresh)`);
+    return;
+  }
+  if (cachedVersion && cachedVersion !== version) {
+    console.log(`  Manifest changed: ${cachedVersion} → ${version}`);
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   console.log('  Downloading tables (parallel)...');
   const [items, socketCategoryDefs, plugSetDefs, seasonDefs, dimWatermarkMap] = await Promise.all([
@@ -100,6 +138,10 @@ async function buildWeapons() {
   console.log(`  Parsed ${weapons.length} weapons`);
 
   write('weapons.json', weapons);
+
+  // Persist the version so the next build can skip this download if unchanged.
+  writeCachedManifestVersion(version);
+  console.log(`  Cached manifest version for next build`);
 }
 
 // ── Step 2: Clarity perk descriptions ────────────────────────────────────────
