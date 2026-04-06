@@ -19,6 +19,7 @@ import { SimilarWeaponsPanel } from '../../components/weapon/SimilarWeaponsPanel
 import { WeaponDataPanel } from '../../components/weapon/WeaponDataPanel';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
 import { MasterworkStat } from '../../store/useWeaponStore';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 function MenuIcon({ open }: { open: boolean }) {
   return (
@@ -46,6 +47,15 @@ function Dashboard() {
   const [activeTab, setActiveTab] = useState<'editor' | 'compare'>('editor');
   const [copied, setCopied] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onSearch: () => setSidebarOpen(true),
+    onEscape: () => { if (sidebarOpen) setSidebarOpen(false); },
+    onPve: () => setMode('pve'),
+    onPvp: () => setMode('pvp'),
+    onCompare: () => setActiveTab((t) => (t === 'editor' ? 'compare' : 'editor')),
+  });
 
   // Memoize grouped weapons — only recompute when the weapons array changes.
   const weaponGroups = useMemo(() => groupWeapons(weapons), [weapons]);

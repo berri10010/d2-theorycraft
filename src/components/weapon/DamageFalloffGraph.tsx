@@ -4,6 +4,8 @@ import React, { useMemo, useState } from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { getArchetype } from '../../lib/archetypes';
 import { StatCurveNode } from '../../types/weapon';
+import { useAnimatedPath } from '../../hooks/useAnimatedPath';
+import { useAnimatedValue } from '../../hooks/useAnimatedValue';
 
 // ─── Curve interpolation ─────────────────────────
 
@@ -113,22 +115,27 @@ export const DamageFalloffGraph: React.FC = () => {
   const yMin = 0;
   const yMax = critDmg * 1.05;
 
-  // Build SVG paths
-  function curveToPath(pts: typeof hipCurve, key: 'crit' | 'body') {
-    return pathStr(pts.map((p) => toSvg(p.dist / maxDist, p[key], yMin, yMax)));
+  // Build SVG paths — animated for smooth transitions
+  function curveToPoints(pts: typeof hipCurve, key: 'crit' | 'body'): [number, number][] {
+    return pts.map((p) => toSvg(p.dist / maxDist, p[key], yMin, yMax));
   }
 
-  const hipCritPath = curveToPath(hipCurve, 'crit');
-  const hipBodyPath = curveToPath(hipCurve, 'body');
-  const adsCritPath = curveToPath(adsCurve, 'crit');
-  const adsBodyPath = curveToPath(adsCurve, 'body');
-
-  // Filled area for the ADS crit curve
-  const adsFillPath = pathStr([
+  const fillPoints = [
     ...adsCurve.map((p) => toSvg(p.dist / maxDist, p.crit, yMin, yMax)),
     toSvg(1, 0, yMin, yMax),
     toSvg(0, 0, yMin, yMax),
-  ]);
+  ];
+
+  const hipCritPoints = curveToPoints(hipCurve, 'crit');
+  const hipBodyPoints = curveToPoints(hipCurve, 'body');
+  const adsCritPoints = curveToPoints(adsCurve, 'crit');
+  const adsBodyPoints = curveToPoints(adsCurve, 'body');
+
+  const hipCritPath = useAnimatedPath(hipCritPoints);
+  const hipBodyPath = useAnimatedPath(hipBodyPoints);
+  const adsCritPath = useAnimatedPath(adsCritPoints);
+  const adsBodyPath = useAnimatedPath(adsBodyPoints);
+  const adsFillPath = useAnimatedPath(fillPoints);
 
   // Hover readout
   let hoverDist: number | null = null;
@@ -149,6 +156,9 @@ export const DamageFalloffGraph: React.FC = () => {
 
   const hipFalloffX  = (hipFalloffStart / maxDist) * IW;
   const adsFalloffX  = (adsFalloffStart / maxDist) * IW;
+
+  const animHipFalloffX  = useAnimatedValue(hipFalloffX);
+  const animAdsFalloffX  = useAnimatedValue(adsFalloffX);
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">

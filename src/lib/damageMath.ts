@@ -253,3 +253,128 @@ export function calculateTTK(
   const hp = mode === 'pvp' ? pvpHp : enemyHealth;
   return calcFromEntry(entry, hp, multiplier, mode);
 }
+
+// ── TTK vs Distance (breakpoint visualization) ────────────────────────────────
+
+export interface TTKBreakpoint {
+  distance: number;
+  ttk: number;
+  shotsToKill: number;
+  crits: number;
+  bodies: number;
+}
+
+/**
+ * Compute TTK at a specific damage falloff fraction.
+ * Used by the breakpoint sparkline to show how TTK changes across distance.
+ */
+function calcTTKAtFalloff(
+  entry: WeaponStatEntry,
+  targetHp: number,
+  multiplier: number,
+  mode: GameMode,
+  falloffFraction: number,
+): TTKResult | null {
+  const modeScalar = mode === 'pve' ? PVE_DAMAGE_SCALAR : 1.0;
+  const effectiveMult = multiplier * falloffFraction;
+
+  if (isChargeWeapon(entry)) {
+    const spb  = entry.shotsPerBurst ?? 1;
+    const body = entry.bodyDamage * spb * modeScalar * effectiveMult;
+    const crit = entry.critDamage  * spb * modeScalar * effectiveMult;
+    const found = findOptimalShots(body, crit, targetHp);
+    if (!found) return null;
+    const [shots, crits, bodies] = found;
+    return {
+      ttk: Math.round(ttkCharge(shots, entry.chargeMs!, entry.shotDelay) * 1000) / 1000,
+      shotsToKill: shots,
+      crits,
+      bodies,
+      optimalPattern: fmtPattern(crits, bodies),
+    };
+  } else if (isBurstWeapon(entry)) {
+    if (entry.burstDelay == null || entry.shotDelay == null) return null;
+    const body = entry.bodyDamage * modeScalar * effectiveMult;
+    const crit = entry.critDamage  * modeScalar * effectiveMult;
+    const found = findOptimalShots(body, crit, targetHp);
+    if (!found) return null;
+    const [shots, crits, bodies] = found;
+    return {
+      ttk: Math.round(ttkBurst(shots, entry.shotsPerBurst!, entry.burstDelay, entry.shotDelay) * 1000) / 1000,
+      shotsToKill: shots,
+      crits,
+      bodies,
+      optimalPattern: fmtPattern(crits, bodies),
+    };
+  } else {
+    if (entry.shotDelay == null) return null;
+    const body = entry.bodyDamage * modeScalar * effectiveMult;
+    const crit = entry.critDamage  * modeScalar * effectiveMult;
+    const found = findOptimalShots(body, crit, targetHp);
+    if (!found) return null;
+    const [shots, crits, bodies] = found;
+    return {
+      ttk: Math.round(ttkStandard(shots, entry.shotDelay) * 1000) / 1000,
+      shotsToKill: shots,
+      crits,
+      bodies,
+      optimalPattern: fmtPattern(crits, bodies),
+    };
+  }
+}
+
+/**
+ * Build a TTK-vs-distance curve showing breakpoint changes.
+ *
+ * Returns an array of points sampled across the falloff range.
+ * Each point represents the TTK at that distance given the damage falloff fraction.
+ *
+ * @param falloffStart  Distance at which falloff begins (meters)
+ * @param maxDist       Maximum distance to sample (meters)
+ * @param falloffFloor  Minimum damage fraction at max distance (default 0.5)
+ */
+export function calculateTTKCurve(
+  mode: GameMode,
+  weapon: TTKWeaponInfo,
+  multiplier: number,
+  pvpHp: number,
+  enemyHealth: number,
+  falloffStart: number,
+  maxDist: number,
+  falloffFloor = 0.5,
+): TTKBreakpoint[] {
+  const entry = lookupWeaponStat(
+    weapon.itemSubType,
+    weapon.ammoType,
+    weapon.intrinsicTrait?.name ?? null,
+  );
+  if (!entry) return [];
+
+  const hp = mode === 'pvp' ? pvpHp : enemyHealth;
+  const steps = 40;
+  const result: TTKBreakpoint[] = [];
+
+  for (let i = 0; i <= steps; i++) {
+    const dist = (i / steps) * maxDist;
+    let frac: number;
+    if (dist <= falloffStart) {
+      frac = 1.0;
+    } else {
+      const t = Math.min(1, (dist - falloffStart) / (maxDist - falloffStart));
+      frac = 1.0 - (1.0 - falloffFloor) * t;
+    }
+
+    const ttkResult = calcTTKAtFalloff(entry, hp, multiplier, mode, frac);
+    if (ttkResult) {
+      result.push({
+        distance: dist,
+        ttk: ttkResult.ttk,
+        shotsToKill: ttkResult.shotsToKill,
+        crits: ttkResult.crits,
+        bodies: ttkResult.bodies,
+      });
+    }
+  }
+
+  return result;
+}

@@ -3,9 +3,8 @@
 import React, { useState } from 'react';
 import { MasterworkPanel } from './MasterworkPanel';
 import { AmmoPanel } from './AmmoPanel';
-import { DamageFalloffGraph } from './DamageFalloffGraph';
 import { ArmorModPanel } from './ArmorModPanel';
-import { TTKPanel } from '../ui/TTKPanel';
+import { TTKAndFalloffPanel } from '../ui/TTKAndFalloffPanel';
 import { SubclassVerbPanel } from './SubclassVerbPanel';
 
 // ── Panel options ─────────────────────────────────────────────────────────────
@@ -13,9 +12,8 @@ import { SubclassVerbPanel } from './SubclassVerbPanel';
 type PanelKey =
   | 'masterwork'
   | 'ammo'
-  | 'falloff'
+  | 'ttk-falloff'
   | 'armor-mods'
-  | 'ttk'
   | 'subclass';
 
 interface PanelOption {
@@ -26,9 +24,8 @@ interface PanelOption {
 const OPTIONS: PanelOption[] = [
   { key: 'masterwork',  label: 'Masterwork & Mods'   },
   { key: 'ammo',        label: 'Ammo'                 },
-  { key: 'falloff',     label: 'Damage Falloff'       },
+  { key: 'ttk-falloff', label: 'TTK & Falloff'        },
   { key: 'armor-mods',  label: 'Armor Mods'           },
-  { key: 'ttk',         label: 'Time-to-Kill'         },
   { key: 'subclass',    label: 'Subclass Verb Math'   },
 ];
 
@@ -78,9 +75,8 @@ export function WeaponDataPanel() {
       <div>
         {active === 'masterwork'  && <MasterworkPanel />}
         {active === 'ammo'        && <AmmoPanel />}
-        {active === 'falloff'     && <DamageFalloffGraph />}
+        {active === 'ttk-falloff' && <TTKAndFalloffPanel />}
         {active === 'armor-mods'  && <ArmorModPanel />}
-        {active === 'ttk'         && <TTKPanel />}
         {active === 'subclass'    && <SubclassVerbPanel />}
       </div>
     </div>

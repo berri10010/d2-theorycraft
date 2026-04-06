@@ -6,6 +6,7 @@ import { useWeaponDb } from '../../store/useWeaponDb';
 import { WeaponGroup } from '../../types/weapon';
 import { groupWeapons } from '../../lib/weaponGroups';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -243,6 +244,12 @@ export const SearchSidebar: React.FC = () => {
   const [filters,    setFilters]    = useState<FilterState>(DEFAULT_FILTERS);
 
   const headerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useKeyboardShortcuts({
+    onSearch: () => searchInputRef.current?.focus(),
+    onEscape: () => { if (query) setQuery(''); if (filterOpen) setFilterOpen(false); },
+  });
 
   // Close filter drawer on outside click
   useEffect(() => {
@@ -367,6 +374,7 @@ export const SearchSidebar: React.FC = () => {
         {/* Search + filter button */}
         <div className="flex gap-2">
           <input
+            ref={searchInputRef}
             type="search" placeholder="Search weapons…" value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
@@ -442,7 +450,20 @@ export const SearchSidebar: React.FC = () => {
 
       {/* ── Weapon list ─────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
-        {isLoading && <p className="text-slate-500 text-sm text-center mt-8">Loading weapons…</p>}
+        {isLoading && (
+          <div className="space-y-2 mt-4 px-1">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-2.5 p-2 animate-pulse">
+                <div className="w-14 h-14 rounded bg-white/5 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 bg-white/5 rounded w-3/4" />
+                  <div className="h-2.5 bg-white/5 rounded w-1/2" />
+                  <div className="h-2 bg-white/5 rounded w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         {error     && <p className="text-red-400 text-xs text-center mt-8 px-2">{error}</p>}
         {!isLoading && !error && filteredGroups.length === 0 && (
           <p className="text-slate-500 text-sm text-center mt-8">
