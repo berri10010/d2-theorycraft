@@ -11,33 +11,85 @@ import { useClarityPerks } from '../../lib/useClarityPerks';
 import { ClarityEntry } from '../../lib/clarity';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 
-// ── Toggle switch ─────────────────────────────────────────────────────────────
+// ── Effect controls ───────────────────────────────────────────────────────────
+
 /**
- * A simple pill toggle.  `on` drives the visual state; `onToggle` is called on click.
- * Used to activate / deactivate a conditional perk effect in the Effects Tab.
+ * Simple pill toggle for boolean (on/off) conditional perks.
+ * Calls onSet(0) to turn off, onSet(1) to turn on.
  */
-function EffectToggle({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) {
+function EffectToggle({ on, onSet, label }: { on: boolean; onSet: (v: number) => void; label: string }) {
   return (
     <button
       role="switch"
       aria-checked={on}
       aria-label={`${on ? 'Deactivate' : 'Activate'} ${label}`}
-      onClick={onToggle}
+      onClick={() => onSet(on ? 0 : 1)}
       className={[
         'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-200',
-        on
-          ? 'border-amber-500 bg-amber-500/30'
-          : 'border-white/20 bg-white/5',
+        on ? 'border-amber-500 bg-amber-500/30' : 'border-white/20 bg-white/5',
       ].join(' ')}
     >
-      <span
-        className={[
-          'inline-block h-3.5 w-3.5 rounded-full shadow transition-transform duration-200',
-          on ? 'translate-x-3.5 bg-amber-400' : 'translate-x-0.5 bg-slate-500',
-          'mt-[1px]',
-        ].join(' ')}
-      />
+      <span className={[
+        'inline-block h-3.5 w-3.5 rounded-full shadow transition-transform duration-200 mt-[1px]',
+        on ? 'translate-x-3.5 bg-amber-400' : 'translate-x-0.5 bg-slate-500',
+      ].join(' ')} />
     </button>
+  );
+}
+
+/**
+ * Stack selector for multi-state perks (Rampage ×1/×2/×3, Swashbuckler ×1–×5, etc.).
+ * Renders an "Off" button plus one button per stack level.
+ * `currentState` is the activeEffects value (0 = off, N = stack N).
+ */
+function EffectStackSelector({
+  buffKey,
+  currentState,
+  onSet,
+}: {
+  buffKey: string;
+  currentState: number;
+  onSet: (v: number) => void;
+}) {
+  const buff = BUFF_DATABASE[buffKey];
+  if (!buff?.stacks?.length) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-1 mt-2">
+      {/* Off button */}
+      <button
+        onClick={() => onSet(0)}
+        className={[
+          'text-[10px] font-bold px-2 py-0.5 rounded border transition-colors leading-none',
+          currentState === 0
+            ? 'bg-slate-700 border-slate-500 text-slate-200'
+            : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20',
+        ].join(' ')}
+      >
+        Off
+      </button>
+      {/* Stack buttons — state N = stacks[N-1] */}
+      {buff.stacks.map((stack, idx) => {
+        const stateVal = idx + 1;
+        const isActive = currentState === stateVal;
+        const pctLabel = `+${((stack.multiplier - 1) * 100).toFixed(0)}%`;
+        return (
+          <button
+            key={stack.count}
+            onClick={() => onSet(stateVal)}
+            className={[
+              'text-[10px] font-bold px-2 py-0.5 rounded border transition-colors leading-none',
+              isActive
+                ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-200 hover:border-white/20',
+            ].join(' ')}
+          >
+            {stack.label}
+            <span className="ml-1 text-[9px] font-normal opacity-70">{pctLabel}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -164,15 +216,15 @@ function StatDelta({ value }: { value: number }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export const EffectsPanel: React.FC = () => {
-  const { activeWeapon, selectedPerks, activeBuffs, activeEffects, clearPerk, toggleBuff, toggleEffect } = useWeaponStore(
+  const { activeWeapon, selectedPerks, activeBuffs, activeEffects, clearPerk, toggleBuff, setEffectState } = useWeaponStore(
     useShallow((s) => ({
-      activeWeapon:  s.activeWeapon,
-      selectedPerks: s.selectedPerks,
-      activeBuffs:   s.activeBuffs,
-      activeEffects: s.activeEffects,
-      clearPerk:     s.clearPerk,
-      toggleBuff:    s.toggleBuff,
-      toggleEffect:  s.toggleEffect,
+      activeWeapon:   s.activeWeapon,
+      selectedPerks:  s.selectedPerks,
+      activeBuffs:    s.activeBuffs,
+      activeEffects:  s.activeEffects,
+      clearPerk:      s.clearPerk,
+      toggleBuff:     s.toggleBuff,
+      setEffectState: s.setEffectState,
     }))
   );
 
@@ -254,7 +306,10 @@ export const EffectsPanel: React.FC = () => {
                 Conditional Effects
               </p>
               {conditionalEntries.map(({ columnName, perkHash, name, icon, description, isEnhanced, buffKey, statModifiers }) => {
-                const isOn = activeEffects.includes(perkHash);
+                const currentState = activeEffects[perkHash] ?? 0;
+                const isOn = currentState > 0;
+                const buff = buffKey ? BUFF_DATABASE[buffKey] : null;
+                const isStackable = !!(buff?.stacks?.length);
                 return (
                   <div
                     key={perkHash}
@@ -322,7 +377,7 @@ export const EffectsPanel: React.FC = () => {
                           <span className="text-xs text-slate-500 uppercase tracking-wide">{columnName}</span>
                         </div>
 
-                        {/* Right side: stat deltas + toggle */}
+                        {/* Right side: stat deltas + control */}
                         <div className="flex items-center gap-3 shrink-0">
                           {statModifiers.length > 0 && (
                             <div className="flex flex-wrap gap-x-2 gap-y-1 justify-end">
@@ -334,11 +389,14 @@ export const EffectsPanel: React.FC = () => {
                               ))}
                             </div>
                           )}
-                          <EffectToggle
-                            on={isOn}
-                            onToggle={() => toggleEffect(perkHash)}
-                            label={name}
-                          />
+                          {/* Boolean perks: pill toggle.  Stackable perks: inline stack buttons. */}
+                          {!isStackable && (
+                            <EffectToggle
+                              on={isOn}
+                              onSet={(v) => setEffectState(perkHash, v)}
+                              label={name}
+                            />
+                          )}
                         </div>
                       </div>
 
@@ -373,12 +431,25 @@ export const EffectsPanel: React.FC = () => {
                         );
                       })()}
 
+                      {/* Stackable perk: stack selector placed below description */}
+                      {isStackable && buffKey && (
+                        <EffectStackSelector
+                          buffKey={buffKey}
+                          currentState={currentState}
+                          onSet={(v) => setEffectState(perkHash, v)}
+                        />
+                      )}
+
                       {/* Buff multiplier indicator when active */}
-                      {isOn && buffKey && BUFF_DATABASE[buffKey] && (
+                      {isOn && buff && (
                         <div className="flex items-center gap-1 mt-1.5">
                           <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                           <span className="text-xs text-amber-500 font-medium">
-                            {BUFF_DATABASE[buffKey].name} ×{BUFF_DATABASE[buffKey].multiplier.toFixed(2)} active
+                            {buff.name}{' '}
+                            {isStackable && buff.stacks
+                              ? `×${buff.stacks[currentState - 1]?.multiplier.toFixed(2) ?? buff.multiplier.toFixed(2)}`
+                              : `×${buff.multiplier.toFixed(2)}`
+                            }{' '}active
                           </span>
                         </div>
                       )}

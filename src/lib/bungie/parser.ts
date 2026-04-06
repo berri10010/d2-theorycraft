@@ -314,9 +314,13 @@ export function parseWeapons(
     if (curves.Handling) statCurves['Handling'] = curves.Handling;
     if (curves.Reload)   statCurves['Reload']   = curves.Reload;
 
-    // Stats that support perk stat-modifier deltas
+    // All stats that can carry a perk stat-modifier delta.
+    // Expanded from the original narrow set so that barrel mods (Recoil Direction),
+    // magazine mods (Magazine size), and utility mods (Airborne Effectiveness, Zoom)
+    // correctly propagate into getCalculatedStats and the stat display panels.
     const BAR_STATS = new Set([
       'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
+      'Zoom', 'Recoil Direction', 'Magazine', 'Airborne Effectiveness',
     ]);
 
     const rawColumns: PerkColumn[] = [];
@@ -397,13 +401,21 @@ export function parseWeapons(
             if (isTrackerPlug(perkName)) continue;
 
             const statModifiers = (plugItem.investmentStats ?? [])
-              .filter((s) => !s.isConditionallyActive && s.value !== 0)
+              // Keep non-zero entries regardless of isConditionallyActive —
+              // we preserve the flag on the modifier so the engine can gate
+              // conditionally-active bonuses (e.g. Eye of the Storm) on the
+              // perk's Effects Tab toggle rather than silently discarding them.
+              .filter((s) => s.value !== 0)
               .map((s) => {
                 const statName = STAT_HASH_MAP[s.statTypeHash];
                 if (!statName || !BAR_STATS.has(statName)) return null;
-                return { statName, value: s.value };
+                return {
+                  statName,
+                  value: s.value,
+                  isConditional: s.isConditionallyActive ?? false,
+                };
               })
-              .filter((s): s is { statName: string; value: number } => s !== null);
+              .filter((s): s is { statName: string; value: number; isConditional: boolean } => s !== null);
 
             const enhanced = isEnhancedPerkItem(plugItem);
             const derivedBuffKey = enhanced ? null : getBuffKeyForPerk(perkName);
@@ -415,9 +427,11 @@ export function parseWeapons(
               description: plugItem.displayProperties.description ?? '',
               statModifiers,
               isEnhanced: enhanced,
-              // A perk is conditional when it has a damage-buff activation requirement.
-              // Passive perks (barrels, mags, always-on traits) have no buffKey.
-              isConditional: derivedBuffKey !== null,
+              // A perk is conditional when it has a damage-buff activation requirement
+              // OR when any of its stat modifiers are only active in specific game states
+              // (isConditionallyActive = true in the manifest, e.g. Eye of the Storm).
+              // Passive perks (barrels, mags, always-on traits) have neither.
+              isConditional: derivedBuffKey !== null || statModifiers.some((m) => m.isConditional),
               buffKey: derivedBuffKey,
               tier: enhanced ? null : (tierEntry?.tier ?? null),
               enhancedVersion: null, // filled in below

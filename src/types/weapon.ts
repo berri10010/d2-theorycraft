@@ -10,6 +10,13 @@ export interface StatCurveNode {
 export interface PerkMod {
   statName: string;
   value: number;
+  /**
+   * True when the Bungie manifest marks this stat investment as conditionally
+   * active (isConditionallyActive).  Examples: Eye of the Storm grants Handling
+   * only when the player is at low health.  These mods are gated in
+   * getCalculatedStats on the perk's activeEffects state being > 0.
+   */
+  isConditional?: boolean;
 }
 
 export interface Perk {

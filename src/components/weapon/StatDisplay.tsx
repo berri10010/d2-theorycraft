@@ -29,6 +29,7 @@ export const StatDisplay: React.FC = () => {
     isCrafted,
     activeMod,
     armorMods,
+    activeEffects,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:       s.activeWeapon,
@@ -38,13 +39,16 @@ export const StatDisplay: React.FC = () => {
       isCrafted:          s.isCrafted,
       activeMod:          s.activeMod,
       armorMods:          s.armorMods,
+      // activeEffects gates conditional perk stat mods — must be a dep so
+      // toggling Effects Tab toggles correctly refreshes the stat bars.
+      activeEffects:      s.activeEffects,
     }))
   );
 
   // Memoize so the computation only reruns when its inputs actually change.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const calcStats = useMemo(() => getCalculatedStats(), [
-    activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods,
+    activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods, activeEffects,
   ]);
 
   if (!activeWeapon) return null;
