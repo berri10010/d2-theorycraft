@@ -164,10 +164,17 @@ function WeaponSearch() {
   const loadWeapons = () => {
     setLoadError(false);
     setLoaded(false);
-    fetch('/data/weapons.json')
-      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-      .then((weapons: WeaponResult[]) => {
-        setGroups(groupWeapons(weapons ?? []));
+    const fetchChunk = async (name: string) => {
+      const res = await fetch(name);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json() as Promise<WeaponResult[]>;
+    };
+    Promise.all([
+      fetchChunk('/data/weapons-0.json'),
+      fetchChunk('/data/weapons-1.json'),
+    ])
+      .then(([chunk0, chunk1]) => {
+        setGroups(groupWeapons([...chunk0, ...chunk1]));
         setLoaded(true);
       })
       .catch(() => { setLoaded(true); setLoadError(true); });
