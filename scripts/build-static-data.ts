@@ -15,16 +15,22 @@
  *   BUNGIE_API_KEY  — your Bungie developer API key
  *
  * Outputs:
- *   public/data/weapons.json          Parsed Weapon[] array
+ *   public/data/weapons-0.json        Parsed Weapon[] — first half (perk.description stripped)
+ *   public/data/weapons-1.json        Parsed Weapon[] — second half (perk.description stripped)
  *   public/data/clarity.json          Filtered Clarity perk descriptions
  *   public/data/god-rolls.json        God roll recommendations
  *   public/data/perk-descriptions.json Destiny Data Compendium perk text
+ *
+ * Note: perk.description is stripped from weapons-*.json to stay under the
+ * Cloudflare Pages 25 MiB per-file asset limit.  Clarity + Compendium cover
+ * perk descriptions at runtime.
  */
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parseWeapons } from '../src/lib/bungie/parser.js';
+import type { Weapon, Perk } from '../src/types/weapon.js';
 
 // ── Path helpers ─────────────────────────────────────────────────────────────
 
@@ -88,6 +94,31 @@ async function fetchTable(relativePath: string) {
   return res.json();
 }
 
+// ── Strip perk descriptions ───────────────────────────────────────────────────
+//
+// perk.description (Bungie manifest text) is the largest text field per perk.
+// Clarity + Compendium cover descriptions at runtime, so we strip this field
+// before writing to keep each chunk under the Cloudflare 25 MiB asset limit.
+
+function stripPerk(perk: Perk): Perk {
+  return {
+    ...perk,
+    description: '',
+    enhancedVersion: perk.enhancedVersion ? stripPerk(perk.enhancedVersion) : null,
+  };
+}
+
+function stripDescriptions(weapons: Weapon[]): Weapon[] {
+  return weapons.map((w) => ({
+    ...w,
+    intrinsicTrait: w.intrinsicTrait ? stripPerk(w.intrinsicTrait) : null,
+    perkSockets: w.perkSockets.map((col) => ({
+      ...col,
+      perks: col.perks.map(stripPerk),
+    })),
+  }));
+}
+
 // ── Step 1: Weapons ───────────────────────────────────────────────────────────
 
 async function buildWeapons() {
@@ -101,7 +132,7 @@ async function buildWeapons() {
 
   // ── Cache check: skip the ~24 MB table download if version unchanged ──────
   const cachedVersion = readCachedManifestVersion();
-  if (cachedVersion === version && fs.existsSync(outPath('weapons.json'))) {
+  if (cachedVersion === version && fs.existsSync(outPath('weapons-0.json')) && fs.existsSync(outPath('weapons-1.json'))) {
     console.log(`  ✓ Manifest unchanged since last build — skipping table download`);
     console.log(`    (delete .next/cache/bungie-manifest-version to force a refresh)`);
     return;
@@ -138,7 +169,12 @@ async function buildWeapons() {
   const weapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs, combinedWatermarkMap);
   console.log(`  Parsed ${weapons.length} weapons`);
 
-  write('weapons.json', weapons);
+  // Strip perk descriptions and split into two chunks to stay under the
+  // Cloudflare Pages 25 MiB per-file asset limit.
+  const stripped = stripDescriptions(weapons);
+  const mid = Math.ceil(stripped.length / 2);
+  write('weapons-0.json', stripped.slice(0, mid));
+  write('weapons-1.json', stripped.slice(mid));
 
   // Persist the version so the next build can skip this download if unchanged.
   writeCachedManifestVersion(version);
