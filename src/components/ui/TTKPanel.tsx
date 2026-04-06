@@ -50,8 +50,7 @@ export const TTKPanel: React.FC = () => {
 
   const result = calculateTTK(
     mode,
-    activeWeapon.itemSubType,
-    activeWeapon.rpm,
+    activeWeapon,
     multiplier,
     PVP_GUARDIAN_HP,
     enemyHealth,

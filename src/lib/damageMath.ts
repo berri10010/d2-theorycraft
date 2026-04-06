@@ -1,156 +1,235 @@
+/**
+ * damageMath.ts
+ *
+ * Exact-engine TTK calculations using Massive Breakdowns weapon stat data.
+ *
+ * Timing rules (all delays are in 30fps engine frames — divide by 30 for seconds):
+ *
+ *   Standard:  TTK = (shots - 1) * (shotDelay / 30)
+ *
+ *   Charge/Draw (Fusions, LFRs, Bows):
+ *              TTK = (chargeMs / 1000) + ((shots - 1) * (shotDelay / 30))
+ *              where "shots" = trigger pulls; damage = bodyDamage * shotsPerBurst
+ *
+ *   Burst (Pulse Rifles, burst Sidearms/SMGs — no charge phase):
+ *              fullBursts     = Math.floor((shots - 1) / shotsPerBurst)
+ *              remainderShots = (shots - 1) % shotsPerBurst
+ *              TTK = (fullBursts * burstDelay / 30) + (remainderShots * shotDelay / 30)
+ *              where "shots" = total individual bullets
+ */
+
 import { GameMode } from '../types/weapon';
-import { getArchetype } from './archetypes';
+import { lookupWeaponStat, isChargeWeapon, isBurstWeapon, WeaponStatEntry } from './weaponStats';
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+/**
+ * PvE enemies have ~3× the damage resistance relative to the spreadsheet's
+ * PvP-calibrated damage values.  This scalar keeps existing PvE health tiers
+ * (calibrated against the old archetype data) meaningful with the new numbers.
+ */
+const PVE_DAMAGE_SCALAR = 3.0;
+
+/** PvE enemy health tiers used in the TTK panel selector. */
+export const PVE_HEALTH_TIERS: Record<string, number> = {
+  'Minor (Dreg/Grunt)': 336,
+  'Major (Elite)':      1344,
+  'Champion':           3024,
+};
+
+// ── Result type ───────────────────────────────────────────────────────────────
 
 export interface TTKResult {
   ttk: number;
+  /** "Shots" appropriate for the weapon category:
+   *   Standard / Burst → total individual bullets.
+   *   Charge           → trigger pulls.
+   */
   shotsToKill: number;
-  /** Headshot (crit) count in the optimal kill pattern */
+  /** Crit (headshot) count in the optimal kill pattern. */
   crits: number;
-  /** Bodyshot count in the optimal kill pattern */
+  /** Body-shot count in the optimal kill pattern. */
   bodies: number;
   optimalPattern: string;
 }
 
-/** PvE enemy health tiers — add more as needed */
-export const PVE_HEALTH_TIERS: Record<string, number> = {
-  'Minor (Dreg/Grunt)': 336,
-  'Major (Elite)': 1344,
-  'Champion': 3024,
-};
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-export function calculateTimePerShot(rpm: number): number {
-  return 60 / rpm;
-}
-
-export function calculateShotsToKill(damagePerShot: number, targetHealth: number): number {
-  return Math.ceil(targetHealth / damagePerShot);
+function fmtPattern(crits: number, bodies: number): string {
+  const parts: string[] = [];
+  if (crits  > 0) parts.push(`${crits}× Head`);
+  if (bodies > 0) parts.push(`${bodies}× Body`);
+  return parts.join(' + ') || '—';
 }
 
 /**
- * Time between consecutive trigger pulls for a given weapon.
- * For single-fire weapons (burstSize === 1) this equals 60/rpm.
- * For burst weapons the cadence between pulls is longer:
- *   e.g. a 390 RPM 3-burst fires 390 rounds/min total, but only 130 bursts/min,
- *   so the interval between pulls = 60 * 3 / 390 ≈ 0.46 s (not 60/390 ≈ 0.15 s).
+ * Find the minimum number of shots whose optimal crit-heavy mix reaches
+ * `targetHp`.  Returns [shots, crits, bodies] or null if unreachable.
  */
-export function timePerBurst(rpm: number, burstSize: number): number {
-  return (60 * burstSize) / rpm;
-}
-
-/**
- * Find the fewest shots (expressed as individual rounds) whose optimal
- * crit-heavy combination meets or exceeds `targetHealth`.
- * Returns [totalRounds, crits, bodies] or null if none found within the cap.
- *
- * Iterates in multiples of burstSize so partial bursts are never counted.
- */
-function findOptimalPattern(
-  scaledCrit: number,
-  scaledBody: number,
-  burstSize: number,
-  targetHealth: number,
-  maxBursts = 50,
-): [totalRounds: number, crits: number, bodies: number] | null {
-  for (let rounds = burstSize; rounds <= maxBursts * burstSize; rounds += burstSize) {
-    // Maximise crits first (fewest shots + most crit-forward pattern)
-    for (let crits = rounds; crits >= 0; crits--) {
-      const bodies = rounds - crits;
-      if (crits * scaledCrit + bodies * scaledBody >= targetHealth) {
-        return [rounds, crits, bodies];
+function findOptimalShots(
+  bodyDmg: number,
+  critDmg: number,
+  targetHp: number,
+  maxShots = 200,
+): [shots: number, crits: number, bodies: number] | null {
+  for (let shots = 1; shots <= maxShots; shots++) {
+    for (let c = shots; c >= 0; c--) {
+      const b = shots - c;
+      if (c * critDmg + b * bodyDmg >= targetHp) {
+        return [shots, c, b];
       }
     }
   }
   return null;
 }
 
-/** Format a crit/body pattern as "2× Head + 1× Body", "3× Head", etc. */
-function fmtPattern(crits: number, bodies: number): string {
-  const parts: string[] = [];
-  if (crits > 0) parts.push(`${crits}× Head`);
-  if (bodies > 0) parts.push(`${bodies}× Body`);
-  return parts.join(' + ') || '—';
+// ── TTK formulae ──────────────────────────────────────────────────────────────
+
+function ttkStandard(shots: number, shotDelay: number): number {
+  return (shots - 1) * (shotDelay / 30);
 }
 
-/**
- * Calculates PvP TTK against a guardian at the given HP value.
- * hp is passed directly (use the RESILIENCE_HP table in the UI layer, not here).
- * Returns null if the archetype is unknown.
- */
+function ttkCharge(
+  shots: number,
+  chargeMs: number,
+  shotDelay: number | null,
+): number {
+  // If the weapon has a per-shot delay between trigger pulls, use it;
+  // otherwise fall back to treating each subsequent trigger as another full charge.
+  const interShotSec = shotDelay != null ? shotDelay / 30 : chargeMs / 1000;
+  return (chargeMs / 1000) + (shots - 1) * interShotSec;
+}
+
+function ttkBurst(
+  shots: number,
+  shotsPerBurst: number,
+  burstDelay: number,
+  shotDelay: number,
+): number {
+  const fullBursts     = Math.floor((shots - 1) / shotsPerBurst);
+  const remainderShots = (shots - 1) % shotsPerBurst;
+  return (fullBursts * burstDelay / 30) + (remainderShots * shotDelay / 30);
+}
+
+// ── Core calculation ──────────────────────────────────────────────────────────
+
+function calcFromEntry(
+  entry: WeaponStatEntry,
+  targetHp: number,
+  multiplier: number,
+  mode: GameMode,
+): TTKResult | null {
+  const modeScalar = mode === 'pve' ? PVE_DAMAGE_SCALAR : 1.0;
+
+  if (isChargeWeapon(entry)) {
+    // Damage per trigger pull = per-projectile × projectiles-per-trigger.
+    const spb  = entry.shotsPerBurst ?? 1;
+    const body = entry.bodyDamage * spb * modeScalar * multiplier;
+    const crit = entry.critDamage  * spb * modeScalar * multiplier;
+
+    const found = findOptimalShots(body, crit, targetHp);
+    if (!found) return null;
+    const [shots, crits, bodies] = found;
+
+    return {
+      ttk: Math.round(ttkCharge(shots, entry.chargeMs!, entry.shotDelay) * 1000) / 1000,
+      shotsToKill: shots,
+      crits,
+      bodies,
+      optimalPattern: fmtPattern(crits, bodies),
+    };
+
+  } else if (isBurstWeapon(entry)) {
+    if (entry.burstDelay == null || entry.shotDelay == null) return null;
+
+    const body = entry.bodyDamage * modeScalar * multiplier;
+    const crit = entry.critDamage  * modeScalar * multiplier;
+
+    const found = findOptimalShots(body, crit, targetHp);
+    if (!found) return null;
+    const [shots, crits, bodies] = found;
+
+    return {
+      ttk: Math.round(ttkBurst(shots, entry.shotsPerBurst!, entry.burstDelay, entry.shotDelay) * 1000) / 1000,
+      shotsToKill: shots,
+      crits,
+      bodies,
+      optimalPattern: fmtPattern(crits, bodies),
+    };
+
+  } else {
+    if (entry.shotDelay == null) return null;
+
+    const body = entry.bodyDamage * modeScalar * multiplier;
+    const crit = entry.critDamage  * modeScalar * multiplier;
+
+    const found = findOptimalShots(body, crit, targetHp);
+    if (!found) return null;
+    const [shots, crits, bodies] = found;
+
+    return {
+      ttk: Math.round(ttkStandard(shots, entry.shotDelay) * 1000) / 1000,
+      shotsToKill: shots,
+      crits,
+      bodies,
+      optimalPattern: fmtPattern(crits, bodies),
+    };
+  }
+}
+
+// ── Public API ────────────────────────────────────────────────────────────────
+
+/** Minimal weapon fields needed for TTK lookup — subset of the `Weapon` type. */
+export interface TTKWeaponInfo {
+  itemSubType: number;
+  ammoType: number;
+  intrinsicTrait: { name: string } | null;
+}
+
 export function calculatePvpTTK(
-  subType: number,
-  rpm: number,
-  hp: number,
-  damageMultiplier: number,
+  weapon: TTKWeaponInfo,
+  guardianHp: number,
+  multiplier: number,
 ): TTKResult | null {
-  const archetype = getArchetype(subType, rpm);
-  if (!archetype) return null;
+  const entry = lookupWeaponStat(
+    weapon.itemSubType,
+    weapon.ammoType,
+    weapon.intrinsicTrait?.name ?? null,
+  );
+  if (!entry) return null;
+  return calcFromEntry(entry, guardianHp, multiplier, 'pvp');
+}
 
-  const { crit, body, burstSize } = archetype.pvp;
-  const scaledCrit = crit * damageMultiplier;
-  const scaledBody = body * damageMultiplier;
-
-  const found = findOptimalPattern(scaledCrit, scaledBody, burstSize, hp);
-  if (!found) return null;
-
-  const [totalRounds, crits, bodies] = found;
-  const realShots = totalRounds / burstSize; // number of trigger pulls / bursts
-  const ttk = (realShots - 1) * timePerBurst(rpm, burstSize);
-
-  return {
-    ttk: Math.round(ttk * 1000) / 1000,
-    shotsToKill: realShots,
-    crits,
-    bodies,
-    optimalPattern: fmtPattern(crits, bodies),
-  };
+export function calculatePveTTK(
+  weapon: TTKWeaponInfo,
+  enemyHp: number,
+  multiplier: number,
+): TTKResult | null {
+  const entry = lookupWeaponStat(
+    weapon.itemSubType,
+    weapon.ammoType,
+    weapon.intrinsicTrait?.name ?? null,
+  );
+  if (!entry) return null;
+  return calcFromEntry(entry, enemyHp, multiplier, 'pve');
 }
 
 /**
- * Calculates PvE TTK against a given enemy health tier.
- * Uses the same optimal crit-heavy algorithm as PvP, so the result
- * reflects the minimum number of headshots needed (not "all crits" assumed).
- * Returns null if the archetype is unknown.
+ * Unified TTK entry point.
+ *
+ * @param mode         'pvp' | 'pve'
+ * @param weapon       Weapon identity fields (itemSubType, ammoType, intrinsicTrait)
+ * @param multiplier   Combined damage multiplier from active buffs / mods
+ * @param pvpHp        Guardian HP for PvP (typically 230)
+ * @param enemyHealth  Enemy HP tier for PvE
  */
-export function calculatePveTTK(
-  subType: number,
-  rpm: number,
-  enemyHealth: number,
-  damageMultiplier: number,
-): TTKResult | null {
-  const archetype = getArchetype(subType, rpm);
-  if (!archetype) return null;
-
-  const { crit, body, burstSize } = archetype.pve;
-  const scaledCrit = crit * damageMultiplier;
-  const scaledBody = body * damageMultiplier;
-
-  const found = findOptimalPattern(scaledCrit, scaledBody, burstSize, enemyHealth);
-  if (!found) return null;
-
-  const [totalRounds, crits, bodies] = found;
-  const realShots = totalRounds / burstSize;
-  const ttk = (realShots - 1) * timePerBurst(rpm, burstSize);
-
-  return {
-    ttk: Math.round(ttk * 1000) / 1000,
-    shotsToKill: realShots,
-    crits,
-    bodies,
-    optimalPattern: fmtPattern(crits, bodies),
-  };
-}
-
 export function calculateTTK(
   mode: GameMode,
-  subType: number,
-  rpm: number,
-  damageMultiplier: number,
-  /** PvP: direct guardian HP (192–230). PvE: unused. */
-  guardianHpOrResilience: number,
+  weapon: TTKWeaponInfo,
+  multiplier: number,
+  pvpHp: number,
   enemyHealth: number,
 ): TTKResult | null {
-  if (mode === 'pvp') {
-    return calculatePvpTTK(subType, rpm, guardianHpOrResilience, damageMultiplier);
-  }
-  return calculatePveTTK(subType, rpm, enemyHealth, damageMultiplier);
+  if (mode === 'pvp') return calculatePvpTTK(weapon, pvpHp, multiplier);
+  return calculatePveTTK(weapon, enemyHealth, multiplier);
 }

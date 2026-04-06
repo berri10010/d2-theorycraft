@@ -132,7 +132,7 @@ function Dashboard() {
 
   const handleAddToCompare = () => {
     if (!activeWeapon) return;
-    const ttkResult = calculateTTK(mode, activeWeapon.itemSubType, activeWeapon.rpm, getDamageMultiplier(), 230, PVE_HEALTH_TIERS['Minor (Dreg/Grunt)'] ?? 336);
+    const ttkResult = calculateTTK(mode, activeWeapon, getDamageMultiplier(), 230, PVE_HEALTH_TIERS['Minor (Dreg/Grunt)'] ?? 336);
     addSnapshot({
       label: activeWeapon.name,
       weapon: activeWeapon,
