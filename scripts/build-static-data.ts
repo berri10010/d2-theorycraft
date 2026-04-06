@@ -43,11 +43,12 @@ function write(name: string, data: unknown) {
 // ── Manifest version cache ────────────────────────────────────────────────────
 //
 // The Bungie manifest DB is ~24 MB.  We cache the last-seen version string in
-// .next/cache/bungie-manifest-version (preserved between Vercel builds) and
-// skip the heavy table downloads when the version hasn't changed.
+// .next/cache/bungie-manifest-version and skip the heavy table downloads when
+// the version hasn't changed.
 //
-// Cache location: .next/cache/ — Vercel restores this directory before every
-// build, making it the ideal place for persistent build-time caches.
+// Cache location: .next/cache/ — Cloudflare Pages (and most CI platforms)
+// restore this directory from the build output cache before each build run,
+// so this file survives across deployments as long as the cache is warm.
 
 const NEXT_CACHE_DIR     = path.join(ROOT, '.next', 'cache');
 const MANIFEST_VER_CACHE = path.join(NEXT_CACHE_DIR, 'bungie-manifest-version');
