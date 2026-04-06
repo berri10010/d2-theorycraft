@@ -19,6 +19,14 @@ export interface Perk {
   description: string;
   statModifiers: PerkMod[];
   isEnhanced: boolean;
+  /**
+   * True when this perk's effects require an in-game activation condition
+   * (e.g. Kill Clip needs a reload after kill).  Conditional perks appear in
+   * the Effects Tab with a toggle; their stat modifiers and damage buff are
+   * only applied while that toggle is ON.  Passive perks (barrels, magazines,
+   * always-on traits) have isConditional: false and apply immediately.
+   */
+  isConditional: boolean;
   /** If set, selecting this perk auto-activates the matching buff key */
   buffKey: string | null;
   /** PvE tier from community analysis: S/A/B/C/D/E/F/G, or null if unrated */

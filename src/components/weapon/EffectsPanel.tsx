@@ -11,6 +11,36 @@ import { useClarityPerks } from '../../lib/useClarityPerks';
 import { ClarityEntry } from '../../lib/clarity';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 
+// ── Toggle switch ─────────────────────────────────────────────────────────────
+/**
+ * A simple pill toggle.  `on` drives the visual state; `onToggle` is called on click.
+ * Used to activate / deactivate a conditional perk effect in the Effects Tab.
+ */
+function EffectToggle({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) {
+  return (
+    <button
+      role="switch"
+      aria-checked={on}
+      aria-label={`${on ? 'Deactivate' : 'Activate'} ${label}`}
+      onClick={onToggle}
+      className={[
+        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 transition-colors duration-200',
+        on
+          ? 'border-amber-500 bg-amber-500/30'
+          : 'border-white/20 bg-white/5',
+      ].join(' ')}
+    >
+      <span
+        className={[
+          'inline-block h-3.5 w-3.5 rounded-full shadow transition-transform duration-200',
+          on ? 'translate-x-3.5 bg-amber-400' : 'translate-x-0.5 bg-slate-500',
+          'mt-[1px]',
+        ].join(' ')}
+      />
+    </button>
+  );
+}
+
 // ── className → colour mapping ────────────────────────────────────────────────
 const CLASS_COLOURS: Record<string, string> = {
   arc:     '#7dd3fc', // sky-300
@@ -134,13 +164,15 @@ function StatDelta({ value }: { value: number }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export const EffectsPanel: React.FC = () => {
-  const { activeWeapon, selectedPerks, activeBuffs, clearPerk, toggleBuff } = useWeaponStore(
+  const { activeWeapon, selectedPerks, activeBuffs, activeEffects, clearPerk, toggleBuff, toggleEffect } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:  s.activeWeapon,
       selectedPerks: s.selectedPerks,
       activeBuffs:   s.activeBuffs,
+      activeEffects: s.activeEffects,
       clearPerk:     s.clearPerk,
       toggleBuff:    s.toggleBuff,
+      toggleEffect:  s.toggleEffect,
     }))
   );
 
@@ -157,6 +189,7 @@ export const EffectsPanel: React.FC = () => {
       icon: string;
       description: string;
       isEnhanced: boolean;
+      isConditional: boolean;
       buffKey: string | null;
       statModifiers: Array<{ statName: string; value: number }>;
     }> = [];
@@ -166,12 +199,18 @@ export const EffectsPanel: React.FC = () => {
       if (!column) continue;
 
       let perk = column.perks.find((p) => p.hash === perkHash) ?? null;
+      let basePerk = perk;
 
       if (!perk) {
-        const basePerk = column.perks.find((p) => p.enhancedVersion?.hash === perkHash);
+        basePerk = column.perks.find((p) => p.enhancedVersion?.hash === perkHash) ?? null;
         if (basePerk?.enhancedVersion) {
           const enhanced = basePerk.enhancedVersion;
-          perk = enhanced.buffKey ? enhanced : { ...enhanced, buffKey: basePerk.buffKey };
+          // Carry buffKey and isConditional from base onto enhanced object
+          perk = enhanced.buffKey ? enhanced : {
+            ...enhanced,
+            buffKey: basePerk.buffKey,
+            isConditional: basePerk.isConditional,
+          };
         }
       }
 
@@ -193,6 +232,10 @@ export const EffectsPanel: React.FC = () => {
 
   const isEmpty = activePerkEntries.length === 0 && manualBuffEntries.length === 0;
 
+  // Split perks into conditional (need toggle) and passive (always-on)
+  const conditionalEntries = activePerkEntries.filter((e) => e.isConditional);
+  const passiveEntries     = activePerkEntries.filter((e) => !e.isConditional);
+
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       <h2 className="text-xl font-bold mb-4 text-white">Effects</h2>
@@ -203,8 +246,170 @@ export const EffectsPanel: React.FC = () => {
         </p>
       ) : (
         <div className="space-y-3">
-          {/* Active perks */}
-          {activePerkEntries.map(({ columnName, perkHash, name, icon, description, isEnhanced, buffKey, statModifiers }) => (
+
+          {/* ── Conditional perks (Effects Tab toggles) ── */}
+          {conditionalEntries.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+                Conditional Effects
+              </p>
+              {conditionalEntries.map(({ columnName, perkHash, name, icon, description, isEnhanced, buffKey, statModifiers }) => {
+                const isOn = activeEffects.includes(perkHash);
+                return (
+                  <div
+                    key={perkHash}
+                    className={[
+                      'flex gap-3 p-3 rounded-lg border group transition-colors',
+                      isOn
+                        ? 'bg-amber-500/10 border-amber-500/30'
+                        : 'bg-black/40 border-white/10',
+                    ].join(' ')}
+                  >
+                    {/* Icon */}
+                    <div className={[
+                      'relative w-10 h-10 rounded-full overflow-hidden border-2 shrink-0 transition-colors',
+                      isOn ? 'border-amber-400' : 'border-slate-600',
+                    ].join(' ')}>
+                      {icon && (
+                        <Image
+                          src={BUNGIE_URL + icon}
+                          alt={name}
+                          fill
+                          sizes="40px"
+                          className={['object-cover transition-opacity', isOn ? 'opacity-100' : 'opacity-40'].join(' ')}
+                          unoptimized
+                        />
+                      )}
+                      {isEnhanced && (
+                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-amber-400 rounded-full border border-slate-900" />
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={['font-semibold text-sm transition-colors', isOn ? 'text-amber-400' : 'text-slate-400'].join(' ')}>
+                              {name}
+                              {isEnhanced && (
+                                <span className="ml-1.5 text-xs text-amber-300 font-normal">(Enhanced)</span>
+                              )}
+                            </span>
+                            {/* Tier badge */}
+                            {(() => {
+                              const p = activeWeapon.perkSockets
+                                .find((c) => c.name === columnName)
+                                ?.perks.find((p) => p.hash === perkHash);
+                              if (!p?.tier) return null;
+                              const cfg = TIER_CONFIG[p.tier as PerkTier];
+                              return cfg ? (
+                                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded leading-none shrink-0 ${cfg.badge}`}>
+                                  {cfg.label}
+                                </span>
+                              ) : null;
+                            })()}
+                            {/* Active / inactive badge */}
+                            <span className={[
+                              'text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none shrink-0',
+                              isOn
+                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                : 'bg-white/5 text-slate-500 border border-white/10',
+                            ].join(' ')}>
+                              {isOn ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                          <span className="text-xs text-slate-500 uppercase tracking-wide">{columnName}</span>
+                        </div>
+
+                        {/* Right side: stat deltas + toggle */}
+                        <div className="flex items-center gap-3 shrink-0">
+                          {statModifiers.length > 0 && (
+                            <div className="flex flex-wrap gap-x-2 gap-y-1 justify-end">
+                              {statModifiers.map((mod) => (
+                                <div key={mod.statName} className="flex items-center gap-1">
+                                  <span className="text-xs text-slate-500">{mod.statName}</span>
+                                  <StatDelta value={mod.value} />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <EffectToggle
+                            on={isOn}
+                            onToggle={() => toggleEffect(perkHash)}
+                            label={name}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      {(() => {
+                        const clarityEntry = clarityData?.[perkHash];
+                        if (clarityEntry) {
+                          return (
+                            <div className="mt-1">
+                              <p className="text-xs text-slate-300 leading-relaxed">
+                                {renderClarityDesc(clarityEntry)}
+                              </p>
+                              <span className="text-[10px] text-slate-600 mt-1 flex items-center gap-2">
+                                <span>via{' '}
+                                  <a href="https://d2clarity.com" target="_blank" rel="noopener noreferrer"
+                                    className="text-slate-500 hover:text-slate-300 underline underline-offset-2 transition-colors">
+                                    Clarity
+                                  </a>
+                                </span>
+                              </span>
+                            </div>
+                          );
+                        }
+                        const compEntry = compendiumData?.[name];
+                        if (compEntry) {
+                          return (
+                            <p className="text-xs text-slate-300 mt-1 leading-relaxed">{compEntry.baseDescription}</p>
+                          );
+                        }
+                        return (
+                          <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-3">{description}</p>
+                        );
+                      })()}
+
+                      {/* Buff multiplier indicator when active */}
+                      {isOn && buffKey && BUFF_DATABASE[buffKey] && (
+                        <div className="flex items-center gap-1 mt-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                          <span className="text-xs text-amber-500 font-medium">
+                            {BUFF_DATABASE[buffKey].name} ×{BUFF_DATABASE[buffKey].multiplier.toFixed(2)} active
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Dismiss */}
+                    <button
+                      onClick={() => clearPerk(columnName)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-red-400 shrink-0 self-start mt-0.5"
+                      aria-label={`Deselect ${name}`}
+                      title="Deselect perk"
+                    >
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ── Passive perks (always-on) ── */}
+          {passiveEntries.length > 0 && (
+            <div className="space-y-2">
+              {conditionalEntries.length > 0 && (
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500 pt-1">
+                  Passive Effects
+                </p>
+              )}
+              {passiveEntries.map(({ columnName, perkHash, name, icon, description, isEnhanced, buffKey, statModifiers }) => (
             <div
               key={perkHash}
               className="flex gap-3 p-3 bg-black/40 rounded-lg border border-white/10 group"
@@ -370,6 +575,8 @@ export const EffectsPanel: React.FC = () => {
               </button>
             </div>
           ))}
+            </div>
+          )}
 
           {/* Manual buffs */}
           {manualBuffEntries.map((buff) => (

@@ -406,6 +406,7 @@ export function parseWeapons(
               .filter((s): s is { statName: string; value: number } => s !== null);
 
             const enhanced = isEnhancedPerkItem(plugItem);
+            const derivedBuffKey = enhanced ? null : getBuffKeyForPerk(perkName);
             const tierEntry = getPerkTier(perkName);
             rawPerks.push({
               hash: hashStr,
@@ -414,7 +415,10 @@ export function parseWeapons(
               description: plugItem.displayProperties.description ?? '',
               statModifiers,
               isEnhanced: enhanced,
-              buffKey: enhanced ? null : getBuffKeyForPerk(perkName),
+              // A perk is conditional when it has a damage-buff activation requirement.
+              // Passive perks (barrels, mags, always-on traits) have no buffKey.
+              isConditional: derivedBuffKey !== null,
+              buffKey: derivedBuffKey,
               tier: enhanced ? null : (tierEntry?.tier ?? null),
               enhancedVersion: null, // filled in below
             });

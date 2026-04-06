@@ -209,6 +209,12 @@ interface WeaponState {
   activeBuffs: string[];
   /** 0-based stack index per stackable buff hash (e.g. "rampage" → 2 = ×3) */
   buffStacks: Record<string, number>;
+  /**
+   * Perk hashes whose conditional effects are toggled ON in the Effects Tab.
+   * A perk appears here only if the user has explicitly activated it.
+   * Defaults to empty — all conditional perks start in the "off" state.
+   */
+  activeEffects: string[];
   mode: GameMode;
 
   // Roll customisation
@@ -232,6 +238,8 @@ interface WeaponState {
   selectPerk: (columnName: string, perkHash: string) => void;
   clearPerk: (columnName: string) => void;
   toggleBuff: (buffHash: string) => void;
+  /** Toggle the activated state of a conditional perk effect in the Effects Tab */
+  toggleEffect: (perkHash: string) => void;
   /** Set the active stack index (0-based) for a stackable buff */
   setBuffStack: (buffHash: string, stackIndex: number) => void;
   setMode: (mode: GameMode) => void;
@@ -253,6 +261,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
   selectedPerks: {},
   activeBuffs: [],
   buffStacks: {},
+  activeEffects: [],
   mode: 'pve',
 
   masterworkStat: null,
@@ -269,6 +278,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       selectedPerks: {},
       activeBuffs: [],
       buffStacks: {},
+      activeEffects: [],
       masterworkStat: null,
       isCrafted: false,
       activeMod: WEAPON_MODS[0],
@@ -308,7 +318,9 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       }
       // Do NOT auto-enable the new perk's buff — user enables manually in Damage Buffs panel.
 
-      return { selectedPerks: { ...state.selectedPerks, [columnName]: perkHash }, activeBuffs, buffStacks };
+      // Also deactivate any conditional effect tied to the old perk
+      const activeEffects = state.activeEffects.filter((h) => h !== state.selectedPerks[columnName]);
+      return { selectedPerks: { ...state.selectedPerks, [columnName]: perkHash }, activeBuffs, buffStacks, activeEffects };
     }),
 
   clearPerk: (columnName) =>
@@ -333,7 +345,8 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       }
 
       const { [columnName]: _removed, ...rest } = state.selectedPerks;
-      return { selectedPerks: rest, activeBuffs, buffStacks };
+      const activeEffects = state.activeEffects.filter((h) => h !== oldPerkHash);
+      return { selectedPerks: rest, activeBuffs, buffStacks, activeEffects };
     }),
 
   toggleBuff: (buffHash) =>
@@ -361,6 +374,16 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       buffStacks: { ...state.buffStacks, [buffHash]: stackIndex },
     })),
 
+  toggleEffect: (perkHash) =>
+    set((state) => {
+      const isActive = state.activeEffects.includes(perkHash);
+      return {
+        activeEffects: isActive
+          ? state.activeEffects.filter((h) => h !== perkHash)
+          : [...state.activeEffects, perkHash],
+      };
+    }),
+
   setMode: (mode) => set({ mode }),
   setMasterworkStat: (stat) => set({ masterworkStat: stat }),
   toggleCrafted: () => set((s) => ({ isCrafted: !s.isCrafted })),
@@ -370,7 +393,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
   setArmorMods: (mods) => set((s) => ({ armorMods: { ...s.armorMods, ...mods } })),
 
   getCalculatedStats: () => {
-    const { activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods } = get();
+    const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, activeMod, armorMods } = get();
     if (!activeWeapon) return {};
 
     const finalStats: StatMap = { ...activeWeapon.baseStats };
@@ -379,15 +402,24 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
     // Enhanced perk hashes are stored on basePerk.enhancedVersion — they don't appear
     // directly in column.perks.  When the direct lookup misses, fall back to the
     // enhancedVersion object so its statModifiers are always applied.
+    //
+    // Conditional perks (isConditional: true) only contribute stat modifiers when the
+    // user has explicitly activated their effect in the Effects Tab (i.e. the perk hash
+    // is present in activeEffects).  Passive perks always apply.
     for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
       const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
       if (!column) continue;
+
+      // Resolve to the actual perk object (handles enhanced hash look-up)
       let perk = column.perks.find((p) => p.hash === perkHash) ?? null;
-      if (!perk) {
-        const base = column.perks.find((p) => p.enhancedVersion?.hash === perkHash);
-        perk = base?.enhancedVersion ?? null;
-      }
+      const basePerk = perk ?? column.perks.find((p) => p.enhancedVersion?.hash === perkHash) ?? null;
+      if (!perk && basePerk) perk = basePerk.enhancedVersion ?? null;
       if (!perk) continue;
+
+      // Gate conditional perks on activeEffects
+      const isConditional = basePerk?.isConditional ?? perk.isConditional;
+      if (isConditional && !activeEffects.includes(perkHash)) continue;
+
       for (const mod of perk.statModifiers) {
         if (finalStats[mod.statName] !== undefined) {
           finalStats[mod.statName] = Math.max(0, Math.min(100, finalStats[mod.statName] + mod.value));
@@ -448,7 +480,29 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
   },
 
   getDamageMultiplier: () => {
-    const { activeBuffs, buffStacks, activeMod, surgeStacks, mode, weaponsStat } = get();
+    const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, activeMod, surgeStacks, mode, weaponsStat } = get();
+
+    // Collect buff keys from conditional perk effects that are toggled ON.
+    // These are weapon-perk buffs (Kill Clip, Rampage, etc.) activated via the
+    // Effects Tab rather than the manual Damage Buffs panel.
+    const effectBuffKeys: string[] = [];
+    if (activeWeapon) {
+      for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+        if (!activeEffects.includes(perkHash)) continue;
+        const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+        if (!column) continue;
+        const basePerk = column.perks.find((p) => p.hash === perkHash)
+          ?? column.perks.find((p) => p.enhancedVersion?.hash === perkHash)
+          ?? null;
+        // buffKey lives on the base perk (enhanced versions carry null)
+        const buffKey = basePerk?.buffKey ?? null;
+        if (buffKey) effectBuffKeys.push(buffKey);
+      }
+    }
+
+    // Combine manual buffs (subclass, debuffs) and effect-activated perk buffs.
+    // Deduplicate so a perk buff toggled in both panels isn't double-counted.
+    const allActiveBuffs = Array.from(new Set([...activeBuffs, ...effectBuffKeys]));
 
     // Weapon perk buffs stack multiplicatively with each other.
     // Empowering buffs are mutually exclusive — only the highest applies.
@@ -457,7 +511,7 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
     let maxEmpowering  = 1;
     let maxDebuff      = 1;
 
-    for (const hash of activeBuffs) {
+    for (const hash of allActiveBuffs) {
       const buff = BUFF_DATABASE[hash];
       if (!buff) continue;
       const mult = getBuffMultiplier(buff, buffStacks[hash]);
