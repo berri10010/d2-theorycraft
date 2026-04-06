@@ -63,52 +63,94 @@ function fmtPattern(crits: number, bodies: number): string {
 }
 
 /**
- * Find the minimum number of shots whose optimal crit-heavy mix reaches
- * `targetHp`.  Returns [shots, crits, bodies] or null if unreachable.
+ * Find the minimum total shots to kill and the optimal head/body split.
+ *
+ * Algorithm: the minimum shot count is ceil(hp / critDmg) — assuming all
+ * crits.  We then walk c downward from that minimum to find the maximum
+ * number of bodies we can substitute while still killing in that same shot
+ * count.  The first c where total damage drops below hp is one too few crits,
+ * so we return the previous (still-valid) c.
+ *
+ * Returns [totalShots, crits, bodies] or null if critDmg <= 0.
  */
 function findOptimalShots(
   bodyDmg: number,
   critDmg: number,
   targetHp: number,
-  maxShots = 200,
 ): [shots: number, crits: number, bodies: number] | null {
-  for (let shots = 1; shots <= maxShots; shots++) {
-    for (let c = shots; c >= 0; c--) {
-      const b = shots - c;
-      if (c * critDmg + b * bodyDmg >= targetHp) {
-        return [shots, c, b];
-      }
+  if (critDmg <= 0) return null;
+
+  const minShots = Math.ceil(targetHp / critDmg);
+  let optimalCrits  = minShots;
+  let optimalBodies = 0;
+
+  for (let c = minShots; c >= 0; c--) {
+    const b      = minShots - c;
+    const damage = c * critDmg + b * bodyDmg;
+    if (damage >= targetHp) {
+      optimalCrits  = c;
+      optimalBodies = b;
+    } else {
+      break; // previous c was the minimum required crits
     }
   }
-  return null;
+
+  return [minShots, optimalCrits, optimalBodies];
 }
 
 // ── TTK formulae ──────────────────────────────────────────────────────────────
 
-function ttkStandard(shots: number, shotDelay: number): number {
-  return (shots - 1) * (shotDelay / 30);
+/**
+ * Standard / auto / semi-auto:
+ *   shotDelay = inter-shot gap in 30fps frames
+ *   TTK = (shots - 1) * shotDelay / 30
+ */
+function ttkStandard(shots: number, shotDelayFrames: number): number {
+  return (shots - 1) * (shotDelayFrames / 30);
 }
 
+/**
+ * Charge / draw weapons (Fusions, LFRs, Bows):
+ *   chargeMs    = charge/draw time in ms
+ *   shotDelay   = inter-trigger gap in 30fps frames (used for shots > 1)
+ *   TTK = chargeMs/1000 + (shots - 1) * shotDelay/30
+ */
 function ttkCharge(
   shots: number,
   chargeMs: number,
-  shotDelay: number | null,
+  shotDelayFrames: number | null,
 ): number {
-  // If the weapon has a per-shot delay between trigger pulls, use it;
-  // otherwise fall back to treating each subsequent trigger as another full charge.
-  const interShotSec = shotDelay != null ? shotDelay / 30 : chargeMs / 1000;
+  const interShotSec = shotDelayFrames != null ? shotDelayFrames / 30 : chargeMs / 1000;
   return (chargeMs / 1000) + (shots - 1) * interShotSec;
 }
 
+/**
+ * Burst weapons (Pulse Rifles, burst Sidearms/SMGs):
+ *
+ * MB spreadsheet naming is counter-intuitive:
+ *   burstDelay  = intra-burst gap  (between consecutive bullets WITHIN a burst)
+ *   shotDelay   = inter-burst gap  (from last bullet of burst N to first of N+1)
+ *
+ * One full burst cycle = (shotsPerBurst - 1) intra-burst gaps + 1 inter-burst gap:
+ *   burstCycleFrames = (shotsPerBurst - 1) * burstDelayFrames + shotDelayFrames
+ *
+ * TTK:
+ *   fullBursts     = floor((shots - 1) / shotsPerBurst)
+ *   remainderShots = (shots - 1) % shotsPerBurst
+ *   totalFrames    = fullBursts * burstCycleFrames + remainderShots * burstDelayFrames
+ *   TTK            = totalFrames / 30
+ */
 function ttkBurst(
   shots: number,
   shotsPerBurst: number,
-  burstDelay: number,
-  shotDelay: number,
+  burstDelayFrames: number,   // intra-burst (MB column: burst delay)
+  shotDelayFrames: number,    // inter-burst (MB column: shot delay)
 ): number {
-  const fullBursts     = Math.floor((shots - 1) / shotsPerBurst);
-  const remainderShots = (shots - 1) % shotsPerBurst;
-  return (fullBursts * burstDelay / 30) + (remainderShots * shotDelay / 30);
+  const burstCycleFrames = (shotsPerBurst - 1) * burstDelayFrames + shotDelayFrames;
+  const fullBursts       = Math.floor((shots - 1) / shotsPerBurst);
+  const remainderShots   = (shots - 1) % shotsPerBurst;
+  const totalFrames      = fullBursts * burstCycleFrames + remainderShots * burstDelayFrames;
+  return totalFrames / 30;
 }
 
 // ── Core calculation ──────────────────────────────────────────────────────────
