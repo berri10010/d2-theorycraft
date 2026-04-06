@@ -98,8 +98,8 @@ export async function fetchGodRolls(): Promise<GodRollDatabase> {
             tier: r[14]?.trim() || null,
           };
         }
-      } catch {
-        // Skip tabs that fail to load
+      } catch (err) {
+        console.warn(`[godRolls] Failed to load tab "${tab}":`, err instanceof Error ? err.message : err);
       }
     }),
   );

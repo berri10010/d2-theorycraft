@@ -31,6 +31,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { parseWeapons } from '../src/lib/bungie/parser.js';
 import type { Weapon, Perk } from '../src/types/weapon.js';
+import type { BungieSeasonDefinition } from '../src/lib/bungie/bungieTypes.js';
 
 // ── Path helpers ─────────────────────────────────────────────────────────────
 
@@ -155,7 +156,8 @@ async function buildWeapons() {
 
   // Artifact watermark → season number (fallback for seasons not yet in DIM map)
   const artifactWatermarkMap: Record<string, number> = {};
-  for (const season of Object.values(seasonDefs) as any[]) {
+  const seasonDefValues = Object.values(seasonDefs) as BungieSeasonDefinition[];
+  for (const season of seasonDefValues) {
     if (!season.artifactItemHash || !season.seasonNumber) continue;
     const artifact = (items as any)[season.artifactItemHash.toString()];
     if (artifact?.iconWatermark) {

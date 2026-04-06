@@ -55,9 +55,11 @@ export function parseWishlist(text: string): WishlistDb {
 
     const existing = db.get(itemStr);
     if (existing) {
-      // Check if identical perk set already present
+      // Check if identical perk set + tags already present
       const isDupe = existing.some(
-        (e) => e.perkSets.some((set) => set.join(',') === perkHashes.join(','))
+        (e) =>
+          e.perkSets.some((set) => set.join(',') === perkHashes.join(',')) &&
+          e.tags.join(',') === tags.join(',')
       );
       if (!isDupe) existing.push({ weaponHash: itemStr, perkSets: [perkHashes], tags });
     } else {

@@ -9,6 +9,8 @@ interface CompareState {
   clearSnapshots: () => void;
 }
 
+let nextId = 0;
+
 export const useCompareStore = create<CompareState>((set) => ({
   snapshots: [],
 
@@ -16,7 +18,7 @@ export const useCompareStore = create<CompareState>((set) => ({
     set((state) => ({
       snapshots: [
         ...state.snapshots,
-        { ...snapshot, id: `${snapshot.weapon.hash}-${Date.now()}` },
+        { ...snapshot, id: `${snapshot.weapon.hash}-${nextId++}` },
       ],
     })),
 

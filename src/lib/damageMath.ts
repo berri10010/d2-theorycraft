@@ -228,34 +228,6 @@ export interface TTKWeaponInfo {
   intrinsicTrait: { name: string } | null;
 }
 
-export function calculatePvpTTK(
-  weapon: TTKWeaponInfo,
-  guardianHp: number,
-  multiplier: number,
-): TTKResult | null {
-  const entry = lookupWeaponStat(
-    weapon.itemSubType,
-    weapon.ammoType,
-    weapon.intrinsicTrait?.name ?? null,
-  );
-  if (!entry) return null;
-  return calcFromEntry(entry, guardianHp, multiplier, 'pvp');
-}
-
-export function calculatePveTTK(
-  weapon: TTKWeaponInfo,
-  enemyHp: number,
-  multiplier: number,
-): TTKResult | null {
-  const entry = lookupWeaponStat(
-    weapon.itemSubType,
-    weapon.ammoType,
-    weapon.intrinsicTrait?.name ?? null,
-  );
-  if (!entry) return null;
-  return calcFromEntry(entry, enemyHp, multiplier, 'pve');
-}
-
 /**
  * Unified TTK entry point.
  *
@@ -272,6 +244,12 @@ export function calculateTTK(
   pvpHp: number,
   enemyHealth: number,
 ): TTKResult | null {
-  if (mode === 'pvp') return calculatePvpTTK(weapon, pvpHp, multiplier);
-  return calculatePveTTK(weapon, enemyHealth, multiplier);
+  const entry = lookupWeaponStat(
+    weapon.itemSubType,
+    weapon.ammoType,
+    weapon.intrinsicTrait?.name ?? null,
+  );
+  if (!entry) return null;
+  const hp = mode === 'pvp' ? pvpHp : enemyHealth;
+  return calcFromEntry(entry, hp, multiplier, mode);
 }
