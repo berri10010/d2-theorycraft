@@ -294,7 +294,8 @@ export function parseWeapons(
       for (const stat of Object.values(item.stats.stats)) {
         const statName = STAT_HASH_MAP[stat.statHash];
         if (!statName) continue;
-        // First value wins — RPM takes priority over Draw/Charge Time
+        // Capture the first rate-of-fire stat encountered (RPM for most weapons,
+        // Draw Time for bows, Charge Time for fusion/linear fusion/rocket launchers).
         if (!rpm && (statName === 'RPM' || statName === 'Draw Time' || statName === 'Charge Time')) {
           rpm = stat.value;
         }

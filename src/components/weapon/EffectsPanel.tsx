@@ -481,171 +481,171 @@ export const EffectsPanel: React.FC = () => {
                 </p>
               )}
               {passiveEntries.map(({ columnName, perkHash, name, icon, description, isEnhanced, buffKey, statModifiers }) => (
-            <div
-              key={perkHash}
-              className="flex gap-3 p-3 bg-black/40 rounded-lg border border-white/10 group"
-            >
-              {/* Icon */}
-              <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-amber-400 shrink-0">
-                {icon && (
-                  <Image
-                    src={BUNGIE_URL + icon}
-                    alt={name}
-                    fill
-                    sizes="40px"
-                    className="object-cover"
-                    unoptimized
-                  />
-                )}
-                {isEnhanced && (
-                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-amber-400 rounded-full border border-slate-900" />
-                )}
-                {buffKey && (
-                  <div className="absolute top-0 left-0 w-2 h-2 bg-green-400 rounded-full border border-slate-900" />
-                )}
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-sm text-amber-400">
-                        {name}
-                        {isEnhanced && (
-                          <span className="ml-1.5 text-xs text-amber-300 font-normal">(Enhanced)</span>
-                        )}
-                      </span>
-                      {/* Tier badge */}
-                      {(() => {
-                        const p = activeWeapon.perkSockets
-                          .find((c) => c.name === columnName)
-                          ?.perks.find((p) => p.hash === perkHash);
-                        if (!p?.tier) return null;
-                        const cfg = TIER_CONFIG[p.tier as PerkTier];
-                        return cfg ? (
-                          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded leading-none shrink-0 ${cfg.badge}`}>
-                            {cfg.label}
-                          </span>
-                        ) : null;
-                      })()}
-                    </div>
-                    <span className="text-xs text-slate-500 uppercase tracking-wide">{columnName}</span>
+                <div
+                  key={perkHash}
+                  className="flex gap-3 p-3 bg-black/40 rounded-lg border border-white/10 group"
+                >
+                  {/* Icon */}
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-amber-400 shrink-0">
+                    {icon && (
+                      <Image
+                        src={BUNGIE_URL + icon}
+                        alt={name}
+                        fill
+                        sizes="40px"
+                        className="object-cover"
+                        unoptimized
+                      />
+                    )}
+                    {isEnhanced && (
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-amber-400 rounded-full border border-slate-900" />
+                    )}
+                    {buffKey && (
+                      <div className="absolute top-0 left-0 w-2 h-2 bg-green-400 rounded-full border border-slate-900" />
+                    )}
                   </div>
 
-                  {/* Stat deltas */}
-                  {statModifiers.length > 0 && (
-                    <div className="flex flex-wrap gap-x-2 gap-y-1 justify-end shrink-0">
-                      {statModifiers.map((mod) => (
-                        <div key={mod.statName} className="flex items-center gap-1">
-                          <span className="text-xs text-slate-500">{mod.statName}</span>
-                          <StatDelta value={mod.value} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Description priority:
-                    1. Clarity (hash lookup — most accurate, community-maintained)
-                    2. Data Compendium (name lookup — fallback)
-                    3. Bungie manifest description (last resort) */}
-                {(() => {
-                  // ① Clarity — keyed by perk hash string
-                  const clarityEntry = clarityData?.[perkHash];
-                  if (clarityEntry) {
-                    return (
-                      <div className="mt-1">
-                        <p className="text-xs text-slate-300 leading-relaxed">
-                          {renderClarityDesc(clarityEntry)}
-                        </p>
-                        <span className="text-[10px] text-slate-600 mt-1 flex items-center gap-2">
-                          <span>
-                            via{' '}
-                            <a
-                              href="https://d2clarity.com"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-slate-500 hover:text-slate-300 underline underline-offset-2 transition-colors"
-                            >
-                              Clarity
-                            </a>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-sm text-amber-400">
+                            {name}
+                            {isEnhanced && (
+                              <span className="ml-1.5 text-xs text-amber-300 font-normal">(Enhanced)</span>
+                            )}
                           </span>
-                          <span className="text-slate-800">·</span>
-                          <a
-                            href="https://d2clarity.com/discord"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-slate-600 hover:text-slate-400 transition-colors"
-                          >
-                            Feedback on this description ↗
-                          </a>
+                          {/* Tier badge */}
+                          {(() => {
+                            const p = activeWeapon.perkSockets
+                              .find((c) => c.name === columnName)
+                              ?.perks.find((p) => p.hash === perkHash);
+                            if (!p?.tier) return null;
+                            const cfg = TIER_CONFIG[p.tier as PerkTier];
+                            return cfg ? (
+                              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded leading-none shrink-0 ${cfg.badge}`}>
+                                {cfg.label}
+                              </span>
+                            ) : null;
+                          })()}
+                        </div>
+                        <span className="text-xs text-slate-500 uppercase tracking-wide">{columnName}</span>
+                      </div>
+
+                      {/* Stat deltas */}
+                      {statModifiers.length > 0 && (
+                        <div className="flex flex-wrap gap-x-2 gap-y-1 justify-end shrink-0">
+                          {statModifiers.map((mod) => (
+                            <div key={mod.statName} className="flex items-center gap-1">
+                              <span className="text-xs text-slate-500">{mod.statName}</span>
+                              <StatDelta value={mod.value} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Description priority:
+                        1. Clarity (hash lookup — most accurate, community-maintained)
+                        2. Data Compendium (name lookup — fallback)
+                        3. Bungie manifest description (last resort) */}
+                    {(() => {
+                      // ① Clarity — keyed by perk hash string
+                      const clarityEntry = clarityData?.[perkHash];
+                      if (clarityEntry) {
+                        return (
+                          <div className="mt-1">
+                            <p className="text-xs text-slate-300 leading-relaxed">
+                              {renderClarityDesc(clarityEntry)}
+                            </p>
+                            <span className="text-[10px] text-slate-600 mt-1 flex items-center gap-2">
+                              <span>
+                                via{' '}
+                                <a
+                                  href="https://d2clarity.com"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-slate-500 hover:text-slate-300 underline underline-offset-2 transition-colors"
+                                >
+                                  Clarity
+                                </a>
+                              </span>
+                              <span className="text-slate-800">·</span>
+                              <a
+                                href="https://d2clarity.com/discord"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-slate-600 hover:text-slate-400 transition-colors"
+                              >
+                                Feedback on this description ↗
+                              </a>
+                            </span>
+                          </div>
+                        );
+                      }
+
+                      // ② Data Compendium — keyed by perk name
+                      const compEntry = compendiumData?.[name];
+                      if (compEntry) {
+                        const bonuses = isEnhanced
+                          ? compEntry.enhancedBonuses.map((b) => b.replace(/↑/g, '').trim()).filter(Boolean)
+                          : [];
+                        return (
+                          <div className="mt-1">
+                            <p className="text-xs text-slate-300 leading-relaxed">
+                              {compEntry.baseDescription}
+                            </p>
+                            {bonuses.length > 0 && (
+                              <div className="mt-1.5 flex flex-wrap gap-1">
+                                {bonuses.map((bonus, i) => (
+                                  <span
+                                    key={i}
+                                    className="inline-flex items-center gap-1 text-[11px] font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded"
+                                  >
+                                    <span className="text-amber-400 font-bold">↑</span>
+                                    {bonus}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            <span className="text-[10px] text-slate-600 mt-1 block">via Data Compendium</span>
+                          </div>
+                        );
+                      }
+
+                      // ③ Bungie manifest fallback
+                      return (
+                        <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-3">
+                          {description}
+                        </p>
+                      );
+                    })()}
+
+                    {/* Auto-buff indicator */}
+                    {buffKey && BUFF_DATABASE[buffKey] && (
+                      <div className="flex items-center gap-1 mt-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                        <span className="text-xs text-green-500">
+                          Auto-activates {BUFF_DATABASE[buffKey].name} (x{BUFF_DATABASE[buffKey].multiplier.toFixed(2)})
                         </span>
                       </div>
-                    );
-                  }
-
-                  // ② Data Compendium — keyed by perk name
-                  const compEntry = compendiumData?.[name];
-                  if (compEntry) {
-                    const bonuses = isEnhanced
-                      ? compEntry.enhancedBonuses.map((b) => b.replace(/↑/g, '').trim()).filter(Boolean)
-                      : [];
-                    return (
-                      <div className="mt-1">
-                        <p className="text-xs text-slate-300 leading-relaxed">
-                          {compEntry.baseDescription}
-                        </p>
-                        {bonuses.length > 0 && (
-                          <div className="mt-1.5 flex flex-wrap gap-1">
-                            {bonuses.map((bonus, i) => (
-                              <span
-                                key={i}
-                                className="inline-flex items-center gap-1 text-[11px] font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded"
-                              >
-                                <span className="text-amber-400 font-bold">↑</span>
-                                {bonus}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        <span className="text-[10px] text-slate-600 mt-1 block">via Data Compendium</span>
-                      </div>
-                    );
-                  }
-
-                  // ③ Bungie manifest fallback
-                  return (
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-3">
-                      {description}
-                    </p>
-                  );
-                })()}
-
-                {/* Auto-buff indicator */}
-                {buffKey && BUFF_DATABASE[buffKey] && (
-                  <div className="flex items-center gap-1 mt-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                    <span className="text-xs text-green-500">
-                      Auto-activates {BUFF_DATABASE[buffKey].name} (x{BUFF_DATABASE[buffKey].multiplier.toFixed(2)})
-                    </span>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* Dismiss button */}
-              <button
-                onClick={() => clearPerk(columnName)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-red-400 shrink-0 self-start mt-0.5"
-                aria-label={`Deselect ${name}`}
-                title="Deselect perk"
-              >
-                <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          ))}
+                  {/* Dismiss button */}
+                  <button
+                    onClick={() => clearPerk(columnName)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-red-400 shrink-0 self-start mt-0.5"
+                    aria-label={`Deselect ${name}`}
+                    title="Deselect perk"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 

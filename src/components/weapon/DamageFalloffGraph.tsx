@@ -40,8 +40,11 @@ function adsMultiplier(zoom: number): number {
   return 1 + Math.max(0, zoom - 10) * 0.033;
 }
 
-// Floor damage fraction at max falloff distance
-const FALLOFF_FLOOR = 0.5; // D2 damage never drops below ~50% at end of falloff for most archetypes
+// Floor damage fraction at max falloff distance.
+// Simplified constant — most archetypes floor around 50%, but some (e.g.
+// linear fusion rifles, certain exotic frames) differ.  A future improvement
+// would read the archetype-specific floor from the manifest if available.
+const FALLOFF_FLOOR = 0.5;
 
 export const DamageFalloffGraph: React.FC = () => {
   const { activeWeapon, getCalculatedStats, mode } = useWeaponStore();
