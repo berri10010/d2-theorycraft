@@ -319,7 +319,7 @@ export const SearchSidebar: React.FC = () => {
       let diff: number;
       if (sortMode === 'season') {
         const sa = bestSeasonNumber(a.g), sb = bestSeasonNumber(b.g);
-        diff = sa !== sb ? sb - sa : a.g.baseName.localeCompare(b.g.baseName);
+        diff = sa !== sb ? sa - sb : a.g.baseName.localeCompare(b.g.baseName);
       } else {
         diff = a.g.baseName.localeCompare(b.g.baseName);
       }

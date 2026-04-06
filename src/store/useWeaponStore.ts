@@ -459,23 +459,10 @@ export const useWeaponStore = create<WeaponState>((set, get) => ({
       }
     }
 
-    // Enhanced perks grant an additional +2 on each stat they affect, regardless of
-    // whether the weapon is in crafted mode.  This matches D2 behaviour where any
-    // weapon that can roll enhanced perks benefits from the stat bonus.
-    for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
-      const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
-      if (!column) continue;
-      for (const basePerk of column.perks) {
-        if (basePerk.enhancedVersion?.hash === perkHash) {
-          for (const mod of basePerk.statModifiers) {
-            if (finalStats[mod.statName] !== undefined) {
-              finalStats[mod.statName] = Math.min(100, finalStats[mod.statName] + 2);
-            }
-          }
-          break;
-        }
-      }
-    }
+    // Enhanced perks: the manifest already stores the correct stat values for
+    // enhanced variants (e.g. +12 vs +10 Range).  The first loop above applies
+    // the selected perk's statModifiers directly, so no additional +2 is needed.
+    // The old +2 loop was removed — it caused double-counting for enhanced perks.
 
     // Weapon mod stat changes
     for (const [stat, delta] of Object.entries(activeMod.statChanges)) {

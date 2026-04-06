@@ -103,9 +103,9 @@ function Dashboard() {
     // Restore active buffs
     if (buffsParam) {
       const toActivate = buffsParam.split(',').filter(Boolean);
-      // activeBuffs from the hook is current at effect run time
+      const currentBuffs = useWeaponStore.getState().activeBuffs;
       toActivate.forEach((hash) => {
-        if (!activeBuffs.includes(hash)) toggleBuff(hash);
+        if (!currentBuffs.includes(hash)) toggleBuff(hash);
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
