@@ -177,6 +177,10 @@ export const TTKAndFalloffPanel: React.FC = () => {
   const animHipFalloffX = useAnimatedValue(hipFalloffX);
   const animAdsFalloffX = useAnimatedValue(adsFalloffX);
 
+  // Animate axis scales so labels smoothly count up/down alongside the curves
+  const animMaxDist = useAnimatedValue(maxDist);
+  const animYMax    = useAnimatedValue(yMax);
+
   // TTK sparkline
   const ttkSparklinePoints = useMemo(() => {
     if (ttkBreakpoints.length === 0) return [];
@@ -224,9 +228,9 @@ export const TTKAndFalloffPanel: React.FC = () => {
   const ttkPadMax = ttkSMax + ttkRange * 0.15;
   const ttkYTicks = Array.from({ length: ttkSMax - ttkSMin + 1 }, (_, i) => ttkSMin + i);
 
-  // X ticks
-  const xTicks = [0, 0.25, 0.5, 0.75, 1.0].map((f) => ({ frac: f, m: (f * maxDist).toFixed(0) }));
-  const yTicks = [0, 0.25, 0.5, 0.75, 1.0].map((f) => Math.round(yMax * f));
+  // X/Y ticks use animated scale values so labels sweep smoothly with the curves
+  const xTicks = [0, 0.25, 0.5, 0.75, 1.0].map((f) => ({ frac: f, m: (f * animMaxDist).toFixed(0) }));
+  const yTicks = [0, 0.25, 0.5, 0.75, 1.0].map((f) => Math.round(animYMax * f));
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 space-y-6">
@@ -314,7 +318,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
               <span className={
                 'text-3xl font-mono font-bold ' + (multiplier > 1 ? 'text-amber-400' : 'text-white')
               }>
-                {ttkResult.ttk === 0 ? '1st shot' : `${ttkResult.ttk.toFixed(2)}s`}
+                {`${ttkResult.ttk.toFixed(2)}s`}
               </span>
             </div>
             <div className="bg-black/40 p-4 rounded-lg border border-white/10 flex flex-col items-center">

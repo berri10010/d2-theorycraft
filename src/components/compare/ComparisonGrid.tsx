@@ -138,6 +138,20 @@ function SnapshotCard({
 export const ComparisonGrid: React.FC = () => {
   const { snapshots, clearSnapshots } = useCompareStore();
 
+  // IMPORTANT: useMemo must be called before any early returns to satisfy
+  // React's rules of hooks — hook call order must be identical every render.
+  // Min and max per stat across all snapshots — used for delta colouring.
+  const { statMins, statMaxes } = useMemo(() => {
+    const mins: Record<string, number> = {};
+    const maxes: Record<string, number> = {};
+    STAT_KEYS.forEach((key) => {
+      const vals = snapshots.map((s) => s.calculatedStats[key] ?? 0);
+      mins[key]  = vals.length > 0 ? Math.min(...vals) : 0;
+      maxes[key] = vals.length > 0 ? Math.max(...vals) : 0;
+    });
+    return { statMins: mins, statMaxes: maxes };
+  }, [snapshots]);
+
   if (snapshots.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-slate-500 bg-white/5 rounded-xl border border-dashed border-white/10">
@@ -148,19 +162,6 @@ export const ComparisonGrid: React.FC = () => {
       </div>
     );
   }
-
-  // Min and max per stat across all snapshots — used for delta colouring.
-  // Memoized so it only recomputes when the snapshot list changes.
-  const { statMins, statMaxes } = useMemo(() => {
-    const mins: Record<string, number> = {};
-    const maxes: Record<string, number> = {};
-    STAT_KEYS.forEach((key) => {
-      const vals = snapshots.map((s) => s.calculatedStats[key] ?? 0);
-      mins[key]  = Math.min(...vals);
-      maxes[key] = Math.max(...vals);
-    });
-    return { statMins: mins, statMaxes: maxes };
-  }, [snapshots]);
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
