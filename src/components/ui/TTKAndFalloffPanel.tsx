@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { getArchetype } from '../../lib/archetypes';
@@ -83,6 +83,16 @@ export const TTKAndFalloffPanel: React.FC = () => {
   const [hoverX, setHoverX] = useState<number | null>(null);
   const [showAds, setShowAds] = useState(true);
   const [showHip, setShowHip] = useState(true);
+  const [expanded, setExpanded] = useState<'ttk' | 'falloff' | null>(null);
+
+  // Close expanded chart on Escape
+  const closeExpanded = useCallback(() => setExpanded(null), []);
+  useEffect(() => {
+    if (!expanded) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') closeExpanded(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [expanded, closeExpanded]);
 
   const calcStats = getCalculatedStats();
   const rangeStat = calcStats['Range'] ?? 0;
@@ -354,11 +364,18 @@ export const TTKAndFalloffPanel: React.FC = () => {
         <div>
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-bold text-slate-300">Shots vs Distance</h3>
-            <span className="text-[10px] text-slate-500">
-              {ttkSMin === ttkSMax
-                ? `No breakpoints — always ${ttkSMin} shots`
-                : `${ttkSMin} → ${ttkSMax} shots across range`}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-500">
+                {ttkSMin === ttkSMax
+                  ? `No breakpoints — always ${ttkSMin} shots`
+                  : `${ttkSMin} → ${ttkSMax} shots across range`}
+              </span>
+              <button
+                onClick={() => setExpanded('ttk')}
+                title="Expand chart"
+                className="text-slate-500 hover:text-slate-200 transition-colors text-sm leading-none px-1"
+              >⛶</button>
+            </div>
           </div>
           <div className="relative select-none">
             <svg
@@ -462,6 +479,11 @@ export const TTKAndFalloffPanel: React.FC = () => {
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-bold text-slate-300">Damage Falloff</h3>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setExpanded('falloff')}
+                title="Expand chart"
+                className="text-slate-500 hover:text-slate-200 transition-colors text-sm leading-none px-1"
+              >⛶</button>
               <button
                 onClick={() => setShowHip((v) => !v)}
                 className={[
@@ -616,6 +638,154 @@ export const TTKAndFalloffPanel: React.FC = () => {
       ) : (
         <div className="bg-black/40 p-4 rounded-lg border border-white/10 text-center text-slate-500 text-sm">
           Falloff data not available for this weapon archetype.
+        </div>
+      )}
+
+      {/* ── Fullscreen overlay ─────────────────────────────── */}
+      {expanded !== null && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 flex flex-col"
+          onClick={(e) => { if (e.target === e.currentTarget) closeExpanded(); }}
+        >
+          {/* Overlay header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 shrink-0">
+            <h2 className="text-lg font-bold text-white">
+              {expanded === 'ttk' ? 'Shots vs Distance' : 'Damage Falloff'}
+            </h2>
+            <button
+              onClick={closeExpanded}
+              className="text-slate-400 hover:text-white text-2xl leading-none px-2 transition-colors"
+              title="Close (Esc)"
+            >✕</button>
+          </div>
+
+          {/* Expanded chart */}
+          <div className="flex-1 overflow-auto p-6">
+            {expanded === 'ttk' && ttkBreakpoints.length > 0 && (
+              <svg
+                width="100%"
+                height="100%"
+                viewBox={`0 0 ${W} ${H}`}
+                preserveAspectRatio="xMidYMid meet"
+                style={{ display: 'block', maxHeight: 'calc(100vh - 120px)' }}
+                className="overflow-visible"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const svgX = ((e.clientX - rect.left) / rect.width) * W - PL;
+                  setHoverX(Math.max(0, Math.min(IW, svgX)));
+                }}
+                onMouseLeave={() => setHoverX(null)}
+              >
+                <g transform={`translate(${PL},${PT})`}>
+                  {ttkYTicks.map((v) => {
+                    const [, cy] = toSvg(0, v, ttkPadMin, ttkPadMax);
+                    return <line key={v} x1={0} y1={cy} x2={IW} y2={cy} stroke="rgba(255,255,255,0.05)" strokeWidth={1} />;
+                  })}
+                  {ttkSparklineFill && <path d={ttkSparklineFill} fill="rgba(168,85,247,0.08)" />}
+                  {ttkSparklinePath && <path d={ttkSparklinePath} fill="none" stroke="rgba(168,85,247,0.8)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />}
+                  {ttkBreakpoints.map((bp, i) => {
+                    if (i === 0) return null;
+                    const prev = ttkBreakpoints[i - 1];
+                    if (bp.shotsToKill === prev.shotsToKill) return null;
+                    const [cx, cy] = toSvg(bp.distance / maxDist, bp.shotsToKill, ttkPadMin, ttkPadMax);
+                    return <circle key={i} cx={cx} cy={cy} r={4} fill="#a855f7" stroke="rgba(0,0,0,0.5)" strokeWidth={1} />;
+                  })}
+                  {hoverX !== null && hoverDist !== null && hoverTtkBp && (() => {
+                    const [cx, cy] = toSvg(hoverTtkBp.distance / maxDist, hoverTtkBp.shotsToKill, ttkPadMin, ttkPadMax);
+                    return (
+                      <>
+                        <line x1={hoverX} y1={0} x2={hoverX} y2={IH} stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
+                        <circle cx={cx} cy={cy} r={5} fill="#a855f7" stroke="white" strokeWidth={1.5} />
+                        <rect x={Math.min(hoverX + 4, IW - 80)} y={4} width={78} height={28} rx={3} fill="rgba(0,0,0,0.85)" />
+                        <text x={Math.min(hoverX + 8, IW - 76)} y={15} fill="white" fontSize={9} fontFamily="monospace">{hoverDist.toFixed(1)}m</text>
+                        <text x={Math.min(hoverX + 8, IW - 76)} y={26} fill="#a855f7" fontSize={9} fontFamily="monospace">{hoverTtkBp.shotsToKill} shots · {hoverTtkBp.ttk.toFixed(2)}s</text>
+                      </>
+                    );
+                  })()}
+                  {ttkYTicks.map((v) => {
+                    const [, cy] = toSvg(0, v, ttkPadMin, ttkPadMax);
+                    return <text key={v} x={-4} y={cy + 3} fill="rgba(148,163,184,0.6)" fontSize={9} textAnchor="end" fontFamily="monospace">{v}</text>;
+                  })}
+                  {xTicks.map(({ frac, m }) => (
+                    <text key={frac} x={frac * IW} y={IH + 18} fill="rgba(148,163,184,0.6)" fontSize={9} textAnchor="middle" fontFamily="monospace">{m}m</text>
+                  ))}
+                  <line x1={0} y1={0} x2={0} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
+                  <line x1={0} y1={IH} x2={IW} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
+                </g>
+              </svg>
+            )}
+
+            {expanded === 'falloff' && hasFalloffData && (
+              <svg
+                width="100%"
+                height="100%"
+                viewBox={`0 0 ${W} ${H}`}
+                preserveAspectRatio="xMidYMid meet"
+                style={{ display: 'block', maxHeight: 'calc(100vh - 120px)' }}
+                className="overflow-visible"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const svgX = ((e.clientX - rect.left) / rect.width) * W - PL;
+                  setHoverX(Math.max(0, Math.min(IW, svgX)));
+                }}
+                onMouseLeave={() => setHoverX(null)}
+              >
+                <g transform={`translate(${PL},${PT})`}>
+                  {yTicks.map((v) => (
+                    <line key={v} x1={0} y1={toSvg(0, v, yMin, yMax)[1]} x2={IW} y2={toSvg(0, v, yMin, yMax)[1]} stroke="rgba(255,255,255,0.05)" strokeWidth={1} />
+                  ))}
+                  {showAds && adsFillPath && <path d={adsFillPath} fill="rgba(251,191,36,0.05)" />}
+                  {showHip && <line x1={animHipFalloffX} y1={0} x2={animHipFalloffX} y2={IH} stroke="rgba(34,211,238,0.3)" strokeWidth={1} strokeDasharray="3 3" />}
+                  {showAds && <line x1={animAdsFalloffX} y1={0} x2={animAdsFalloffX} y2={IH} stroke="rgba(251,191,36,0.3)" strokeWidth={1} strokeDasharray="3 3" />}
+                  {showHip && hipCritPath && <>
+                    <path d={hipBodyPath} fill="none" stroke="rgba(34,211,238,0.35)" strokeWidth={2} strokeDasharray="4 2" />
+                    <path d={hipCritPath} fill="none" stroke="rgba(34,211,238,0.9)" strokeWidth={2.5} strokeLinecap="round" />
+                  </>}
+                  {showAds && adsCritPath && <>
+                    <path d={adsBodyPath} fill="none" stroke="rgba(251,191,36,0.35)" strokeWidth={2} strokeDasharray="4 2" />
+                    <path d={adsCritPath} fill="none" stroke="rgba(251,191,36,0.9)" strokeWidth={2.5} strokeLinecap="round" />
+                  </>}
+                  {hoverX !== null && hoverDist !== null && (() => {
+                    const tx = Math.min(hoverX + 4, IW - 80);
+                    const ty = 4;
+                    const h  = showHip && showAds ? 32 : 20;
+                    return (
+                      <>
+                        <line x1={hoverX} y1={0} x2={hoverX} y2={IH} stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
+                        {showHip && hoverHipCrit !== null && <circle cx={toSvg(hoverX / IW, hoverHipCrit, yMin, yMax)[0]} cy={toSvg(hoverX / IW, hoverHipCrit, yMin, yMax)[1]} r={4} fill="#22d3ee" />}
+                        {showAds && hoverAdsCrit !== null && <circle cx={toSvg(hoverX / IW, hoverAdsCrit, yMin, yMax)[0]} cy={toSvg(hoverX / IW, hoverAdsCrit, yMin, yMax)[1]} r={4} fill="#fbbf24" />}
+                        <rect x={tx} y={ty} width={78} height={h} rx={3} fill="rgba(0,0,0,0.85)" />
+                        <text x={tx + 4} y={ty + 11} fill="white" fontSize={9} fontFamily="monospace">{hoverDist.toFixed(1)}m</text>
+                        {showHip && hoverHipCrit !== null && <text x={tx + 4} y={ty + 22} fill="#22d3ee" fontSize={9} fontFamily="monospace">Hip: {hoverHipCrit.toFixed(1)}</text>}
+                        {showAds && hoverAdsCrit !== null && <text x={tx + 4} y={ty + (showHip ? 32 : 22)} fill="#fbbf24" fontSize={9} fontFamily="monospace">ADS: {hoverAdsCrit.toFixed(1)}</text>}
+                      </>
+                    );
+                  })()}
+                  {yTicks.filter((v) => v > 0).map((v) => {
+                    const [, cy] = toSvg(0, v, yMin, yMax);
+                    return <text key={v} x={-4} y={cy + 3} fill="rgba(148,163,184,0.6)" fontSize={9} textAnchor="end" fontFamily="monospace">{v}</text>;
+                  })}
+                  {xTicks.map(({ frac, m }) => (
+                    <text key={frac} x={frac * IW} y={IH + 18} fill="rgba(148,163,184,0.6)" fontSize={9} textAnchor="middle" fontFamily="monospace">{m}m</text>
+                  ))}
+                  <line x1={0} y1={0} x2={0} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
+                  <line x1={0} y1={IH} x2={IW} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
+                </g>
+              </svg>
+            )}
+          </div>
+
+          {/* Overlay footer */}
+          {expanded === 'falloff' && hasFalloffData && (
+            <div className="flex items-center gap-4 px-6 py-3 border-t border-white/10 shrink-0 flex-wrap">
+              <button onClick={() => setShowHip((v) => !v)} className={['text-xs font-bold px-2 py-1 rounded border transition-colors', showHip ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40' : 'bg-white/5 text-slate-600 border-white/10'].join(' ')}>Hip</button>
+              <button onClick={() => setShowAds((v) => !v)} className={['text-xs font-bold px-2 py-1 rounded border transition-colors', showAds ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' : 'bg-white/5 text-slate-600 border-white/10'].join(' ')}>ADS</button>
+              <span className="text-xs text-slate-500">Range <span className="text-white font-mono">{rangeStat}</span></span>
+              <span className="text-xs text-slate-500">Zoom <span className="text-white font-mono">{zoomStat}</span></span>
+              <span className="text-cyan-400/70 text-xs">Hip <span className="text-white font-mono">{hipFalloffStart!.toFixed(1)}m</span></span>
+              <span className="text-amber-400/70 text-xs">ADS <span className="text-white font-mono">{adsFalloffStart.toFixed(1)}m</span></span>
+            </div>
+          )}
         </div>
       )}
     </div>

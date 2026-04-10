@@ -35,10 +35,10 @@ function MenuIcon({ open }: { open: boolean }) {
 
 function Dashboard() {
   const {
-    loadWeapon, activeWeapon, selectedPerks, selectPerk,
+    loadWeapon, activeWeapon, activeWeaponHash, selectedPerks, selectPerk,
     getCalculatedStats, getDamageMultiplier, mode, setMode,
     masterworkStat, activeBuffs, setWeaponsStat, weaponsStat,
-    setMasterworkStat, toggleBuff,
+    setMasterworkStat, toggleBuff, clearRoll,
   } = useWeaponStore();
   const { addSnapshot, snapshots } = useCompareStore();
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
@@ -64,11 +64,23 @@ function Dashboard() {
   useEffect(() => { setSidebarOpen(false); }, [activeWeapon?.hash]);
 
   useEffect(() => {
-    if (weapons.length > 0 && !activeWeapon && !searchParams.get('w')) {
-      const firstGroup = weaponGroups[0];
-      if (firstGroup) loadWeapon(firstGroup.default, firstGroup.variants);
+    if (weapons.length === 0 || activeWeapon || searchParams.get('w')) return;
+    // Try to restore the last active weapon from the persisted hash.
+    if (activeWeaponHash) {
+      const group = weaponGroups.find((g) =>
+        g.default.hash === activeWeaponHash ||
+        g.variants.some((v) => v.hash === activeWeaponHash)
+      );
+      if (group) {
+        // loadWeapon will restore the saved roll from weaponRolls automatically.
+        loadWeapon(group.default, group.variants);
+        return;
+      }
     }
-  }, [weapons, activeWeapon, loadWeapon, searchParams, weaponGroups]);
+    // Fallback: first weapon in the list.
+    const firstGroup = weaponGroups[0];
+    if (firstGroup) loadWeapon(firstGroup.default, firstGroup.variants);
+  }, [weapons, activeWeapon, loadWeapon, searchParams, weaponGroups, activeWeaponHash]);
 
   useEffect(() => {
     const weaponHash  = searchParams.get('w');
@@ -287,6 +299,14 @@ function Dashboard() {
                   className="bg-white/5 hover:bg-white/10 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border border-white/10 min-h-[44px]"
                 >
                   {copied ? 'Copied!' : 'Share'}
+                </button>
+                <button
+                  onClick={clearRoll}
+                  aria-label="Clear all perks and mods for this weapon"
+                  title="Reset perks, mods, and masterwork for this weapon"
+                  className="bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-400 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border border-white/10 hover:border-red-500/30 min-h-[44px]"
+                >
+                  Clear Roll
                 </button>
                 <button
                   onClick={handleAddToCompare}

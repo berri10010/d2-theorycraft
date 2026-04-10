@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Weapon, StatMap, GameMode, WeaponGroup } from '../types/weapon';
 import { BUFF_DATABASE, getBuffMultiplier } from '../lib/buffDatabase';
 
@@ -131,8 +132,6 @@ const INFLIGHT_AE:     [number, number, number, number] = [0, 15, 25, 30];
 const AMMO_GEN:        [number, number, number, number] = [0, 20, 40, 50];
 
 // Dexterity → approximate flat Handling bonus for the stat bar.
-// The real effect is a 0.8x/0.75x/0.7x ready/stow duration multiplier,
-// but we map it to Handling so changes show in the stat display.
 const DEXTERITY_HANDLING: [number, number, number, number] = [0, 8, 10, 12];
 
 export interface ArmorModState {
@@ -195,390 +194,434 @@ export const MASTERWORK_STATS = [
 export type MasterworkStat = typeof MASTERWORK_STATS[number];
 
 // Weapon Surge multipliers — actual in-game values from Weapon Surge mod description.
-// Stacks 1-3 available from regular armor; stack 4 only via Artifact or Exotic Armor.
 export const SURGE_PVE: Record<number, number> = { 0: 1.00, 1: 1.10, 2: 1.17, 3: 1.22, 4: 1.25 };
 export const SURGE_PVP: Record<number, number> = { 0: 1.00, 1: 1.03, 2: 1.045, 3: 1.055, 4: 1.06 };
+
+// ─── Per-weapon roll cache ────────────────────────────────────────────────────
+//
+// When you switch weapons, the current weapon's roll (perks, mods, masterwork,
+// armor mods, conditional effects) is saved here keyed by weapon hash.
+// Switching back to a weapon restores its roll automatically.
+// Persisted to localStorage so rolls survive page reloads.
+//
+// Note: activeBuffs and buffStacks are intentionally global (not per-weapon)
+// so subclass / exotic / empowering buff selections carry across weapons.
+
+interface WeaponRoll {
+  selectedPerks:  Record<string, string>;
+  masterworkStat: MasterworkStat | null;
+  isCrafted:      boolean;
+  activeModId:    string;           // id field from WEAPON_MODS
+  armorMods:      ArmorModState;
+  activeEffects:  Record<string, number>;
+}
 
 // ─── Store interface ─────────────────────────────────────────────────────────
 
 interface WeaponState {
-  activeWeapon: Weapon | null;
-  /** All variants in the active weapon's family */
-  variantGroup: Weapon[];
-  selectedPerks: Record<string, string>;
-  activeBuffs: string[];
-  /** 0-based stack index per stackable buff hash (e.g. "rampage" → 2 = ×3) */
-  buffStacks: Record<string, number>;
+  activeWeapon:      Weapon | null;
+  /** Persisted hash used to restore the active weapon on page reload. */
+  activeWeaponHash:  string | null;
+  variantGroup:      Weapon[];
+  selectedPerks:     Record<string, string>;
+  activeBuffs:       string[];
+  buffStacks:        Record<string, number>;
   /**
    * Multi-state activation map for conditional perk effects (Effects Tab).
-   *
-   * Key:   selected perk hash (string)
-   * Value: activation state
-   *   0  → off (default — perk is equipped but effect not activated)
+   *   0  → off (default)
    *   1  → on / first stack
-   *   2  → second stack (e.g. Rampage ×2)
    *   N  → Nth stack
-   *
-   * For boolean perks (Kill Clip) only 0/1 are used.
-   * For stackable perks (Rampage, Swashbuckler) N maps to stacks[N-1] in the
-   * buff database.
    */
-  activeEffects: Record<string, number>;
-  mode: GameMode;
+  activeEffects:     Record<string, number>;
+  mode:              GameMode;
 
-  // Roll customisation
-  masterworkStat: MasterworkStat | null;
-  isCrafted: boolean;
-  activeMod: WeaponMod;
-  surgeStacks: 0 | 1 | 2 | 3 | 4;
-  /**
-   * Guardian "Weapons" armor stat (formerly Mobility), range 1–200.
-   * PvE only — scales weapon damage vs combatants.
-   * 1–100: 0–15% vs minors/majors (Primary/Special), 0–10% (Heavy)
-   * 101–200: additional 0–15% vs bosses (Primary/Special), 0–10% (Heavy)
-   */
-  weaponsStat: number;
+  masterworkStat:    MasterworkStat | null;
+  isCrafted:         boolean;
+  activeMod:         WeaponMod;
+  surgeStacks:       0 | 1 | 2 | 3 | 4;
+  weaponsStat:       number;
+  armorMods:         ArmorModState;
 
-  /** Armor mod tiers (Targeting / Loader / Dexterity / Unflinching) */
-  armorMods: ArmorModState;
+  /** Per-weapon roll cache, keyed by weapon hash. Persisted to localStorage. */
+  weaponRolls:       Record<string, WeaponRoll>;
 
   // Actions
-  loadWeapon: (weapon: Weapon, group?: Weapon[]) => void;
-  selectPerk: (columnName: string, perkHash: string) => void;
-  clearPerk: (columnName: string) => void;
-  toggleBuff: (buffHash: string) => void;
-  /**
-   * Set the activation state for a conditional perk effect.
-   * Pass 0 to deactivate.  Pass 1 for on/first-stack, 2 for second stack, etc.
-   * This replaces the old toggleEffect — callers compute the desired next state.
-   */
-  setEffectState: (perkHash: string, state: number) => void;
-  /** Set the active stack index (0-based) for a stackable buff */
-  setBuffStack: (buffHash: string, stackIndex: number) => void;
-  setMode: (mode: GameMode) => void;
+  loadWeapon:        (weapon: Weapon, group?: Weapon[]) => void;
+  selectPerk:        (columnName: string, perkHash: string) => void;
+  clearPerk:         (columnName: string) => void;
+  /** Reset all per-weapon state to defaults and remove its cached roll. */
+  clearRoll:         () => void;
+  toggleBuff:        (buffHash: string) => void;
+  setEffectState:    (perkHash: string, state: number) => void;
+  setBuffStack:      (buffHash: string, stackIndex: number) => void;
+  setMode:           (mode: GameMode) => void;
   setMasterworkStat: (stat: MasterworkStat | null) => void;
-  toggleCrafted: () => void;
-  setActiveMod: (mod: WeaponMod) => void;
-  setSurgeStacks: (stacks: 0 | 1 | 2 | 3 | 4) => void;
-  setWeaponsStat: (stat: number) => void;
-  setArmorMods: (mods: Partial<ArmorModState>) => void;
+  toggleCrafted:     () => void;
+  setActiveMod:      (mod: WeaponMod) => void;
+  setSurgeStacks:    (stacks: 0 | 1 | 2 | 3 | 4) => void;
+  setWeaponsStat:    (stat: number) => void;
+  setArmorMods:      (mods: Partial<ArmorModState>) => void;
 
   // Computed
-  getCalculatedStats: () => StatMap;
+  getCalculatedStats:  () => StatMap;
   getDamageMultiplier: () => number;
 }
 
-export const useWeaponStore = create<WeaponState>((set, get) => ({
-  activeWeapon: null,
-  variantGroup: [],
-  selectedPerks: {},
-  activeBuffs: [],
-  buffStacks: {},
-  activeEffects: {},
-  mode: 'pve',
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
-  masterworkStat: null,
-  isCrafted: false,
-  activeMod: WEAPON_MODS[0], // 'none'
-  surgeStacks: 0,
-  weaponsStat: 0,
-  armorMods: DEFAULT_ARMOR_MODS,
+function captureRoll(state: WeaponState): WeaponRoll {
+  return {
+    selectedPerks:  state.selectedPerks,
+    masterworkStat: state.masterworkStat,
+    isCrafted:      state.isCrafted,
+    activeModId:    state.activeMod.id,
+    armorMods:      state.armorMods,
+    activeEffects:  state.activeEffects,
+  };
+}
 
-  loadWeapon: (weapon, group) =>
-    set({
-      activeWeapon: weapon,
-      variantGroup: group ?? [weapon],
-      selectedPerks: {},
-      activeBuffs: [],
-      buffStacks: {},
-      activeEffects: {},
-      masterworkStat: null,
-      isCrafted: false,
-      activeMod: WEAPON_MODS[0],
-      armorMods: DEFAULT_ARMOR_MODS,
-    }),
+/** Returns true if the roll is the same as factory defaults — no need to cache it. */
+function isDefaultRoll(roll: WeaponRoll): boolean {
+  return (
+    Object.keys(roll.selectedPerks).length === 0 &&
+    roll.masterworkStat === null &&
+    !roll.isCrafted &&
+    roll.activeModId === 'none' &&
+    Object.values(roll.armorMods).every((v) => v === 0) &&
+    Object.keys(roll.activeEffects).length === 0
+  );
+}
 
-  selectPerk: (columnName, perkHash) =>
-    set((state) => {
-      if (!state.activeWeapon) return state;
+// ─── Store ───────────────────────────────────────────────────────────────────
 
-      const column = state.activeWeapon.perkSockets.find((c) => c.name === columnName);
+export const useWeaponStore = create<WeaponState>()(
+  persist(
+    (set, get) => ({
+      activeWeapon:      null,
+      activeWeaponHash:  null,
+      variantGroup:      [],
+      selectedPerks:     {},
+      activeBuffs:       [],
+      buffStacks:        {},
+      activeEffects:     {},
+      mode:              'pve',
+      masterworkStat:    null,
+      isCrafted:         false,
+      activeMod:         WEAPON_MODS[0],
+      surgeStacks:       0,
+      weaponsStat:       0,
+      armorMods:         DEFAULT_ARMOR_MODS,
+      weaponRolls:       {},
 
-      /**
-       * Resolve a perk hash to the perk that owns the buffKey.
-       * Enhanced version hashes are NOT in column.perks directly — they live on
-       * basePerk.enhancedVersion.  In that case we return the base perk so that
-       * buffKey (which always lives on the base) is correctly found.
-       */
-      const resolvePerk = (hash: string) => {
-        if (!column) return null;
-        const direct = column.perks.find((p) => p.hash === hash);
-        if (direct) return direct;
-        // Hash belongs to an enhanced version → return the base perk
-        return column.perks.find((p) => p.enhancedVersion?.hash === hash) ?? null;
-      };
+      // ── loadWeapon ──────────────────────────────────────────────────────────
+      // Saves the outgoing weapon's roll, then restores the incoming weapon's
+      // saved roll (or starts fresh if none exists).
+      // Global state — activeBuffs, buffStacks, mode, weaponsStat, surgeStacks
+      // — is preserved across weapon switches intentionally.
+      loadWeapon: (weapon, group) => {
+        const state = get();
 
-      const oldPerk = resolvePerk(state.selectedPerks[columnName]);
-      const newPerk = resolvePerk(perkHash);
-
-      let activeBuffs = [...state.activeBuffs];
-      let buffStacks  = { ...state.buffStacks };
-      // When a perk is deselected/replaced, remove its buff from activeBuffs.
-      if (oldPerk?.buffKey && activeBuffs.includes(oldPerk.buffKey)) {
-        activeBuffs = activeBuffs.filter((b) => b !== oldPerk.buffKey);
-        const { [oldPerk.buffKey]: _removed, ...restStacks } = buffStacks;
-        buffStacks = restStacks;
-      }
-      // Do NOT auto-enable the new perk's buff — user enables manually in Damage Buffs panel.
-
-      // Also deactivate any conditional effect tied to the old perk
-      const { [state.selectedPerks[columnName]]: _oldEffect, ...activeEffects } = state.activeEffects;
-      return { selectedPerks: { ...state.selectedPerks, [columnName]: perkHash }, activeBuffs, buffStacks, activeEffects };
-    }),
-
-  clearPerk: (columnName) =>
-    set((state) => {
-      if (!state.activeWeapon) return state;
-      const column = state.activeWeapon.perkSockets.find((c) => c.name === columnName);
-      const oldPerkHash = state.selectedPerks[columnName];
-
-      // Resolve enhanced hashes the same way as selectPerk
-      const oldPerk = oldPerkHash
-        ? (column?.perks.find((p) => p.hash === oldPerkHash)
-            ?? column?.perks.find((p) => p.enhancedVersion?.hash === oldPerkHash)
-            ?? null)
-        : null;
-
-      let activeBuffs = [...state.activeBuffs];
-      let buffStacks  = { ...state.buffStacks };
-      if (oldPerk?.buffKey) {
-        activeBuffs = activeBuffs.filter((b) => b !== oldPerk.buffKey);
-        const { [oldPerk.buffKey]: _removed, ...restStacks } = buffStacks;
-        buffStacks = restStacks;
-      }
-
-      const { [columnName]: _removed, ...rest } = state.selectedPerks;
-      const { [oldPerkHash ?? '']: _oldEffect, ...activeEffects } = state.activeEffects;
-      return { selectedPerks: rest, activeBuffs, buffStacks, activeEffects };
-    }),
-
-  toggleBuff: (buffHash) =>
-    set((state) => {
-      const isActive = state.activeBuffs.includes(buffHash);
-      if (isActive) {
-        // Deactivate — also clear the saved stack index
-        const { [buffHash]: _removed, ...restStacks } = state.buffStacks;
-        return {
-          activeBuffs: state.activeBuffs.filter((h) => h !== buffHash),
-          buffStacks: restStacks,
-        };
-      }
-      // Activate — default stackable buffs to max stack (last index)
-      const buff = BUFF_DATABASE[buffHash];
-      const buffStacks = { ...state.buffStacks };
-      if (buff?.stacks?.length) {
-        buffStacks[buffHash] = buff.stacks.length - 1;
-      }
-      return { activeBuffs: [...state.activeBuffs, buffHash], buffStacks };
-    }),
-
-  setBuffStack: (buffHash, stackIndex) =>
-    set((state) => ({
-      buffStacks: { ...state.buffStacks, [buffHash]: stackIndex },
-    })),
-
-  setEffectState: (perkHash, state) =>
-    set((s) => {
-      if (state <= 0) {
-        // Remove the key entirely when turning off
-        const { [perkHash]: _removed, ...rest } = s.activeEffects;
-        return { activeEffects: rest };
-      }
-      return { activeEffects: { ...s.activeEffects, [perkHash]: state } };
-    }),
-
-  setMode: (mode) => set({ mode }),
-  setMasterworkStat: (stat) => set({ masterworkStat: stat }),
-  toggleCrafted: () => set((s) => ({ isCrafted: !s.isCrafted })),
-  setActiveMod: (mod) => set({ activeMod: mod }),
-  setSurgeStacks: (stacks) => set({ surgeStacks: stacks }),
-  setWeaponsStat: (stat) => set({ weaponsStat: Math.max(0, Math.min(200, stat)) }),
-  setArmorMods: (mods) => set((s) => ({ armorMods: { ...s.armorMods, ...mods } })),
-
-  getCalculatedStats: () => {
-    const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, activeMod, armorMods } = get();
-    if (!activeWeapon) return {};
-
-    const finalStats: StatMap = { ...activeWeapon.baseStats };
-
-    // Perk stat modifiers.
-    // Enhanced perk hashes are stored on basePerk.enhancedVersion — they don't appear
-    // directly in column.perks.  When the direct lookup misses, fall back to the
-    // enhancedVersion object so its statModifiers are always applied.
-    //
-    // Each PerkMod carries an optional isConditional flag (e.g. Eye of the Storm's
-    // Handling bonus only applies at low health).  Conditionally-active mods are
-    // gated on the perk having a non-zero state in activeEffects.  Always-on mods
-    // (isConditional = false/undefined) apply regardless of the toggle state.
-    for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
-      const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
-      if (!column) continue;
-
-      // Resolve to the actual perk object (handles enhanced hash look-up)
-      let perk = column.perks.find((p) => p.hash === perkHash) ?? null;
-      const basePerk = perk ?? column.perks.find((p) => p.enhancedVersion?.hash === perkHash) ?? null;
-      if (!perk && basePerk) perk = basePerk.enhancedVersion ?? null;
-      if (!perk) continue;
-
-      const effectState = activeEffects[perkHash] ?? 0;
-      const isEffectActive = effectState > 0;
-
-      for (const mod of perk.statModifiers) {
-        // Conditionally-active mods only apply when the Effects Tab toggle is on
-        if ((mod.isConditional ?? false) && !isEffectActive) continue;
-        if (finalStats[mod.statName] !== undefined) {
-          finalStats[mod.statName] = Math.max(0, Math.min(100, finalStats[mod.statName] + mod.value));
-        }
-      }
-    }
-
-    // Masterwork: +10 to chosen stat; if Adept, +3 to all other base stats
-    if (masterworkStat) {
-      if (activeWeapon.isAdept) {
-        for (const stat of Object.keys(finalStats)) {
-          if (stat === masterworkStat) {
-            finalStats[stat] = Math.min(100, finalStats[stat] + 10);
-          } else {
-            finalStats[stat] = Math.min(100, finalStats[stat] + 3);
+        // Save current weapon's roll before switching
+        let weaponRolls = state.weaponRolls;
+        if (state.activeWeapon && state.activeWeapon.hash !== weapon.hash) {
+          const roll = captureRoll(state);
+          if (!isDefaultRoll(roll)) {
+            weaponRolls = { ...weaponRolls, [state.activeWeapon.hash]: roll };
           }
         }
-      } else {
-        if (finalStats[masterworkStat] !== undefined) {
-          finalStats[masterworkStat] = Math.min(100, finalStats[masterworkStat] + 10);
+
+        // Restore saved roll for the new weapon (or use defaults)
+        const saved  = weaponRolls[weapon.hash];
+        const newMod = saved
+          ? (WEAPON_MODS.find((m) => m.id === saved.activeModId) ?? WEAPON_MODS[0])
+          : WEAPON_MODS[0];
+
+        set({
+          activeWeapon:     weapon,
+          activeWeaponHash: weapon.hash,
+          variantGroup:     group ?? [weapon],
+          weaponRolls,
+          selectedPerks:    saved?.selectedPerks  ?? {},
+          masterworkStat:   saved?.masterworkStat ?? null,
+          isCrafted:        saved?.isCrafted      ?? false,
+          activeMod:        newMod,
+          armorMods:        saved?.armorMods      ?? DEFAULT_ARMOR_MODS,
+          activeEffects:    saved?.activeEffects  ?? {},
+          // activeBuffs / buffStacks intentionally preserved (global)
+        });
+      },
+
+      // ── clearRoll ───────────────────────────────────────────────────────────
+      // Resets all per-weapon state to defaults and removes the cached roll so
+      // switching away and back starts fresh too.
+      clearRoll: () => {
+        const { activeWeapon, weaponRolls } = get();
+        if (!activeWeapon) return;
+        const { [activeWeapon.hash]: _removed, ...remainingRolls } = weaponRolls;
+        set({
+          selectedPerks:  {},
+          masterworkStat: null,
+          isCrafted:      false,
+          activeMod:      WEAPON_MODS[0],
+          armorMods:      DEFAULT_ARMOR_MODS,
+          activeEffects:  {},
+          weaponRolls:    remainingRolls,
+        });
+      },
+
+      selectPerk: (columnName, perkHash) =>
+        set((state) => {
+          if (!state.activeWeapon) return state;
+
+          const column = state.activeWeapon.perkSockets.find((c) => c.name === columnName);
+
+          /**
+           * Resolve a perk hash to the perk that owns the buffKey.
+           * Enhanced version hashes are NOT in column.perks directly — they live on
+           * basePerk.enhancedVersion.  In that case we return the base perk so that
+           * buffKey (which always lives on the base) is correctly found.
+           */
+          const resolvePerk = (hash: string) => {
+            if (!column) return null;
+            const direct = column.perks.find((p) => p.hash === hash);
+            if (direct) return direct;
+            return column.perks.find((p) => p.enhancedVersion?.hash === hash) ?? null;
+          };
+
+          const oldPerk = resolvePerk(state.selectedPerks[columnName]);
+
+          let activeBuffs = [...state.activeBuffs];
+          let buffStacks  = { ...state.buffStacks };
+          if (oldPerk?.buffKey && activeBuffs.includes(oldPerk.buffKey)) {
+            activeBuffs = activeBuffs.filter((b) => b !== oldPerk.buffKey);
+            const { [oldPerk.buffKey]: _removed, ...restStacks } = buffStacks;
+            buffStacks = restStacks;
+          }
+
+          const { [state.selectedPerks[columnName]]: _oldEffect, ...activeEffects } = state.activeEffects;
+          return { selectedPerks: { ...state.selectedPerks, [columnName]: perkHash }, activeBuffs, buffStacks, activeEffects };
+        }),
+
+      clearPerk: (columnName) =>
+        set((state) => {
+          if (!state.activeWeapon) return state;
+          const column = state.activeWeapon.perkSockets.find((c) => c.name === columnName);
+          const oldPerkHash = state.selectedPerks[columnName];
+
+          const oldPerk = oldPerkHash
+            ? (column?.perks.find((p) => p.hash === oldPerkHash)
+                ?? column?.perks.find((p) => p.enhancedVersion?.hash === oldPerkHash)
+                ?? null)
+            : null;
+
+          let activeBuffs = [...state.activeBuffs];
+          let buffStacks  = { ...state.buffStacks };
+          if (oldPerk?.buffKey) {
+            activeBuffs = activeBuffs.filter((b) => b !== oldPerk.buffKey);
+            const { [oldPerk.buffKey]: _removed, ...restStacks } = buffStacks;
+            buffStacks = restStacks;
+          }
+
+          const { [columnName]: _removed, ...rest } = state.selectedPerks;
+          const { [oldPerkHash ?? '']: _oldEffect, ...activeEffects } = state.activeEffects;
+          return { selectedPerks: rest, activeBuffs, buffStacks, activeEffects };
+        }),
+
+      toggleBuff: (buffHash) =>
+        set((state) => {
+          const isActive = state.activeBuffs.includes(buffHash);
+          if (isActive) {
+            const { [buffHash]: _removed, ...restStacks } = state.buffStacks;
+            return {
+              activeBuffs: state.activeBuffs.filter((h) => h !== buffHash),
+              buffStacks: restStacks,
+            };
+          }
+          const buff = BUFF_DATABASE[buffHash];
+          const buffStacks = { ...state.buffStacks };
+          if (buff?.stacks?.length) {
+            buffStacks[buffHash] = buff.stacks.length - 1;
+          }
+          return { activeBuffs: [...state.activeBuffs, buffHash], buffStacks };
+        }),
+
+      setBuffStack: (buffHash, stackIndex) =>
+        set((state) => ({
+          buffStacks: { ...state.buffStacks, [buffHash]: stackIndex },
+        })),
+
+      setEffectState: (perkHash, state) =>
+        set((s) => {
+          if (state <= 0) {
+            const { [perkHash]: _removed, ...rest } = s.activeEffects;
+            return { activeEffects: rest };
+          }
+          return { activeEffects: { ...s.activeEffects, [perkHash]: state } };
+        }),
+
+      setMode:           (mode)   => set({ mode }),
+      setMasterworkStat: (stat)   => set({ masterworkStat: stat }),
+      toggleCrafted:     ()       => set((s) => ({ isCrafted: !s.isCrafted })),
+      setActiveMod:      (mod)    => set({ activeMod: mod }),
+      setSurgeStacks:    (stacks) => set({ surgeStacks: stacks }),
+      setWeaponsStat:    (stat)   => set({ weaponsStat: Math.max(0, Math.min(200, stat)) }),
+      setArmorMods:      (mods)   => set((s) => ({ armorMods: { ...s.armorMods, ...mods } })),
+
+      getCalculatedStats: () => {
+        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, activeMod, armorMods } = get();
+        if (!activeWeapon) return {};
+
+        const finalStats: StatMap = { ...activeWeapon.baseStats };
+
+        // Perk stat modifiers.
+        for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+          const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+          if (!column) continue;
+
+          let perk = column.perks.find((p) => p.hash === perkHash) ?? null;
+          const basePerk = perk ?? column.perks.find((p) => p.enhancedVersion?.hash === perkHash) ?? null;
+          if (!perk && basePerk) perk = basePerk.enhancedVersion ?? null;
+          if (!perk) continue;
+
+          const effectState    = activeEffects[perkHash] ?? 0;
+          const isEffectActive = effectState > 0;
+
+          for (const mod of perk.statModifiers) {
+            if ((mod.isConditional ?? false) && !isEffectActive) continue;
+            if (finalStats[mod.statName] !== undefined) {
+              finalStats[mod.statName] = Math.max(0, Math.min(100, finalStats[mod.statName] + mod.value));
+            }
+          }
         }
-      }
+
+        // Masterwork: +10 to chosen stat; if Adept, +3 to all other base stats
+        if (masterworkStat) {
+          if (activeWeapon.isAdept) {
+            for (const stat of Object.keys(finalStats)) {
+              if (stat === masterworkStat) {
+                finalStats[stat] = Math.min(100, finalStats[stat] + 10);
+              } else {
+                finalStats[stat] = Math.min(100, finalStats[stat] + 3);
+              }
+            }
+          } else {
+            if (finalStats[masterworkStat] !== undefined) {
+              finalStats[masterworkStat] = Math.min(100, finalStats[masterworkStat] + 10);
+            }
+          }
+        }
+
+        // Weapon mod stat changes
+        for (const [stat, delta] of Object.entries(activeMod.statChanges)) {
+          if (delta && finalStats[stat] !== undefined) {
+            finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + delta));
+          }
+        }
+
+        // Armor mod stat bonuses
+        for (const [stat, delta] of Object.entries(armorModStatDeltas(armorMods))) {
+          if (delta && finalStats[stat] !== undefined) {
+            finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + delta));
+          }
+        }
+
+        // isCrafted is tracked in state; stat impact is via perk slot availability
+        void isCrafted;
+
+        return finalStats;
+      },
+
+      getDamageMultiplier: () => {
+        const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, activeMod, surgeStacks, mode, weaponsStat } = get();
+
+        const effectBuffEntries: Array<{ key: string; stackIndex: number }> = [];
+        if (activeWeapon) {
+          for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+            const effectState = activeEffects[perkHash] ?? 0;
+            if (effectState === 0) continue;
+
+            const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+            if (!column) continue;
+            const basePerk = column.perks.find((p) => p.hash === perkHash)
+              ?? column.perks.find((p) => p.enhancedVersion?.hash === perkHash)
+              ?? null;
+            const buffKey = basePerk?.buffKey ?? null;
+            if (!buffKey) continue;
+
+            effectBuffEntries.push({ key: buffKey, stackIndex: effectState - 1 });
+          }
+        }
+
+        const seenBuffKeys     = new Set<string>();
+        const allActiveBuffs:  string[] = [];
+        const effectStackByKey: Record<string, number> = {};
+
+        for (const { key, stackIndex } of effectBuffEntries) {
+          if (!seenBuffKeys.has(key)) {
+            seenBuffKeys.add(key);
+            allActiveBuffs.push(key);
+            effectStackByKey[key] = stackIndex;
+          }
+        }
+        for (const hash of activeBuffs) {
+          if (!seenBuffKeys.has(hash)) {
+            seenBuffKeys.add(hash);
+            allActiveBuffs.push(hash);
+          }
+        }
+
+        let multiplicative = 1;
+        let maxEmpowering  = 1;
+        let maxDebuff      = 1;
+
+        for (const hash of allActiveBuffs) {
+          const buff = BUFF_DATABASE[hash];
+          if (!buff) continue;
+          const stackIdx = hash in effectStackByKey ? effectStackByKey[hash] : buffStacks[hash];
+          const mult = getBuffMultiplier(buff, stackIdx);
+          if (buff.stackType === 'multiplicative') {
+            multiplicative *= mult;
+          } else if (buff.stackType === 'empowering') {
+            if (mult > maxEmpowering) maxEmpowering = mult;
+          } else if (buff.stackType === 'debuff') {
+            if (mult > maxDebuff) maxDebuff = mult;
+          }
+        }
+
+        let multiplier = multiplicative * maxEmpowering * maxDebuff;
+        multiplier *= activeMod.damageMultiplier;
+
+        if (mode === 'pve') {
+          multiplier *= SURGE_PVE[surgeStacks] ?? 1;
+          const tier1 = Math.min(weaponsStat, 100) / 100;
+          const tier2 = Math.max(0, weaponsStat - 100) / 100;
+          multiplier *= (1 + tier1 * 0.15 + tier2 * 0.15);
+        } else if (mode === 'pvp') {
+          multiplier *= SURGE_PVP[surgeStacks] ?? 1;
+          const pvpTier = Math.max(0, weaponsStat - 100) / 100;
+          multiplier *= (1 + pvpTier * 0.05);
+        }
+
+        return multiplier;
+      },
+    }),
+    {
+      name: 'd2tc-weapon',
+      // Only persist fields meaningful across reloads.
+      // activeWeapon is NOT persisted (large object); it's restored from the DB
+      // using activeWeaponHash when weapons load.
+      partialize: (state) => ({
+        activeWeaponHash: state.activeWeaponHash,
+        weaponRolls:      state.weaponRolls,
+        mode:             state.mode,
+        weaponsStat:      state.weaponsStat,
+        surgeStacks:      state.surgeStacks,
+        activeBuffs:      state.activeBuffs,
+        buffStacks:       state.buffStacks,
+      }),
     }
+  )
+);
 
-    // Enhanced perks: the manifest already stores the correct stat values for
-    // enhanced variants (e.g. +12 vs +10 Range).  The first loop above applies
-    // the selected perk's statModifiers directly, so no additional +2 is needed.
-    // The old +2 loop was removed — it caused double-counting for enhanced perks.
-
-    // Weapon mod stat changes
-    for (const [stat, delta] of Object.entries(activeMod.statChanges)) {
-      if (delta && finalStats[stat] !== undefined) {
-        finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + delta));
-      }
-    }
-
-    // Armor mod stat bonuses (Targeting, Loader, Dexterity)
-    for (const [stat, delta] of Object.entries(armorModStatDeltas(armorMods))) {
-      if (delta && finalStats[stat] !== undefined) {
-        finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + delta));
-      }
-    }
-
-    return finalStats;
-  },
-
-  getDamageMultiplier: () => {
-    const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, activeMod, surgeStacks, mode, weaponsStat } = get();
-
-    // Collect buff keys + their effective stack index from conditional perk
-    // effects that are toggled ON in the Effects Tab.
-    //
-    // activeEffects[perkHash] encodes both on/off and stack level:
-    //   0         → off, skip
-    //   1         → on at first stack (stacks[0]) or full multiplier if no stacks
-    //   N         → Nth stack (stacks[N-1])
-    const effectBuffEntries: Array<{ key: string; stackIndex: number }> = [];
-    if (activeWeapon) {
-      for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
-        const effectState = activeEffects[perkHash] ?? 0;
-        if (effectState === 0) continue;
-
-        const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
-        if (!column) continue;
-        const basePerk = column.perks.find((p) => p.hash === perkHash)
-          ?? column.perks.find((p) => p.enhancedVersion?.hash === perkHash)
-          ?? null;
-        const buffKey = basePerk?.buffKey ?? null;
-        if (!buffKey) continue;
-
-        // Map state value → 0-based stack index (state 1 → index 0)
-        effectBuffEntries.push({ key: buffKey, stackIndex: effectState - 1 });
-      }
-    }
-
-    // Build combined active-buff list for multiplicative/empowering/debuff math.
-    // activeBuffs = subclass + external manual buffs (no weapon_perk entries
-    // remain there after the BuffToggle cleanup).
-    // effectBuffEntries = perk buffs activated via Effects Tab.
-    // Deduplicate by key so a buff can't be counted twice.
-    const seenBuffKeys = new Set<string>();
-    const allActiveBuffs: string[] = [];
-    // Add effect-activated perk buffs first so their stack index wins
-    const effectStackByKey: Record<string, number> = {};
-    for (const { key, stackIndex } of effectBuffEntries) {
-      if (!seenBuffKeys.has(key)) {
-        seenBuffKeys.add(key);
-        allActiveBuffs.push(key);
-        effectStackByKey[key] = stackIndex;
-      }
-    }
-    for (const hash of activeBuffs) {
-      if (!seenBuffKeys.has(hash)) {
-        seenBuffKeys.add(hash);
-        allActiveBuffs.push(hash);
-      }
-    }
-
-    // Weapon perk buffs stack multiplicatively with each other.
-    // Empowering buffs are mutually exclusive — only the highest applies.
-    // Debuffs are mutually exclusive — only the highest applies.
-    let multiplicative = 1;
-    let maxEmpowering  = 1;
-    let maxDebuff      = 1;
-
-    for (const hash of allActiveBuffs) {
-      const buff = BUFF_DATABASE[hash];
-      if (!buff) continue;
-      // For effect-activated perk buffs, use the stack index derived from
-      // activeEffects state; for manual buffs, fall back to buffStacks.
-      const stackIdx = hash in effectStackByKey ? effectStackByKey[hash] : buffStacks[hash];
-      const mult = getBuffMultiplier(buff, stackIdx);
-      if (buff.stackType === 'multiplicative') {
-        multiplicative *= mult;
-      } else if (buff.stackType === 'empowering') {
-        if (mult > maxEmpowering) maxEmpowering = mult;
-      } else if (buff.stackType === 'debuff') {
-        if (mult > maxDebuff) maxDebuff = mult;
-      }
-    }
-
-    let multiplier = multiplicative * maxEmpowering * maxDebuff;
-    // Weapon mod damage bonus
-    multiplier *= activeMod.damageMultiplier;
-
-    if (mode === 'pve') {
-      // PvE Weapon Surge (element-matching armor surge mod)
-      multiplier *= SURGE_PVE[surgeStacks] ?? 1;
-      // Weapons stat PvE bonus (formerly Mobility):
-      //   1–100:   0–15% vs minors/majors (Primary/Special)
-      //   101–200: additional 0–15% vs bosses
-      const tier1 = Math.min(weaponsStat, 100) / 100;
-      const tier2 = Math.max(0, weaponsStat - 100) / 100;
-      multiplier *= (1 + tier1 * 0.15 + tier2 * 0.15);
-    } else if (mode === 'pvp') {
-      // PvP Weapon Surge (lower values — 3%/4.5%/5.5%/6%)
-      multiplier *= SURGE_PVP[surgeStacks] ?? 1;
-      // Weapons stat PvP bonus:
-      //   1–100:   no bonus vs Guardians (PvE targets only)
-      //   101–200: 0–5% bonus damage vs Guardians
-      const pvpTier = Math.max(0, weaponsStat - 100) / 100;   // 0.0 → 1.0
-      multiplier *= (1 + pvpTier * 0.05);
-    }
-
-    return multiplier;
-  },
-}));
+// Silence unused import — WeaponGroup is used by callers that import from this module.
+export type { WeaponGroup };
