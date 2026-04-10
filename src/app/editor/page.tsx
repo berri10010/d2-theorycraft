@@ -301,7 +301,11 @@ function Dashboard() {
                   {copied ? 'Copied!' : 'Share'}
                 </button>
                 <button
-                  onClick={clearRoll}
+                  onClick={() => {
+                    if (window.confirm(`Clear all perks, mods, and masterwork for ${activeWeapon.name}?`)) {
+                      clearRoll();
+                    }
+                  }}
                   aria-label="Clear all perks and mods for this weapon"
                   title="Reset perks, mods, and masterwork for this weapon"
                   className="bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-400 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border border-white/10 hover:border-red-500/30 min-h-[44px]"

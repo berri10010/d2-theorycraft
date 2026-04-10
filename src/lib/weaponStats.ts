@@ -139,7 +139,11 @@ export function isChargeWeapon(entry: WeaponStatEntry): boolean {
 /**
  * Weapon fires multiple projectiles per trigger pull with intra-burst timing
  * but does NOT use a charge phase (Pulse Rifles, burst Sidearms/SMGs).
+ *
+ * Note: requires burstDelay !== null to distinguish burst weapons from
+ * pellet shotguns, which also have shotsPerBurst (pellet count) but fire
+ * all pellets simultaneously with no intra-shot timing.
  */
 export function isBurstWeapon(entry: WeaponStatEntry): boolean {
-  return entry.shotsPerBurst !== null && entry.chargeMs === null;
+  return entry.shotsPerBurst !== null && entry.chargeMs === null && entry.burstDelay !== null;
 }

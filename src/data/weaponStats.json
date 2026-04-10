@@ -1465,7 +1465,7 @@
     "shotDelay": 33.0,
     "burstDelay": null,
     "chargeMs": null,
-    "shotsPerBurst": null,
+    "shotsPerBurst": 10,
     "rpm": 54.54545455
   },
   {
@@ -1478,7 +1478,7 @@
     "shotDelay": 19.0,
     "burstDelay": null,
     "chargeMs": null,
-    "shotsPerBurst": null,
+    "shotsPerBurst": 2,
     "rpm": 72.0
   },
   {
@@ -1491,7 +1491,7 @@
     "shotDelay": 22.0,
     "burstDelay": null,
     "chargeMs": null,
-    "shotsPerBurst": null,
+    "shotsPerBurst": 6,
     "rpm": 81.81818182
   },
   {
@@ -1517,7 +1517,7 @@
     "shotDelay": 28.0,
     "burstDelay": null,
     "chargeMs": null,
-    "shotsPerBurst": null,
+    "shotsPerBurst": 8,
     "rpm": 64.28571429
   },
   {
@@ -1530,7 +1530,7 @@
     "shotDelay": 13.0,
     "burstDelay": null,
     "chargeMs": null,
-    "shotsPerBurst": null,
+    "shotsPerBurst": 8,
     "rpm": 138.4615385
   },
   {
@@ -1569,7 +1569,7 @@
     "shotDelay": 33.0,
     "burstDelay": null,
     "chargeMs": null,
-    "shotsPerBurst": null,
+    "shotsPerBurst": 20,
     "rpm": 54.54545455
   },
   {

@@ -202,8 +202,11 @@ function calcFromEntry(
   } else {
     if (entry.shotDelay == null) return null;
 
-    const body = entry.bodyDamage * modeScalar * multiplier;
-    const crit = entry.critDamage  * modeScalar * multiplier;
+    // shotsPerBurst on a standard weapon = pellets fired simultaneously per shot
+    // (e.g. shotgun pellet count).  Null → 1 pellet / standard single projectile.
+    const spb  = entry.shotsPerBurst ?? 1;
+    const body = entry.bodyDamage * spb * modeScalar * multiplier;
+    const crit = entry.critDamage  * spb * modeScalar * multiplier;
 
     const found = findOptimalShots(body, crit, targetHp);
     if (!found) return null;
@@ -308,8 +311,9 @@ function calcTTKAtFalloff(
     };
   } else {
     if (entry.shotDelay == null) return null;
-    const body = entry.bodyDamage * modeScalar * effectiveMult;
-    const crit = entry.critDamage  * modeScalar * effectiveMult;
+    const spb  = entry.shotsPerBurst ?? 1;
+    const body = entry.bodyDamage * spb * modeScalar * effectiveMult;
+    const crit = entry.critDamage  * spb * modeScalar * effectiveMult;
     const found = findOptimalShots(body, crit, targetHp);
     if (!found) return null;
     const [shots, crits, bodies] = found;

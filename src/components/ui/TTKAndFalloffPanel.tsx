@@ -65,6 +65,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
     activeWeapon, getCalculatedStats, mode,
     weaponsStat, setWeaponsStat,
     getDamageMultiplier, activeBuffs, activeMod, surgeStacks,
+    activeEffects, selectedPerks,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:        s.activeWeapon,
@@ -76,6 +77,8 @@ export const TTKAndFalloffPanel: React.FC = () => {
       activeBuffs:         s.activeBuffs,
       activeMod:           s.activeMod,
       surgeStacks:         s.surgeStacks,
+      activeEffects:       s.activeEffects,
+      selectedPerks:       s.selectedPerks,
     }))
   );
 
@@ -99,7 +102,8 @@ export const TTKAndFalloffPanel: React.FC = () => {
   const zoomStat  = calcStats['Zoom'] ?? 14;
 
   const multiplier = useMemo(() => getDamageMultiplier(), [
-    activeBuffs, activeMod, surgeStacks, mode, weaponsStat,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    activeBuffs, activeMod, surgeStacks, mode, weaponsStat, activeEffects, selectedPerks,
   ]);
 
   if (!activeWeapon) return null;
