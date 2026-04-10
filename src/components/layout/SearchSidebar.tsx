@@ -356,6 +356,9 @@ export const SearchSidebar: React.FC = () => {
   const availableFrames = useMemo(() => {
     const seen = new Set<string>();
     for (const { g } of preFrameGroups) {
+      // Exotics have unique intrinsic perk names — skip them so the Frame
+      // filter only shows generic archetype frames (Adaptive, Precision, …).
+      if (g.default.rarity === 'Exotic') continue;
       const name = g.default.intrinsicTrait?.name;
       if (name) seen.add(name);
     }
