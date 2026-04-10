@@ -45,6 +45,11 @@ export function useKeyboardShortcuts({
     function handleKeyDown(e: KeyboardEvent) {
       if (isTyping(e)) return;
 
+      // Never intercept when any OS/browser modifier is held.
+      // This preserves Ctrl+C (copy), Ctrl+V (paste), Ctrl+Z (undo),
+      // Cmd+* (macOS), Alt+* (AltGr / menu shortcuts), etc.
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
       const h = handlersRef.current;
 
       switch (e.key) {
@@ -65,6 +70,7 @@ export function useKeyboardShortcuts({
           h.onPvp?.();
           break;
         case 'c':
+        case 'C':
           e.preventDefault();
           h.onCompare?.();
           break;

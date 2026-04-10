@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
 import { WeaponGroup } from '../../types/weapon';
@@ -38,6 +38,8 @@ interface FilterState {
   ammo:       MultiFilter;
   rarity:     MultiFilter;
   weaponType: MultiFilter;
+  /** Frame archetype filter — populated dynamically from visible weapons. */
+  frame:      MultiFilter;
   adeptOnly:     boolean;
   craftableOnly: boolean;
 }
@@ -49,11 +51,17 @@ const DEFAULT_FILTERS: FilterState = {
   ammo:       emptyMF(),
   rarity:     emptyMF(),
   weaponType: emptyMF(),
+  frame:      emptyMF(),
   adeptOnly:     false,
   craftableOnly: false,
 };
 
-type MultiKey = 'damage' | 'ammo' | 'rarity' | 'weaponType';
+type MultiKey = 'damage' | 'ammo' | 'rarity' | 'weaponType' | 'frame';
+
+/** Strip " Frame" suffix for compact display: "Adaptive Frame" → "Adaptive" */
+function frameLabel(name: string): string {
+  return name.replace(/ Frame$/, '');
+}
 
 // Three-state cycle per value: none → include (amber) → exclude (red) → none
 function cycleFilter(f: FilterState, key: MultiKey, val: string): FilterState {
@@ -146,12 +154,14 @@ function Toggle({
 }
 
 function FilterDrawer({
-  filters, onToggle, onClose, weaponTypes, onToggleAdept, onToggleCraftable,
+  filters, onToggle, onClose, weaponTypes, availableFrames, onToggleAdept, onToggleCraftable,
 }: {
   filters: FilterState;
   onToggle: (key: MultiKey, val: string) => void;
   onClose: () => void;
   weaponTypes: string[];
+  /** Frame names derived from the current pre-frame filtered result set. */
+  availableFrames: string[];
   onToggleAdept: () => void;
   onToggleCraftable: () => void;
 }) {
@@ -207,6 +217,21 @@ function FilterDrawer({
                 label={t}
                 mode={chipMode(filters.weaponType, t)}
                 onClick={() => onToggle('weaponType', t)} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Frame — only shown when the current result set has ≥2 distinct frames */}
+      {availableFrames.length >= 2 && (
+        <div>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Frame</p>
+          <div className="flex flex-wrap gap-1.5">
+            {availableFrames.map((f) => (
+              <FilterChip key={f}
+                label={frameLabel(f)}
+                mode={chipMode(filters.frame, f)}
+                onClick={() => onToggle('frame', f)} />
             ))}
           </div>
         </div>
@@ -287,23 +312,27 @@ export const SearchSidebar: React.FC = () => {
   const activeFilterCount =
     countMF(filters.damage) + countMF(filters.ammo) +
     countMF(filters.rarity) + countMF(filters.weaponType) +
+    countMF(filters.frame) +
     (filters.adeptOnly ? 1 : 0) + (filters.craftableOnly ? 1 : 0);
 
   const groups = useMemo(() => groupWeapons(weapons), [weapons]);
 
-  const filteredGroups = useMemo(() => {
+  // ── Helper: rank a weapon name against a query string ──────────────────────
+  const makeRankFn = useCallback((q: string) => (name: string): number => {
+    if (!q) return 0;
+    if (name.startsWith(q)) return 0;
+    if (name.split(/\s+/).some(w => w.startsWith(q))) return 1;
+    if (name.includes(q)) return 2;
+    return 999;
+  }, []);
+
+  // ── Pass 1: all filters EXCEPT frame ──────────────────────────────────────
+  // Used to derive the available frame chips without a circular dependency.
+  const preFrameGroups = useMemo(() => {
     const q = query.toLowerCase().trim();
+    const nameRank = makeRankFn(q);
 
-    // Rank by match quality: 0 = starts-with, 1 = word starts-with, 2 = contains
-    const nameRank = (name: string): number => {
-      if (!q) return 0;
-      if (name.startsWith(q)) return 0;
-      if (name.split(/\s+/).some(w => w.startsWith(q))) return 1;
-      if (name.includes(q)) return 2;
-      return 999;
-    };
-
-    let result = groups
+    return groups
       .map((g) => {
         const rank = q ? Math.min(...g.variants.map(v => nameRank(v.name.toLowerCase()))) : 0;
         return { g, rank };
@@ -311,17 +340,53 @@ export const SearchSidebar: React.FC = () => {
       .filter(({ g, rank }) => {
         if (rank === 999) return false;
         const d = g.default;
-        const dmgMatch   = matchesMF(filters.damage,     d.damageType);
-        const ammoMatch  = matchesMF(filters.ammo,       String(d.ammoType));
-        const rarMatch   = matchesMF(filters.rarity,     d.rarity ?? '');
-        const typeMatch  = matchesMF(filters.weaponType, d.itemTypeDisplayName);
-        const adeptMatch = !filters.adeptOnly     || g.variants.some(v => v.isAdept);
-        const craftMatch = !filters.craftableOnly || g.variants.some(v => v.hasCraftedPattern);
-        return dmgMatch && ammoMatch && rarMatch && typeMatch && adeptMatch && craftMatch;
+        return (
+          matchesMF(filters.damage,     d.damageType)         &&
+          matchesMF(filters.ammo,       String(d.ammoType))   &&
+          matchesMF(filters.rarity,     d.rarity ?? '')       &&
+          matchesMF(filters.weaponType, d.itemTypeDisplayName) &&
+          (!filters.adeptOnly     || g.variants.some(v => v.isAdept))          &&
+          (!filters.craftableOnly || g.variants.some(v => v.hasCraftedPattern))
+        );
       });
+  }, [groups, query, filters.damage, filters.ammo, filters.rarity,
+      filters.weaponType, filters.adeptOnly, filters.craftableOnly, makeRankFn]);
+
+  // ── Available frames: derived from Pass 1 result, sorted alphabetically ──
+  const availableFrames = useMemo(() => {
+    const seen = new Set<string>();
+    for (const { g } of preFrameGroups) {
+      const name = g.default.intrinsicTrait?.name;
+      if (name) seen.add(name);
+    }
+    return Array.from(seen).sort();
+  }, [preFrameGroups]);
+
+  // Auto-clear the frame filter whenever no frames are available (e.g. filters/
+  // search was cleared). Targeted update — only touches filters.frame.
+  useEffect(() => {
+    if (availableFrames.length === 0 && (filters.frame.inc.length > 0 || filters.frame.exc.length > 0)) {
+      setFilters(f => ({ ...f, frame: emptyMF() }));
+    }
+  }, [availableFrames, filters.frame.inc.length, filters.frame.exc.length]);
+
+  // ── Pass 2: apply frame filter on top of Pass 1 ───────────────────────────
+  const filteredGroups = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    const hasFrameFilter = filters.frame.inc.length > 0 || filters.frame.exc.length > 0;
+
+    let result = preFrameGroups;
+
+    if (hasFrameFilter) {
+      result = result.filter(({ g }) => {
+        const frameName = g.default.intrinsicTrait?.name ?? '';
+        return matchesMF(filters.frame, frameName);
+      });
+    }
 
     // Apply sort — when there's a query, rank takes priority; otherwise pure sort
-    result.sort((a, b) => {
+    const sorted = [...result];
+    sorted.sort((a, b) => {
       if (q && a.rank !== b.rank) return a.rank - b.rank;
       let diff: number;
       if (sortMode === 'season') {
@@ -333,8 +398,8 @@ export const SearchSidebar: React.FC = () => {
       return sortDir === 'asc' ? diff : -diff;
     });
 
-    return result.map(({ g }) => g);
-  }, [groups, query, filters, sortMode, sortDir]);
+    return sorted.map(({ g }) => g);
+  }, [preFrameGroups, filters.frame, query, sortMode, sortDir]);
 
   // Active dismissible chips
   const mkChips = (key: MultiKey, labelFn: (v: string) => string) => [
@@ -353,6 +418,7 @@ export const SearchSidebar: React.FC = () => {
     ...mkChips('ammo',       v => AMMO_LABELS[Number(v)] ?? v),
     ...mkChips('rarity',     v => v),
     ...mkChips('weaponType', v => v),
+    ...mkChips('frame',      v => frameLabel(v)),
     ...(filters.adeptOnly     ? [{ label: 'Adept only', isExclude: false, clear: handleToggleAdept }]     : []),
     ...(filters.craftableOnly ? [{ label: 'Craftable',  isExclude: false, clear: handleToggleCraftable }] : []),
   ];
@@ -406,6 +472,7 @@ export const SearchSidebar: React.FC = () => {
             onToggle={handleToggleFilter}
             onClose={() => setFilterOpen(false)}
             weaponTypes={weaponTypes}
+            availableFrames={availableFrames}
             onToggleAdept={handleToggleAdept}
             onToggleCraftable={handleToggleCraftable}
           />
@@ -430,7 +497,7 @@ export const SearchSidebar: React.FC = () => {
           </div>
           {anyFilter && (
             <button
-              onClick={() => { setQuery(''); setFilters(DEFAULT_FILTERS); }}
+              onClick={() => { setQuery(''); setFilters(DEFAULT_FILTERS); /* frame auto-clears via useEffect */ }}
               className="text-[10px] text-slate-500 hover:text-amber-400 transition-colors ml-auto"
             >
               Clear all
