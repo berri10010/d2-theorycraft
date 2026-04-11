@@ -84,10 +84,10 @@ A standalone, extensible TypeScript architecture for heterogeneous weapon stats.
 | TypeScript strict-mode: 0 compiler errors | ✅ Done |
 | Committed to repo (`weapon-system/`) | ✅ Done |
 | Write unit tests for each strategy and WeaponFactory validation paths | ⬜ Pending |
-| Integration: wire `weapon-system` damage output into the site's TTK calculator | ⬜ Pending |
-| Document extension pattern (adding weapon type #6 end-to-end example) | ⬜ Pending |
+| Integration: wire `weapon-system` damage output into the site's TTK calculator | ✅ Done |
+| Document extension pattern (adding weapon type #6 end-to-end example) | ✅ Done (in plan.md architecture section) |
 
-**Stage 3 progress: 65%**
+**Stage 3 progress: 85%**
 
 ---
 
@@ -112,7 +112,7 @@ Clear artifact entries and fix the 11 real perks that still have wrong data.
 |-------|----------|-------|
 | 1 — Data Pipeline | 85% | Accelerated Heatsink + Tier 4 verification remaining |
 | 2 — UI Enhancements | 60% | Component changes committed; stat pills + tooltip pending |
-| 3 — Weapon System Module | 65% | Tests + site integration pending |
+| 3 — Weapon System Module | 85% | Unit tests are the only remaining item |
 | 4 — Perk Audit Cleanup | 75% | Accelerated Heatsink + Tier 4 verification remaining |
 | **Overall** | **~72%** | |
 
@@ -145,7 +145,9 @@ Clear artifact entries and fix the 11 real perks that still have wrong data.
 
 > These are ordered by priority. Claude should start from the top.
 
-1. **Accelerated Heatsink** — add a proper entry for this perk in `src/data/perkAudit.json` directly (look up Clarity DB or use known values: +30 Charge Rate, Instant-Always). It is the only real perk in the Tier 2 group.
+1. **Push** (`git push`) so Vercel deploys the perkAudit fix and the new Damage Profile panel.
+
+2. **Accelerated Heatsink** — add a proper entry for this perk in `src/data/perkAudit.json` directly (look up Clarity DB or use known values: +30 Charge Rate, Instant-Always). It is the only real perk in the Tier 2 group.
 
 2. **Tier 4 verification** — run a quick check on the 107 fully-empty entries in `perkAudit.json` (entries where `statModifiers: []`, `activation: null`, `clarityVerified: false`). Confirm none are real perks that should have data. If any real perks are found, add entries for them.
 
@@ -202,4 +204,4 @@ git push   # Vercel auto-deploys on push to main
 
 ---
 
-*Last updated: 2026-04-11 — Session fixed perkAudit.json (committed `b0ebbda`): cleared activation on 44 artifact entries, fixed ttaCategory on 8 real perks, Unknown TTA → 0. Note: HEAD before this session had invalid JSON in perkAudit.json (commit 8215a4c) — now resolved. Component changes from prior sessions were already committed. Next: Accelerated Heatsink entry, Tier 4 verification, git push.*
+*Last updated: 2026-04-11 — Integrated weapon-system module into the site (committed `a798f32`). New "Damage Profile" panel in WeaponDataPanel dropdown for Rocket Launchers, Shotguns, Sniper Rifles, Swords, and Trace Rifles. Adapter maps D2 0-100 stat bars → weapon-system physical units; panel shows direct+splash breakdown, key stats, and scenario label reactive to active perks/buffs. TypeScript compiles clean (0 errors). Next: git push, then weapon-system unit tests.*
