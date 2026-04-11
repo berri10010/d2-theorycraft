@@ -66,10 +66,10 @@ export class WeaponFactory {
         "durability", base.durability,
       );
 
-    const validTiers = new Set(["common", "rare", "legendary", "exotic"]);
-    if (!validTiers.has(base.tier))
+    const validTiers = ["common", "rare", "legendary", "exotic"] as const;
+    if (!(validTiers as readonly string[]).includes(base.tier))
       throw new StatValidationError(
-        `tier must be one of: ${[...validTiers].join(", ")}`,
+        `tier must be one of: ${validTiers.join(", ")}`,
         "tier", base.tier,
       );
   }

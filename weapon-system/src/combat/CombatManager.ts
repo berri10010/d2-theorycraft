@@ -66,6 +66,6 @@ export class CombatManager {
 
   /** Returns the list of all registered archetype keys (useful for debugging). */
   registeredArchetypes(): string[] {
-    return [...this.registry.keys()];
+    return Array.from(this.registry.keys());
   }
 }

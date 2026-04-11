@@ -6,6 +6,7 @@ import { AmmoPanel } from './AmmoPanel';
 import { ArmorModPanel } from './ArmorModPanel';
 import { TTKAndFalloffPanel } from '../ui/TTKAndFalloffPanel';
 import { SubclassVerbPanel } from './SubclassVerbPanel';
+import { DamageProfilePanel } from './DamageProfilePanel';
 
 // ── Panel options ─────────────────────────────────────────────────────────────
 
@@ -13,6 +14,7 @@ type PanelKey =
   | 'masterwork'
   | 'ammo'
   | 'ttk-falloff'
+  | 'damage-profile'
   | 'armor-mods'
   | 'subclass';
 
@@ -22,11 +24,12 @@ interface PanelOption {
 }
 
 const OPTIONS: PanelOption[] = [
-  { key: 'masterwork',  label: 'Masterwork & Mods'   },
-  { key: 'ammo',        label: 'Ammo'                 },
-  { key: 'ttk-falloff', label: 'TTK & Falloff'        },
-  { key: 'armor-mods',  label: 'Armor Mods'           },
-  { key: 'subclass',    label: 'Subclass Verb Math'   },
+  { key: 'masterwork',     label: 'Masterwork & Mods'   },
+  { key: 'ammo',           label: 'Ammo'                 },
+  { key: 'ttk-falloff',    label: 'TTK & Falloff'        },
+  { key: 'damage-profile', label: 'Damage Profile'       },
+  { key: 'armor-mods',     label: 'Armor Mods'           },
+  { key: 'subclass',       label: 'Subclass Verb Math'   },
 ];
 
 // ── Chevron icon ──────────────────────────────────────────────────────────────
@@ -73,11 +76,12 @@ export function WeaponDataPanel() {
 
       {/* Panel content */}
       <div>
-        {active === 'masterwork'  && <MasterworkPanel />}
-        {active === 'ammo'        && <AmmoPanel />}
-        {active === 'ttk-falloff' && <TTKAndFalloffPanel />}
-        {active === 'armor-mods'  && <ArmorModPanel />}
-        {active === 'subclass'    && <SubclassVerbPanel />}
+        {active === 'masterwork'     && <MasterworkPanel />}
+        {active === 'ammo'           && <AmmoPanel />}
+        {active === 'ttk-falloff'    && <TTKAndFalloffPanel />}
+        {active === 'damage-profile' && <DamageProfilePanel />}
+        {active === 'armor-mods'     && <ArmorModPanel />}
+        {active === 'subclass'       && <SubclassVerbPanel />}
       </div>
     </div>
   );
