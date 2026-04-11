@@ -1,4 +1,4 @@
-import { Weapon, Perk, PerkColumn, ColumnType, StatMap } from '../../types/weapon';
+import { Weapon, Perk, PerkColumn, ColumnType, StatMap, PerkActivation } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../bungieUrl';
 import {
   BungieInventoryItem,
@@ -9,6 +9,34 @@ import {
 import { getCurves } from '../archetypes';
 import { getBuffKeyForPerk } from '../buffDatabase';
 import { getPerkTier } from '../perkTierDatabase';
+import PERK_AUDIT from '../../data/perkAudit.json';
+
+// ── perkAudit helpers ────────────────────────────────────────────────────────
+type AuditEntry = {
+  statModifiers: Array<{ statName: string; value: number; isConditional: boolean }>;
+  activation:  { trigger: string; ttaCategory: string; estTtaSeconds: string; duration: string } | null;
+  activation2: { trigger: string; ttaCategory: string; estTtaSeconds: string; duration: string } | null;
+  clarityVerified: boolean;
+  notes: string;
+};
+const AUDIT = PERK_AUDIT as Record<string, AuditEntry>;
+
+/**
+ * Returns audit stat modifiers for a perk, or null if the audit has none.
+ * Audit data is preferred over the Bungie manifest when present — it uses
+ * Clarity-verified values rather than investmentStats which can be wrong.
+ */
+function auditStatsFor(perkName: string): AuditEntry['statModifiers'] | null {
+  const entry = AUDIT[perkName];
+  if (!entry || entry.statModifiers.length === 0) return null;
+  return entry.statModifiers;
+}
+
+function auditActivationFor(perkName: string): { act: PerkActivation | null; act2: PerkActivation | null } {
+  const entry = AUDIT[perkName];
+  if (!entry) return { act: null, act2: null };
+  return { act: entry.activation ?? null, act2: entry.activation2 ?? null };
+}
 
 const WEAPON_ITEM_TYPE = 3;
 
@@ -401,7 +429,9 @@ export function parseWeapons(
             // ── Tracker plug guard ──────────────────────
             if (isTrackerPlug(perkName)) continue;
 
-            const statModifiers = (plugItem.investmentStats ?? [])
+            // Build stat modifiers: prefer perkAudit (Clarity-verified) over
+            // the Bungie manifest investmentStats, which can have wrong values.
+            const manifestStats = (plugItem.investmentStats ?? [])
               // Keep non-zero entries regardless of isConditionallyActive —
               // we preserve the flag on the modifier so the engine can gate
               // conditionally-active bonuses (e.g. Eye of the Storm) on the
@@ -418,9 +448,14 @@ export function parseWeapons(
               })
               .filter((s): s is { statName: string; value: number; isConditional: boolean } => s !== null);
 
+            // Use Clarity-verified audit stats when available; fall back to manifest.
+            const auditStats = auditStatsFor(perkName);
+            const statModifiers = auditStats ?? manifestStats;
+
             const enhanced = isEnhancedPerkItem(plugItem);
             const derivedBuffKey = enhanced ? null : getBuffKeyForPerk(perkName);
             const tierEntry = getPerkTier(perkName);
+            const { act, act2 } = auditActivationFor(perkName);
             rawPerks.push({
               hash: hashStr,
               name: perkName,
@@ -435,6 +470,8 @@ export function parseWeapons(
               isConditional: derivedBuffKey !== null || statModifiers.some((m) => m.isConditional),
               buffKey: derivedBuffKey,
               tier: enhanced ? null : (tierEntry?.tier ?? null),
+              activation:  act,
+              activation2: act2,
               enhancedVersion: null, // filled in below
             });
           }

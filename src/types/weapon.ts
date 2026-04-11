@@ -19,6 +19,25 @@ export interface PerkMod {
   isConditional?: boolean;
 }
 
+/**
+ * Activation timing data sourced from the perkAudit.json (Clarity-powered).
+ * Describes how and when a conditional perk activates.
+ */
+export interface PerkActivation {
+  /** Plain-English description of what triggers the buff (e.g. "Kill", "Reload after kill") */
+  trigger: string;
+  /**
+   * Broad timing category used for UI badge and filtering.
+   * Kill-Proc | Reload-Proc | Wind-Up | State-Based | Shot-Proc |
+   * Instant-Always | Melee-Proc | Orb-Proc | Ability-Proc | Ammo-Proc | Conditional State
+   */
+  ttaCategory: string;
+  /** Estimated seconds from combat start to first activation (e.g. "12", "~3-5", "0") */
+  estTtaSeconds: string;
+  /** How long the buff lasts once active (e.g. "5s", "Permanent", "4.5s per stack") */
+  duration: string;
+}
+
 export interface Perk {
   hash: string;
   name: string;
@@ -38,6 +57,16 @@ export interface Perk {
   buffKey: string | null;
   /** PvE tier from community analysis: S/A/B/C/D/E/F/G, or null if unrated */
   tier: string | null;
+  /**
+   * Primary activation timing from perkAudit.json (Clarity-sourced).
+   * Null for passive/always-on perks.
+   */
+  activation: PerkActivation | null;
+  /**
+   * Second independent trigger, if the perk has two distinct activation paths
+   * (e.g. Cascade Point: kill OR precision hits with a different weapon).
+   */
+  activation2: PerkActivation | null;
   /**
    * If this is a base perk that has an enhanced counterpart in the same column,
    * this holds the enhanced perk so the UI can offer an "upgrade" button in Crafted mode.

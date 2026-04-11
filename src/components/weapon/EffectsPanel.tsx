@@ -244,6 +244,8 @@ export const EffectsPanel: React.FC = () => {
       isConditional: boolean;
       buffKey: string | null;
       statModifiers: Array<{ statName: string; value: number }>;
+      activation:  import('../../types/weapon').PerkActivation | null;
+      activation2: import('../../types/weapon').PerkActivation | null;
     }> = [];
 
     for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
@@ -266,7 +268,13 @@ export const EffectsPanel: React.FC = () => {
         }
       }
 
-      if (perk) entries.push({ columnName, perkHash, ...perk });
+      if (perk) entries.push({
+        columnName,
+        perkHash,
+        ...perk,
+        activation:  perk.activation  ?? null,
+        activation2: perk.activation2 ?? null,
+      });
     }
     return entries;
   }, [activeWeapon, selectedPerks]);
@@ -305,7 +313,7 @@ export const EffectsPanel: React.FC = () => {
               <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">
                 Conditional Effects
               </p>
-              {conditionalEntries.map(({ columnName, perkHash, name, icon, description, isEnhanced, buffKey, statModifiers }) => {
+              {conditionalEntries.map(({ columnName, perkHash, name, icon, description, isEnhanced, buffKey, statModifiers, activation, activation2 }) => {
                 const currentState = activeEffects[perkHash] ?? 0;
                 const isOn = currentState > 0;
                 const buff = buffKey ? BUFF_DATABASE[buffKey] : null;
@@ -375,6 +383,45 @@ export const EffectsPanel: React.FC = () => {
                             </span>
                           </div>
                           <span className="text-xs text-slate-500 uppercase tracking-wide">{columnName}</span>
+
+                          {/* Activation timing badges */}
+                          {(() => {
+                            const acts = [activation, activation2].filter(Boolean) as NonNullable<typeof activation>[];
+                            if (acts.length === 0) return null;
+                            const TTA_COLORS: Record<string, string> = {
+                              'Kill-Proc':      'bg-red-500/15 text-red-400 border-red-500/30',
+                              'Reload-Proc':    'bg-blue-500/15 text-blue-400 border-blue-500/30',
+                              'Wind-Up':        'bg-amber-500/15 text-amber-400 border-amber-500/30',
+                              'State-Based':    'bg-teal-500/15 text-teal-400 border-teal-500/30',
+                              'Shot-Proc':      'bg-purple-500/15 text-purple-400 border-purple-500/30',
+                              'Melee-Proc':     'bg-orange-500/15 text-orange-400 border-orange-500/30',
+                              'Instant-Always': 'bg-slate-500/15 text-slate-400 border-slate-500/30',
+                              'Orb-Proc':       'bg-violet-500/15 text-violet-400 border-violet-500/30',
+                              'Ability-Proc':   'bg-green-500/15 text-green-400 border-green-500/30',
+                              'Ammo-Proc':      'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+                              'Conditional State': 'bg-sky-500/15 text-sky-400 border-sky-500/30',
+                            };
+                            return (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {acts.map((act, i) => {
+                                  const color = TTA_COLORS[act.ttaCategory] ?? 'bg-white/5 text-slate-400 border-white/10';
+                                  const ttaLabel = act.estTtaSeconds && act.estTtaSeconds !== '0'
+                                    ? `${act.estTtaSeconds}s wind-up`
+                                    : act.ttaCategory;
+                                  const durLabel = act.duration ? ` · ${act.duration}` : '';
+                                  return (
+                                    <span
+                                      key={i}
+                                      title={`Trigger: ${act.trigger}${durLabel}`}
+                                      className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none ${color}`}
+                                    >
+                                      {ttaLabel}{durLabel}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })()}
                         </div>
 
                         {/* Right side: stat deltas + control */}

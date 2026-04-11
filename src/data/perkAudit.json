@@ -1,0 +1,5155 @@
+{
+  "+1 Magazine Capacity": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+10 Range": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+100 Handling": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+100 Ready/Stow Handling": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+100? Reload Speed": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+11 Aim Assist": {
+    "statModifiers": [
+      {
+        "statName": "Airborne Eff.",
+        "value": 32,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+15 Aim Assist": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+15 Reload Speed": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+20 Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 60,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+20 \u2191+25 Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+30 Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+30 \u219135? Reload Speed": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+30? Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+40 Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+5 Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+50 Reload Speed": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+50 \u2191+55? Reload Speed": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+60 \u2191+65 Guard Efficiency": {
+    "statModifiers": [
+      {
+        "statName": "Guard stats",
+        "value": 60,
+        "isConditional": false
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+? Handling": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 20,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "+? Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "-?% \u2191-?% Accuracy Cone Size": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 1,
+        "isConditional": false
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "0.75x ADS Duration Multiplier": {
+    "statModifiers": [
+      {
+        "statName": "Airborne Eff.",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "10% \u219114% per hit": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "10%: Bows": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "15% Increased damage": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "15% \u219120% Increased Damage against Vehicles (such as Cyclops": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "17.5% Counter per Precision Hit: Hand Cannons": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "20% Increased Aim Assist Falloff Distance": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "20% Increased Non-Precision Damage: Auto Rifles": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "20% decreased damage": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "25% decreased damage": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": -15,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "3 Hits: Bow": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "30% increased damage": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "50% Increased damage": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "8% Counter per Precision Hit: Auto Rifles": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Accelerated Heatsink": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 2,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Adagio": {
+    "statModifiers": [
+      {
+        "statName": "Range",
+        "value": 10,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Adaptive Burst": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Adaptive Frame": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Adaptive Munitions": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Additional Grenade Ability Usage": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "vs Boss/Vehicle/Super",
+      "ttaCategory": "Conditional State",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Adhesive Ordnance": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Special/Heavy ammo pickup",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Adrenaline Junkie": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Grenade kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Aggregate Charge": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Aggressive Burst": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Aggressive Frame": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Air Assault": {
+    "statModifiers": [
+      {
+        "statName": "Airborne Eff.",
+        "value": 10,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": "5s"
+    },
+    "activation2": {
+      "trigger": "Airborne",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": "5s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Air Trigger": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 35,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "All-Star": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Special/Heavy ammo pickup",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Alloy Magazine": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Ambitious Assassin": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 5,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Reload after kill",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Ancillary Ordinance": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Any Powered Melee which requires sprinting": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Arc": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Archer's Gambit": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Precision hit",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": "4s"
+    },
+    "activation2": {
+      "trigger": "Reload",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": "4s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Archer's Tempo": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision hit",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Area Denial Frame": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Armor-Piercing Rounds": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Assassin's Blade": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Attrition Orbs": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Orb of Power pickup",
+      "ttaCategory": "Orb-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Auto-Loading Holster": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Backup Plan": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Bait and Switch": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Balanced Heat Weapon": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Barrel Constrictor": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Beacon Rounds": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 15,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "6s"
+    },
+    "activation2": {
+      "trigger": "Reload",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "6s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Bewildering Burst": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Reload after kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Binary Orbit": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "8.5s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Bipod": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Blast Distributor": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "5s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Blunt Execution Rounds": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Sprinting",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Bolt Scavenger": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "4s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Bolts": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Bonuses are doubled to +10 \u2191+11 Aim Assist": {
+    "statModifiers": [
+      {
+        "statName": "Airborne Eff.",
+        "value": 32,
+        "isConditional": false
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Bottomless Grief": {
+    "statModifiers": [
+      {
+        "statName": "Magazine",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Bow": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Box Breathing": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": "1.5s"
+    },
+    "activation2": {
+      "trigger": "Special/Heavy ammo pickup",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": "1.5s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Buff can be activated while stowed": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Built To Blast": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Burning Ambition": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Butterfly": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Can overflow based on the magazine size at the moment of swapping": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Cascade Point": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "2.5s"
+    },
+    "activation2": {
+      "trigger": "Precision hit",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": "2.5s"
+    },
+    "clarityVerified": false,
+    "notes": "Two independent triggers. Reduces Firing Delay on ready."
+  },
+  "Celerity": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 20,
+        "isConditional": true
+      },
+      {
+        "statName": "Reload Speed",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Chain Reaction": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Chaos Reshaped": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Sustained combat (12s)",
+      "ttaCategory": "Wind-Up",
+      "estTtaSeconds": "12",
+      "duration": "12s"
+    },
+    "activation2": {
+      "trigger": "Sustained combat",
+      "ttaCategory": "Wind-Up",
+      "estTtaSeconds": "12",
+      "duration": "12s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Charge Rate": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Charged Bolts": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Chill Clip": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Circle of Life": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Close To Melee": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Closing Time": {
+    "statModifiers": [
+      {
+        "statName": "Range",
+        "value": 20,
+        "isConditional": false
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Clown Cartridge": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Cluster Bomb": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Cold Steel": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Collective Action": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Collective Pugilism": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": "8s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Collective Purpose grants +5? Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Combines the penetration from Armor-Piercing Rounds": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Compulsive Reloader": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 50,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Consumes up to 3 \u21912 stacks": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Controlled Burst": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "2s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Cooling Baubles": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Orb of Power pickup",
+      "ttaCategory": "Orb-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Cornered": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Counterattack": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Crystalline Corpsebloom": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "4s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Danger Zone": {
+    "statModifiers": [
+      {
+        "statName": "Blast Radius",
+        "value": 5,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Near 3+ enemies",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": "3.5s"
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": "3.5s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Dealing ANY (really": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Dealing damage with the Support Auto Rifle doubles the Weapon Energy gains": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Deconstruct": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Delicate Tuning": {
+    "statModifiers": [
+      {
+        "statName": "Range",
+        "value": 11,
+        "isConditional": false
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Demolitionist": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Demoralize": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Desperado": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "6s"
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "6s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Desperate Measures": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Desperate Measures x3 | 30% increased damage for 7 \u21917.5 seconds. Additional Weapon": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Destabilizing Rounds": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "3s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Detonator Beam": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Direct Damage kills cause targets explode on death": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Discord": {
+    "statModifiers": [
+      {
+        "statName": "Airborne Eff.",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "activation2": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Disorienting Grenades": {
+    "statModifiers": [
+      {
+        "statName": "Blast Radius",
+        "value": -200,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": "4.5s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Disruption Break": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Double Fire": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Dragonfly": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Drop Mag": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 30,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Dual Loader": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Duelist's Trance": {
+    "statModifiers": [
+      {
+        "statName": "Guard stats",
+        "value": 60,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Dungeon,\",Upon destroying a Vehicle Combatant": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Dynamic Heat Weapon": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Dynamic Sway Reduction": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 1,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Dynamically scales up to +20 \u2191+? Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Each stack of Explosive Pact grants +Stability": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "7.5s"
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Eager Edge": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Eddy Current": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "1.5s"
+    },
+    "activation2": {
+      "trigger": "Sprinting",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "1.5s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Elemental Capacitor": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 50,
+        "isConditional": false
+      },
+      {
+        "statName": "Handling",
+        "value": 50,
+        "isConditional": false
+      },
+      {
+        "statName": "Stability",
+        "value": 20,
+        "isConditional": false
+      },
+      {
+        "statName": "Airborne Eff.",
+        "value": 20,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Elemental Honing": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "20s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "En Garde": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Encore": {
+    "statModifiers": [
+      {
+        "statName": "Range",
+        "value": 5,
+        "isConditional": true
+      },
+      {
+        "statName": "Stability",
+        "value": 8,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Energy Transfer": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Enlightened Action": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 50,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": "2s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Ensemble": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 30,
+        "isConditional": true
+      },
+      {
+        "statName": "Reload Speed",
+        "value": 40,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "State-Based",
+      "estTtaSeconds": "0",
+      "duration": "1.5s"
+    },
+    "activation2": {
+      "trigger": "Near allies",
+      "ttaCategory": "State-Based",
+      "estTtaSeconds": "0",
+      "duration": "1.5s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Envious Arsenal": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Envious Assassin": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Epochal Integration HC,\",Equipping more than one Root of Nightmares Weapon grants increased Handling": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Event,\",Upon scoring an assist": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Explosive Bolts": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Explosive Head": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Explosive Light": {
+    "statModifiers": [
+      {
+        "statName": "Blast Radius",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Orb of Power pickup",
+      "ttaCategory": "Orb-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Explosive Payload": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Eye of the Storm": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 33,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Low HP",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Feeding Frenzy": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "3.5s"
+    },
+    "activation2": {
+      "trigger": "Reload",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "3.5s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Field Prep": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 50,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Field-Forged Foundry,\",Scoring Hits and Kills progress a Counter": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Firefly": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 50,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "6s"
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "6s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Firing Line": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Firing consumes a stack of Explosive Light": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Firmly Planted": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 35,
+        "isConditional": true
+      },
+      {
+        "statName": "Stability",
+        "value": 25,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Flash Counter": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Focused Fury": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision hit",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": "11s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "For example: 5+2 seconds of Restoration for Ember of Solace": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "For in-depth Damage Stacking info, check out Court's Modifier Database": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Foundry,\",Passively grants increased damage against Vehicles": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Fourth Time's The Charm": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision hit",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Fragile Focus": {
+    "statModifiers": [
+      {
+        "statName": "Range",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Low HP",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Frame of Reference x1 | 1.45% Increased Weapon Damage": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Frame of Reference x2 | 2.8% Increased Weapon Damage": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Frame of Reference x3 | 4.2% Increased Weapon Damage": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Frame of Reference x4 | 5.6% Increased Weapon Damage": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Frame of Reference x5 | 7% Increased Weapon Damage": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Frenzy": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 100,
+        "isConditional": true
+      },
+      {
+        "statName": "Handling",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Sustained combat (12s)",
+      "ttaCategory": "Wind-Up",
+      "estTtaSeconds": "12",
+      "duration": "7.2s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Refreshes on damage dealt/received. Works while stowed."
+  },
+  "Full Auto Trigger System": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Full Choke": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Full Court": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Genesis": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Golden Tricorn": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "activation2": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Grants +10 \u2191+? Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants +20 Aim Assist": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "5s"
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants +30 Mobility": {
+    "statModifiers": [
+      {
+        "statName": "Charge Rate",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants +40 Reload Speed": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants +5 Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants 10% Grenade": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants ?% Flinch Resist": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants Enhanced Radar": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants a continuously increasing Stability": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants a stack of Onslaught": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants a stack of Recombination": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants up to +? \u219122? Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grants up to 10% increased damage": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Grave Robber": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Guard Endurance": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Guard Resistance": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Gutshot Straight": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Hand Cannon": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Harmony": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 15,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Has 50% Increased Aim Assist Falloff Distance at 0 Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Hatchling": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Headseeker": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 5,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": "0.55s"
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": "0.55s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Headstone": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "5s"
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "5s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Heal Clip": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Reload after kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Healing burst builds up at a rate of 5 HP/s while readied": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Heating Up": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 30,
+        "isConditional": true
+      },
+      {
+        "statName": "Recoil",
+        "value": 40,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Heating Up x1 | +15 Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Heating Up x2 | +30 Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Heavy Bolts": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Heavy Burst": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "High Ground": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "High-Caliber Rounds": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "High-Impact Frame": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "High-Impact Reserves": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Hip-Fire Grip": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 25,
+        "isConditional": true
+      },
+      {
+        "statName": "Aim Assist",
+        "value": 15,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Identical to Telesto Bolts in behavior": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Immovable Object": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Impact Casing": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Imperial Allegiance x1 | 1.035x Cooling Multiplier": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Imperial Allegiance x2 | 1.07x Cooling Multiplier": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Imperial Allegiance x3 | 1.105x Cooling Multiplier": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Impromptu Ammunition": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Special/Heavy ammo pickup",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Impulse Amplifier": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Incandescent": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Increases x2 Stat Bonuses to +44? Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 63,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Internally": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Invisible Hand": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Ionic Traces": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Iron Gaze": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Iron Grip": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Iron Reach": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Jolting Feedback": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Special/Heavy ammo pickup",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Elemental proc",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Keep Away": {
+    "statModifiers": [
+      {
+        "statName": "Range",
+        "value": 10,
+        "isConditional": true
+      },
+      {
+        "statName": "Reload Speed",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Kickstart": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Sprinting",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "1.5s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Kill Clip": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload after kill",
+      "ttaCategory": "Reload-Proc",
+      "estTtaSeconds": "~3-5",
+      "duration": "5s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Reload must complete within 3.6s of kill. Stow cancels buff."
+  },
+  "Killing Tally": {
+    "statModifiers": [
+      {
+        "statName": "Magazine",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "Until stow/reload"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "PvE: 10/20/30% per stack. Passively grants +10 Mag. Stow/reload clears stacks."
+  },
+  "Killing Wind": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 40,
+        "isConditional": true
+      },
+      {
+        "statName": "Range",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Kinetic": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Kinetic Tremors": {
+    "statModifiers": [
+      {
+        "statName": "Fire Rate",
+        "value": 120,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Lasting Impression": {
+    "statModifiers": [
+      {
+        "statName": "Blast Radius",
+        "value": 50,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Lead from Gold": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Special/Heavy ammo pickup",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Lead from Light": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Orb of Power pickup",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Legacy PR-55 Frame": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Lightweight Frame": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Linearly grants up to +30 \u2191+33 Handling": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Lone Wolf": {
+    "statModifiers": [
+      {
+        "statName": "Aim Assist",
+        "value": 5,
+        "isConditional": true
+      },
+      {
+        "statName": "Airborne Eff.",
+        "value": 15,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Loose Change": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 50,
+        "isConditional": true
+      },
+      {
+        "statName": "Aim Assist",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "9s"
+    },
+    "activation2": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "9s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "MIDA Synergy": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Magnificent Howl": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Master of Arms": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Meganeura": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Melee Attacks": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Melee Momentum": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "10s"
+    },
+    "activation2": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "10s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Micro-missile aggressively tracks the closest enemy within 30 meters": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Moving Target": {
+    "statModifiers": [
+      {
+        "statName": "Aim Assist",
+        "value": 10,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Multikill Clip": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Reload after kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Nadir Focus grants up to +10 Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "No Distractions": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Not to be confused with Precision Damage": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Offhand Strike": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "On Grenade or Powered Melee Kill": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "One For All": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Hitting 3 different targets",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "~2-4",
+      "duration": "10.5s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Must tag 3 distinct enemies. x1.35 for 10.5s."
+  },
+  "One Quiet Moment x1 | +10 Handling": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "One Quiet Moment x2 | +20 Handling": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "One-Two Punch": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Conditional State",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "vs Boss/Vehicle/Super",
+      "ttaCategory": "Conditional State",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Onslaught": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 35,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Reload",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Opening Shot": {
+    "statModifiers": [
+      {
+        "statName": "Aim Assist",
+        "value": 25,
+        "isConditional": true
+      },
+      {
+        "statName": "Range",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Osmosis": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "vs Boss/Vehicle/Super",
+      "ttaCategory": "Conditional State",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Outlaw": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 70,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "6s"
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "6s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Overclocked Heatsink": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Overflow": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Special/Heavy ammo pickup",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Paracausal Affinity": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Paracausal Fluid x2 | +? Handling": {
+    "statModifiers": [
+      {
+        "statName": "Charge Rate",
+        "value": 90,
+        "isConditional": false
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Perfect Float": {
+    "statModifiers": [
+      {
+        "statName": "Airborne Eff.",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Sustained combat",
+      "ttaCategory": "Wind-Up",
+      "estTtaSeconds": "6",
+      "duration": "6s"
+    },
+    "activation2": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Wind-Up",
+      "estTtaSeconds": "6",
+      "duration": "6s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Permeability": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "vs Boss/Vehicle/Super",
+      "ttaCategory": "Conditional State",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Perpetual Motion": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 10,
+        "isConditional": true
+      },
+      {
+        "statName": "Handling",
+        "value": 10,
+        "isConditional": true
+      },
+      {
+        "statName": "Reload Speed",
+        "value": 10,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "0.5s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Perpetual Motion x1 | +10 Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Phase Magazine": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Physic": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Portal Playlist,\",Upon scoring multiple direct hits within 5 seconds of each against a Champion": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "vs Boss/Vehicle/Super",
+      "ttaCategory": "Conditional State",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Precision Frame": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Precision Instrument": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Primary Ammo Dynamic Heat Weapons intrinsically deal 15% Increased Impact Damage to Rank-and-File": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Primary/Power Weapons: +25 +30 Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Projectile Attacks": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Proximity Power": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "State-Based",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "State-Based",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Pugilist": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 35,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "3s"
+    },
+    "activation2": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "3s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Pulse Monitor": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 50,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Quickdraw": {
+    "statModifiers": [
+      {
+        "statName": "Ready/Stow",
+        "value": 100,
+        "isConditional": true
+      },
+      {
+        "statName": "Reload Speed",
+        "value": 5,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": "1s"
+    },
+    "activation2": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": "1s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Raid,\",Grants Grenade": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Rampage": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "4.5s per stack"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "PvE: 20/41/66% per stack. Stacks expire one at a time every 4.5s."
+  },
+  "Rangefinder": {
+    "statModifiers": [
+      {
+        "statName": "Range",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Rank-And-File = 16.7% \u219120% | Elites": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Rank-and-File": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Rapid Hit": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 25,
+        "isConditional": true
+      },
+      {
+        "statName": "Reload Speed",
+        "value": 60,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Precision hit",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": "2s"
+    },
+    "activation2": {
+      "trigger": "Reload",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": "2s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Rapid Hit grants Stability": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Rapid-Fire Frame": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Reaper's Tithe": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Reciprocity": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Reckoning Reprises,\",While Grenade": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Recombination": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Reconstruction": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Recycled Energy": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Reload after kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Redirection": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Refills 15% of Magazine": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Refills Magazine": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Relentless Strikes": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Reload = Procs on-reload perks. Manual Reload": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Replenishing Aegis": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Repulsor Brace": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Reservoir Burst": {
+    "statModifiers": [
+      {
+        "statName": "Magazine",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Reverberation": {
+    "statModifiers": [
+      {
+        "statName": "Blast Radius",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Reversal of Fortune": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Rewind Rounds": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Ricochet Rounds": {
+    "statModifiers": [
+      {
+        "statName": "Range",
+        "value": 5,
+        "isConditional": false
+      },
+      {
+        "statName": "Stability",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Rimestealer": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Rockets attach on impact": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Rolling Storm": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Season of Defiance,\",Upon buffing an ally through Healing": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Seraph Rounds": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Seraph,\",On Elemental": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Serrated Bolts": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Sharp Harvest": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Special/Heavy ammo pickup",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Shattering Blade": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Shield Disorient": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Shoot to Loot": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Special/Heavy ammo pickup",
+      "ttaCategory": "Ammo-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Shot Swap": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Shotguns": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Shots explode on hit": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Similarly": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Sleight of Hand": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Reload",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Sleight of Hand x1 = +10 Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Sleight of Hand x2 = +20 Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 20,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Sleight of Hand x3 = +30 Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 30,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Slice": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Slickdraw": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 100,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Slideshot": {
+    "statModifiers": [
+      {
+        "statName": "Range",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Slideways": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 33,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Smoothbore": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Snapshot Sights": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 5,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Sneak Bow": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Special Weapons receive halved benefits": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Special Weapons: +13 \u2191+15 Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Spike Grenades": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Spread Shot": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Spring-Auger Bolts": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Stacks up to -?% Accuracy Cone Size": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 10,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Stats for All": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 35,
+        "isConditional": true
+      },
+      {
+        "statName": "Stability",
+        "value": 10,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "10s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Steady Hands": {
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Sticky Bomb detonates after 0.8 seconds": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Sticky Grenades": {
+    "statModifiers": [
+      {
+        "statName": "Blast Radius",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Stopping Power": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Strategist": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Subclass Pickups: Ionic Traces": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Subsistence": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Successful Warm-Up": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "6s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Support Frame": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Surplus": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 25,
+        "isConditional": false
+      },
+      {
+        "statName": "Handling",
+        "value": 60,
+        "isConditional": false
+      },
+      {
+        "statName": "Reload Speed",
+        "value": 60,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Surrounded": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Near 3+ enemies",
+      "ttaCategory": "State-Based",
+      "estTtaSeconds": "0",
+      "duration": "1.5s linger"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Within 15m of 3 enemies. Swords/GLs/RLs get 35% explosive only."
+  },
+  "Swap Mag": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Swashbuckler": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "4.5s"
+    },
+    "activation2": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "4.5s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Sword Guarding": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Sword Logic": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Swords are granted +100 Guard Resistance": {
+    "statModifiers": [
+      {
+        "statName": "Charge Rate",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Sympathetic Arsenal": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 20,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Reload after kill",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Tap The Trigger": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 40,
+        "isConditional": true
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Target Lock": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Target explodes": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Tear": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Thermal Atomization": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Dealing damage",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "This is basically Target Lock's S Curve mixed with Field-Tested on top of being actually damage based": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Threat Detector": {
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 40,
+        "isConditional": true
+      },
+      {
+        "statName": "Reload Speed",
+        "value": 60,
+        "isConditional": true
+      },
+      {
+        "statName": "Handling",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "State-Based",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Threat Detector x1 | +15? \u219119? Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Threat Detector x2 | +40? \u2191+44? Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Threat Remover": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 60,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Thresh": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Tilting at Windmills": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Timed Payload": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Tireless Blade": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "To The Pain": {
+    "statModifiers": [
+      {
+        "statName": "Aim Assist",
+        "value": 2,
+        "isConditional": false
+      }
+    ],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Together Forever": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Reload",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Tracking Module": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Transcendent Moment": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Trench Barrel": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 35,
+        "isConditional": false
+      },
+      {
+        "statName": "Handling",
+        "value": 35,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Trickle Charge": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Triple Tap": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Precision hit",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Tunnel Vision": {
+    "statModifiers": [
+      {
+        "statName": "Aim Assist",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "5s"
+    },
+    "activation2": {
+      "trigger": "Reload after kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "5s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Turnabout": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Under Pressure": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Under-Over": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Unrelenting": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Unstoppable Force": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Up to +? Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Upon breaking a Combatant": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Valiant Charge": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Voltshot": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "activation2": {
+      "trigger": "Reload after kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "7s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Vorpal Weapon": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "vs Boss/Vehicle/Super",
+      "ttaCategory": "Conditional State",
+      "estTtaSeconds": "0",
+      "duration": "Permanent while condition met"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Primary +20%, Special +15%, Power +10%. Enhanced: 60/20/20%."
+  },
+  "Weakspot Hits that do not register as a Precision Hit can still benefit or trigger Weakspot effects": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Weapon Energy & Shield": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "Well-Rounded": {
+    "statModifiers": [
+      {
+        "statName": "Range",
+        "value": 12,
+        "isConditional": true
+      },
+      {
+        "statName": "Stability",
+        "value": 12,
+        "isConditional": true
+      },
+      {
+        "statName": "Handling",
+        "value": 12,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Melee-Proc",
+      "estTtaSeconds": "0",
+      "duration": "15s"
+    },
+    "activation2": {
+      "trigger": "vs Boss/Vehicle/Super",
+      "ttaCategory": "Melee-Proc",
+      "estTtaSeconds": "0",
+      "duration": "15s"
+    },
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Wellspring": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Whirlwind Blade": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "Withering Gaze": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "ADS / Aiming",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity"
+  },
+  "[Fusion Rifles Only] +10 Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "[Fusion Rifles] 10 \u2191+13 Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x1 = +10 Handling": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x1 = +10 \u2191+12? Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x1 = +10? Handling": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x1 = +? Stability": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x1 Ability Charges = +5 Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x2 =  +20 \u2191+24? Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x2 = +20 Handling": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x2 = +20? Handling": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x2 = +? Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 5,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x2 Ability Charges = +15 Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x3 = +45? Handling": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x3 = +? Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x3 Ability Charges = +25 Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 60,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x4 = +? Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  },
+  "x5 = +20? Stability": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 30,
+        "isConditional": false
+      }
+    ],
+    "activation": {
+      "trigger": "Reload",
+      "ttaCategory": "Unknown",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match \u2014 dataset description used"
+  }
+}

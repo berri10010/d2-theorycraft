@@ -64,14 +64,14 @@
     "name": "Rampage",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.30,
-    "description": "Kills grant a stacking damage bonus that resets on reload.",
+    "multiplier": 1.66,
+    "description": "Kills grant a stacking damage bonus (PvE: 20/41/66% at ×1/×2/×3). Stacks expire one at a time every 4.5s.",
     "perkNames": ["Rampage", "Enhanced Rampage"],
     "icon": null,
     "stacks": [
-      { "count": 1, "label": "×1", "multiplier": 1.10 },
-      { "count": 2, "label": "×2", "multiplier": 1.20 },
-      { "count": 3, "label": "×3", "multiplier": 1.30 }
+      { "count": 1, "label": "×1", "multiplier": 1.20 },
+      { "count": 2, "label": "×2", "multiplier": 1.41 },
+      { "count": 3, "label": "×3", "multiplier": 1.66 }
     ]
   },
   "golden_tricorn": {
@@ -144,10 +144,15 @@
     "name": "Vorpal Weapon",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.15,
-    "description": "+15% damage against bosses, vehicles, and Guardians with their Super active.",
+    "multiplier": 1.20,
+    "description": "Increased damage vs bosses, vehicles, Supered Guardians. Primary: +20%, Special: +15%, Power: +10%.",
     "perkNames": ["Vorpal Weapon", "Enhanced Vorpal Weapon"],
-    "icon": null
+    "icon": null,
+    "ammoTypeMultipliers": {
+      "primary": 1.20,
+      "special": 1.15,
+      "power": 1.10
+    }
   },
   "firing_line": {
     "hash": "firing_line",
@@ -197,6 +202,31 @@
     "multiplier": 1.10,
     "description": "+10% weapon damage when shooting at targets that are below you.",
     "perkNames": ["High Ground"],
+    "icon": null
+  },
+  "killing_tally": {
+    "hash": "killing_tally",
+    "name": "Killing Tally",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.30,
+    "description": "Kills grant stacking damage (PvE: 10/20/30% at ×1/×2/×3). Stow or reload removes all stacks. Passively grants +10 Magazine.",
+    "perkNames": ["Killing Tally", "Enhanced Killing Tally"],
+    "icon": null,
+    "stacks": [
+      { "count": 1, "label": "×1", "multiplier": 1.10 },
+      { "count": 2, "label": "×2", "multiplier": 1.20 },
+      { "count": 3, "label": "×3", "multiplier": 1.30 }
+    ]
+  },
+  "one_for_all": {
+    "hash": "one_for_all",
+    "name": "One For All",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.35,
+    "description": "Hitting 3 different targets in quick succession grants +35% damage for 10.5s.",
+    "perkNames": ["One For All", "Enhanced One For All"],
     "icon": null
   },
   "radiant": {
