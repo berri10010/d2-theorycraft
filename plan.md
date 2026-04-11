@@ -43,11 +43,12 @@ Fix the underlying data layer so the UI has accurate values to display.
 | Merge perkAudit into `parser.ts` (audit stats override manifest investmentStats) | ✅ Done |
 | VERIFIED_OVERRIDES — Tier 1 (4 critical damage perks: Bait and Switch, Firing Line, Target Lock, Trench Barrel) | ✅ Done |
 | VERIFIED_OVERRIDES — Tier 3 (22 real perks with Unknown TTA fixed) | ✅ Done |
-| VERIFIED_OVERRIDES — Tier 2 cleanup (29 artifact entries with wrong auto-parsed stats) | ⬜ Pending |
-| VERIFIED_OVERRIDES — Remaining 52 Unknown TTA entries (41 artifacts + 11 real perks) | ⬜ Pending |
+| Clear activation on 44 artifact entries (description fragments with wrong auto-parsed activation data) | ✅ Done |
+| Fix ttaCategory on 8 real perks (Bolt Scavenger, Charged Bolts, Detonator Beam, Energy Transfer, Explosive Bolts, Rapid-Fire Frame, Spread Shot, Spring-Auger Bolts) | ✅ Done |
+| Unknown TTA → 0 | ✅ Done |
 | Tier 4 (107 fully empty entries) — already empty, verify none are real perks needing data | ⬜ Pending |
 
-**Stage 1 progress: 65%**
+**Stage 1 progress: 85%**
 
 ---
 
@@ -61,11 +62,11 @@ Surface corrected perk data visually in the site's components.
 | Wire `auditStatsFor()` + `auditActivationFor()` helpers in `parser.ts` | ✅ Done |
 | EffectsPanel: colour-coded TTA badge pills (Kill-Proc=red, State-Based=teal, etc.) | ✅ Done |
 | EffectsPanel: badge shows `ttaCategory` + duration | ✅ Done |
-| **Uncommitted changes** in `ComparisonGrid.tsx`, `TTKAndFalloffPanel.tsx`, `RollEditor.tsx` — review and commit | ⬜ Pending |
+| Uncommitted changes in `ComparisonGrid.tsx`, `TTKAndFalloffPanel.tsx`, `RollEditor.tsx` — reviewed; already committed in prior sessions | ✅ Done |
 | Stat modifier display in EffectsPanel (show +X Handling etc. from perkAudit) | ⬜ Pending |
 | Enhanced perk tooltip: show Clarity notes + source badge | ⬜ Pending |
 
-**Stage 2 progress: 55%**
+**Stage 2 progress: 60%**
 
 ---
 
@@ -95,14 +96,13 @@ Clear artifact entries and fix the 11 real perks that still have wrong data.
 
 | Task | Status |
 |------|--------|
-| Add overrides for 28 Tier 2 artifact entries (clear wrong auto-parsed stats) | ⬜ Pending |
+| Clear activation on 44 artifact/description-fragment entries | ✅ Done |
+| Fix ttaCategory on 8 real perks (Unknown → correct category) | ✅ Done |
+| Verify Unknown TTA count = 0 | ✅ Done |
 | Add proper entry for `Accelerated Heatsink` (Tier 2 — only real perk in that tier) | ⬜ Pending |
-| Add overrides for 41 Unknown-TTA artifact entries | ⬜ Pending |
-| Fix 11 real Unknown-TTA perks: Bolt Scavenger, Charged Bolts, Detonator Beam, Energy Transfer, Explosive Bolts, Frame of Reference (parent), Rapid-Fire Frame, Spread Shot, Spring-Auger Bolts | ⬜ Pending |
-| Regenerate `perkAudit.json` after all overrides added | ⬜ Pending |
-| Verify: Unknown TTA count drops to ~0 | ⬜ Pending |
+| Verify Tier 4 (107 fully empty entries) — confirm none are real perks needing data | ⬜ Pending |
 
-**Stage 4 progress: 0%** *(blocked on adding overrides to `build_perk_audit_json.py`)*
+**Stage 4 progress: 75%**
 
 ---
 
@@ -110,11 +110,11 @@ Clear artifact entries and fix the 11 real perks that still have wrong data.
 
 | Stage | Progress | Notes |
 |-------|----------|-------|
-| 1 — Data Pipeline | 65% | Audit cleanup (Stage 4) is the open gap |
-| 2 — UI Enhancements | 55% | 3 components have uncommitted changes |
+| 1 — Data Pipeline | 85% | Accelerated Heatsink + Tier 4 verification remaining |
+| 2 — UI Enhancements | 60% | Component changes committed; stat pills + tooltip pending |
 | 3 — Weapon System Module | 65% | Tests + site integration pending |
-| 4 — Perk Audit Cleanup | 0% | Self-contained; see `claude_perk_audit_prompt_v2.txt` |
-| **Overall** | **~47%** | |
+| 4 — Perk Audit Cleanup | 75% | Accelerated Heatsink + Tier 4 verification remaining |
+| **Overall** | **~72%** | |
 
 ---
 
@@ -145,11 +145,11 @@ Clear artifact entries and fix the 11 real perks that still have wrong data.
 
 > These are ordered by priority. Claude should start from the top.
 
-1. **Review the 3 uncommitted component changes** (`ComparisonGrid.tsx`, `TTKAndFalloffPanel.tsx`, `RollEditor.tsx`) — diff each one, understand what changed, commit if clean or flag issues.
+1. **Accelerated Heatsink** — add a proper entry for this perk in `src/data/perkAudit.json` directly (look up Clarity DB or use known values: +30 Charge Rate, Instant-Always). It is the only real perk in the Tier 2 group.
 
-2. **Stage 4 perk audit cleanup** — open `build_perk_audit_json.py`, add all artifact overrides and the 11 real-perk fixes per the spec in `claude_perk_audit_prompt_v2.txt`, then regenerate `perkAudit.json`.
+2. **Tier 4 verification** — run a quick check on the 107 fully-empty entries in `perkAudit.json` (entries where `statModifiers: []`, `activation: null`, `clarityVerified: false`). Confirm none are real perks that should have data. If any real perks are found, add entries for them.
 
-3. **Commit + push** the updated `perkAudit.json` so Vercel deploys it.
+3. **Push** (`git push`) so Vercel picks up the perkAudit fix that was just committed.
 
 4. **Weapon system tests** — write tests for `WeaponFactory` validation (invalid stats throw `StatValidationError`) and each `DamageStrategy.compute()` (known input → known output). Save to `weapon-system/src/__tests__/`.
 
@@ -202,4 +202,4 @@ git push   # Vercel auto-deploys on push to main
 
 ---
 
-*Last updated: 2026-04-11 — Session completed weapon-system module (committed `8215a4c`), perk audit Tier 1 + Tier 3 overrides. Stage 4 cleanup and 3 uncommitted components are the immediate next actions.*
+*Last updated: 2026-04-11 — Session fixed perkAudit.json (committed `b0ebbda`): cleared activation on 44 artifact entries, fixed ttaCategory on 8 real perks, Unknown TTA → 0. Note: HEAD before this session had invalid JSON in perkAudit.json (commit 8215a4c) — now resolved. Component changes from prior sessions were already committed. Next: Accelerated Heatsink entry, Tier 4 verification, git push.*
