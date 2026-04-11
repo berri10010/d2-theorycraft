@@ -1,3 +1,9 @@
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Fully static export — no Next.js server, no API routes, no SSR.
@@ -15,6 +21,12 @@ const nextConfig = {
       },
     ],
   },
+
+  experimental: {
+    // Ensure SWC is used for transpilation even if Babel config is detected
+    // elsewhere in node_modules. SWC is ~17× faster than Babel.
+    forceSwcTransforms: true,
+  },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);
