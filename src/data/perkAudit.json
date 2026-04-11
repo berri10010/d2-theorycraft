@@ -551,14 +551,14 @@
   "Alloy Magazine": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Magazine empty",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "Instant on empty mag"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Bonus reload speed while mag is empty (last round in mag fires faster). State-based \u2014 active whenever mag hits 0."
   },
   "Ambitious Assassin": {
     "statModifiers": [
@@ -715,14 +715,14 @@
   "Bait and Switch": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
+      "trigger": "Damage with all 3 weapons in sequence",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "~7",
+      "duration": "11s"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "30% damage boost. Must deal damage with all 3 weapons within ~7s window. Chained sequence resets the 11s duration."
   },
   "Balanced Heat Weapon": {
     "statModifiers": [],
@@ -796,51 +796,57 @@
     "notes": "Clarity"
   },
   "Bipod": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Blast Radius",
+        "value": 5,
+        "isConditional": false
+      },
+      {
+        "statName": "Velocity",
+        "value": -20,
+        "isConditional": false
+      }
+    ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "Permanent"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Fires 2 projectiles per shot. Doubles ammo consumption. +5 Blast Radius, -20 Velocity. Always active \u2014 no trigger."
   },
   "Blast Distributor": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
+      "trigger": "Explosive damage kills",
+      "ttaCategory": "Shot-Proc",
       "estTtaSeconds": "0",
-      "duration": "5s"
+      "duration": "Per explosion"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Explosion damage stacks; each explosion in chain extends the buff window. Damages stack multiplicatively."
   },
   "Blunt Execution Rounds": {
     "statModifiers": [
       {
         "statName": "Handling",
-        "value": 100,
+        "value": 40,
         "isConditional": true
       }
     ],
     "activation": {
-      "trigger": "Melee hit/kill",
-      "ttaCategory": "Unknown",
+      "trigger": "Melee kill",
+      "ttaCategory": "Melee-Proc",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "Until next shot"
     },
-    "activation2": {
-      "trigger": "Sprinting",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "After melee kill: next shot deals significantly increased damage. +40 Handling on melee kill."
   },
   "Bolt Scavenger": {
     "statModifiers": [],
@@ -1172,14 +1178,14 @@
       }
     ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Mag above 50%",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "While mag > 50%"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "+50 Reload Speed while magazine is above 50% capacity. State-based \u2014 deactivates when mag drops below threshold."
   },
   "Consumes up to 3 \u21912 stacks": {
     "statModifiers": [],
@@ -1583,74 +1589,60 @@
     "statModifiers": [
       {
         "statName": "Reload Speed",
-        "value": 20,
+        "value": 55,
+        "isConditional": true
+      },
+      {
+        "statName": "Handling",
+        "value": 30,
         "isConditional": true
       }
     ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": "1.5s"
+      "trigger": "Sprinting 1.5s",
+      "ttaCategory": "State-Based",
+      "estTtaSeconds": "1.5",
+      "duration": "While sprinting"
     },
-    "activation2": {
-      "trigger": "Sprinting",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": "1.5s"
-    },
+    "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "+55 Reload Speed + 30 Handling after sprinting for 1.5s. Deactivates on sprint stop."
   },
   "Elemental Capacitor": {
     "statModifiers": [
       {
-        "statName": "Reload Speed",
-        "value": 50,
-        "isConditional": false
-      },
-      {
-        "statName": "Handling",
-        "value": 50,
-        "isConditional": false
-      },
-      {
-        "statName": "Stability",
-        "value": 20,
-        "isConditional": false
-      },
-      {
-        "statName": "Airborne Eff.",
-        "value": 20,
+        "statName": "Varies by subclass",
+        "value": 0,
         "isConditional": false
       }
     ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Always (passive \u2014 based on subclass)",
+      "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
-      "duration": ""
-    },
-    "activation2": {
-      "trigger": "ADS / Aiming",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
-    "clarityVerified": true,
-    "notes": "Clarity"
-  },
-  "Elemental Honing": {
-    "statModifiers": [],
-    "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": "20s"
+      "duration": "Permanent"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Passive stat boost based on equipped subclass element. Solar: +10 Reload Speed. Arc: +10 Handling. Void: +10 Stability. Stasis: +10 Recoil. Strand: +10 Charge Rate/Draw Time."
+  },
+  "Elemental Honing": {
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
+    "activation": {
+      "trigger": "Dealing elemental damage",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "0",
+      "duration": "8s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Dealing elemental damage (matching subclass) procs buff. +30 Reload Speed for 8s."
   },
   "En Garde": {
     "statModifiers": [],
@@ -1748,14 +1740,14 @@
   "Envious Arsenal": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
+      "trigger": "Damage with other 2 weapon slots",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "~3-5",
+      "duration": "Until mag overflow consumed"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Dealing damage with both other weapon slots overflows this weapon's mag (up to 2x capacity). Similar chain to Bait and Switch but for ammo not damage."
   },
   "Envious Assassin": {
     "statModifiers": [],
@@ -1836,19 +1828,24 @@
     "statModifiers": [
       {
         "statName": "Handling",
-        "value": 33,
-        "isConditional": false
+        "value": 30,
+        "isConditional": true
+      },
+      {
+        "statName": "Accuracy/Cone",
+        "value": 0,
+        "isConditional": true
       }
     ],
     "activation": {
-      "trigger": "Low HP",
-      "ttaCategory": "Unknown",
+      "trigger": "Low shield HP",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "While low HP"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "+30 Handling + improved accuracy cone when player shields are low. State-based \u2014 activates once below ~50% shields."
   },
   "Feeding Frenzy": {
     "statModifiers": [
@@ -1928,10 +1925,15 @@
   },
   "Firing Line": {
     "statModifiers": [],
-    "activation": null,
+    "activation": {
+      "trigger": "Near 2+ allies within 15m",
+      "ttaCategory": "State-Based",
+      "estTtaSeconds": "0",
+      "duration": "Permanent while condition met"
+    },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "20% increased Precision Damage only (not body shots). Requires 2 allies within 15m."
   },
   "Firing consumes a stack of Explosive Light": {
     "statModifiers": [],
@@ -2751,26 +2753,37 @@
       }
     ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "No enemies within 15m",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "While no enemies within 15m"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "+10 Range + 30 Reload Speed when no enemies within 15m. 1.5s linger after enemy enters range."
   },
   "Kickstart": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 40,
+        "isConditional": true
+      },
+      {
+        "statName": "Handling",
+        "value": 40,
+        "isConditional": true
+      }
+    ],
     "activation": {
-      "trigger": "Sprinting",
-      "ttaCategory": "Unknown",
+      "trigger": "Sliding after sprint",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
-      "duration": "1.5s"
+      "duration": "One mag"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Sliding after a sprint grants +40 Reload Speed + 40 Handling for one magazine."
   },
   "Kill Clip": {
     "statModifiers": [],
@@ -2970,19 +2983,14 @@
       }
     ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Applying elemental debuff to target",
+      "ttaCategory": "Ability-Proc",
       "estTtaSeconds": "0",
-      "duration": "9s"
+      "duration": "5s"
     },
-    "activation2": {
-      "trigger": "ADS / Aiming",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": "9s"
-    },
+    "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Applying an elemental debuff (slow, jolt, scorch, etc.) procs +50 Reload Speed + 20 Aim Assist for 5s."
   },
   "MIDA Synergy": {
     "statModifiers": [],
@@ -3089,17 +3097,22 @@
         "statName": "Aim Assist",
         "value": 10,
         "isConditional": true
+      },
+      {
+        "statName": "Move Speed",
+        "value": 0,
+        "isConditional": true
       }
     ],
     "activation": {
-      "trigger": "ADS / Aiming",
-      "ttaCategory": "Unknown",
+      "trigger": "ADS while moving",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "While ADS and moving"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "+10 Aim Assist + increased movement speed while ADS. State-based \u2014 always on when condition met."
   },
   "Multikill Clip": {
     "statModifiers": [],
@@ -3126,16 +3139,22 @@
     "notes": "No Clarity match \u2014 dataset description used"
   },
   "No Distractions": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Aim Assist",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
     "activation": {
-      "trigger": "ADS / Aiming",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
+      "trigger": "ADS for 0.9s without firing",
+      "ttaCategory": "State-Based",
+      "estTtaSeconds": "0.9",
+      "duration": "While ADS"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "+20 Aim Assist after 0.9s of ADS without firing. Reduces flinch while scoped."
   },
   "Not to be confused with Precision Damage": {
     "statModifiers": [],
@@ -3391,29 +3410,29 @@
     "statModifiers": [
       {
         "statName": "Stability",
-        "value": 10,
+        "value": 20,
         "isConditional": true
       },
       {
         "statName": "Handling",
-        "value": 10,
+        "value": 20,
         "isConditional": true
       },
       {
         "statName": "Reload Speed",
-        "value": 10,
+        "value": 20,
         "isConditional": true
       }
     ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "While moving at 2m/s+",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
-      "duration": "0.5s"
+      "duration": "While moving"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Stacks x1/x2: +10/+20 Stability, +10/+20 Handling, +10/+20 Reload Speed. Note: values shown are x2 (max stack)."
   },
   "Perpetual Motion x1 | +10 Stability": {
     "statModifiers": [
@@ -3840,14 +3859,14 @@
   "Rewind Rounds": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Magazine depleted",
+      "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "Instant refill"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "When magazine is depleted, it is instantly refilled from reserves (no reload animation). Tracks hits during the magazine."
   },
   "Ricochet Rounds": {
     "statModifiers": [
@@ -3862,15 +3881,10 @@
         "isConditional": false
       }
     ],
-    "activation": {
-      "trigger": "Always (passive)",
-      "ttaCategory": "Instant-Always",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
-    "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "clarityVerified": true,
+    "notes": "Passive intrinsic perk. Rounds richocet off hard surfaces. +5 Range, +10 Stability (confirmed Clarity)."
   },
   "Rimestealer": {
     "statModifiers": [],
@@ -4166,16 +4180,27 @@
     "notes": "Clarity"
   },
   "Sneak Bow": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Draw Time",
+        "value": -40,
+        "isConditional": true
+      },
+      {
+        "statName": "Aim Assist",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Crouching",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "While crouching"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "-40 Draw Time (faster draw) + 20 Aim Assist while crouching. State-based \u2014 immediate on crouch."
   },
   "Special Weapons receive halved benefits": {
     "statModifiers": [
@@ -4249,20 +4274,30 @@
         "isConditional": true
       },
       {
+        "statName": "Reload Speed",
+        "value": 35,
+        "isConditional": true
+      },
+      {
         "statName": "Stability",
+        "value": 10,
+        "isConditional": true
+      },
+      {
+        "statName": "Range",
         "value": 10,
         "isConditional": true
       }
     ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
+      "trigger": "Damage 3 separate enemies in 3s",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "~3",
       "duration": "10s"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Tag 3 distinct enemies within 3s window: +35 Handling, +35 Reload Speed, +10 Stability, +10 Range for 10s."
   },
   "Steady Hands": {
     "statModifiers": [
@@ -4364,28 +4399,28 @@
       {
         "statName": "Stability",
         "value": 25,
-        "isConditional": false
+        "isConditional": true
       },
       {
         "statName": "Handling",
         "value": 60,
-        "isConditional": false
+        "isConditional": true
       },
       {
         "statName": "Reload Speed",
         "value": 60,
-        "isConditional": false
+        "isConditional": true
       }
     ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Charged abilities (state-based stacks)",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "While abilities charged"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "x1/x2/x3 stacks per charged ability slot. x3: +25 Stability, +60 Handling, +60 Reload Speed. Values shown are x3 (max)."
   },
   "Surrounded": {
     "statModifiers": [],
@@ -4493,10 +4528,15 @@
   },
   "Target Lock": {
     "statModifiers": [],
-    "activation": null,
+    "activation": {
+      "trigger": "Successive hits on same target",
+      "ttaCategory": "Shot-Proc",
+      "estTtaSeconds": "~0.2",
+      "duration": "Until miss or target change"
+    },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Ramps from +18.82% to +45% damage with successive hits on same target. Missing a shot deactivates the buff. Enhanced: higher ramp rate."
   },
   "Target explodes": {
     "statModifiers": [],
@@ -4597,14 +4637,14 @@
       }
     ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Hit 10+ pellets on target",
+      "ttaCategory": "Shot-Proc",
       "estTtaSeconds": "0",
-      "duration": "7s"
+      "duration": "Until reload"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "+60 Reload Speed after landing 10+ pellets from a single burst/spread. Shotgun-focused."
   },
   "Thresh": {
     "statModifiers": [],
@@ -4698,28 +4738,23 @@
       {
         "statName": "Reload Speed",
         "value": 35,
-        "isConditional": false
+        "isConditional": true
       },
       {
         "statName": "Handling",
         "value": 35,
-        "isConditional": false
+        "isConditional": true
       }
     ],
     "activation": {
-      "trigger": "Melee hit/kill",
-      "ttaCategory": "Unknown",
+      "trigger": "Melee hit",
+      "ttaCategory": "Melee-Proc",
       "estTtaSeconds": "0",
-      "duration": ""
+      "duration": "3 shots / 5s"
     },
-    "activation2": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "50% damage + 35 Reload Speed + 35 Handling for next 3 shots within 5s. Melee must connect."
   },
   "Trickle Charge": {
     "statModifiers": [],
@@ -4922,14 +4957,14 @@
   "Withering Gaze": {
     "statModifiers": [],
     "activation": {
-      "trigger": "ADS / Aiming",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
+      "trigger": "ADS for 1.4s without firing",
+      "ttaCategory": "State-Based",
+      "estTtaSeconds": "1.4",
+      "duration": "5s linger"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "After 1.4s ADS without shooting, the target is debuffed (weaker). Buff lingers 5s after breaking ADS."
   },
   "[Fusion Rifles Only] +10 Stability": {
     "statModifiers": [],
