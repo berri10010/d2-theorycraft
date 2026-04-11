@@ -218,7 +218,7 @@ function Dashboard() {
         aria-label="Weapon theorycrafting editor"
         className="flex-1 overflow-y-auto overscroll-y-contain min-w-0 focus:outline-none"
       >
-        <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6">
+        <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
           {/* ── Top action bar ──────────────────────────── */}
           <header className="flex items-center gap-3 flex-wrap justify-between">
@@ -331,7 +331,7 @@ function Dashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                 {/* ── Left column (always visible) ───────── */}
-                <div className="lg:col-span-7 space-y-6">
+                <div className="lg:col-span-6 space-y-6">
                   <RollEditor />
 
                   {/* PvE — god roll guide, wishlists, effects, buffs */}
@@ -355,7 +355,7 @@ function Dashboard() {
                 </div>
 
                 {/* ── Right column ───────────────────────── */}
-                <div className="lg:col-span-5 space-y-6">
+                <div className="lg:col-span-6 space-y-6">
                   <StatDisplay />
                   <WeaponDataPanel />
                   <SimilarWeaponsPanel />

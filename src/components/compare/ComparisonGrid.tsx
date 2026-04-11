@@ -3,13 +3,34 @@
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useCompareStore } from '../../store/useCompareStore';
-import { CompareSnapshot } from '../../types/weapon';
+import { CompareSnapshot, StatCurveNode } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
-const STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance'];
 
-// ─── Delta color scale ─────────────────────────────────────────────────────────
-// Positive: green scale; Negative: red scale. No raw "+N" numbers shown.
+// ─── Stat keys shown in the comparison card ────────────────────────────────────
+// Mirrors the keys in StatDisplay so the Compare view has full parity.
+const BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance'];
+const NUMERIC_STAT_KEYS = ['Zoom', 'Airborne Effectiveness', 'Magazine', 'Recoil Direction'];
+const ALL_TRACKED_STAT_KEYS = [...BAR_STAT_KEYS, ...NUMERIC_STAT_KEYS];
 
+// ─── Curve interpolation (mirrors TTKAndFalloffPanel logic) ───────────────────
+function interpolateCurve(curve: StatCurveNode[], statVal: number): number {
+  if (!curve || curve.length === 0) return 0;
+  const clamped = Math.max(curve[0].stat, Math.min(curve[curve.length - 1].stat, statVal));
+  for (let i = 0; i < curve.length - 1; i++) {
+    const a = curve[i], b = curve[i + 1];
+    if (clamped >= a.stat && clamped <= b.stat) {
+      const t = (clamped - a.stat) / (b.stat - a.stat);
+      return a.value + t * (b.value - a.value);
+    }
+  }
+  return curve[curve.length - 1].value;
+}
+
+function adsMultiplier(zoom: number): number {
+  return 1 + Math.max(0, zoom - 10) * 0.033;
+}
+
+// ─── Delta colour scale ────────────────────────────────────────────────────────
 function deltaColorClass(delta: number): string {
   if (delta === 0) return 'text-slate-300';
   if (delta > 0) {
@@ -17,14 +38,12 @@ function deltaColorClass(delta: number): string {
     if (delta >= 6)  return 'text-green-400';
     return 'text-green-300';
   }
-  // negative
   if (delta <= -16) return 'text-red-400 font-bold';
   if (delta <= -6)  return 'text-red-400';
   return 'text-red-300';
 }
 
 // ─── Snapshot card ─────────────────────────────────────────────────────────────
-
 function SnapshotCard({
   snapshot,
   statMins,
@@ -35,13 +54,52 @@ function SnapshotCard({
   statMaxes: Record<string, number>;
 }) {
   const { removeSnapshot, renameSnapshot } = useCompareStore();
-  const [editing, setEditing]   = useState(false);
-  const [labelValue, setLabel]  = useState(snapshot.label);
+  const [editing, setEditing] = useState(false);
+  const [labelValue, setLabel] = useState(snapshot.label);
 
   const handleRename = () => { renameSnapshot(snapshot.id, labelValue); setEditing(false); };
 
+  // ── Derive falloff distances from snapshot data ───────────────────────────
+  const rangeCurve = snapshot.weapon.statCurves?.['Range'];
+  const rangeStat  = snapshot.calculatedStats['Range'] ?? 0;
+  const zoomStat   = snapshot.calculatedStats['Zoom']  ?? 14;
+
+  const hipFalloff = useMemo(() => {
+    if (!rangeCurve || rangeCurve.length === 0) return null;
+    return interpolateCurve(rangeCurve, rangeStat);
+  }, [rangeCurve, rangeStat]);
+
+  const adsFalloff = hipFalloff !== null
+    ? hipFalloff * adsMultiplier(zoomStat)
+    : null;
+
+  // ── Build selected perk list from weapon socket data ─────────────────────
+  const selectedPerkList = useMemo(() => {
+    const result: Array<{ name: string; icon: string; columnType: string }> = [];
+    for (const column of snapshot.weapon.perkSockets) {
+      const selectedHash = snapshot.selectedPerks[column.name];
+      if (!selectedHash) continue;
+      // Find the perk (or its enhanced version) that matches the selected hash
+      for (const perk of column.perks) {
+        if (perk.hash === selectedHash) {
+          result.push({ name: perk.name, icon: perk.icon, columnType: column.columnType });
+          break;
+        }
+        if (perk.enhancedVersion?.hash === selectedHash) {
+          result.push({
+            name: perk.enhancedVersion.name,
+            icon: perk.enhancedVersion.icon,
+            columnType: column.columnType,
+          });
+          break;
+        }
+      }
+    }
+    return result;
+  }, [snapshot.weapon.perkSockets, snapshot.selectedPerks]);
+
   return (
-    <div className="min-w-[240px] bg-black/40 p-4 rounded-lg border border-white/10 relative flex flex-col gap-3">
+    <div className="min-w-[260px] bg-black/40 p-4 rounded-lg border border-white/10 relative flex flex-col gap-4">
       {/* Remove */}
       <button
         onClick={() => removeSnapshot(snapshot.id)}
@@ -49,11 +107,18 @@ function SnapshotCard({
         aria-label="Remove"
       >×</button>
 
-      {/* Icon + label */}
+      {/* ── Weapon identity ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 pr-6">
         <div className="w-12 h-12 bg-white/5 rounded overflow-hidden flex-shrink-0 border border-white/10">
           {snapshot.weapon.icon && (
-            <Image src={BUNGIE_ROOT + snapshot.weapon.icon} alt="" width={48} height={48} className="w-full h-full object-cover" unoptimized />
+            <Image
+              src={BUNGIE_ROOT + snapshot.weapon.icon}
+              alt=""
+              width={48}
+              height={48}
+              className="w-full h-full object-cover"
+              unoptimized
+            />
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -86,68 +151,150 @@ function SnapshotCard({
         </div>
       </div>
 
-      {/* TTK badge */}
-      {snapshot.ttk !== null && (
-        <div className="px-3 py-1.5 bg-white/5 rounded border border-white/10 flex items-center justify-between">
-          <span className="text-xs text-slate-400">TTK ({snapshot.mode.toUpperCase()})</span>
-          <span className="font-mono text-sm font-bold text-amber-400">{snapshot.ttk.toFixed(2)}s</span>
+      {/* ── Intrinsic trait ──────────────────────────────────────────────── */}
+      {snapshot.weapon.intrinsicTrait && (
+        <div className="flex items-center gap-2 px-2 py-1.5 bg-white/5 rounded border border-white/10">
+          <div className="w-6 h-6 bg-white/5 rounded-full overflow-hidden border border-white/10 flex-shrink-0">
+            <Image
+              src={BUNGIE_ROOT + snapshot.weapon.intrinsicTrait.icon}
+              alt=""
+              width={24}
+              height={24}
+              className="w-full h-full object-cover"
+              unoptimized
+            />
+          </div>
+          <span className="text-xs text-slate-300 font-medium truncate">
+            {snapshot.weapon.intrinsicTrait.name}
+          </span>
         </div>
       )}
 
-      {/* Stats — values are color-coded by delta from the minimum across snapshots */}
+      {/* ── TTK + falloff row ────────────────────────────────────────────── */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
+          <span className="text-[10px] text-slate-500">TTK</span>
+          <span className="font-mono text-sm font-bold text-amber-400">
+            {snapshot.ttk !== null ? `${snapshot.ttk.toFixed(2)}s` : '—'}
+          </span>
+        </div>
+        <div className="px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
+          <span className="text-[10px] text-slate-500">Hip</span>
+          <span className="font-mono text-sm font-bold text-cyan-400">
+            {hipFalloff !== null ? `${hipFalloff.toFixed(1)}m` : '—'}
+          </span>
+        </div>
+        <div className="px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
+          <span className="text-[10px] text-slate-500">ADS</span>
+          <span className="font-mono text-sm font-bold text-amber-300">
+            {adsFalloff !== null ? `${adsFalloff.toFixed(1)}m` : '—'}
+          </span>
+        </div>
+      </div>
+
+      {/* ── Bar stats (mirrors StatDisplay BAR_STAT_KEYS) ───────────────── */}
       <div className="space-y-2">
-        {STAT_KEYS.map((statName) => {
-          const val  = snapshot.calculatedStats[statName] ?? 0;
-          const min  = statMins[statName]  ?? val;
-          const max  = statMaxes[statName] ?? val;
+        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Stats</p>
+        {BAR_STAT_KEYS.map((statName) => {
+          const val    = snapshot.calculatedStats[statName] ?? 0;
+          const base   = snapshot.weapon.baseStats?.[statName] ?? val;
+          const min    = statMins[statName]  ?? val;
+          const max    = statMaxes[statName] ?? val;
           const isBest = val > 0 && val === max && max !== min;
-          const delta  = val - min; // 0 when this IS the min, positive otherwise
+          const delta  = val - min;
+          const diff   = val - base;
 
           return (
-            <div key={statName} className="flex justify-between items-center text-sm gap-2">
-              <span className="text-slate-500 text-xs w-24 shrink-0">{statName}</span>
-              <div className="flex items-center gap-2 flex-1 justify-end">
-                {/* Bar */}
-                <div className="w-14 h-1 bg-white/5 rounded-full overflow-hidden">
-                  <div
-                    className={[
-                      'h-full rounded-full transition-all',
-                      isBest ? 'bg-green-500' : 'bg-amber-500/60',
-                    ].join(' ')}
-                    style={{ width: `${val}%` }}
-                  />
-                </div>
-                {/* Color-scaled value — no parenthetical delta */}
-                <span className={[
-                  'font-mono text-sm tabular-nums w-8 text-right',
-                  delta !== 0 ? deltaColorClass(delta) : 'text-slate-300',
-                ].join(' ')}>
-                  {val}
-                </span>
+            <div key={statName} className="flex items-center gap-2 text-xs">
+              <span className="text-slate-500 w-20 shrink-0">{statName}</span>
+              <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className={['h-full rounded-full transition-all', isBest ? 'bg-green-500' : 'bg-amber-500/60'].join(' ')}
+                  style={{ width: `${Math.min(val, 100)}%` }}
+                />
               </div>
+              <span className={['font-mono tabular-nums w-8 text-right', delta !== 0 ? deltaColorClass(delta) : 'text-slate-300'].join(' ')}>
+                {val}
+              </span>
+              {diff !== 0 && (
+                <span className={['text-[10px] tabular-nums w-7', diff > 0 ? 'text-green-400' : 'text-red-400'].join(' ')}>
+                  {diff > 0 ? '+' : ''}{diff}
+                </span>
+              )}
             </div>
           );
         })}
       </div>
+
+      {/* ── Numeric stats (mirrors StatDisplay NUMERIC_STAT_KEYS) ─────────── */}
+      {NUMERIC_STAT_KEYS.some((k) => snapshot.calculatedStats[k] !== undefined || snapshot.weapon.baseStats?.[k] !== undefined) && (
+        <div className="border-t border-white/10 pt-3">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Additional</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            {NUMERIC_STAT_KEYS.map((statName) => {
+              const base    = snapshot.weapon.baseStats?.[statName];
+              const current = snapshot.calculatedStats[statName] ?? base;
+              if (current === undefined) return null;
+              const diff = current - (base ?? current);
+              return (
+                <div key={statName} className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400">{statName}</span>
+                  <span className={['font-mono font-bold', diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-white'].join(' ')}>
+                    {current}
+                    {diff !== 0 && <span className="text-[9px] ml-0.5">({diff > 0 ? '+' : ''}{diff})</span>}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Selected perks ──────────────────────────────────────────────── */}
+      {selectedPerkList.length > 0 && (
+        <div className="border-t border-white/10 pt-3">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Perks</p>
+          <div className="flex flex-wrap gap-2">
+            {selectedPerkList.map((perk, idx) => (
+              <div
+                key={idx}
+                className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-full border border-white/10"
+                title={perk.name}
+              >
+                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 bg-white/5">
+                  <Image
+                    src={BUNGIE_ROOT + perk.icon}
+                    alt={perk.name}
+                    width={20}
+                    height={20}
+                    className="w-full h-full object-cover"
+                    unoptimized
+                  />
+                </div>
+                <span className="text-[10px] text-slate-300 font-medium max-w-[80px] truncate">
+                  {perk.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // ─── Main component ────────────────────────────────────────────────────────────
-
 export const ComparisonGrid: React.FC = () => {
   const { snapshots, clearSnapshots } = useCompareStore();
 
-  // IMPORTANT: useMemo must be called before any early returns to satisfy
-  // React's rules of hooks — hook call order must be identical every render.
-  // Min and max per stat across all snapshots — used for delta colouring.
+  // Min and max per stat across all snapshots — must be before early returns.
   const { statMins, statMaxes } = useMemo(() => {
-    const mins: Record<string, number> = {};
+    const mins: Record<string, number>  = {};
     const maxes: Record<string, number> = {};
-    STAT_KEYS.forEach((key) => {
-      const vals = snapshots.map((s) => s.calculatedStats[key] ?? 0);
-      mins[key]  = vals.length > 0 ? Math.min(...vals) : 0;
-      maxes[key] = vals.length > 0 ? Math.max(...vals) : 0;
+    ALL_TRACKED_STAT_KEYS.forEach((key) => {
+      const vals  = snapshots.map((s) => s.calculatedStats[key] ?? 0);
+      mins[key]   = vals.length > 0 ? Math.min(...vals) : 0;
+      maxes[key]  = vals.length > 0 ? Math.max(...vals) : 0;
     });
     return { statMins: mins, statMaxes: maxes };
   }, [snapshots]);
@@ -182,7 +329,7 @@ export const ComparisonGrid: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex overflow-x-auto gap-4 pb-4 md:grid md:grid-cols-2 lg:grid-cols-3">
+      <div className="flex overflow-x-auto gap-4 pb-4 md:grid md:grid-cols-2 xl:grid-cols-3">
         {snapshots.map((snapshot) => (
           <SnapshotCard
             key={snapshot.id}

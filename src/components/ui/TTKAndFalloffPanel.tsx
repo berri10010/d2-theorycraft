@@ -123,6 +123,11 @@ export const TTKAndFalloffPanel: React.FC = () => {
   const critDmg = dmg?.crit ?? 0;
   const bodyDmg = dmg?.body ?? 0;
 
+  // Apply the active damage multiplier (perks, buffs, surge) so the falloff
+  // chart Y-axis reflects actual post-perk damage values, not raw archetypes.
+  const effectiveCrit = critDmg * multiplier;
+  const effectiveBody = bodyDmg * multiplier;
+
   const hipFalloffStart = useMemo(() => {
     if (!rangeCurve || rangeCurve.length === 0) return null;
     return interpolate(rangeCurve, rangeStat);
@@ -159,11 +164,11 @@ export const TTKAndFalloffPanel: React.FC = () => {
     return pts;
   }
 
-  const hipCurve = hasFalloffData ? buildDamageCurve(hipFalloffStart!, maxDist, critDmg, bodyDmg) : [];
-  const adsCurve = hasFalloffData ? buildDamageCurve(adsFalloffStart, maxDist, critDmg, bodyDmg) : [];
+  const hipCurve = hasFalloffData ? buildDamageCurve(hipFalloffStart!, maxDist, effectiveCrit, effectiveBody) : [];
+  const adsCurve = hasFalloffData ? buildDamageCurve(adsFalloffStart, maxDist, effectiveCrit, effectiveBody) : [];
 
   const yMin = 0;
-  const yMax = critDmg > 0 ? critDmg * 1.05 : 1;
+  const yMax = effectiveCrit > 0 ? effectiveCrit * 1.05 : 1;
 
   function curveToPoints(pts: typeof hipCurve, key: 'crit' | 'body'): [number, number][] {
     return pts.map((p) => toSvg(p.dist / maxDist, p[key], yMin, yMax));
@@ -225,8 +230,9 @@ export const TTKAndFalloffPanel: React.FC = () => {
     hoverDist = (hoverX / IW) * maxDist;
     const hipFrac = hoverDist <= hipFalloffStart! ? 1 : Math.max(FALLOFF_FLOOR, 1 - (1 - FALLOFF_FLOOR) * Math.min(1, (hoverDist - hipFalloffStart!) / (maxDist - hipFalloffStart!)));
     const adsFrac = hoverDist <= adsFalloffStart ? 1 : Math.max(FALLOFF_FLOOR, 1 - (1 - FALLOFF_FLOOR) * Math.min(1, (hoverDist - adsFalloffStart) / (maxDist - adsFalloffStart)));
-    hoverHipCrit = critDmg * hipFrac;
-    hoverAdsCrit = critDmg * adsFrac;
+    // Use effectiveCrit so tooltip reflects active perk/buff bonuses
+    hoverHipCrit = effectiveCrit * hipFrac;
+    hoverAdsCrit = effectiveCrit * adsFrac;
     hoverTtkBp = ttkBreakpoints.reduce<TTKBreakpoint | null>((closest, bp) => {
       if (!closest || Math.abs(bp.distance - hoverDist!) < Math.abs(closest.distance - hoverDist!)) return bp;
       return closest;

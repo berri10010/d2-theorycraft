@@ -55,7 +55,7 @@ export const RollEditor: React.FC = () => {
       {/* Header row */}
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl font-bold text-white">Weapon Perks</h2>
-        {hasEnhanceable && (
+        {hasEnhanceable && activeWeapon.hasCraftedPattern && (
           <span className="text-xs text-slate-500 font-normal tracking-wide">
             Click twice to enhance
           </span>
