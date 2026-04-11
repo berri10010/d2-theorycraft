@@ -4,368 +4,263 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "+10 Range": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 25,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "+100 Handling": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "+100 Ready/Stow Handling": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "ADS / Aiming",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "+100? Reload Speed": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "+11 Aim Assist": {
-    "statModifiers": [
-      {
-        "statName": "Airborne Eff.",
-        "value": 32,
-        "isConditional": true
-      }
-    ],
+    "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "+15 Aim Assist": {
-    "statModifiers": [
-      {
-        "statName": "Stability",
-        "value": 25,
-        "isConditional": false
-      }
-    ],
+    "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "+15 Reload Speed": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "+20 Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 60,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
-    "activation2": null,
-    "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
-  },
-  "+20 \u2191+25 Stability": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
+  },
+  "+20 ↑+25 Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match — dataset description used"
   },
   "+30 Stability": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
-  "+30 \u219135? Reload Speed": {
+  "+30 ↑35? Reload Speed": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "+30? Stability": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "+40 Stability": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "+5 Range": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "+50 Reload Speed": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "ADS / Aiming",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
-  "+50 \u2191+55? Reload Speed": {
+  "+50 ↑+55? Reload Speed": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
-  "+60 \u2191+65 Guard Efficiency": {
-    "statModifiers": [
-      {
-        "statName": "Guard stats",
-        "value": 60,
-        "isConditional": false
-      }
-    ],
+  "+60 ↑+65 Guard Efficiency": {
+    "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "+? Handling": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 20,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "+? Stability": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
-  "-?% \u2191-?% Accuracy Cone Size": {
-    "statModifiers": [
-      {
-        "statName": "Stability",
-        "value": 1,
-        "isConditional": false
-      }
-    ],
-    "activation": null,
-    "activation2": null,
-    "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
-  },
-  "0.75x ADS Duration Multiplier": {
-    "statModifiers": [
-      {
-        "statName": "Airborne Eff.",
-        "value": 30,
-        "isConditional": true
-      }
-    ],
-    "activation": null,
-    "activation2": null,
-    "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
-  },
-  "10% \u219114% per hit": {
+  "-?% ↑-?% Accuracy Cone Size": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
+  },
+  "0.75x ADS Duration Multiplier": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
+  },
+  "10% ↑14% per hit": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match — dataset description used"
   },
   "10%: Bows": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "15% Increased damage": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 100,
-        "isConditional": true
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": "7s"
-    },
-    "activation2": null,
-    "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
-  },
-  "15% \u219120% Increased Damage against Vehicles (such as Cyclops": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
+  },
+  "15% ↑20% Increased Damage against Vehicles (such as Cyclops": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match — dataset description used"
   },
   "17.5% Counter per Precision Hit: Hand Cannons": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "20% Increased Aim Assist Falloff Distance": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "20% Increased Non-Precision Damage: Auto Rifles": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "20% decreased damage": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "25% decreased damage": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": -15,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "3 Hits: Bow": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "30% increased damage": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "50% Increased damage": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "8% Counter per Precision Hit: Auto Rifles": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Accelerated Heatsink": {
     "statModifiers": [
       {
-        "statName": "Reload Speed",
+        "statName": "Charge Rate",
         "value": 2,
         "isConditional": false
       }
     ],
     "activation": {
-      "trigger": "Reload",
+      "trigger": "Always",
       "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
-    "activation2": {
-      "trigger": "Always (passive)",
-      "ttaCategory": "Instant-Always",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Fusion Rifle barrel mod — passive +2 Charge Rate. Not in Clarity DB."
   },
   "Adagio": {
     "statModifiers": [
@@ -390,14 +285,14 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Adaptive Frame": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Adaptive Munitions": {
     "statModifiers": [],
@@ -416,7 +311,7 @@
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Adhesive Ordnance": {
     "statModifiers": [],
@@ -477,7 +372,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Air Assault": {
     "statModifiers": [
@@ -558,7 +453,7 @@
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Bonus reload speed while mag is empty (last round in mag fires faster). State-based \u2014 active whenever mag hits 0."
+    "notes": "Bonus reload speed while mag is empty (last round in mag fires faster). State-based — active whenever mag hits 0."
   },
   "Ambitious Assassin": {
     "statModifiers": [
@@ -605,7 +500,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Arc": {
     "statModifiers": [],
@@ -617,7 +512,7 @@
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Archer's Gambit": {
     "statModifiers": [
@@ -659,7 +554,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Armor-Piercing Rounds": {
     "statModifiers": [],
@@ -729,7 +624,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Barrel Constrictor": {
     "statModifiers": [],
@@ -816,7 +711,7 @@
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Fires 2 projectiles per shot. Doubles ammo consumption. +5 Blast Radius, -20 Velocity. Always active \u2014 no trigger."
+    "notes": "Fires 2 projectiles per shot. Doubles ammo consumption. +5 Blast Radius, -20 Velocity. Always active — no trigger."
   },
   "Blast Distributor": {
     "statModifiers": [],
@@ -851,34 +746,28 @@
   "Bolt Scavenger": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Crossbow Bolt pickup",
+      "ttaCategory": "Ammo-Proc",
       "estTtaSeconds": "0",
       "duration": "4s"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Clarity — Crossbow Bolt pickup grants ? Handling and ? Reload Speed for 4s. Additional bolt pickups extend by 3?s (max 15s). Exact stat values TBD."
   },
   "Bolts": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
-  "Bonuses are doubled to +10 \u2191+11 Aim Assist": {
-    "statModifiers": [
-      {
-        "statName": "Airborne Eff.",
-        "value": 32,
-        "isConditional": false
-      }
-    ],
+  "Bonuses are doubled to +10 ↑+11 Aim Assist": {
+    "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Bottomless Grief": {
     "statModifiers": [
@@ -908,7 +797,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Box Breathing": {
     "statModifiers": [],
@@ -932,7 +821,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Built To Blast": {
     "statModifiers": [
@@ -976,7 +865,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Cascade Point": {
     "statModifiers": [],
@@ -1057,19 +946,19 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Charged Bolts": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
+      "trigger": "Always",
+      "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Fusion rifle bolt type intrinsic — passive projectile behavior. Not in Clarity DB."
   },
   "Chill Clip": {
     "statModifiers": [],
@@ -1160,14 +1049,14 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Combines the penetration from Armor-Piercing Rounds": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Compulsive Reloader": {
     "statModifiers": [
@@ -1185,14 +1074,14 @@
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "+50 Reload Speed while magazine is above 50% capacity. State-based \u2014 deactivates when mag drops below threshold."
+    "notes": "+50 Reload Speed while magazine is above 50% capacity. State-based — deactivates when mag drops below threshold."
   },
-  "Consumes up to 3 \u21912 stacks": {
+  "Consumes up to 3 ↑2 stacks": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Controlled Burst": {
     "statModifiers": [],
@@ -1272,14 +1161,14 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Dealing damage with the Support Auto Rifle doubles the Weapon Energy gains": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Deconstruct": {
     "statModifiers": [],
@@ -1364,7 +1253,7 @@
     "clarityVerified": true,
     "notes": "Clarity"
   },
-  "Desperate Measures x3 | 30% increased damage for 7 \u21917.5 seconds. Additional Weapon": {
+  "Desperate Measures x3 | 30% increased damage for 7 ↑7.5 seconds. Additional Weapon": {
     "statModifiers": [],
     "activation": {
       "trigger": "Kill",
@@ -1379,7 +1268,7 @@
       "duration": ""
     },
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Destabilizing Rounds": {
     "statModifiers": [],
@@ -1396,21 +1285,21 @@
   "Detonator Beam": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
+      "trigger": "25 hits within window",
+      "ttaCategory": "Shot-Proc",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Clarity — Telesto exotic. Scoring 25 hits within a time window triggers an explosion (8m radius, up to 250 PvE damage). Damage perk; no weapon stat modifiers."
   },
   "Direct Damage kills cause targets explode on death": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Discord": {
     "statModifiers": [
@@ -1465,7 +1354,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Dragonfly": {
     "statModifiers": [],
@@ -1537,14 +1426,14 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Dynamic Heat Weapon": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Dynamic Sway Reduction": {
     "statModifiers": [
@@ -1559,24 +1448,19 @@
     "clarityVerified": true,
     "notes": "Clarity"
   },
-  "Dynamically scales up to +20 \u2191+? Range": {
+  "Dynamically scales up to +20 ↑+? Range": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Each stack of Explosive Pact grants +Stability": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": "7.5s"
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Eager Edge": {
     "statModifiers": [],
@@ -1617,7 +1501,7 @@
       }
     ],
     "activation": {
-      "trigger": "Always (passive \u2014 based on subclass)",
+      "trigger": "Always (passive — based on subclass)",
       "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": "Permanent"
@@ -1682,14 +1566,14 @@
   "Energy Transfer": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Melee hit/kill",
-      "ttaCategory": "Unknown",
+      "trigger": "Guarding (damage blocked)",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity"
+    "notes": "Clarity — Sword perk: damage taken while Guarding grants Class Ability Energy (~1.56% melee, ~1.5% non-melee, ~0.63% unblocked). No weapon stat modifiers."
   },
   "Enlightened Action": {
     "statModifiers": [
@@ -1766,31 +1650,26 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Event,\",Upon scoring an assist": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Explosive Bolts": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
+      "trigger": "Always",
+      "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Intrinsic bolt type — bolts explode on impact. Passive projectile behavior. Not in Clarity DB."
   },
   "Explosive Head": {
     "statModifiers": [],
@@ -1845,7 +1724,7 @@
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "+30 Handling + improved accuracy cone when player shields are low. State-based \u2014 activates once below ~50% shields."
+    "notes": "+30 Handling + improved accuracy cone when player shields are low. State-based — activates once below ~50% shields."
   },
   "Feeding Frenzy": {
     "statModifiers": [
@@ -1898,7 +1777,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Firefly": {
     "statModifiers": [
@@ -1940,7 +1819,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Firmly Planted": {
     "statModifiers": [
@@ -1984,26 +1863,21 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "For in-depth Damage Stacking info, check out Court's Modifier Database": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Foundry,\",Passively grants increased damage against Vehicles": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Fourth Time's The Charm": {
     "statModifiers": [],
@@ -2042,63 +1916,38 @@
   },
   "Frame of Reference x1 | 1.45% Increased Weapon Damage": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Frame of Reference x2 | 2.8% Increased Weapon Damage": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Frame of Reference x3 | 4.2% Increased Weapon Damage": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Frame of Reference x4 | 5.6% Increased Weapon Damage": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Frame of Reference x5 | 7% Increased Weapon Damage": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Frenzy": {
     "statModifiers": [
@@ -2168,65 +2017,54 @@
     "clarityVerified": true,
     "notes": "Clarity"
   },
-  "Grants +10 \u2191+? Range": {
+  "Grants +10 ↑+? Range": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants +20 Aim Assist": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "ADS / Aiming",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": "5s"
-    },
-    "activation2": null,
-    "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
-  },
-  "Grants +30 Mobility": {
-    "statModifiers": [
-      {
-        "statName": "Charge Rate",
-        "value": 20,
-        "isConditional": true
-      }
-    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
+  },
+  "Grants +30 Mobility": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Grants +40 Reload Speed": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants +5 Range": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants 10% Grenade": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants ?% Flinch Resist": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants Enhanced Radar": {
     "statModifiers": [],
@@ -2238,52 +2076,42 @@
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants a continuously increasing Stability": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Grants a stack of Onslaught": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants a stack of Recombination": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
-  "Grants up to +? \u219122? Range": {
+  "Grants up to +? ↑22? Range": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants up to 10% increased damage": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Grave Robber": {
     "statModifiers": [],
@@ -2312,14 +2140,14 @@
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Guard Resistance": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Gutshot Straight": {
     "statModifiers": [],
@@ -2333,7 +2161,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Harmony": {
     "statModifiers": [
@@ -2358,7 +2186,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Hatchling": {
     "statModifiers": [],
@@ -2439,7 +2267,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Heating Up": {
     "statModifiers": [
@@ -2469,28 +2297,28 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Heating Up x2 | +30 Stability": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Heavy Bolts": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Heavy Burst": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "High Ground": {
     "statModifiers": [],
@@ -2545,15 +2373,10 @@
   },
   "Identical to Telesto Bolts in behavior": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Immovable Object": {
     "statModifiers": [],
@@ -2574,21 +2397,21 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Imperial Allegiance x2 | 1.07x Cooling Multiplier": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Imperial Allegiance x3 | 1.105x Cooling Multiplier": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Impromptu Ammunition": {
     "statModifiers": [],
@@ -2643,29 +2466,18 @@
     "notes": "Clarity"
   },
   "Increases x2 Stat Bonuses to +44? Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 63,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Internally": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Invisible Hand": {
     "statModifiers": [],
@@ -2679,7 +2491,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Iron Gaze": {
     "statModifiers": [],
@@ -2848,7 +2660,7 @@
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Kinetic Tremors": {
     "statModifiers": [
@@ -2920,7 +2732,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Lightweight Frame": {
     "statModifiers": [],
@@ -2932,14 +2744,14 @@
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
-  "Linearly grants up to +30 \u2191+33 Handling": {
+  "Linearly grants up to +30 ↑+33 Handling": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Lone Wolf": {
     "statModifiers": [
@@ -3047,20 +2859,10 @@
   },
   "Melee Attacks": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Melee hit/kill",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
-    "activation2": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
+    "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Melee Momentum": {
     "statModifiers": [],
@@ -3081,15 +2883,10 @@
   },
   "Micro-missile aggressively tracks the closest enemy within 30 meters": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Moving Target": {
     "statModifiers": [
@@ -3112,7 +2909,7 @@
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "+10 Aim Assist + increased movement speed while ADS. State-based \u2014 always on when condition met."
+    "notes": "+10 Aim Assist + increased movement speed while ADS. State-based — always on when condition met."
   },
   "Multikill Clip": {
     "statModifiers": [],
@@ -3136,7 +2933,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "No Distractions": {
     "statModifiers": [
@@ -3161,7 +2958,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Offhand Strike": {
     "statModifiers": [
@@ -3183,15 +2980,10 @@
   },
   "On Grenade or Powered Melee Kill": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Melee hit/kill",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "One For All": {
     "statModifiers": [],
@@ -3207,27 +2999,17 @@
   },
   "One Quiet Moment x1 | +10 Handling": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "One Quiet Moment x2 | +20 Handling": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "One-Two Punch": {
     "statModifiers": [],
@@ -3359,17 +3141,11 @@
     "notes": "Clarity"
   },
   "Paracausal Fluid x2 | +? Handling": {
-    "statModifiers": [
-      {
-        "statName": "Charge Rate",
-        "value": 90,
-        "isConditional": false
-      }
-    ],
+    "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Perfect Float": {
     "statModifiers": [
@@ -3435,22 +3211,11 @@
     "notes": "Stacks x1/x2: +10/+20 Stability, +10/+20 Handling, +10/+20 Reload Speed. Note: values shown are x2 (max stack)."
   },
   "Perpetual Motion x1 | +10 Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 10,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Phase Magazine": {
     "statModifiers": [],
@@ -3476,7 +3241,7 @@
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Precision Frame": {
     "statModifiers": [],
@@ -3497,21 +3262,21 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Primary/Power Weapons: +25 +30 Range": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Projectile Attacks": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Proximity Power": {
     "statModifiers": [],
@@ -3599,7 +3364,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Rampage": {
     "statModifiers": [],
@@ -3626,19 +3391,19 @@
     "clarityVerified": true,
     "notes": "Clarity"
   },
-  "Rank-And-File = 16.7% \u219120% | Elites": {
+  "Rank-And-File = 16.7% ↑20% | Elites": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Rank-and-File": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Rapid Hit": {
     "statModifiers": [
@@ -3670,27 +3435,22 @@
   },
   "Rapid Hit grants Stability": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Rapid-Fire Frame": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
+      "trigger": "Always",
+      "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Intrinsic archetype — full-auto fires faster on sustained fire. Not in Clarity DB."
   },
   "Reaper's Tithe": {
     "statModifiers": [],
@@ -3716,7 +3476,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Recombination": {
     "statModifiers": [],
@@ -3766,14 +3526,14 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Refills Magazine": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Relentless Strikes": {
     "statModifiers": [],
@@ -3787,7 +3547,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Replenishing Aegis": {
     "statModifiers": [],
@@ -3895,15 +3655,10 @@
   },
   "Rockets attach on impact": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Rolling Storm": {
     "statModifiers": [],
@@ -3922,7 +3677,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Seraph Rounds": {
     "statModifiers": [],
@@ -3936,14 +3691,14 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Serrated Bolts": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Sharp Harvest": {
     "statModifiers": [],
@@ -4000,21 +3755,21 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Shots explode on hit": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Similarly": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Sleight of Hand": {
     "statModifiers": [
@@ -4040,58 +3795,25 @@
     "notes": "Clarity"
   },
   "Sleight of Hand x1 = +10 Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 10,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Sleight of Hand x2 = +20 Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 20,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Sleight of Hand x3 = +30 Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 30,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Slice": {
     "statModifiers": [],
@@ -4200,27 +3922,21 @@
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "-40 Draw Time (faster draw) + 20 Aim Assist while crouching. State-based \u2014 immediate on crouch."
+    "notes": "-40 Draw Time (faster draw) + 20 Aim Assist while crouching. State-based — immediate on crouch."
   },
   "Special Weapons receive halved benefits": {
-    "statModifiers": [
-      {
-        "statName": "Handling",
-        "value": 25,
-        "isConditional": false
-      }
-    ],
-    "activation": null,
-    "activation2": null,
-    "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
-  },
-  "Special Weapons: +13 \u2191+15 Range": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
+  },
+  "Special Weapons: +13 ↑+15 Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match — dataset description used"
   },
   "Spike Grenades": {
     "statModifiers": [],
@@ -4232,39 +3948,33 @@
   "Spread Shot": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
+      "trigger": "Always",
+      "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Shotgun spread pattern intrinsic — passive. Not in Clarity DB (differs from 'Spread Shot Package', which is a Cerberus+1 exotic trait)."
   },
   "Spring-Auger Bolts": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Dealing damage",
-      "ttaCategory": "Unknown",
+      "trigger": "Always",
+      "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Fusion rifle bolt type intrinsic — passive projectile behavior. Not in Clarity DB."
   },
   "Stacks up to -?% Accuracy Cone Size": {
-    "statModifiers": [
-      {
-        "statName": "Stability",
-        "value": 10,
-        "isConditional": true
-      }
-    ],
+    "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Stats for All": {
     "statModifiers": [
@@ -4322,7 +4032,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Sticky Grenades": {
     "statModifiers": [
@@ -4361,7 +4071,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Subsistence": {
     "statModifiers": [],
@@ -4392,7 +4102,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Surplus": {
     "statModifiers": [
@@ -4463,7 +4173,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Sword Logic": {
     "statModifiers": [],
@@ -4478,17 +4188,11 @@
     "notes": "Clarity"
   },
   "Swords are granted +100 Guard Resistance": {
-    "statModifiers": [
-      {
-        "statName": "Charge Rate",
-        "value": 100,
-        "isConditional": true
-      }
-    ],
+    "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "Sympathetic Arsenal": {
     "statModifiers": [
@@ -4543,7 +4247,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Tear": {
     "statModifiers": [],
@@ -4584,7 +4288,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Threat Detector": {
     "statModifiers": [
@@ -4614,19 +4318,19 @@
     "clarityVerified": true,
     "notes": "Clarity"
   },
-  "Threat Detector x1 | +15? \u219119? Stability": {
+  "Threat Detector x1 | +15? ↑19? Stability": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
-  "Threat Detector x2 | +40? \u2191+44? Stability": {
+  "Threat Detector x2 | +40? ↑+44? Stability": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Threat Remover": {
     "statModifiers": [
@@ -4843,14 +4547,14 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Upon breaking a Combatant": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Valiant Charge": {
     "statModifiers": [],
@@ -4893,14 +4597,14 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Weapon Energy & Shield": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "Well-Rounded": {
     "statModifiers": [
@@ -4971,220 +4675,130 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
-  "[Fusion Rifles] 10 \u2191+13 Stability": {
+  "[Fusion Rifles] 10 ↑+13 Stability": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "x1 = +10 Handling": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
-  "x1 = +10 \u2191+12? Range": {
+  "x1 = +10 ↑+12? Range": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "No Clarity match — dataset description used"
   },
   "x1 = +10? Handling": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "x1 = +? Stability": {
-    "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
-    "activation2": null,
-    "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
-  },
-  "x1 Ability Charges = +5 Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 10,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
-    "activation2": null,
-    "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
-  },
-  "x2 =  +20 \u2191+24? Range": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
+  },
+  "x1 Ability Charges = +5 Stability": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
+  },
+  "x2 =  +20 ↑+24? Range": {
+    "statModifiers": [],
+    "activation": null,
+    "activation2": null,
+    "clarityVerified": false,
+    "notes": "No Clarity match — dataset description used"
   },
   "x2 = +20 Handling": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "x2 = +20? Handling": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "x2 = +? Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 5,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "x2 Ability Charges = +15 Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 25,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "x3 = +45? Handling": {
     "statModifiers": [],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "x3 = +? Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 10,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "x3 Ability Charges = +25 Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 60,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "x4 = +? Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 25,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
   },
   "x5 = +20? Stability": {
-    "statModifiers": [
-      {
-        "statName": "Reload Speed",
-        "value": 30,
-        "isConditional": false
-      }
-    ],
-    "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Unknown",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
+    "statModifiers": [],
+    "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match \u2014 dataset description used"
+    "notes": "Dataset artifact — description fragment, not a standalone perk."
+  },
+  "Frame of Reference": {
+    "statModifiers": [],
+    "activation": {
+      "trigger": "Weapon kill",
+      "ttaCategory": "Kill-Proc",
+      "estTtaSeconds": "0",
+      "duration": "8s"
+    },
+    "activation2": null,
+    "clarityVerified": true,
+    "notes": "Clarity — Iron Banner origin trait. Weapon kills grant a stack (max 5, 8s each, paused while stowed). Damage per stack: 1.45%/2.8%/4.2%/5.6%/7%. Range and Reload Speed bonuses TBD (?). Damage buff tracked in buffs.json."
   }
 }
