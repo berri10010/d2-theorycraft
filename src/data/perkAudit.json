@@ -7,11 +7,17 @@
     "notes": "No Clarity match — dataset description used"
   },
   "+10 Range": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "+100 Handling": {
     "statModifiers": [],
@@ -25,7 +31,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "+100? Reload Speed": {
     "statModifiers": [],
@@ -35,18 +41,30 @@
     "notes": "No Clarity match — dataset description used"
   },
   "+11 Aim Assist": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Airborne Eff.",
+        "value": 32,
+        "isConditional": true
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "+15 Aim Assist": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "+15 Reload Speed": {
     "statModifiers": [],
@@ -56,11 +74,17 @@
     "notes": "No Clarity match — dataset description used"
   },
   "+20 Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 60,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "+20 ↑+25 Stability": {
     "statModifiers": [],
@@ -109,7 +133,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "+50 ↑+55? Reload Speed": {
     "statModifiers": [],
@@ -119,18 +143,30 @@
     "notes": "No Clarity match — dataset description used"
   },
   "+60 ↑+65 Guard Efficiency": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Guard stats",
+        "value": 60,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "+? Handling": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 20,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "+? Stability": {
     "statModifiers": [],
@@ -140,18 +176,30 @@
     "notes": "No Clarity match — dataset description used"
   },
   "-?% ↑-?% Accuracy Cone Size": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 1,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "0.75x ADS Duration Multiplier": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Airborne Eff.",
+        "value": 30,
+        "isConditional": true
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "10% ↑14% per hit": {
     "statModifiers": [],
@@ -168,11 +216,17 @@
     "notes": "No Clarity match — dataset description used"
   },
   "15% Increased damage": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "15% ↑20% Increased Damage against Vehicles (such as Cyclops": {
     "statModifiers": [],
@@ -210,11 +264,17 @@
     "notes": "No Clarity match — dataset description used"
   },
   "25% decreased damage": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": -15,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "3 Hits: Bow": {
     "statModifiers": [],
@@ -235,7 +295,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "8% Counter per Precision Hit: Auto Rifles": {
     "statModifiers": [],
@@ -247,20 +307,25 @@
   "Accelerated Heatsink": {
     "statModifiers": [
       {
-        "statName": "Charge Rate",
+        "statName": "Reload Speed",
         "value": 2,
         "isConditional": false
       }
     ],
     "activation": {
-      "trigger": "Always",
+      "trigger": "Reload",
       "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
-    "activation2": null,
+    "activation2": {
+      "trigger": "Always (passive)",
+      "ttaCategory": "Instant-Always",
+      "estTtaSeconds": "0",
+      "duration": ""
+    },
     "clarityVerified": false,
-    "notes": "Fusion Rifle barrel mod — passive +2 Charge Rate. Not in Clarity DB."
+    "notes": "No Clarity match — dataset description used"
   },
   "Adagio": {
     "statModifiers": [
@@ -746,14 +811,14 @@
   "Bolt Scavenger": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Crossbow Bolt pickup",
+      "trigger": "Reload",
       "ttaCategory": "Ammo-Proc",
       "estTtaSeconds": "0",
       "duration": "4s"
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity — Crossbow Bolt pickup grants ? Handling and ? Reload Speed for 4s. Additional bolt pickups extend by 3?s (max 15s). Exact stat values TBD."
+    "notes": "Clarity"
   },
   "Bolts": {
     "statModifiers": [],
@@ -763,11 +828,17 @@
     "notes": "No Clarity match — dataset description used"
   },
   "Bonuses are doubled to +10 ↑+11 Aim Assist": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Airborne Eff.",
+        "value": 32,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Bottomless Grief": {
     "statModifiers": [
@@ -951,14 +1022,14 @@
   "Charged Bolts": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Always",
-      "ttaCategory": "Instant-Always",
+      "trigger": "Dealing damage",
+      "ttaCategory": "State-Based",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Fusion rifle bolt type intrinsic — passive projectile behavior. Not in Clarity DB."
+    "notes": "No Clarity match — dataset description used"
   },
   "Chill Clip": {
     "statModifiers": [],
@@ -1285,14 +1356,14 @@
   "Detonator Beam": {
     "statModifiers": [],
     "activation": {
-      "trigger": "25 hits within window",
+      "trigger": "Dealing damage",
       "ttaCategory": "Shot-Proc",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity — Telesto exotic. Scoring 25 hits within a time window triggers an explosion (8m radius, up to 250 PvE damage). Damage perk; no weapon stat modifiers."
+    "notes": "Clarity"
   },
   "Direct Damage kills cause targets explode on death": {
     "statModifiers": [],
@@ -1460,7 +1531,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Eager Edge": {
     "statModifiers": [],
@@ -1566,14 +1637,14 @@
   "Energy Transfer": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Guarding (damage blocked)",
-      "ttaCategory": "State-Based",
+      "trigger": "Melee hit/kill",
+      "ttaCategory": "Melee-Proc",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": true,
-    "notes": "Clarity — Sword perk: damage taken while Guarding grants Class Ability Energy (~1.56% melee, ~1.5% non-melee, ~0.63% unblocked). No weapon stat modifiers."
+    "notes": "Clarity"
   },
   "Enlightened Action": {
     "statModifiers": [
@@ -1657,19 +1728,19 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Explosive Bolts": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Always",
+      "trigger": "Dealing damage",
       "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Intrinsic bolt type — bolts explode on impact. Passive projectile behavior. Not in Clarity DB."
+    "notes": "No Clarity match — dataset description used"
   },
   "Explosive Head": {
     "statModifiers": [],
@@ -1870,7 +1941,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Foundry,\",Passively grants increased damage against Vehicles": {
     "statModifiers": [],
@@ -1919,35 +1990,35 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Frame of Reference x2 | 2.8% Increased Weapon Damage": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Frame of Reference x3 | 4.2% Increased Weapon Damage": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Frame of Reference x4 | 5.6% Increased Weapon Damage": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Frame of Reference x5 | 7% Increased Weapon Damage": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Frenzy": {
     "statModifiers": [
@@ -2029,14 +2100,20 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants +30 Mobility": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Charge Rate",
+        "value": 20,
+        "isConditional": true
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants +40 Reload Speed": {
     "statModifiers": [],
@@ -2083,7 +2160,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Grants a stack of Onslaught": {
     "statModifiers": [],
@@ -2111,7 +2188,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Grave Robber": {
     "statModifiers": [],
@@ -2376,7 +2453,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Immovable Object": {
     "statModifiers": [],
@@ -2466,11 +2543,17 @@
     "notes": "Clarity"
   },
   "Increases x2 Stat Bonuses to +44? Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 63,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Internally": {
     "statModifiers": [],
@@ -2862,7 +2945,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Melee Momentum": {
     "statModifiers": [],
@@ -2886,7 +2969,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Moving Target": {
     "statModifiers": [
@@ -2983,7 +3066,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "One For All": {
     "statModifiers": [],
@@ -3002,14 +3085,14 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "One Quiet Moment x2 | +20 Handling": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "One-Two Punch": {
     "statModifiers": [],
@@ -3141,11 +3224,17 @@
     "notes": "Clarity"
   },
   "Paracausal Fluid x2 | +? Handling": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Charge Rate",
+        "value": 90,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Perfect Float": {
     "statModifiers": [
@@ -3211,11 +3300,17 @@
     "notes": "Stacks x1/x2: +10/+20 Stability, +10/+20 Handling, +10/+20 Reload Speed. Note: values shown are x2 (max stack)."
   },
   "Perpetual Motion x1 | +10 Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Phase Magazine": {
     "statModifiers": [],
@@ -3438,19 +3533,19 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Rapid-Fire Frame": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Always",
+      "trigger": "Reload",
       "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Intrinsic archetype — full-auto fires faster on sustained fire. Not in Clarity DB."
+    "notes": "No Clarity match — dataset description used"
   },
   "Reaper's Tithe": {
     "statModifiers": [],
@@ -3658,7 +3753,7 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Rolling Storm": {
     "statModifiers": [],
@@ -3795,25 +3890,43 @@
     "notes": "Clarity"
   },
   "Sleight of Hand x1 = +10 Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Sleight of Hand x2 = +20 Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 20,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Sleight of Hand x3 = +30 Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 30,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Slice": {
     "statModifiers": [],
@@ -3925,11 +4038,17 @@
     "notes": "-40 Draw Time (faster draw) + 20 Aim Assist while crouching. State-based — immediate on crouch."
   },
   "Special Weapons receive halved benefits": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Handling",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Special Weapons: +13 ↑+15 Range": {
     "statModifiers": [],
@@ -3948,33 +4067,39 @@
   "Spread Shot": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Always",
+      "trigger": "Dealing damage",
       "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Shotgun spread pattern intrinsic — passive. Not in Clarity DB (differs from 'Spread Shot Package', which is a Cerberus+1 exotic trait)."
+    "notes": "No Clarity match — dataset description used"
   },
   "Spring-Auger Bolts": {
     "statModifiers": [],
     "activation": {
-      "trigger": "Always",
+      "trigger": "Dealing damage",
       "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Fusion rifle bolt type intrinsic — passive projectile behavior. Not in Clarity DB."
+    "notes": "No Clarity match — dataset description used"
   },
   "Stacks up to -?% Accuracy Cone Size": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Stability",
+        "value": 10,
+        "isConditional": true
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Stats for All": {
     "statModifiers": [
@@ -4188,11 +4313,17 @@
     "notes": "Clarity"
   },
   "Swords are granted +100 Guard Resistance": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Charge Rate",
+        "value": 100,
+        "isConditional": true
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "Sympathetic Arsenal": {
     "statModifiers": [
@@ -4703,21 +4834,27 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x1 = +? Stability": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x1 Ability Charges = +5 Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x2 =  +20 ↑+24? Range": {
     "statModifiers": [],
@@ -4731,75 +4868,98 @@
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x2 = +20? Handling": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x2 = +? Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 5,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x2 Ability Charges = +15 Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x3 = +45? Handling": {
     "statModifiers": [],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x3 = +? Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 10,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x3 Ability Charges = +25 Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 60,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x4 = +? Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 25,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
+    "notes": "No Clarity match — dataset description used"
   },
   "x5 = +20? Stability": {
-    "statModifiers": [],
+    "statModifiers": [
+      {
+        "statName": "Reload Speed",
+        "value": 30,
+        "isConditional": false
+      }
+    ],
     "activation": null,
     "activation2": null,
     "clarityVerified": false,
-    "notes": "Dataset artifact — description fragment, not a standalone perk."
-  },
-  "Frame of Reference": {
-    "statModifiers": [],
-    "activation": {
-      "trigger": "Weapon kill",
-      "ttaCategory": "Kill-Proc",
-      "estTtaSeconds": "0",
-      "duration": "8s"
-    },
-    "activation2": null,
-    "clarityVerified": true,
-    "notes": "Clarity — Iron Banner origin trait. Weapon kills grant a stack (max 5, 8s each, paused while stowed). Damage per stack: 1.45%/2.8%/4.2%/5.6%/7%. Range and Reload Speed bonuses TBD (?). Damage buff tracked in buffs.json."
+    "notes": "No Clarity match — dataset description used"
   }
 }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
