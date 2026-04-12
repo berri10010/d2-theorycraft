@@ -11,8 +11,10 @@ const STAT_TRANSLATIONS: Record<string, { label: string; unit: string }> = {
   Reload:   { label: 'Time',    unit: 's' },
 };
 
-// Stats with bar visualisation + optional curve translation
-const BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance'];
+// Superset of all possible bar stats across weapon types.
+// Each weapon only shows the subset present in its baseStats so inapplicable
+// stats (e.g. Impact / Range for Rocket Launchers) are automatically hidden.
+const ALL_BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance'];
 
 // Stats shown as plain numbers (no meaningful 0-100 bar)
 const NUMERIC_STAT_KEYS = ['Zoom', 'Airborne Effectiveness', 'Inventory Size', 'Recoil Direction', 'Magazine'];
@@ -55,11 +57,15 @@ export const StatDisplay: React.FC = () => {
 
   const baseStats = activeWeapon.baseStats;
 
+  // Only show bar stats that this weapon type actually has — hides irrelevant
+  // stats like Impact/Range for Rocket Launchers or Stability/Reload for Swords.
+  const barStatKeys = ALL_BAR_STAT_KEYS.filter((k) => baseStats[k] !== undefined);
+
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       <h2 className="text-xl font-bold mb-4 text-white">Weapon Stats</h2>
       <div className="flex flex-col gap-4">
-        {BAR_STAT_KEYS.map((statName) => {
+        {barStatKeys.map((statName) => {
           const base    = baseStats[statName] ?? 0;
           const current = calcStats[statName] ?? base;
           const diff    = current - base;

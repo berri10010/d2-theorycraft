@@ -5,12 +5,16 @@ import Image from 'next/image';
 import { useCompareStore } from '../../store/useCompareStore';
 import { CompareSnapshot, StatCurveNode } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
+import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
 
 // ─── Stat keys shown in the comparison card ────────────────────────────────────
 // Mirrors the keys in StatDisplay so the Compare view has full parity.
-const BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance'];
+// ALL_BAR_STAT_KEYS is the superset; each card filters to stats present in the
+// weapon's baseStats so inapplicable stats (e.g. Impact on Rockets) are hidden.
+const ALL_BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance'];
 const NUMERIC_STAT_KEYS = ['Zoom', 'Airborne Effectiveness', 'Magazine', 'Recoil Direction'];
-const ALL_TRACKED_STAT_KEYS = [...BAR_STAT_KEYS, ...NUMERIC_STAT_KEYS];
+
+const PVP_GUARDIAN_HP = 230;
 
 // ─── Curve interpolation (mirrors TTKAndFalloffPanel logic) ───────────────────
 function interpolateCurve(curve: StatCurveNode[], statVal: number): number {
@@ -48,16 +52,30 @@ function SnapshotCard({
   snapshot,
   statMins,
   statMaxes,
+  sharedBarStatKeys,
+  enemyTier,
 }: {
   snapshot: CompareSnapshot;
   statMins: Record<string, number>;
   statMaxes: Record<string, number>;
+  sharedBarStatKeys: string[];
+  enemyTier: string;
 }) {
   const { removeSnapshot, renameSnapshot } = useCompareStore();
   const [editing, setEditing] = useState(false);
   const [labelValue, setLabel] = useState(snapshot.label);
 
   const handleRename = () => { renameSnapshot(snapshot.id, labelValue); setEditing(false); };
+
+  // ── Recalculate TTK dynamically based on the selected enemy tier ──────────
+  const multiplier = snapshot.multiplier ?? 1.0;
+  const liveTtk = useMemo(() => {
+    if (snapshot.mode === 'pvp') {
+      return calculateTTK('pvp', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, 0);
+    }
+    const enemyHealth = PVE_HEALTH_TIERS[enemyTier] ?? 336;
+    return calculateTTK('pve', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, enemyHealth);
+  }, [snapshot.weapon, snapshot.mode, multiplier, enemyTier]);
 
   // ── Derive falloff distances from snapshot data ───────────────────────────
   const rangeCurve = snapshot.weapon.statCurves?.['Range'];
@@ -79,7 +97,6 @@ function SnapshotCard({
     for (const column of snapshot.weapon.perkSockets) {
       const selectedHash = snapshot.selectedPerks[column.name];
       if (!selectedHash) continue;
-      // Find the perk (or its enhanced version) that matches the selected hash
       for (const perk of column.perks) {
         if (perk.hash === selectedHash) {
           result.push({ name: perk.name, icon: perk.icon, columnType: column.columnType });
@@ -175,7 +192,7 @@ function SnapshotCard({
         <div className="px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
           <span className="text-[10px] text-slate-500">TTK</span>
           <span className="font-mono text-sm font-bold text-amber-400">
-            {snapshot.ttk !== null ? `${snapshot.ttk.toFixed(2)}s` : '—'}
+            {liveTtk !== null ? `${liveTtk.ttk.toFixed(2)}s` : '—'}
           </span>
         </div>
         <div className="px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
@@ -192,39 +209,41 @@ function SnapshotCard({
         </div>
       </div>
 
-      {/* ── Bar stats (mirrors StatDisplay BAR_STAT_KEYS) ───────────────── */}
-      <div className="space-y-2">
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Stats</p>
-        {BAR_STAT_KEYS.map((statName) => {
-          const val    = snapshot.calculatedStats[statName] ?? 0;
-          const base   = snapshot.weapon.baseStats?.[statName] ?? val;
-          const min    = statMins[statName]  ?? val;
-          const max    = statMaxes[statName] ?? val;
-          const isBest = val > 0 && val === max && max !== min;
-          const delta  = val - min;
-          const diff   = val - base;
+      {/* ── Bar stats (weapon-specific: only stats present in baseStats) ─── */}
+      {sharedBarStatKeys.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Stats</p>
+          {sharedBarStatKeys.map((statName) => {
+            const val    = snapshot.calculatedStats[statName] ?? 0;
+            const base   = snapshot.weapon.baseStats?.[statName] ?? val;
+            const min    = statMins[statName]  ?? val;
+            const max    = statMaxes[statName] ?? val;
+            const isBest = val > 0 && val === max && max !== min;
+            const delta  = val - min;
+            const diff   = val - base;
 
-          return (
-            <div key={statName} className="flex items-center gap-2 text-xs">
-              <span className="text-slate-500 w-20 shrink-0">{statName}</span>
-              <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                <div
-                  className={['h-full rounded-full transition-all', isBest ? 'bg-green-500' : 'bg-amber-500/60'].join(' ')}
-                  style={{ width: `${Math.min(val, 100)}%` }}
-                />
-              </div>
-              <span className={['font-mono tabular-nums w-8 text-right', delta !== 0 ? deltaColorClass(delta) : 'text-slate-300'].join(' ')}>
-                {val}
-              </span>
-              {diff !== 0 && (
-                <span className={['text-[10px] tabular-nums w-7', diff > 0 ? 'text-green-400' : 'text-red-400'].join(' ')}>
-                  {diff > 0 ? '+' : ''}{diff}
+            return (
+              <div key={statName} className="flex items-center gap-2 text-xs">
+                <span className="text-slate-500 w-20 shrink-0">{statName}</span>
+                <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div
+                    className={['h-full rounded-full transition-all', isBest ? 'bg-green-500' : 'bg-amber-500/60'].join(' ')}
+                    style={{ width: `${Math.min(val, 100)}%` }}
+                  />
+                </div>
+                <span className={['font-mono tabular-nums w-8 text-right', delta !== 0 ? deltaColorClass(delta) : 'text-slate-300'].join(' ')}>
+                  {val}
                 </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                {diff !== 0 && (
+                  <span className={['text-[10px] tabular-nums w-7', diff > 0 ? 'text-green-400' : 'text-red-400'].join(' ')}>
+                    {diff > 0 ? '+' : ''}{diff}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* ── Numeric stats (mirrors StatDisplay NUMERIC_STAT_KEYS) ─────────── */}
       {NUMERIC_STAT_KEYS.some((k) => snapshot.calculatedStats[k] !== undefined || snapshot.weapon.baseStats?.[k] !== undefined) && (
@@ -287,16 +306,27 @@ function SnapshotCard({
 export const ComparisonGrid: React.FC = () => {
   const { snapshots, clearSnapshots } = useCompareStore();
 
-  // Min and max per stat across all snapshots — must be before early returns.
-  const { statMins, statMaxes } = useMemo(() => {
+  const pveTierKeys = Object.keys(PVE_HEALTH_TIERS);
+  const [enemyTier, setEnemyTier] = useState(pveTierKeys[0]);
+
+  // Whether any snapshot uses PvE mode (shows the enemy tier selector).
+  const hasPveSnapshot = snapshots.some((s) => s.mode === 'pve');
+
+  // Shared bar stat keys: intersection of ALL_BAR_STAT_KEYS with stats present
+  // in every snapshot's weapon baseStats — avoids comparing inapplicable stats.
+  const { statMins, statMaxes, sharedBarStatKeys } = useMemo(() => {
+    const shared = ALL_BAR_STAT_KEYS.filter((k) =>
+      snapshots.length === 0 || snapshots.every((s) => s.weapon.baseStats?.[k] !== undefined)
+    );
+    const tracked = [...shared, ...NUMERIC_STAT_KEYS];
     const mins: Record<string, number>  = {};
     const maxes: Record<string, number> = {};
-    ALL_TRACKED_STAT_KEYS.forEach((key) => {
+    tracked.forEach((key) => {
       const vals  = snapshots.map((s) => s.calculatedStats[key] ?? 0);
       mins[key]   = vals.length > 0 ? Math.min(...vals) : 0;
       maxes[key]  = vals.length > 0 ? Math.max(...vals) : 0;
     });
-    return { statMins: mins, statMaxes: maxes };
+    return { statMins: mins, statMaxes: maxes, sharedBarStatKeys: shared };
   }, [snapshots]);
 
   if (snapshots.length === 0) {
@@ -312,20 +342,39 @@ export const ComparisonGrid: React.FC = () => {
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-      <div className="flex justify-between items-center mb-5">
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-5">
         <h2 className="text-xl font-bold text-white">
           Comparison
           <span className="text-slate-500 text-base font-normal ml-2">
             ({snapshots.length} roll{snapshots.length !== 1 ? 's' : ''})
           </span>
         </h2>
-        <div className="flex items-center gap-3 text-[10px] text-slate-600">
-          <span title="Colors show each stat's delta above the lowest value across all snapshots">
-            Δ from min: <span className="text-green-300">■</span> +1–5 <span className="text-green-400">■</span> +6–15 <span className="text-green-400 font-bold">■</span> +16+ <span className="text-red-400">■</span> lower
-          </span>
-          <button onClick={clearSnapshots} className="text-red-400 hover:text-red-300 transition-colors text-xs">
-            Clear all
-          </button>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* PvE enemy tier selector — only when at least one PvE snapshot exists */}
+          {hasPveSnapshot && (
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-slate-500 shrink-0">TTK vs</span>
+              <select
+                value={enemyTier}
+                onChange={(e) => setEnemyTier(e.target.value)}
+                className="bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+              >
+                {pveTierKeys.map((tier) => (
+                  <option key={tier} value={tier}>{tier}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 text-[10px] text-slate-600">
+            <span title="Colors show each stat's delta above the lowest value across all snapshots">
+              Δ from min: <span className="text-green-300">■</span> +1–5 <span className="text-green-400">■</span> +6–15 <span className="text-green-400 font-bold">■</span> +16+ <span className="text-red-400">■</span> lower
+            </span>
+            <button onClick={clearSnapshots} className="text-red-400 hover:text-red-300 transition-colors text-xs">
+              Clear all
+            </button>
+          </div>
         </div>
       </div>
 
@@ -336,6 +385,8 @@ export const ComparisonGrid: React.FC = () => {
             snapshot={snapshot}
             statMins={statMins}
             statMaxes={statMaxes}
+            sharedBarStatKeys={sharedBarStatKeys}
+            enemyTier={enemyTier}
           />
         ))}
       </div>

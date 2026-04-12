@@ -83,10 +83,14 @@ export const TTKAndFalloffPanel: React.FC = () => {
   );
 
   const [enemyTier, setEnemyTier] = useState(PVE_TIERS_KEYS[0]);
+  const [championMod, setChampionMod] = useState<'none' | 'overload' | 'unstoppable' | 'barrier'>('none');
   const [hoverX, setHoverX] = useState<number | null>(null);
   const [showAds, setShowAds] = useState(true);
   const [showHip, setShowHip] = useState(true);
   const [expanded, setExpanded] = useState<'ttk' | 'falloff' | null>(null);
+
+  const isChampionTier = enemyTier === 'Champion';
+  const championModMissing = isChampionTier && championMod === 'none';
 
   // Close expanded chart on Escape
   const closeExpanded = useCallback(() => setExpanded(null), []);
@@ -112,9 +116,12 @@ export const TTKAndFalloffPanel: React.FC = () => {
   const pvpWeaponsBonus = Math.max(0, weaponsStat - 100) / 100 * 0.05;
 
   // ── TTK result ────────────────────────────────────────────────────────
-  const ttkResult = calculateTTK(
-    mode, activeWeapon, multiplier, PVP_GUARDIAN_HP, enemyHealth,
-  );
+  // Against Champions, a matching stagger mod (Overload / Unstoppable / Barrier)
+  // is required — without it the champion cannot be killed in a standard TTK
+  // pattern, so we suppress the result until a mod is selected.
+  const ttkResult = championModMissing
+    ? null
+    : calculateTTK(mode, activeWeapon, multiplier, PVP_GUARDIAN_HP, enemyHealth);
 
   // ── Falloff curve data ────────────────────────────────────────────────
   const rangeCurve = activeWeapon.statCurves?.['Range'];
@@ -140,12 +147,12 @@ export const TTKAndFalloffPanel: React.FC = () => {
 
   // ── TTK breakpoint curve ──────────────────────────────────────────────
   const ttkBreakpoints = useMemo(() => {
-    if (!hasFalloffData) return [];
+    if (!hasFalloffData || championModMissing) return [];
     return calculateTTKCurve(
       mode, activeWeapon, multiplier, PVP_GUARDIAN_HP, enemyHealth,
       hipFalloffStart!, maxDist, FALLOFF_FLOOR,
     );
-  }, [mode, activeWeapon, multiplier, hipFalloffStart, maxDist, enemyHealth, hasFalloffData]);
+  }, [mode, activeWeapon, multiplier, hipFalloffStart, maxDist, enemyHealth, hasFalloffData, championModMissing]);
 
   // ── Damage falloff curves ─────────────────────────────────────────────
   function buildDamageCurve(falloffStart: number, maxD: number, critVal: number, bodyVal: number) {
@@ -315,17 +322,55 @@ export const TTKAndFalloffPanel: React.FC = () => {
       )}
 
       {mode === 'pve' && (
-        <div>
-          <label className="text-sm text-slate-400 block mb-1">Enemy Type</label>
-          <select
-            value={enemyTier}
-            onChange={(e) => setEnemyTier(e.target.value)}
-            className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500"
-          >
-            {Object.entries(PVE_HEALTH_TIERS).map(([tier, hp]) => (
-              <option key={tier} value={tier}>{tier} ({hp} HP)</option>
-            ))}
-          </select>
+        <div className="space-y-3">
+          <div>
+            <label className="text-sm text-slate-400 block mb-1">Enemy Type</label>
+            <select
+              value={enemyTier}
+              onChange={(e) => { setEnemyTier(e.target.value); setChampionMod('none'); }}
+              className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500"
+            >
+              {Object.entries(PVE_HEALTH_TIERS).map(([tier, hp]) => (
+                <option key={tier} value={tier}>{tier} ({hp} HP)</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Champion mod selector — required when facing Champion-tier enemies */}
+          {isChampionTier && (
+            <div>
+              <label className="text-sm text-slate-400 block mb-1">
+                Champion Mod
+                <span className="ml-1.5 text-[10px] text-amber-500/80">required to stagger</span>
+              </label>
+              <div className="flex gap-1.5 flex-wrap">
+                {([
+                  { id: 'none',         label: 'None',          color: 'text-slate-500 border-white/10' },
+                  { id: 'overload',     label: 'Overload',      color: 'text-orange-400 border-orange-500/40' },
+                  { id: 'unstoppable',  label: 'Unstoppable',   color: 'text-red-400    border-red-500/40'    },
+                  { id: 'barrier',      label: 'Barrier',       color: 'text-blue-400   border-blue-500/40'   },
+                ] as const).map(({ id, label, color }) => (
+                  <button
+                    key={id}
+                    onClick={() => setChampionMod(id)}
+                    className={[
+                      'text-[11px] font-bold px-2.5 py-1 rounded border transition-colors',
+                      championMod === id
+                        ? `bg-white/10 ${color}`
+                        : 'bg-white/5 text-slate-600 border-white/10 hover:text-slate-300',
+                    ].join(' ')}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {championModMissing && (
+                <p className="mt-2 text-xs text-amber-500/80">
+                  Select a stagger mod to calculate effective TTK against this Champion.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -364,8 +409,14 @@ export const TTKAndFalloffPanel: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-black/40 p-4 rounded-lg border border-white/10 text-center text-slate-500 text-sm">
-          TTK calculation not available for this weapon type.
+        <div className="bg-black/40 p-4 rounded-lg border border-white/10 text-center text-sm">
+          {championModMissing ? (
+            <span className="text-amber-500/80">
+              Champion mod required — select Overload, Unstoppable, or Barrier above.
+            </span>
+          ) : (
+            <span className="text-slate-500">TTK calculation not available for this weapon type.</span>
+          )}
         </div>
       )}
 
@@ -654,7 +705,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
       {/* ── Fullscreen overlay ─────────────────────────────── */}
       {expanded !== null && (
         <div
-          className="fixed inset-0 z-50 bg-black/95 flex flex-col"
+          className="fixed inset-0 z-[9999] bg-black/95 flex flex-col"
           onClick={(e) => { if (e.target === e.currentTarget) closeExpanded(); }}
         >
           {/* Overlay header */}

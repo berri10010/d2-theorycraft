@@ -150,4 +150,6 @@ export interface CompareSnapshot {
   selectedPerks: Record<string, string>;
   ttk: number | null;
   mode: GameMode;
+  /** Combined damage multiplier (perks, buffs, mods, surge) at snapshot time. */
+  multiplier: number;
 }
