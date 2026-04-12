@@ -48,7 +48,7 @@ Fix the underlying data layer so the UI has accurate values to display.
 | Unknown TTA → 0 | ✅ Done |
 | Tier 4 (107 fully empty entries) — already empty, verify none are real perks needing data | ⬜ Pending |
 
-**Stage 1 progress: 85%**
+**Stage 1 progress: 100%**
 
 ---
 
@@ -63,10 +63,10 @@ Surface corrected perk data visually in the site's components.
 | EffectsPanel: colour-coded TTA badge pills (Kill-Proc=red, State-Based=teal, etc.) | ✅ Done |
 | EffectsPanel: badge shows `ttaCategory` + duration | ✅ Done |
 | Uncommitted changes in `ComparisonGrid.tsx`, `TTKAndFalloffPanel.tsx`, `RollEditor.tsx` — reviewed; already committed in prior sessions | ✅ Done |
-| Stat modifier display in EffectsPanel (show +X Handling etc. from perkAudit) | ⬜ Pending |
+| Stat modifier display in EffectsPanel (show +X Handling etc. from perkAudit) | ✅ Done |
 | Enhanced perk tooltip: show Clarity notes + source badge | ⬜ Pending |
 
-**Stage 2 progress: 60%**
+**Stage 2 progress: 80%**
 
 ---
 
@@ -83,11 +83,11 @@ A standalone, extensible TypeScript architecture for heterogeneous weapon stats.
 | `index.ts` — public API, pre-wired `combat` singleton, usage examples | ✅ Done |
 | TypeScript strict-mode: 0 compiler errors | ✅ Done |
 | Committed to repo (`weapon-system/`) | ✅ Done |
-| Write unit tests for each strategy and WeaponFactory validation paths | ⬜ Pending |
+| Write unit tests for each strategy and WeaponFactory validation paths | ✅ Done |
 | Integration: wire `weapon-system` damage output into the site's TTK calculator | ✅ Done |
 | Document extension pattern (adding weapon type #6 end-to-end example) | ✅ Done (in plan.md architecture section) |
 
-**Stage 3 progress: 85%**
+**Stage 3 progress: 100%**
 
 ---
 
@@ -99,10 +99,10 @@ Clear artifact entries and fix the 11 real perks that still have wrong data.
 | Clear activation on 44 artifact/description-fragment entries | ✅ Done |
 | Fix ttaCategory on 8 real perks (Unknown → correct category) | ✅ Done |
 | Verify Unknown TTA count = 0 | ✅ Done |
-| Add proper entry for `Accelerated Heatsink` (Tier 2 — only real perk in that tier) | ⬜ Pending |
-| Verify Tier 4 (107 fully empty entries) — confirm none are real perks needing data | ⬜ Pending |
+| Add proper entry for `Accelerated Heatsink` (Tier 2 — only real perk in that tier) | ✅ Done |
+| Verify Tier 4 (134 fully empty entries) — confirm none are real perks needing data | ✅ Done |
 
-**Stage 4 progress: 75%**
+**Stage 4 progress: 100%**
 
 ---
 
@@ -110,11 +110,11 @@ Clear artifact entries and fix the 11 real perks that still have wrong data.
 
 | Stage | Progress | Notes |
 |-------|----------|-------|
-| 1 — Data Pipeline | 85% | Accelerated Heatsink + Tier 4 verification remaining |
-| 2 — UI Enhancements | 60% | Component changes committed; stat pills + tooltip pending |
-| 3 — Weapon System Module | 85% | Unit tests are the only remaining item |
-| 4 — Perk Audit Cleanup | 75% | Accelerated Heatsink + Tier 4 verification remaining |
-| **Overall** | **~72%** | |
+| 1 — Data Pipeline | 100% | Complete |
+| 2 — UI Enhancements | 80% | Clarity notes tooltip still pending |
+| 3 — Weapon System Module | 100% | Complete |
+| 4 — Perk Audit Cleanup | 100% | Complete |
+| **Overall** | **~92%** | |
 
 ---
 
@@ -145,17 +145,9 @@ Clear artifact entries and fix the 11 real perks that still have wrong data.
 
 > These are ordered by priority. Claude should start from the top.
 
-1. **Push** (`git push`) so Vercel deploys the perkAudit fix and the new Damage Profile panel.
+1. **Push** (`git push`) — commit `7bb740c` is ready. Deploy delivers: Accelerated Heatsink fix, stat modifier pills in EffectsPanel, 35 weapon-system unit tests.
 
-2. **Accelerated Heatsink** — add a proper entry for this perk in `src/data/perkAudit.json` directly (look up Clarity DB or use known values: +30 Charge Rate, Instant-Always). It is the only real perk in the Tier 2 group.
-
-2. **Tier 4 verification** — run a quick check on the 107 fully-empty entries in `perkAudit.json` (entries where `statModifiers: []`, `activation: null`, `clarityVerified: false`). Confirm none are real perks that should have data. If any real perks are found, add entries for them.
-
-3. **Push** (`git push`) so Vercel picks up the perkAudit fix that was just committed.
-
-4. **Weapon system tests** — write tests for `WeaponFactory` validation (invalid stats throw `StatValidationError`) and each `DamageStrategy.compute()` (known input → known output). Save to `weapon-system/src/__tests__/`.
-
-5. **Stat modifier pills in EffectsPanel** — for conditional perks that have `statModifiers` in perkAudit, render small grey pills (e.g. `+100 Reload Speed`) alongside the TTA badge.
+2. **Enhanced perk tooltip** — show Clarity notes + source badge for perks that have a `clarityVerified: true` entry in perkAudit. The Clarity description is already rendered via `renderClarityDesc`; the remaining work is surfacing a "Verified" badge/icon in the perk card header when `perkAudit[name].clarityVerified === true`.
 
 ---
 
@@ -204,4 +196,4 @@ git push   # Vercel auto-deploys on push to main
 
 ---
 
-*Last updated: 2026-04-11 — Integrated weapon-system module into the site (committed `a798f32`). New "Damage Profile" panel in WeaponDataPanel dropdown for Rocket Launchers, Shotguns, Sniper Rifles, Swords, and Trace Rifles. Adapter maps D2 0-100 stat bars → weapon-system physical units; panel shows direct+splash breakdown, key stats, and scenario label reactive to active perks/buffs. TypeScript compiles clean (0 errors). Next: git push, then weapon-system unit tests.*
+*Last updated: 2026-04-11 — Committed `7bb740c`. Session completed: (1) Accelerated Heatsink fixed to +30 Charge Rate passive; (2) Tier 4 verified — all 134 empty entries are description fragments/frame types, none are real perks; (3) weapon-system unit tests: 35 tests (WeaponFactory + all 5 strategies), Jest + ts-jest wired, all passing; (4) EffectsPanel stat modifier pills: green/red pill badges below TTA badges for conditional perks, below column label for passive perks. TypeScript 0 errors. Stages 1, 3, 4 complete. Stage 2 at 80% — only Clarity verified-badge tooltip remaining. Next: git push, then Clarity verified badge.*
