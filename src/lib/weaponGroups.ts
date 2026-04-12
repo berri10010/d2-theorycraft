@@ -1,6 +1,6 @@
 import { Weapon, WeaponGroup } from '../types/weapon';
 
-/** Variant priority for default selection (index 0 = highest priority = loaded first) */
+/** Variant sort order within a group — base loads first so the header toggle starts on base. */
 const VARIANT_PRIORITY = ['Adept', 'Timelost', 'Harrowed', 'Brave'];
 
 function variantPriority(w: Weapon): number {
@@ -11,8 +11,26 @@ function variantPriority(w: Weapon): number {
 }
 
 /**
+ * Select the single Default Variant for a weapon group using a strict hierarchy:
+ *  1. Highest seasonNumber (null treated as 0) — never pick a lower season if a higher exists.
+ *  2. Base version (variantLabel === null) over specialised variants within that season.
+ *  3. Presence of an icon asset as a tie-breaker between otherwise identical candidates.
+ */
+function selectDefault(variants: Weapon[]): Weapon {
+  const maxSeason = Math.max(...variants.map(v => v.seasonNumber ?? 0));
+  let candidates = variants.filter(v => (v.seasonNumber ?? 0) === maxSeason);
+
+  const baseOnly = candidates.filter(v => v.variantLabel === null);
+  if (baseOnly.length > 0) candidates = baseOnly;
+
+  const withIcon = candidates.filter(v => !!v.icon);
+  return withIcon.length > 0 ? withIcon[0] : candidates[0];
+}
+
+/**
  * Group a flat weapon array into families sharing the same baseName.
- * Within each group, variants are sorted best-first (Adept > Timelost > Harrowed > base).
+ * Within each group, variants are sorted base-first for the header variant toggle.
+ * The `default` field is chosen by selectDefault (highest season → base → has icon).
  * Only groups with ≥1 member are returned.
  */
 export function groupWeapons(weapons: Weapon[]): WeaponGroup[] {
@@ -29,12 +47,11 @@ export function groupWeapons(weapons: Weapon[]): WeaponGroup[] {
 
   const groups: WeaponGroup[] = [];
   map.forEach((variants, baseName) => {
-    // Sort best variant first
     variants.sort((a: Weapon, b: Weapon) => variantPriority(a) - variantPriority(b));
     groups.push({
       baseName,
       variants,
-      default: variants[0],
+      default: selectDefault(variants),
     });
   });
 

@@ -157,6 +157,20 @@ Correctness and completeness pass on the TTK panel, Comparison tab, and weapon s
 
 ---
 
+### Stage 8 — Default Variant Selection
+
+Programmatic algorithm to pick the most relevant weapon variant as the group default.
+
+| Task | Status |
+|------|--------|
+| Implement `selectDefault()` in `weaponGroups.ts`: highest season → base variant → has icon | ✅ Done |
+| Wire into `groupWeapons()`: `default: selectDefault(variants)` replaces `default: variants[0]` | ✅ Done |
+| Verified zero constraint violations across all 408 multi-variant weapon groups | ✅ Done |
+
+**Stage 8 progress: 100%**
+
+---
+
 ## Overall Progress
 
 | Stage | Progress | Notes |
@@ -168,6 +182,7 @@ Correctness and completeness pass on the TTK panel, Comparison tab, and weapon s
 | 5 — Build & Deployment | 100% | Complete |
 | 6 — Homepage Enhancements | 100% | Complete |
 | 7 — TTK, Stats & Champion Mods | 100% | Complete |
+| 8 — Default Variant Selection | 100% | Complete |
 | **Overall** | **100%** | |
 
 ---
@@ -248,4 +263,4 @@ npm run build
 
 ---
 
-*Last updated: 2026-04-11 — Stage 7 complete. Full-screen graph overlay z-index fix (z-[9999]). Comparison Tab TTK now recalculates live per enemy tier using stored multiplier. Dynamic weapon stat bars filter by weapon baseStats (hides inapplicable stats per weapon type). Champion mod selector (Overload/Unstoppable/Barrier) gates TTK calculation when Champion enemy tier is selected.*
+*Last updated: 2026-04-11 — Stage 8 complete. `selectDefault()` in `weaponGroups.ts` picks the group default using a strict hierarchy: highest seasonNumber → base variant (variantLabel === null) → has icon. Replaces the old `variants[0]` approach which was season-agnostic. Zero violations across all 408 multi-variant groups.*
