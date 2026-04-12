@@ -1,11 +1,11 @@
 'use client';
 
-import React, { Suspense, useEffect, useState, useMemo, useRef } from 'react';
+import React, { Suspense, useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { BUNGIE_URL } from '../lib/bungieUrl';
 
-// ── Minimal weapon type for search ───────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 interface WeaponResult {
   hash: string;
@@ -13,6 +13,7 @@ interface WeaponResult {
   baseName: string;
   variantLabel: string | null;
   icon: string;
+  iconWatermark: string | null;
   damageType: string;
   ammoType: number;
   rarity: string | null;
@@ -26,6 +27,48 @@ interface WeaponGroupResult {
   /** Best variant first (base > Adept > Timelost > Harrowed) */
   default: WeaponResult;
   variants: WeaponResult[];
+}
+
+interface GodRollEntry {
+  weaponType: string;
+  season: string | null;
+  energy: string | null;
+  frame: string | null;
+  barrel: string[];
+  mag: string[];
+  perk1: string[];
+  perk2: string[];
+  originTrait: string | null;
+  notes: string | null;
+  rank: number | null;
+  tier: string | null;
+}
+
+// ── Event watermark → display label ──────────────────────────────────────────
+//
+// These watermarks belong to seasonal events (Dawning, FotL, Solstice) or
+// dedicated raid/expansion content whose watermarks are not tracked in the
+// DIM watermark-to-season map. We map them to human-readable labels so the
+// UI never displays a blank season field for these weapons.
+
+const EVENT_WATERMARKS: Record<string, string> = {
+  '50c3ebe414c6946429934d79504922fa': 'Dawning',
+  '83fbcacd223402c09af4b7ab067f8cce': 'Dawning',
+  '53dc0b02306726ff1517af33ac908cef': 'Festival of the Lost',
+  '9c091ec0e22c01dacc25efb63b46eb9b': 'Solstice',
+  'fe8bcc20fbfaf4cac69dfb640bb0b84e': 'Vow of the Disciple',
+};
+
+function eventLabelFor(iconWatermark: string | null): string | null {
+  if (!iconWatermark) return null;
+  const filename = iconWatermark.split('/').pop() ?? '';
+  const hash = filename.replace('.png', '');
+  return EVENT_WATERMARKS[hash] ?? null;
+}
+
+/** Returns the best available season label: seasonName → event label → null */
+function seasonLabel(w: WeaponResult): string | null {
+  return w.seasonName ?? eventLabelFor(w.iconWatermark);
 }
 
 // ── Variant priority (lower = shown first) ────────────────────────────────────
@@ -53,7 +96,6 @@ function groupWeapons(weapons: WeaponResult[]): WeaponGroupResult[] {
 }
 
 // ── Ranked search over groups ─────────────────────────────────────────────────
-// 0 = name starts with query (best), 1 = any word starts with, 2 = substring
 function rankGroup(g: WeaponGroupResult, q: string): number {
   const name = g.baseName.toLowerCase();
   if (name.startsWith(q)) return 0;
@@ -62,15 +104,14 @@ function rankGroup(g: WeaponGroupResult, q: string): number {
   return 999;
 }
 
-// ── Variant pill colours ──────────────────────────────────────────────────────
-const VARIANT_COLOURS: Record<string, string> = {
-  Adept:     'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/35',
-  Timelost:  'bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/35',
-  Harrowed:  'bg-rose-500/20 text-rose-300 border-rose-500/30 hover:bg-rose-500/35',
-  Brave:     'bg-sky-500/20 text-sky-300 border-sky-500/30 hover:bg-sky-500/35',
-};
-
 // ── Colour helpers ────────────────────────────────────────────────────────────
+
+const VARIANT_COLOURS: Record<string, string> = {
+  Adept:    'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/35',
+  Timelost: 'bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/35',
+  Harrowed: 'bg-rose-500/20 text-rose-300 border-rose-500/30 hover:bg-rose-500/35',
+  Brave:    'bg-sky-500/20 text-sky-300 border-sky-500/30 hover:bg-sky-500/35',
+};
 
 const DAMAGE_COLORS: Record<string, string> = {
   kinetic: 'text-slate-300',
@@ -88,9 +129,14 @@ const AMMO_COLORS: Record<number, string> = {
   3: 'text-yellow-400',
 };
 
-const RARITY_COLORS: Record<string, string> = {
-  Exotic:    'text-yellow-400',
-  Legendary: 'text-purple-400',
+const TIER_COLORS: Record<string, string> = {
+  S: 'bg-amber-400 text-slate-950',
+  A: 'bg-green-400 text-slate-950',
+  B: 'bg-blue-400 text-slate-950',
+  C: 'bg-slate-500 text-white',
+  D: 'bg-slate-600 text-slate-300',
+  E: 'bg-slate-700 text-slate-400',
+  F: 'bg-slate-800 text-slate-500',
 };
 
 // ── Feature cards ─────────────────────────────────────────────────────────────
@@ -150,41 +196,21 @@ function ShareLinkRedirector() {
 
 // ── Weapon search component ───────────────────────────────────────────────────
 
-function WeaponSearch() {
+interface WeaponSearchProps {
+  groups: WeaponGroupResult[];
+  loaded: boolean;
+  loadError: boolean;
+  onRetry: () => void;
+}
+
+function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps) {
   const router = useRouter();
-  const [query, setQuery]         = useState('');
-  const [groups, setGroups]       = useState<WeaponGroupResult[]>([]);
-  const [loaded, setLoaded]       = useState(false);
-  const [loadError, setLoadError] = useState(false);
-  const [open, setOpen]           = useState(false);
-  const [focused, setFocused]     = useState(-1);
-  const inputRef                  = useRef<HTMLInputElement>(null);
-  const listRef                   = useRef<HTMLUListElement>(null);
+  const [query, setQuery]     = useState('');
+  const [open, setOpen]       = useState(false);
+  const [focused, setFocused] = useState(-1);
+  const inputRef              = useRef<HTMLInputElement>(null);
+  const listRef               = useRef<HTMLUListElement>(null);
 
-  const loadWeapons = () => {
-    setLoadError(false);
-    setLoaded(false);
-    const fetchChunk = async (name: string) => {
-      const res = await fetch(name);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json() as Promise<WeaponResult[]>;
-    };
-    Promise.all([
-      fetchChunk('/data/weapons-0.json'),
-      fetchChunk('/data/weapons-1.json'),
-    ])
-      .then(([chunk0, chunk1]) => {
-        setGroups(groupWeapons([...chunk0, ...chunk1]));
-        setLoaded(true);
-      })
-      .catch(() => { setLoaded(true); setLoadError(true); });
-  };
-
-  // Fetch weapons once on mount, then group them
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { loadWeapons(); }, []);
-
-  // Ranked search: starts-with > word-starts-with > contains
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q || !loaded) return [];
@@ -254,7 +280,7 @@ function WeaponSearch() {
         <div className="mt-3 flex items-center justify-between gap-3 bg-red-950/40 border border-red-500/20 rounded-xl px-4 py-3">
           <p className="text-sm text-red-400">Couldn&apos;t load weapon data. The site may need to be redeployed.</p>
           <button
-            onClick={loadWeapons}
+            onClick={onRetry}
             className="shrink-0 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors border border-amber-500/30 hover:border-amber-400/50 px-3 py-1.5 rounded-lg"
           >
             Retry
@@ -270,8 +296,8 @@ function WeaponSearch() {
         >
           {results.map((group, i) => {
             const w = group.default;
-            // Non-default variants (Adept, Timelost, etc.)
             const altVariants = group.variants.filter(v => v.variantLabel);
+            const sl = seasonLabel(w);
 
             return (
               <li key={group.baseName}>
@@ -298,7 +324,6 @@ function WeaponSearch() {
                       <p className={`text-sm font-semibold truncate ${w.rarity === 'Exotic' ? 'text-yellow-400' : 'text-slate-100'}`}>
                         {group.baseName}
                       </p>
-                      {/* Variant pills */}
                       {altVariants.map(v => (
                         <button
                           key={v.hash}
@@ -319,10 +344,10 @@ function WeaponSearch() {
                       </span>
                       <span className="text-slate-700">·</span>
                       <span>{w.itemTypeDisplayName}</span>
-                      {w.seasonName && (
+                      {sl && (
                         <>
                           <span className="text-slate-700">·</span>
-                          <span>{w.seasonName}</span>
+                          <span>{sl}</span>
                         </>
                       )}
                     </p>
@@ -342,9 +367,173 @@ function WeaponSearch() {
   );
 }
 
+// ── Featured God Rolls ────────────────────────────────────────────────────────
+
+function FeaturedGodRolls({
+  groups,
+  godRolls,
+}: {
+  groups: WeaponGroupResult[];
+  godRolls: Record<string, GodRollEntry> | null;
+}) {
+  const router = useRouter();
+
+  const featured = useMemo(() => {
+    if (!godRolls || !groups.length) return [];
+
+    const byName = new Map(groups.map(g => [g.baseName.toLowerCase(), g]));
+
+    const sorted = (Object.entries(godRolls) as [string, GodRollEntry][])
+      .filter(([, r]) => r.season && parseInt(r.season) > 0)
+      .sort(([, a], [, b]) => (parseInt(b.season!) || 0) - (parseInt(a.season!) || 0));
+
+    const result: Array<{ name: string; group: WeaponGroupResult; roll: GodRollEntry }> = [];
+    for (const [name, roll] of sorted) {
+      if (result.length >= 6) break;
+      const group = byName.get(name.toLowerCase());
+      if (group) result.push({ name, group, roll });
+    }
+    return result;
+  }, [godRolls, groups]);
+
+  // Skeleton while data loads
+  if (godRolls === null) {
+    return (
+      <section className="relative z-10 px-6 pb-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <div className="h-5 w-44 bg-white/8 rounded animate-pulse mb-2" />
+              <div className="h-3.5 w-64 bg-white/5 rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 h-32 animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (featured.length === 0) return null;
+
+  return (
+    <section className="relative z-10 px-6 pb-10">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-base font-bold text-white">Featured God Rolls</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Latest weapon additions and their recommended perks</p>
+          </div>
+          <Link
+            href="/editor"
+            className="text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+          >
+            Browse all →
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {featured.map(({ name, group, roll }) => {
+            const w = group.default;
+            const sl = seasonLabel(w) ?? (roll.season ? `Season ${roll.season}` : null);
+            const perks = [...roll.perk1.slice(0, 1), ...roll.perk2.slice(0, 1)];
+
+            return (
+              <button
+                key={name}
+                onClick={() => router.push(`/editor?w=${w.hash}`)}
+                className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 hover:border-white/15 transition-colors text-left flex flex-col gap-3 group"
+              >
+                {/* Header: icon + name + tier */}
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-white/5 border border-white/10 shrink-0">
+                    <img src={BUNGIE_URL + w.icon} alt="" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={`font-bold text-sm leading-tight truncate ${w.rarity === 'Exotic' ? 'text-yellow-400' : 'text-slate-100'}`}>
+                        {name}
+                      </p>
+                      {roll.tier && TIER_COLORS[roll.tier] && (
+                        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded shrink-0 ${TIER_COLORS[roll.tier]}`}>
+                          {roll.tier}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-0.5 truncate">
+                      <span className={DAMAGE_COLORS[w.damageType] ?? 'text-slate-400'}>
+                        {w.damageType.charAt(0).toUpperCase() + w.damageType.slice(1)}
+                      </span>
+                      {' · '}
+                      {roll.weaponType}
+                      {sl && ` · ${sl}`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Perk pills */}
+                {perks.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {perks.map((p, idx) => (
+                      <span
+                        key={idx}
+                        className="text-[10px] bg-white/8 border border-white/10 rounded px-2 py-0.5 text-slate-300"
+                      >
+                        {p}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Action */}
+                <div className="flex justify-end mt-auto">
+                  <span className="text-[10px] font-semibold text-amber-400 group-hover:text-amber-300 transition-colors">
+                    View Roll →
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Landing page ──────────────────────────────────────────────────────────────
 
 export default function HomePage() {
+  const [weaponGroups, setWeaponGroups] = useState<WeaponGroupResult[]>([]);
+  const [weaponLoaded, setWeaponLoaded] = useState(false);
+  const [weaponError, setWeaponError]   = useState(false);
+  const [godRolls, setGodRolls]         = useState<Record<string, GodRollEntry> | null>(null);
+  const [featuresOpen, setFeaturesOpen] = useState(false);
+
+  const loadWeapons = useCallback(() => {
+    setWeaponError(false);
+    setWeaponLoaded(false);
+    const fetchChunk = async (name: string) => {
+      const res = await fetch(name);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json() as Promise<WeaponResult[]>;
+    };
+    Promise.all([fetchChunk('/data/weapons-0.json'), fetchChunk('/data/weapons-1.json')])
+      .then(([c0, c1]) => { setWeaponGroups(groupWeapons([...c0, ...c1])); setWeaponLoaded(true); })
+      .catch(() => { setWeaponLoaded(true); setWeaponError(true); });
+  }, []);
+
+  useEffect(() => { loadWeapons(); }, [loadWeapons]);
+
+  useEffect(() => {
+    fetch('/data/god-rolls.json')
+      .then(r => r.ok ? r.json() : null)
+      .then((data: Record<string, GodRollEntry> | null) => { if (data) setGodRolls(data); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen bg-black text-slate-200 font-sans flex flex-col overflow-x-hidden">
 
@@ -385,10 +574,12 @@ export default function HomePage() {
           Search for any weapon to get started.
         </p>
 
-        {/* Weapon search */}
-        <Suspense fallback={null}>
-          <WeaponSearch />
-        </Suspense>
+        <WeaponSearch
+          groups={weaponGroups}
+          loaded={weaponLoaded}
+          loadError={weaponError}
+          onRetry={loadWeapons}
+        />
 
         <p className="text-xs text-slate-700 mt-5">
           Or{' '}
@@ -398,21 +589,46 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Feature cards */}
+      {/* Featured God Rolls */}
+      <FeaturedGodRolls groups={weaponGroups} godRolls={godRolls} />
+
+      {/* Tools & Features (collapsible) */}
       <section className="relative z-10 px-6 pb-20">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/8 hover:border-white/15 transition-colors"
+        <div className="max-w-4xl mx-auto">
+          <button
+            onClick={() => setFeaturesOpen(o => !o)}
+            className="w-full flex items-center justify-between gap-3 py-3 border-t border-white/5 group"
+          >
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              Tools &amp; Features
+            </span>
+            <svg
+              viewBox="0 0 20 20" fill="currentColor"
+              className={[
+                'w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-all',
+                featuresOpen ? 'rotate-180' : '',
+              ].join(' ')}
             >
-              <div className="w-10 h-10 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4">
-                {f.icon}
-              </div>
-              <h3 className="font-bold text-white text-sm mb-2">{f.title}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">{f.desc}</p>
+              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+            </svg>
+          </button>
+
+          {featuresOpen && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-3 pb-6">
+              {FEATURES.map((f) => (
+                <div
+                  key={f.title}
+                  className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/8 hover:border-white/15 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-4">
+                    {f.icon}
+                  </div>
+                  <h3 className="font-bold text-white text-sm mb-2">{f.title}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">{f.desc}</p>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       </section>
 

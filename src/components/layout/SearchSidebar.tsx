@@ -92,11 +92,31 @@ function chipMode(mf: MultiFilter, val: string): 'none' | 'inc' | 'exc' {
 
 function countMF(mf: MultiFilter) { return mf.inc.length + mf.exc.length; }
 
+// Event watermark → display label (mirrors homepage logic)
+// These weapons have null seasonName because their watermarks are not in the
+// DIM watermark-to-season map. Show a human-readable event label instead.
+const EVENT_WATERMARKS: Record<string, string> = {
+  '50c3ebe414c6946429934d79504922fa': 'Dawning',
+  '83fbcacd223402c09af4b7ab067f8cce': 'Dawning',
+  '53dc0b02306726ff1517af33ac908cef': 'Festival of the Lost',
+  '9c091ec0e22c01dacc25efb63b46eb9b': 'Solstice',
+  'fe8bcc20fbfaf4cac69dfb640bb0b84e': 'Vow of the Disciple',
+};
+
+function eventLabelFor(iconWatermark: string | null): string | null {
+  if (!iconWatermark) return null;
+  const hash = (iconWatermark.split('/').pop() ?? '').replace('.png', '');
+  return EVENT_WATERMARKS[hash] ?? null;
+}
+
 function bestSeasonNumber(g: WeaponGroup): number {
   return Math.max(...g.variants.map(v => v.seasonNumber ?? -1));
 }
 function bestSeasonName(g: WeaponGroup): string | null {
-  return g.variants.map(v => v.seasonName).find(Boolean) ?? null;
+  const fromSeason = g.variants.map(v => v.seasonName).find(Boolean) ?? null;
+  if (fromSeason) return fromSeason;
+  const watermark = g.variants.find(v => v.iconWatermark)?.iconWatermark ?? null;
+  return eventLabelFor(watermark);
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
