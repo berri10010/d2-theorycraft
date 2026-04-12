@@ -101,6 +101,7 @@ Clear artifact entries and fix the 11 real perks that still have wrong data.
 | Verify Unknown TTA count = 0 | ✅ Done |
 | Add proper entry for `Accelerated Heatsink` (Tier 2 — only real perk in that tier) | ✅ Done |
 | Verify Tier 4 (134 fully empty entries) — confirm none are real perks needing data | ✅ Done |
+| Remove 134 fully-empty entries from perkAudit.json (415 → 281 entries) | ✅ Done |
 
 **Stage 4 progress: 100%**
 
@@ -196,4 +197,4 @@ git push   # Vercel auto-deploys on push to main
 
 ---
 
-*Last updated: 2026-04-11 — Committed `7bb740c`. Session completed: (1) Accelerated Heatsink fixed to +30 Charge Rate passive; (2) Tier 4 verified — all 134 empty entries are description fragments/frame types, none are real perks; (3) weapon-system unit tests: 35 tests (WeaponFactory + all 5 strategies), Jest + ts-jest wired, all passing; (4) EffectsPanel stat modifier pills: green/red pill badges below TTA badges for conditional perks, below column label for passive perks. TypeScript 0 errors. Stages 1, 3, 4 complete. Stage 2 at 80% — only Clarity verified-badge tooltip remaining. Next: git push, then Clarity verified badge.*
+*Last updated: 2026-04-11 — Committed `e6ece18`. Removed 134 fully-empty perkAudit entries (description fragments, stack labels, frame types auto-parsed from Clarity). perkAudit.json: 415 → 281 entries. TypeScript 0 errors. Prior commit `7bb740c`: Accelerated Heatsink fix, stat modifier pills, 35 weapon-system unit tests. Stages 1, 3, 4 complete. Stage 2 at 80% — only Clarity verified-badge tooltip remaining. Next: git push, then Clarity verified badge.*
