@@ -214,6 +214,35 @@ function StatDelta({ value }: { value: number }) {
   );
 }
 
+// ── StatModPills helper ───────────────────────────────────────────────────────
+/**
+ * Renders each stat modifier as a compact pill badge.
+ * Positive values are green-tinted; negative values are red-tinted.
+ * Zero-value modifiers are omitted.
+ */
+function StatModPills({ mods }: { mods: Array<{ statName: string; value: number; isConditional?: boolean }> }) {
+  const nonZero = mods.filter((m) => m.value !== 0);
+  if (nonZero.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-1 mt-1">
+      {nonZero.map((mod) => {
+        const positive = mod.value > 0;
+        const pillClass = positive
+          ? 'bg-green-500/10 text-green-400 border-green-500/25'
+          : 'bg-red-500/10 text-red-400 border-red-500/25';
+        return (
+          <span
+            key={mod.statName}
+            className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none ${pillClass}`}
+          >
+            {positive ? '+' : ''}{mod.value} {mod.statName}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 export const EffectsPanel: React.FC = () => {
   const { activeWeapon, selectedPerks, activeBuffs, activeEffects, clearPerk, toggleBuff, setEffectState } = useWeaponStore(
@@ -422,20 +451,13 @@ export const EffectsPanel: React.FC = () => {
                               </div>
                             );
                           })()}
+
+                          {/* Stat modifier pills — inline below TTA badges */}
+                          <StatModPills mods={statModifiers} />
                         </div>
 
-                        {/* Right side: stat deltas + control */}
+                        {/* Right side: toggle control */}
                         <div className="flex items-center gap-3 shrink-0">
-                          {statModifiers.length > 0 && (
-                            <div className="flex flex-wrap gap-x-2 gap-y-1 justify-end">
-                              {statModifiers.map((mod) => (
-                                <div key={mod.statName} className="flex items-center gap-1">
-                                  <span className="text-xs text-slate-500">{mod.statName}</span>
-                                  <StatDelta value={mod.value} />
-                                </div>
-                              ))}
-                            </div>
-                          )}
                           {/* Boolean perks: pill toggle.  Stackable perks: inline stack buttons. */}
                           {!isStackable && (
                             <EffectToggle
@@ -578,19 +600,9 @@ export const EffectsPanel: React.FC = () => {
                           })()}
                         </div>
                         <span className="text-xs text-slate-500 uppercase tracking-wide">{columnName}</span>
+                        {/* Stat modifier pills — passive perks show them below the column label */}
+                        <StatModPills mods={statModifiers} />
                       </div>
-
-                      {/* Stat deltas */}
-                      {statModifiers.length > 0 && (
-                        <div className="flex flex-wrap gap-x-2 gap-y-1 justify-end shrink-0">
-                          {statModifiers.map((mod) => (
-                            <div key={mod.statName} className="flex items-center gap-1">
-                              <span className="text-xs text-slate-500">{mod.statName}</span>
-                              <StatDelta value={mod.value} />
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
 
                     {/* Description priority:

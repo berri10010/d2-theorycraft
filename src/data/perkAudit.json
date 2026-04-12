@@ -307,25 +307,20 @@
   "Accelerated Heatsink": {
     "statModifiers": [
       {
-        "statName": "Reload Speed",
-        "value": 2,
+        "statName": "Charge Rate",
+        "value": 30,
         "isConditional": false
       }
     ],
     "activation": {
-      "trigger": "Reload",
-      "ttaCategory": "Instant-Always",
-      "estTtaSeconds": "0",
-      "duration": ""
-    },
-    "activation2": {
       "trigger": "Always (passive)",
       "ttaCategory": "Instant-Always",
       "estTtaSeconds": "0",
       "duration": ""
     },
+    "activation2": null,
     "clarityVerified": false,
-    "notes": "No Clarity match — dataset description used"
+    "notes": "Manual override — barrel attachment: +30 Charge Rate passive"
   },
   "Adagio": {
     "statModifiers": [
