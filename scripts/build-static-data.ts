@@ -95,6 +95,67 @@ async function fetchTable(relativePath: string) {
   return res.json();
 }
 
+// ── Screenshot URL validation ─────────────────────────────────────────────────
+//
+// Multiple weapon entries can share the same baseName, season, and variantLabel
+// (Bungie sometimes publishes several "versions" of the same weapon).  When
+// selectDefault() must break the tie it prefers the variant with a live
+// screenshot URL.  We HEAD-check only the small set of URLs that are actually
+// involved in such tie-breaks and null out any that return non-200, so the
+// client-side algorithm can rely on `screenshot !== null` as a reliable signal.
+
+async function validateTieBreakerScreenshots(weapons: Weapon[]): Promise<Weapon[]> {
+  // Identify screenshot URLs that are actual tie-breaking candidates.
+  const byBase = new Map<string, Weapon[]>();
+  for (const w of weapons) {
+    const list = byBase.get(w.baseName) ?? [];
+    list.push(w);
+    byBase.set(w.baseName, list);
+  }
+
+  const urlsToCheck = new Set<string>();
+  for (const variants of byBase.values()) {
+    const maxSeason = Math.max(...variants.map(v => v.seasonNumber ?? 0));
+    let candidates = variants.filter(v => (v.seasonNumber ?? 0) === maxSeason);
+    const baseOnly = candidates.filter(v => v.variantLabel === null);
+    if (baseOnly.length > 0) candidates = baseOnly;
+    if (candidates.length > 1) {
+      for (const w of candidates) {
+        if (w.screenshot) urlsToCheck.add(w.screenshot);
+      }
+    }
+  }
+
+  if (urlsToCheck.size === 0) return weapons;
+  console.log(`  Validating ${urlsToCheck.size} tie-breaker screenshot URLs...`);
+
+  // HEAD-check in batches of 20 with a 5-second timeout per request.
+  const broken = new Set<string>();
+  const urls = [...urlsToCheck];
+  const BATCH = 20;
+  for (let i = 0; i < urls.length; i += BATCH) {
+    await Promise.all(
+      urls.slice(i, i + BATCH).map(async (url) => {
+        try {
+          const res = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+          if (!res.ok) broken.add(url);
+        } catch {
+          broken.add(url);
+        }
+      })
+    );
+  }
+
+  if (broken.size > 0) {
+    console.log(`  ✓ Nulled ${broken.size} broken screenshot URL(s): ${[...broken].map(u => u.split('/').pop()).join(', ')}`);
+    return weapons.map(w =>
+      w.screenshot && broken.has(w.screenshot) ? { ...w, screenshot: null } : w
+    );
+  }
+  console.log(`  ✓ All ${urlsToCheck.size} screenshot URLs valid`);
+  return weapons;
+}
+
 // ── Strip perk descriptions ───────────────────────────────────────────────────
 //
 // perk.description (Bungie manifest text) is the largest text field per perk.
@@ -168,8 +229,11 @@ async function buildWeapons() {
   console.log(`  Watermark map: ${Object.keys(dimWatermarkMap).length} DIM + ${Object.keys(artifactWatermarkMap).length} artifact entries`);
 
   console.log('  Parsing weapons...');
-  const weapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs, combinedWatermarkMap);
-  console.log(`  Parsed ${weapons.length} weapons`);
+  const rawWeapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs, combinedWatermarkMap);
+  console.log(`  Parsed ${rawWeapons.length} weapons`);
+
+  // Null out 404 screenshot URLs for tie-breaking candidates before writing.
+  const weapons = await validateTieBreakerScreenshots(rawWeapons);
 
   // Strip perk descriptions and split into two chunks to stay under the
   // Cloudflare Pages 25 MiB per-file asset limit.

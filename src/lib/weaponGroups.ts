@@ -14,7 +14,8 @@ function variantPriority(w: Weapon): number {
  * Select the single Default Variant for a weapon group using a strict hierarchy:
  *  1. Highest seasonNumber (null treated as 0) — never pick a lower season if a higher exists.
  *  2. Base version (variantLabel === null) over specialised variants within that season.
- *  3. Presence of an icon asset as a tie-breaker between otherwise identical candidates.
+ *  3. Presence of a screenshot (banner image) — validated at build time; null means 404.
+ *  4. Presence of an icon asset as a final tie-breaker.
  */
 function selectDefault(variants: Weapon[]): Weapon {
   const maxSeason = Math.max(...variants.map(v => v.seasonNumber ?? 0));
@@ -22,6 +23,9 @@ function selectDefault(variants: Weapon[]): Weapon {
 
   const baseOnly = candidates.filter(v => v.variantLabel === null);
   if (baseOnly.length > 0) candidates = baseOnly;
+
+  const withScreenshot = candidates.filter(v => !!v.screenshot);
+  if (withScreenshot.length > 0) candidates = withScreenshot;
 
   const withIcon = candidates.filter(v => !!v.icon);
   return withIcon.length > 0 ? withIcon[0] : candidates[0];
