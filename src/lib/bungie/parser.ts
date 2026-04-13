@@ -386,23 +386,43 @@ export function parseWeapons(
           // currentlyCanRoll:false on the enhanced entries.  By collecting from both
           // sets up-front we ensure base+enhanced land in the same rawPerks array so
           // the within-socket dedup can pair them — preventing duplicate icon rows.
+          //
+          // Key distinction:
+          //   reusablePlugSetHash  — fixed / choosable options (e.g. barrel mods, exotic
+          //     Tang/Grip choices).  ALL items are valid choices regardless of
+          //     currentlyCanRoll, which Bungie sometimes sets false on non-default
+          //     alternatives (see e.g. Praxic Blade Tang/Grip sockets).
+          //   randomizedPlugSetHash — random-roll perk pool.  Only currentlyCanRoll:true
+          //     items are in the current pool; false = deprecated / removed from rotation.
           const plugHashSet = new Set<number>();
           const plugHashes: number[] = [];
 
-          for (const setHashKey of [
-            socket.reusablePlugSetHash?.toString(),
-            socket.randomizedPlugSetHash?.toString(),
-          ].filter((k): k is string => !!k)) {
-            const ps = plugSetDefs[setHashKey];
-            if (!ps) continue;
-            const rollable = ps.reusablePlugItems
-              .filter((p) => p.currentlyCanRoll)
-              .map((p) => p.plugItemHash);
-            const hashes = rollable.length > 0
-              ? rollable
-              : ps.reusablePlugItems.map((p) => p.plugItemHash);
-            for (const h of hashes) {
-              if (!plugHashSet.has(h)) { plugHashSet.add(h); plugHashes.push(h); }
+          // reusablePlugSetHash: include ALL items (choosable, not random-rolled)
+          if (socket.reusablePlugSetHash) {
+            const ps = plugSetDefs[socket.reusablePlugSetHash.toString()];
+            if (ps) {
+              for (const p of ps.reusablePlugItems) {
+                if (!plugHashSet.has(p.plugItemHash)) {
+                  plugHashSet.add(p.plugItemHash);
+                  plugHashes.push(p.plugItemHash);
+                }
+              }
+            }
+          }
+
+          // randomizedPlugSetHash: only include currently-rollable items
+          if (socket.randomizedPlugSetHash) {
+            const ps = plugSetDefs[socket.randomizedPlugSetHash.toString()];
+            if (ps) {
+              const rollable = ps.reusablePlugItems
+                .filter((p) => p.currentlyCanRoll)
+                .map((p) => p.plugItemHash);
+              const hashes = rollable.length > 0
+                ? rollable
+                : ps.reusablePlugItems.map((p) => p.plugItemHash);
+              for (const h of hashes) {
+                if (!plugHashSet.has(h)) { plugHashSet.add(h); plugHashes.push(h); }
+              }
             }
           }
           if (plugHashes.length === 0 && socket.reusablePlugItems?.length) {
