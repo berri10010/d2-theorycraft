@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { getArchetype } from '../../lib/archetypes';
@@ -702,8 +703,8 @@ export const TTKAndFalloffPanel: React.FC = () => {
         </div>
       )}
 
-      {/* ── Fullscreen overlay ─────────────────────────────── */}
-      {expanded !== null && (
+      {/* ── Fullscreen overlay — rendered via portal so no ancestor stacking context can clip it */}
+      {expanded !== null && createPortal(
         <div
           className="fixed inset-0 z-[9999] bg-black/95 flex flex-col"
           onClick={(e) => { if (e.target === e.currentTarget) closeExpanded(); }}
@@ -847,7 +848,8 @@ export const TTKAndFalloffPanel: React.FC = () => {
               <span className="text-amber-400/70 text-xs">ADS <span className="text-white font-mono">{adsFalloffStart.toFixed(1)}m</span></span>
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
