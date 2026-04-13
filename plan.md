@@ -166,6 +166,10 @@ Programmatic algorithm to pick the most relevant weapon variant as the group def
 | Implement `selectDefault()` in `weaponGroups.ts`: highest season → base variant → has icon | ✅ Done |
 | Wire into `groupWeapons()`: `default: selectDefault(variants)` replaces `default: variants[0]` | ✅ Done |
 | Verified zero constraint violations across all 408 multi-variant weapon groups | ✅ Done |
+| Bug fix: "A Good Shout" loaded variant without banner — root cause: Bungie CDN 404 on screenshot URL | ✅ Done |
+| Add `screenshot` as tier-3 tie-breaker in `selectDefault` (season → base → **screenshot** → icon) | ✅ Done |
+| Build pipeline: `validateTieBreakerScreenshots()` HEAD-checks ~200 tie-break URLs, nulls out 404s | ✅ Done |
+| Live data patch: `weapons-0.json` hash `649691506` screenshot set to null immediately | ✅ Done |
 
 **Stage 8 progress: 100%**
 
@@ -263,4 +267,4 @@ npm run build
 
 ---
 
-*Last updated: 2026-04-11 — Stage 8 complete. `selectDefault()` in `weaponGroups.ts` picks the group default using a strict hierarchy: highest seasonNumber → base variant (variantLabel === null) → has icon. Replaces the old `variants[0]` approach which was season-agnostic. Zero violations across all 408 multi-variant groups.*
+*Last updated: 2026-04-12 — Stage 8 complete + bug fix. "A Good Shout" was defaulting to a variant with a Bungie CDN 404 screenshot. Fixed by: (1) adding `screenshot` as tier-3 tie-breaker in `selectDefault` (season → base → screenshot → icon); (2) `validateTieBreakerScreenshots()` in build pipeline HEAD-checks the ~200 screenshot URLs involved in actual tie-breaks and nulls out 404s; (3) immediate live patch to `weapons-0.json`.*
