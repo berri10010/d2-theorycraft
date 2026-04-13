@@ -94,7 +94,7 @@ function countMF(mf: MultiFilter) { return mf.inc.length + mf.exc.length; }
 
 // Season numbers whose names are absent from the Bungie manifest.
 const UNLABELLED_SEASON_NAMES: Record<number, string> = {
-  1: 'The Red War (Season 1, Year 1)',
+  1: 'The Red War',
 };
 
 // Event watermark → display label (mirrors homepage logic)
