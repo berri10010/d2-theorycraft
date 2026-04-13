@@ -313,6 +313,14 @@ const TAB_TO_TYPE: Record<string, string> = {
 };
 
 async function buildGodRolls() {
+  // If god-rolls.json was committed to the repo (e.g. exported from the local
+  // Excel workbook), use it as-is and skip the Google Sheets fetch entirely.
+  if (fs.existsSync(outPath('god-rolls.json'))) {
+    const existing = JSON.parse(fs.readFileSync(outPath('god-rolls.json'), 'utf8'));
+    console.log(`\n[god-rolls] Using committed file (${Object.keys(existing).length} entries) — skipping Google Sheets fetch.`);
+    return;
+  }
+
   console.log('\n[god-rolls] Fetching Google Sheets tabs...');
   const base = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
   const db: Record<string, unknown> = {};
