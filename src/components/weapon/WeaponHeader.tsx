@@ -53,6 +53,11 @@ function cardBorderClass(
   return 'border-white/10';
 }
 
+// Season numbers whose names are absent from the Bungie manifest.
+const UNLABELLED_SEASON_NAMES: Record<number, string> = {
+  1: 'The Red War',
+};
+
 function d2Year(seasonNumber: number): number {
   if (seasonNumber <= 3) return 1;
   return Math.floor((seasonNumber - 4) / 4) + 2;
@@ -63,10 +68,11 @@ function formatSeasonLabel(
   seasonNumber: number | null,
 ): string | null {
   if (!seasonName && seasonNumber === null) return null;
+  const resolvedName = seasonName ?? (seasonNumber !== null ? (UNLABELLED_SEASON_NAMES[seasonNumber] ?? null) : null);
   const isEpisode = seasonNumber !== null && seasonNumber >= 24;
-  const displayName = isEpisode
-    ? `Episode: ${seasonName}`
-    : (seasonName ?? `Season ${seasonNumber}`);
+  const displayName = resolvedName
+    ? (isEpisode ? `Episode: ${resolvedName}` : resolvedName)
+    : `Season ${seasonNumber}`;
   const suffix: string[] = [];
   if (seasonNumber !== null) {
     suffix.push(`Season ${seasonNumber}`);

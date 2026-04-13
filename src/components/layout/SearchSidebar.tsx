@@ -92,6 +92,11 @@ function chipMode(mf: MultiFilter, val: string): 'none' | 'inc' | 'exc' {
 
 function countMF(mf: MultiFilter) { return mf.inc.length + mf.exc.length; }
 
+// Season numbers whose names are absent from the Bungie manifest.
+const UNLABELLED_SEASON_NAMES: Record<number, string> = {
+  1: 'The Red War (Season 1, Year 1)',
+};
+
 // Event watermark → display label (mirrors homepage logic)
 // These weapons have null seasonName because their watermarks are not in the
 // DIM watermark-to-season map. Show a human-readable event label instead.
@@ -116,7 +121,10 @@ function bestSeasonName(g: WeaponGroup): string | null {
   const fromSeason = g.variants.map(v => v.seasonName).find(Boolean) ?? null;
   if (fromSeason) return fromSeason;
   const watermark = g.variants.find(v => v.iconWatermark)?.iconWatermark ?? null;
-  return eventLabelFor(watermark);
+  const eventLabel = eventLabelFor(watermark);
+  if (eventLabel) return eventLabel;
+  const sn = bestSeasonNumber(g);
+  return UNLABELLED_SEASON_NAMES[sn] ?? null;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
