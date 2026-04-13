@@ -45,13 +45,16 @@ function RollRow({ label, options }: { label: string; options: string[] }) {
 export const GodRollPanel: React.FC = () => {
   const { activeWeapon } = useWeaponStore();
   const { data: godRollDb, loading } = useGodRolls();
+  const [collapsed, setCollapsed] = React.useState(false);
 
   if (!activeWeapon) return null;
 
   if (loading) {
     return (
       <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-        <h2 className="text-xl font-bold mb-4 text-white">God Roll</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white">God Roll</h2>
+        </div>
         <p className="text-slate-600 text-sm text-center py-6 animate-pulse">Loading community analysis…</p>
       </div>
     );
@@ -62,7 +65,9 @@ export const GodRollPanel: React.FC = () => {
   if (!entry) {
     return (
       <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-        <h2 className="text-xl font-bold mb-4 text-white">God Roll</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white">God Roll</h2>
+        </div>
         <p className="text-slate-600 text-sm text-center py-6">
           No community data found for <span className="text-slate-400">{activeWeapon.name}</span>.
         </p>
@@ -83,22 +88,36 @@ export const GodRollPanel: React.FC = () => {
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
+      <button
+        onClick={() => setCollapsed((v) => !v)}
+        className="flex items-center justify-between w-full text-left mb-0 group"
+        aria-expanded={!collapsed}
+      >
+        <div className={collapsed ? '' : 'mb-0'}>
           <h2 className="text-xl font-bold text-white">God Roll</h2>
-          <p className="text-xs text-slate-500 mt-0.5">{subtitleParts}</p>
+          {!collapsed && <p className="text-xs text-slate-500 mt-0.5">{subtitleParts}</p>}
         </div>
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex items-center gap-2">
           {tierCfg && (
             <span className={`text-sm font-black px-3 py-1 rounded-lg leading-none ${tierCfg.bg} ${tierCfg.text}`}>
               {tierCfg.label}
             </span>
           )}
-          {entry.frame && !/^\d+$/.test(entry.frame.trim()) && (
+          {!collapsed && entry.frame && !/^\d+$/.test(entry.frame.trim()) && (
             <span className="text-xs text-slate-500">{entry.frame}</span>
           )}
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className={`w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-transform duration-200 shrink-0 ${collapsed ? '-rotate-90' : ''}`}
+          >
+            <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.937a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+          </svg>
         </div>
-      </div>
+      </button>
+
+      {collapsed ? null : <div className="mt-4">
 
       {/* Roll recommendations */}
       {(() => {
@@ -152,6 +171,7 @@ export const GodRollPanel: React.FC = () => {
       <p className="text-[10px] text-slate-700 mt-4 text-right">
         Source: Destiny 2 Endgame Analysis · @theaegisrelic
       </p>
+    </div>}
     </div>
   );
 };
