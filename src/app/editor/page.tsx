@@ -211,21 +211,22 @@ function Dashboard() {
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         'md:static md:translate-x-0 md:z-auto md:transition-all md:duration-300',
         sidebarCollapsed ? 'md:w-0' : 'md:w-72',
-        'border-r border-white/10 shrink-0 overflow-hidden relative',
+        'border-r border-white/10 shrink-0 overflow-hidden',
       ].join(' ')}>
         <SearchSidebar />
-        {/* Desktop collapse toggle — sits on the right edge of the sidebar */}
-        <button
-          onClick={() => setSidebarCollapsed((v) => !v)}
-          aria-label={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
-          title={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
-          className="hidden md:flex absolute top-1/2 -translate-y-1/2 -right-3 z-10 w-6 h-12 items-center justify-center rounded-full bg-slate-800 border border-white/15 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors shadow-lg"
-        >
-          <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className={`w-3.5 h-3.5 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-0' : 'rotate-180'}`}>
-            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-        </button>
       </div>
+
+      {/* Desktop sidebar collapse toggle — lives outside the sidebar so it's always reachable */}
+      <button
+        onClick={() => setSidebarCollapsed((v) => !v)}
+        aria-label={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
+        title={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
+        className="hidden md:flex self-center shrink-0 items-center justify-center w-4 h-10 text-slate-600 hover:text-slate-300 transition-colors"
+      >
+        <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className={`w-3 h-3 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`}>
+          <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+      </button>
 
       <main
         id="main-content"
