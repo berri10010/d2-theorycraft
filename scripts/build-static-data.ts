@@ -56,6 +56,11 @@ function write(name: string, data: unknown) {
 // Cache location: .next/cache/ — Cloudflare Pages (and most CI platforms)
 // restore this directory from the build output cache before each build run,
 // so this file survives across deployments as long as the cache is warm.
+//
+// DATA_FORMAT_VERSION: bump this whenever parser logic changes in a way that
+// would produce different weapons-*.json output from the same manifest.
+// This forces a re-parse even when the Bungie manifest version is unchanged.
+const DATA_FORMAT_VERSION = '2';
 
 const NEXT_CACHE_DIR     = path.join(ROOT, '.next', 'cache');
 const MANIFEST_VER_CACHE = path.join(NEXT_CACHE_DIR, 'bungie-manifest-version');
@@ -70,7 +75,7 @@ function readCachedManifestVersion(): string | null {
 
 function writeCachedManifestVersion(version: string): void {
   fs.mkdirSync(NEXT_CACHE_DIR, { recursive: true });
-  fs.writeFileSync(MANIFEST_VER_CACHE, version, 'utf-8');
+  fs.writeFileSync(MANIFEST_VER_CACHE, `${DATA_FORMAT_VERSION}:${version}`, 'utf-8');
 }
 
 // ── Bungie API helpers ────────────────────────────────────────────────────────
@@ -193,14 +198,15 @@ async function buildWeapons() {
   console.log(`  Manifest version: ${version}`);
 
   // ── Cache check: skip the ~24 MB table download if version unchanged ──────
+  const cacheKey = `${DATA_FORMAT_VERSION}:${version}`;
   const cachedVersion = readCachedManifestVersion();
-  if (cachedVersion === version && fs.existsSync(outPath('weapons-0.json')) && fs.existsSync(outPath('weapons-1.json'))) {
+  if (cachedVersion === cacheKey && fs.existsSync(outPath('weapons-0.json')) && fs.existsSync(outPath('weapons-1.json'))) {
     console.log(`  ✓ Manifest unchanged since last build — skipping table download`);
     console.log(`    (delete .next/cache/bungie-manifest-version to force a refresh)`);
     return;
   }
-  if (cachedVersion && cachedVersion !== version) {
-    console.log(`  Manifest changed: ${cachedVersion} → ${version}`);
+  if (cachedVersion && cachedVersion !== cacheKey) {
+    console.log(`  Cache miss: ${cachedVersion} → ${cacheKey}`);
   }
   // ─────────────────────────────────────────────────────────────────────────
 
