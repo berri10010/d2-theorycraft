@@ -365,7 +365,52 @@ async function buildGodRolls() {
   write('god-rolls.json', db);
 }
 
-// ── Step 4: Perk descriptions (Destiny Data Compendium) ──────────────────────
+// ── Step 4: Back-fill seasonNumber from god-rolls for event weapons ───────────
+// Event weapons (Dawning, Solstice, FotL, etc.) have null seasonNumber in the
+// Bungie manifest because their watermarks are not in the DIM watermark map.
+// TheAegisRelic's god-rolls database records the correct season for these, so
+// we patch weapons-*.json after both files are written.
+
+async function patchEventWeaponSeasons() {
+  console.log('\n[patch-seasons] Back-filling null seasonNumbers from god-rolls...');
+
+  const grPath = outPath('god-rolls.json');
+  const w0Path = outPath('weapons-0.json');
+  const w1Path = outPath('weapons-1.json');
+
+  if (!fs.existsSync(grPath) || !fs.existsSync(w0Path) || !fs.existsSync(w1Path)) {
+    console.log('  Skipping — required files not present.');
+    return;
+  }
+
+  const godRolls = JSON.parse(fs.readFileSync(grPath, 'utf8')) as Record<string, { season?: string | null }>;
+
+  // name → season number from god-rolls
+  const grSeason = new Map<string, number>();
+  for (const [name, entry] of Object.entries(godRolls)) {
+    if (entry.season) {
+      const n = parseInt(entry.season, 10);
+      if (!isNaN(n) && n > 0) grSeason.set(name, n);
+    }
+  }
+
+  let patchCount = 0;
+  for (const file of ['weapons-0.json', 'weapons-1.json'] as const) {
+    const weapons = JSON.parse(fs.readFileSync(outPath(file), 'utf8')) as Array<{ name: string; seasonNumber: number | null }>;
+    let changed = false;
+    for (const w of weapons) {
+      if (w.seasonNumber === null) {
+        const s = grSeason.get(w.name);
+        if (s !== undefined) { w.seasonNumber = s; patchCount++; changed = true; }
+      }
+    }
+    if (changed) write(file, weapons);
+  }
+
+  console.log(`  Patched ${patchCount} weapon entries (${grSeason.size} god-roll seasons available).`);
+}
+
+// ── Step 5: Perk descriptions (Destiny Data Compendium) ──────────────────────
 
 async function buildPerkDescriptions() {
   console.log('\n[perk-descriptions] Fetching Destiny Data Compendium...');
@@ -418,10 +463,11 @@ async function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
   const steps = [
-    { name: 'weapons',           fn: buildWeapons },
-    { name: 'clarity',           fn: buildClarity },
-    { name: 'god-rolls',         fn: buildGodRolls },
-    { name: 'perk-descriptions', fn: buildPerkDescriptions },
+    { name: 'weapons',              fn: buildWeapons },
+    { name: 'clarity',              fn: buildClarity },
+    { name: 'god-rolls',            fn: buildGodRolls },
+    { name: 'patch-event-seasons',  fn: patchEventWeaponSeasons },
+    { name: 'perk-descriptions',    fn: buildPerkDescriptions },
   ];
 
   let failed = 0;
