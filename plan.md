@@ -175,6 +175,22 @@ Programmatic algorithm to pick the most relevant weapon variant as the group def
 
 ---
 
+### Stage 9 — God Roll Database Refresh (TheAegisRelic)
+
+Replace the 38-weapon stub `god-rolls.json` with TheAegisRelic's full weapon ranking database.
+
+| Task | Status |
+|------|--------|
+| Extract all 683 weapons from `Destiny 2_ Endgame Analysis.xlsx` (20 sheets: Autos, Bows, HCs, Pulses, Scouts, Sidearms, SMGs, BGLs, Fusions, Glaives, Shotguns, Snipers, Swords, Rocket Sidearms, Traces, HGLs, LFRs, LMGs, Rockets, Other) | ✅ Done |
+| Map multi-option perk fields (newline-delimited → string[]) | ✅ Done |
+| Align weapon type strings with `godRolls.ts` TAB_TO_TYPE (e.g. SMGs → 'Submachine Gun') | ✅ Done |
+| 0 non-standard tier values; 7 null rank/tier entries in 'Other' sheet (intentionally unranked) | ✅ Done |
+| Verified key weapons resolve correctly for Featured God Rolls (Praedyth's Revenge S/1, Perfect Paradox S/1, etc.) | ✅ Done |
+
+**Stage 9 progress: 100%**
+
+---
+
 ## Overall Progress
 
 | Stage | Progress | Notes |
@@ -187,6 +203,7 @@ Programmatic algorithm to pick the most relevant weapon variant as the group def
 | 6 — Homepage Enhancements | 100% | Complete |
 | 7 — TTK, Stats & Champion Mods | 100% | Complete |
 | 8 — Default Variant Selection | 100% | Complete |
+| 9 — God Roll Database Refresh | 100% | Complete |
 | **Overall** | **100%** | |
 
 ---
@@ -204,6 +221,10 @@ Programmatic algorithm to pick the most relevant weapon variant as the group def
 > These are ordered by priority. Claude should start from the top.
 
 *All planned work is complete. No outstanding actions.*
+
+---
+
+*Last updated: 2026-04-13 — Stage 9 complete. Replaced 38-weapon stub god-rolls.json with TheAegisRelic's full database: 683 weapons across 20 weapon type sheets, extracted from `Destiny 2_ Endgame Analysis.xlsx`. Multi-option perk fields (barrel/mag/perk1/perk2) stored as arrays. 75 S-tier entries, 0 schema errors.*
 
 ---
 
@@ -267,4 +288,4 @@ npm run build
 
 ---
 
-*Last updated: 2026-04-12 — Stage 8 complete + bug fix. "A Good Shout" was defaulting to a variant with a Bungie CDN 404 screenshot. Fixed by: (1) adding `screenshot` as tier-3 tie-breaker in `selectDefault` (season → base → screenshot → icon); (2) `validateTieBreakerScreenshots()` in build pipeline HEAD-checks the ~200 screenshot URLs involved in actual tie-breaks and nulls out 404s; (3) immediate live patch to `weapons-0.json`.*
+*Last updated: 2026-04-13 — Stage 9 complete. Replaced 38-weapon stub god-rolls.json with TheAegisRelic's full database (683 weapons, 20 weapon types, extracted from Destiny 2_ Endgame Analysis.xlsx).*
