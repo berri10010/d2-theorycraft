@@ -191,6 +191,23 @@ Replace the 38-weapon stub `god-rolls.json` with TheAegisRelic's full weapon ran
 
 ---
 
+### Stage 10 — Weapon List Polish
+
+Minor UX and display fixes to the weapon browser sidebar.
+
+| Task | Status |
+|------|--------|
+| GodRollPanel collapsible (header click) | ✅ Done |
+| Weapon list sidebar collapsible on desktop (chevron button, always accessible) | ✅ Done |
+| Graph overlay via React portal (covers full viewport incl. sidebar) | ✅ Done |
+| Back-fill `seasonNumber` for event weapons (Dawning, Solstice, FotL) from god-rolls data | ✅ Done |
+| Season 1 labelled "The Red War" in sidebar; full "The Red War (Season 1, Year 1)" in weapon detail | ✅ Done |
+| Ammo type colors: Primary → gray, Special → green, Heavy → purple | ✅ Done |
+
+**Stage 10 progress: 100%**
+
+---
+
 ## Overall Progress
 
 | Stage | Progress | Notes |
@@ -204,6 +221,7 @@ Replace the 38-weapon stub `god-rolls.json` with TheAegisRelic's full weapon ran
 | 7 — TTK, Stats & Champion Mods | 100% | Complete |
 | 8 — Default Variant Selection | 100% | Complete |
 | 9 — God Roll Database Refresh | 100% | Complete |
+| 10 — Weapon List Polish | 100% | Complete |
 | **Overall** | **100%** | |
 
 ---
@@ -288,4 +306,4 @@ npm run build
 
 ---
 
-*Last updated: 2026-04-13 — Stage 9 complete. Replaced 38-weapon stub god-rolls.json with TheAegisRelic's full database (683 weapons, 20 weapon types, extracted from Destiny 2_ Endgame Analysis.xlsx).*
+*Last updated: 2026-04-13 — Stage 10 complete. Weapon list polish: collapsible sidebar/god-roll panel, portal-based graph overlay, event weapon season back-fill, Season 1 "The Red War" label, ammo type color update (Primary gray, Special green, Heavy purple).*

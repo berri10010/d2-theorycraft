@@ -17,7 +17,7 @@ const DAMAGE_COLORS: Record<string, string> = {
 
 const AMMO_LABELS: Record<number, string> = { 1: 'Primary', 2: 'Special', 3: 'Heavy' };
 const AMMO_COLORS: Record<number, string> = {
-  1: 'text-green-400', 2: 'text-purple-400', 3: 'text-yellow-400',
+  1: 'text-slate-400', 2: 'text-green-400', 3: 'text-purple-400',
 };
 
 const DAMAGE_OPTIONS = ['kinetic', 'solar', 'arc', 'void', 'stasis', 'strand'];
