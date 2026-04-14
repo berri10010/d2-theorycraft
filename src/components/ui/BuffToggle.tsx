@@ -236,8 +236,8 @@ export const BuffToggle: React.FC = () => {
     }))
   );
 
-  const [empoweringOpen, setEmpoweringOpen] = useState(true);
-  const [debuffOpen,     setDebuffOpen]     = useState(true);
+  const [empoweringOpen, setEmpoweringOpen] = useState(false);
+  const [debuffOpen,     setDebuffOpen]     = useState(false);
 
   const activeSet   = useMemo(() => new Set(activeBuffs), [activeBuffs]);
   const activeCount = activeBuffs.length;
