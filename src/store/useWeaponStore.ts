@@ -269,6 +269,22 @@ interface WeaponState {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+/**
+ * Pre-select every single-option perk column so their stat modifiers are
+ * always active in calculations without any user interaction required.
+ * Fixed-slot perks (barrel, mag, exotic intrinsics with only one choice)
+ * are not real user choices — they should be auto-applied on load.
+ */
+function autoSelectFixedPerks(weapon: Weapon): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const col of weapon.perkSockets) {
+    if (col.perks.length === 1) {
+      result[col.name] = col.perks[0].hash;
+    }
+  }
+  return result;
+}
+
 function captureRoll(state: WeaponState): WeaponRoll {
   return {
     selectedPerks:  state.selectedPerks,
@@ -280,10 +296,18 @@ function captureRoll(state: WeaponState): WeaponRoll {
   };
 }
 
-/** Returns true if the roll is the same as factory defaults — no need to cache it. */
-function isDefaultRoll(roll: WeaponRoll): boolean {
+/**
+ * Returns true if the roll has no meaningful user customisation.
+ * Auto-selected fixed-column perks don't count — they're always present
+ * by default and would otherwise prevent the cache-skip optimisation.
+ */
+function isDefaultRoll(roll: WeaponRoll, weapon: Weapon): boolean {
+  const fixedKeys = new Set(
+    weapon.perkSockets.filter((c) => c.perks.length === 1).map((c) => c.name),
+  );
+  const userSelectedKeys = Object.keys(roll.selectedPerks).filter((k) => !fixedKeys.has(k));
   return (
-    Object.keys(roll.selectedPerks).length === 0 &&
+    userSelectedKeys.length === 0 &&
     roll.masterworkStat === null &&
     !roll.isCrafted &&
     roll.activeModId === 'none' &&
@@ -325,13 +349,16 @@ export const useWeaponStore = create<WeaponState>()(
         let weaponRolls = state.weaponRolls;
         if (state.activeWeapon && state.activeWeapon.hash !== weapon.hash) {
           const roll = captureRoll(state);
-          if (!isDefaultRoll(roll)) {
+          if (!isDefaultRoll(roll, state.activeWeapon)) {
             weaponRolls = { ...weaponRolls, [state.activeWeapon.hash]: roll };
           }
         }
 
-        // Restore saved roll for the new weapon (or use defaults)
-        const saved  = weaponRolls[weapon.hash];
+        // Restore saved roll for the new weapon (or use defaults).
+        // Always seed with auto-selected fixed perks first so single-option
+        // columns are always active — saved user choices overlay on top.
+        const saved      = weaponRolls[weapon.hash];
+        const fixedPerks = autoSelectFixedPerks(weapon);
         const newMod = saved
           ? (WEAPON_MODS.find((m) => m.id === saved.activeModId) ?? WEAPON_MODS[0])
           : WEAPON_MODS[0];
@@ -341,7 +368,7 @@ export const useWeaponStore = create<WeaponState>()(
           activeWeaponHash: weapon.hash,
           variantGroup:     group ?? [weapon],
           weaponRolls,
-          selectedPerks:    saved?.selectedPerks  ?? {},
+          selectedPerks:    saved ? { ...fixedPerks, ...saved.selectedPerks } : fixedPerks,
           masterworkStat:   saved?.masterworkStat ?? null,
           isCrafted:        saved?.isCrafted      ?? false,
           activeMod:        newMod,
@@ -359,7 +386,7 @@ export const useWeaponStore = create<WeaponState>()(
         if (!activeWeapon) return;
         const { [activeWeapon.hash]: _removed, ...remainingRolls } = weaponRolls;
         set({
-          selectedPerks:  {},
+          selectedPerks:  autoSelectFixedPerks(activeWeapon),
           masterworkStat: null,
           isCrafted:      false,
           activeMod:      WEAPON_MODS[0],
