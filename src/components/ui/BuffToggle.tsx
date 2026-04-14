@@ -1,16 +1,11 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import Image from 'next/image';
+import React, { useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE, DamageBuff, getBuffMultiplier } from '../../lib/buffDatabase';
-import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 
 // Pre-computed buff lists — static since BUFF_DATABASE is module-level.
-// Weapon-perk buffs (category: 'weapon_perk') are now handled exclusively by
-// the Effects Tab in EffectsPanel — they are intentionally excluded here to
-// prevent duplication and confusion.
 const _allBuffs        = Object.values(BUFF_DATABASE);
 const _empoweringBuffs = _allBuffs.filter((b) => b.stackType === 'empowering');
 const _debuffBuffs     = _allBuffs.filter((b) => b.stackType === 'debuff');
@@ -24,29 +19,6 @@ function multStr(multiplier: number): string {
   return `×${multiplier.toFixed(2)}`;
 }
 
-// ─── Icon ─────────────────────────────────────────────────────────────────────
-
-function BuffIcon({ buff }: { buff: DamageBuff }) {
-  const iconPath = buff.icon ?? null;
-
-  if (!iconPath) {
-    const dotClass =
-      buff.stackType === 'empowering'
-        ? 'bg-amber-400/20 border-amber-400/40'
-        : 'bg-red-400/20 border-red-400/40';
-    return (
-      <span className={`shrink-0 w-6 h-6 rounded border flex items-center justify-center ${dotClass}`} />
-    );
-  }
-
-  const src = iconPath.startsWith('http') ? iconPath : BUNGIE_ROOT + iconPath;
-  return (
-    <div className="shrink-0 w-6 h-6 rounded overflow-hidden bg-white/5 border border-white/10">
-      <Image src={src} alt="" width={24} height={24} className="w-full h-full object-cover" unoptimized />
-    </div>
-  );
-}
-
 // ─── Stack selector ───────────────────────────────────────────────────────────
 
 interface StackSelectorProps {
@@ -58,7 +30,7 @@ interface StackSelectorProps {
 function StackSelector({ buff, activeStackIndex, onSelect }: StackSelectorProps) {
   if (!buff.stacks?.length) return null;
   return (
-    <div className="flex items-center gap-1 mt-1.5 ml-8 flex-wrap">
+    <div className="flex items-center gap-1 mt-1.5 ml-4 flex-wrap">
       {buff.stacks.map((stack, idx) => (
         <button
           key={stack.count}
@@ -95,14 +67,12 @@ function BuffRow({
   buff, isActive, isOverridden,
   activeStackIndex, onToggle, onSelectStack,
 }: BuffRowProps) {
-  const isDebuff = buff.stackType === 'debuff';
+  const isDebuff    = buff.stackType === 'debuff';
+  const activeColor = isDebuff ? 'red' : 'amber';
 
-  // Effective multiplier at the current stack level
   const effectiveMult = isActive
     ? getBuffMultiplier(buff, buff.stacks?.length ? activeStackIndex : undefined)
     : buff.multiplier;
-
-  const activeColor = isDebuff ? 'red' : 'amber';
 
   const buttonClass = [
     'flex items-start gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 border text-left w-full',
@@ -116,19 +86,17 @@ function BuffRow({
   return (
     <div>
       <button onClick={onToggle} title={buff.description} className={buttonClass}>
-        {/* Icon */}
-        <BuffIcon buff={buff} />
+        {/* Active dot */}
+        <span className={[
+          'shrink-0 w-1.5 h-1.5 rounded-full mt-1.5',
+          isActive
+            ? activeColor === 'red' ? 'bg-red-400' : 'bg-amber-400'
+            : 'bg-white/15',
+        ].join(' ')} />
 
-        {/* Name + subtitle */}
+        {/* Name + description */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            {/* Active dot */}
-            <span className={[
-              'shrink-0 w-1.5 h-1.5 rounded-full',
-              isActive
-                ? activeColor === 'red' ? 'bg-red-400' : 'bg-amber-400'
-                : 'bg-white/15',
-            ].join(' ')} />
             <span className="text-xs font-semibold truncate">{buff.name}</span>
             {isActive && isOverridden && (
               <span className="shrink-0 text-[8px] text-slate-500 bg-slate-900 px-1 py-0.5 rounded border border-slate-700 leading-none">
@@ -152,41 +120,67 @@ function BuffRow({
         </span>
       </button>
 
-      {/* Stack selector — shown only when active and buff has stacks */}
       {isActive && buff.stacks?.length ? (
-        <StackSelector
-          buff={buff}
-          activeStackIndex={activeStackIndex}
-          onSelect={onSelectStack}
-        />
+        <StackSelector buff={buff} activeStackIndex={activeStackIndex} onSelect={onSelectStack} />
       ) : null}
     </div>
   );
 }
 
-// ─── Section heading ──────────────────────────────────────────────────────────
+// ─── Collapsible section ──────────────────────────────────────────────────────
 
-function SectionLabel({ label, count, note }: { label: string; count?: number; note?: string }) {
+interface CollapsibleSectionProps {
+  label: string;
+  note?: string;
+  activeCount: number;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}
+
+function CollapsibleSection({ label, note, activeCount, open, onToggle, children }: CollapsibleSectionProps) {
   return (
-    <div className="flex items-center gap-2 mb-2">
-      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</span>
-      {count !== undefined && count > 0 && (
-        <span className="text-[9px] font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full leading-none">
-          {count}
-        </span>
-      )}
-      <div className="flex-1 h-px bg-white/5" />
-      {note && (
-        <span className="text-[9px] text-slate-600 italic shrink-0">{note}</span>
+    <div>
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center gap-2 mb-2 group"
+      >
+        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</span>
+        {activeCount > 0 && (
+          <span className="text-[9px] font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full leading-none">
+            {activeCount}
+          </span>
+        )}
+        <div className="flex-1 h-px bg-white/5" />
+        {note && !open && (
+          <span className="text-[9px] text-slate-600 italic shrink-0">{note}</span>
+        )}
+        {/* Chevron */}
+        <svg
+          className={[
+            'shrink-0 w-3 h-3 text-slate-600 transition-transform duration-200 group-hover:text-slate-400',
+            open ? 'rotate-180' : '',
+          ].join(' ')}
+          viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"
+        >
+          <path d="M2 4l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      {open && (
+        <>
+          {note && (
+            <p className="text-[9px] text-slate-600 italic mb-2">{note}</p>
+          )}
+          <div className="space-y-1.5">{children}</div>
+        </>
       )}
     </div>
   );
 }
 
-// ─── Combined multiplier breakdown ───────────────────────────────────────────
+// ─── External multiplier breakdown ───────────────────────────────────────────
 
-// External-buff-only breakdown (empowering + debuff from activeBuffs).
-// Weapon-perk multiplicatives are shown in the Effects Tab, not here.
 function ExternalMultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] }) {
   const { empoweringMult, debuffMult, total } = useMemo(() => {
     let empoweringMult = 1;
@@ -231,22 +225,19 @@ function ExternalMultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] })
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-//
-// This panel handles only external (non-weapon-perk) buffs:
-//   • Empowering:  Radiant, Well of Radiance, Empowering Rift, etc.
-//   • Debuffs:     Weaken, Shadowshot Tether, Divinity, etc.
-//
-// Weapon-perk damage buffs (Kill Clip, Rampage, …) are now managed exclusively
-// in the Effects Tab (EffectsPanel) to avoid duplication.
 
 export const BuffToggle: React.FC = () => {
-  const { activeBuffs, toggleBuff, buffStacks } = useWeaponStore(
+  const { activeBuffs, toggleBuff, buffStacks, setBuffStack } = useWeaponStore(
     useShallow((s) => ({
       activeBuffs:  s.activeBuffs,
       toggleBuff:   s.toggleBuff,
       buffStacks:   s.buffStacks,
+      setBuffStack: s.setBuffStack,
     }))
   );
+
+  const [empoweringOpen, setEmpoweringOpen] = useState(true);
+  const [debuffOpen,     setDebuffOpen]     = useState(true);
 
   const activeSet   = useMemo(() => new Set(activeBuffs), [activeBuffs]);
   const activeCount = activeBuffs.length;
@@ -283,62 +274,60 @@ export const BuffToggle: React.FC = () => {
         )}
       </div>
 
-      {/* External multiplier breakdown */}
       <ExternalMultiplierBreakdown activeBuffs={activeBuffs} />
 
       <div className="space-y-5">
 
-        {/* ── Empowering buffs ── */}
-        <div>
-          <SectionLabel
-            label="Empowering"
-            count={_empoweringBuffs.filter((b) => activeSet.has(b.hash)).length}
-            note="only highest applies"
-          />
-          <div className="space-y-1.5">
-            {_empoweringBuffs.map((buff) => {
-              const isActive    = activeSet.has(buff.hash);
-              const isOverridden = isActive && winningEmpowering !== null && buff.hash !== winningEmpowering;
-              return (
-                <BuffRow
-                  key={buff.hash}
-                  buff={buff}
-                  isActive={isActive}
-                  isOverridden={isOverridden}
-                  activeStackIndex={0}
-                  onToggle={() => toggleBuff(buff.hash)}
-                  onSelectStack={() => {}}
-                />
-              );
-            })}
-          </div>
-        </div>
+        {/* Empowering */}
+        <CollapsibleSection
+          label="Empowering"
+          note="only highest applies"
+          activeCount={_empoweringBuffs.filter((b) => activeSet.has(b.hash)).length}
+          open={empoweringOpen}
+          onToggle={() => setEmpoweringOpen((v) => !v)}
+        >
+          {_empoweringBuffs.map((buff) => {
+            const isActive     = activeSet.has(buff.hash);
+            const isOverridden = isActive && winningEmpowering !== null && buff.hash !== winningEmpowering;
+            return (
+              <BuffRow
+                key={buff.hash}
+                buff={buff}
+                isActive={isActive}
+                isOverridden={isOverridden}
+                activeStackIndex={0}
+                onToggle={() => toggleBuff(buff.hash)}
+                onSelectStack={() => {}}
+              />
+            );
+          })}
+        </CollapsibleSection>
 
-        {/* ── Debuffs ── */}
-        <div>
-          <SectionLabel
-            label="Debuffs"
-            count={_debuffBuffs.filter((b) => activeSet.has(b.hash)).length}
-            note="only highest applies"
-          />
-          <div className="space-y-1.5">
-            {_debuffBuffs.map((buff) => {
-              const isActive    = activeSet.has(buff.hash);
-              const isOverridden = isActive && winningDebuff !== null && buff.hash !== winningDebuff;
-              return (
-                <BuffRow
-                  key={buff.hash}
-                  buff={buff}
-                  isActive={isActive}
-                  isOverridden={isOverridden}
-                  activeStackIndex={0}
-                  onToggle={() => toggleBuff(buff.hash)}
-                  onSelectStack={() => {}}
-                />
-              );
-            })}
-          </div>
-        </div>
+        {/* Debuffs */}
+        <CollapsibleSection
+          label="Debuffs"
+          note="only highest applies"
+          activeCount={_debuffBuffs.filter((b) => activeSet.has(b.hash)).length}
+          open={debuffOpen}
+          onToggle={() => setDebuffOpen((v) => !v)}
+        >
+          {_debuffBuffs.map((buff) => {
+            const isActive     = activeSet.has(buff.hash);
+            const isOverridden = isActive && winningDebuff !== null && buff.hash !== winningDebuff;
+            const stackIndex   = buffStacks[buff.hash] ?? 0;
+            return (
+              <BuffRow
+                key={buff.hash}
+                buff={buff}
+                isActive={isActive}
+                isOverridden={isOverridden}
+                activeStackIndex={stackIndex}
+                onToggle={() => toggleBuff(buff.hash)}
+                onSelectStack={(idx) => setBuffStack(buff.hash, idx)}
+              />
+            );
+          })}
+        </CollapsibleSection>
 
       </div>
     </div>
