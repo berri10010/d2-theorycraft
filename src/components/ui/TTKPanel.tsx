@@ -5,6 +5,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useState } from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
+import { getPlDeltaMultiplier, fmtPlDelta } from '../../lib/plDelta';
 
 // PvP guardian HP is fixed at 230 in the current armor rework.
 const PVP_GUARDIAN_HP = 230;
@@ -37,6 +38,7 @@ export const TTKPanel: React.FC = () => {
   );
 
   const [enemyTier, setEnemyTier] = useState(PVE_TIERS_KEYS[0]);
+  const [powerDelta, setPowerDelta] = useState(0);
 
   // Memoize the multiplier so it only recomputes when buff/mod/surge/mode inputs change.
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,10 +48,14 @@ export const TTKPanel: React.FC = () => {
 
   if (!activeWeapon) return null;
 
+  // PL delta multiplier — PvE only, normalised so delta 0 = 1.0
+  const plMult = mode === 'pve' ? getPlDeltaMultiplier(powerDelta) : 1.0;
+  const effectiveMultiplier = multiplier * plMult;
+
   const result = calculateTTK(
     mode,
     activeWeapon,
-    multiplier,
+    effectiveMultiplier,
     PVP_GUARDIAN_HP,
     enemyTier,
   );
@@ -61,9 +67,9 @@ export const TTKPanel: React.FC = () => {
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-white">Time-to-Kill</h2>
-        {multiplier > 1 && (
+        {effectiveMultiplier > 1 && (
           <span className="text-xs font-bold bg-amber-500 text-slate-950 px-2 py-1 rounded">
-            ×{multiplier.toFixed(2)} dmg
+            ×{effectiveMultiplier.toFixed(2)} dmg
           </span>
         )}
       </div>
@@ -124,19 +130,63 @@ export const TTKPanel: React.FC = () => {
         </div>
       )}
 
-      {/* ── PvE: enemy-type selector ──────────────────── */}
+      {/* ── PvE: enemy-type selector + power delta ────── */}
       {mode === 'pve' && (
-        <div className="mb-4">
-          <label className="text-sm text-slate-400 block mb-1">Enemy Type</label>
-          <select
-            value={enemyTier}
-            onChange={(e) => setEnemyTier(e.target.value)}
-            className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500"
-          >
-            {Object.entries(PVE_HEALTH_TIERS).map(([tier, hp]) => (
-              <option key={tier} value={tier}>{tier} ({hp} HP)</option>
-            ))}
-          </select>
+        <div className="mb-4 space-y-3">
+          <div>
+            <label className="text-sm text-slate-400 block mb-1">Enemy Type</label>
+            <select
+              value={enemyTier}
+              onChange={(e) => setEnemyTier(e.target.value)}
+              className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500"
+            >
+              {Object.entries(PVE_HEALTH_TIERS).map(([tier, hp]) => (
+                <option key={tier} value={tier}>{tier} ({hp} HP)</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Power-level delta slider */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-sm text-slate-400">Power Delta</label>
+              <span className={[
+                'text-xs font-bold font-mono tabular-nums',
+                powerDelta < 0 ? 'text-red-400' : powerDelta > 0 ? 'text-green-400' : 'text-slate-500',
+              ].join(' ')}>
+                {fmtPlDelta(powerDelta)}
+              </span>
+            </div>
+            <input
+              type="range"
+              min={-30}
+              max={10}
+              step={1}
+              value={powerDelta}
+              onChange={(e) => setPowerDelta(Number(e.target.value))}
+              className="w-full accent-amber-500 h-1.5 rounded-full cursor-pointer"
+            />
+            <div className="flex gap-1.5 flex-wrap mt-1.5">
+              {[-20, -10, -5, 0, 5, 10].map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setPowerDelta(v)}
+                  className={[
+                    'text-[10px] font-bold px-2 py-0.5 rounded border transition-colors',
+                    powerDelta === v
+                      ? v < 0
+                        ? 'bg-red-500/20 border-red-500/50 text-red-400'
+                        : v > 0
+                          ? 'bg-green-500/20 border-green-500/50 text-green-400'
+                          : 'bg-white/10 border-white/20 text-slate-300'
+                      : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-300',
+                  ].join(' ')}
+                >
+                  {v > 0 ? `+${v}` : v}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
@@ -147,7 +197,7 @@ export const TTKPanel: React.FC = () => {
             <div className="bg-black/40 p-4 rounded-lg border border-white/10 flex flex-col items-center">
               <span className="text-sm text-slate-400 mb-1">TTK</span>
               <span className={
-                'text-3xl font-mono font-bold ' + (multiplier > 1 ? 'text-amber-400' : 'text-white')
+                'text-3xl font-mono font-bold ' + (effectiveMultiplier > 1 ? 'text-amber-400' : 'text-white')
               }>
                 {result.ttk === 0 ? '1st shot' : `${result.ttk.toFixed(2)}s`}
               </span>
