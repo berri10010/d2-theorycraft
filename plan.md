@@ -242,7 +242,17 @@ Minor UX and display fixes to the weapon browser sidebar.
 
 ---
 
-*Last updated: 2026-04-13 — Stage 9 complete. Replaced 38-weapon stub god-rolls.json with TheAegisRelic's full database: 683 weapons across 20 weapon type sheets, extracted from `Destiny 2_ Endgame Analysis.xlsx`. Multi-option perk fields (barrel/mag/perk1/perk2) stored as arrays. 75 S-tier entries, 0 schema errors.*
+*Last updated: 2026-04-13 — Session summary:*
+
+*1. Parser fix (commit 9e60175): Exotic weapons with choosable mods (e.g. Praxic Blade Tang/Grip) now show all options. Root cause: Bungie sets currentlyCanRoll:false on non-default alternatives in reusablePlugSetHash; old code filtered them out. Fix splits plug set handling by type — reusablePlugSetHash always includes all items, randomizedPlugSetHash keeps the currentlyCanRoll filter.*
+
+*2. Build cache fix (commit 5a0e45a): Added DATA_FORMAT_VERSION to manifest cache key so parser logic changes force a full re-parse even when the Bungie manifest version is unchanged. Bumped to '2' to pick up the reusablePlugSet fix.*
+
+*3. Weapon Perks redesign (commit b907927): RollEditor now splits perk columns into two zones — "Fixed Traits" (single-option columns shown as inline rows with icon + name + stat mods + description) and "Choosable Mods" (multi-option columns shown as the existing icon-grid selector). Zone headers only appear when both zones are present. Store auto-selects single-option perks on weapon load so their stat modifiers always apply without user interaction.*
+
+*4. Intrinsic trait moved (commit c4a5971): Removed intrinsic perk from RollEditor Fixed Traits zone. WeaponHeader now loads the intrinsic description from Compendium via useCompendiumPerks (previously blank because build pipeline strips manifest text).*
+
+*5. External Buffs UX (commits cf460d8, be1dc4a): Empowering and Debuffs sections are now collapsible accordions with chevron headers, active count badge visible when collapsed. Broken Bungie CDN icons removed. Both sections start collapsed by default.*
 
 ---
 
