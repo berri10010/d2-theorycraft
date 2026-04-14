@@ -113,7 +113,6 @@ export const TTKAndFalloffPanel: React.FC = () => {
 
   if (!activeWeapon) return null;
 
-  const enemyHealth = PVE_HEALTH_TIERS[enemyTier] ?? 336;
   const pvpWeaponsBonus = Math.max(0, weaponsStat - 100) / 100 * 0.05;
 
   // ── TTK result ────────────────────────────────────────────────────────
@@ -122,7 +121,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
   // pattern, so we suppress the result until a mod is selected.
   const ttkResult = championModMissing
     ? null
-    : calculateTTK(mode, activeWeapon, multiplier, PVP_GUARDIAN_HP, enemyHealth);
+    : calculateTTK(mode, activeWeapon, multiplier, PVP_GUARDIAN_HP, enemyTier);
 
   // ── Falloff curve data ────────────────────────────────────────────────
   const rangeCurve = activeWeapon.statCurves?.['Range'];
@@ -150,10 +149,10 @@ export const TTKAndFalloffPanel: React.FC = () => {
   const ttkBreakpoints = useMemo(() => {
     if (!hasFalloffData || championModMissing) return [];
     return calculateTTKCurve(
-      mode, activeWeapon, multiplier, PVP_GUARDIAN_HP, enemyHealth,
+      mode, activeWeapon, multiplier, PVP_GUARDIAN_HP, enemyTier,
       hipFalloffStart!, maxDist, FALLOFF_FLOOR,
     );
-  }, [mode, activeWeapon, multiplier, hipFalloffStart, maxDist, enemyHealth, hasFalloffData, championModMissing]);
+  }, [mode, activeWeapon, multiplier, hipFalloffStart, maxDist, enemyTier, hasFalloffData, championModMissing]);
 
   // ── Damage falloff curves ─────────────────────────────────────────────
   function buildDamageCurve(falloffStart: number, maxD: number, critVal: number, bodyVal: number) {

@@ -46,14 +46,12 @@ export const TTKPanel: React.FC = () => {
 
   if (!activeWeapon) return null;
 
-  const enemyHealth = PVE_HEALTH_TIERS[enemyTier] ?? 336;
-
   const result = calculateTTK(
     mode,
     activeWeapon,
     multiplier,
     PVP_GUARDIAN_HP,
-    enemyHealth,
+    enemyTier,
   );
 
   // PvP weapons bonus: only the 101–200 tier applies vs Guardians (0–5%)

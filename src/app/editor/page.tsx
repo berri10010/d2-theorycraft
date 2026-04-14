@@ -17,7 +17,7 @@ import { GodRollPanel } from '../../components/weapon/GodRollPanel';
 import { WishlistPanel } from '../../components/weapon/WishlistPanel';
 import { SimilarWeaponsPanel } from '../../components/weapon/SimilarWeaponsPanel';
 import { WeaponDataPanel } from '../../components/weapon/WeaponDataPanel';
-import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
+import { calculateTTK } from '../../lib/damageMath';
 import { MasterworkStat } from '../../store/useWeaponStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
@@ -156,7 +156,7 @@ function Dashboard() {
   const handleAddToCompare = () => {
     if (!activeWeapon) return;
     const multiplier = getDamageMultiplier();
-    const ttkResult = calculateTTK(mode, activeWeapon, multiplier, 230, PVE_HEALTH_TIERS['Minor (Dreg/Grunt)'] ?? 336);
+    const ttkResult = calculateTTK(mode, activeWeapon, multiplier, 230, 'Minor');
     addSnapshot({
       label: activeWeapon.name,
       weapon: activeWeapon,

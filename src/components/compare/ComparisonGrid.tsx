@@ -71,10 +71,9 @@ function SnapshotCard({
   const multiplier = snapshot.multiplier ?? 1.0;
   const liveTtk = useMemo(() => {
     if (snapshot.mode === 'pvp') {
-      return calculateTTK('pvp', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, 0);
+      return calculateTTK('pvp', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, 'Minor');
     }
-    const enemyHealth = PVE_HEALTH_TIERS[enemyTier] ?? 336;
-    return calculateTTK('pve', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, enemyHealth);
+    return calculateTTK('pve', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, enemyTier);
   }, [snapshot.weapon, snapshot.mode, multiplier, enemyTier]);
 
   // ── Derive falloff distances from snapshot data ───────────────────────────

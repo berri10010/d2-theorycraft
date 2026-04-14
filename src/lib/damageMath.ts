@@ -20,6 +20,7 @@
 
 import { GameMode } from '../types/weapon';
 import { lookupWeaponStat, isChargeWeapon, isBurstWeapon, WeaponStatEntry } from './weaponStats';
+import rawCombatantScalars from '../data/combatantScalars.json';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -32,10 +33,27 @@ const PVE_DAMAGE_SCALAR = 3.0;
 
 /** PvE enemy health tiers used in the TTK panel selector. */
 export const PVE_HEALTH_TIERS: Record<string, number> = {
-  'Minor (Dreg/Grunt)': 336,
-  'Major (Elite)':      1344,
-  'Champion':           3024,
+  'Minor':         336,
+  'Major / Elite': 1344,
+  'Miniboss':      2500,
+  'Boss':          4000,
+  'Champion':      3024,
 };
+
+// ── Combatant scalar lookup ───────────────────────────────────────────────────
+
+/**
+ * Per-archetype PvE damage scalars sourced from MossyMax's Outgoing Damage
+ * Scaling Spreadsheet.  Normalised so Major/Elite = 3.0 for every archetype,
+ * so existing HP-tier calibration is preserved while each weapon type now
+ * correctly varies in effectiveness across Boss / Minor / Champion tiers.
+ */
+const COMBATANT_SCALARS = rawCombatantScalars as Record<string, Record<string, number>>;
+
+function getCombatantScalar(itemSubType: number, tier: string): number {
+  const entry = COMBATANT_SCALARS[String(itemSubType)];
+  return entry?.[tier] ?? PVE_DAMAGE_SCALAR;
+}
 
 // ── Result type ───────────────────────────────────────────────────────────────
 
@@ -160,8 +178,9 @@ function calcFromEntry(
   targetHp: number,
   multiplier: number,
   mode: GameMode,
+  pveScalar = PVE_DAMAGE_SCALAR,
 ): TTKResult | null {
-  const modeScalar = mode === 'pve' ? PVE_DAMAGE_SCALAR : 1.0;
+  const modeScalar = mode === 'pve' ? pveScalar : 1.0;
 
   if (isChargeWeapon(entry)) {
     // Damage per trigger pull = per-projectile × projectiles-per-trigger.
@@ -238,14 +257,14 @@ export interface TTKWeaponInfo {
  * @param weapon       Weapon identity fields (itemSubType, ammoType, intrinsicTrait)
  * @param multiplier   Combined damage multiplier from active buffs / mods
  * @param pvpHp        Guardian HP for PvP (typically 230)
- * @param enemyHealth  Enemy HP tier for PvE
+ * @param enemyTier    Key from PVE_HEALTH_TIERS (e.g. 'Minor', 'Boss') — ignored for pvp
  */
 export function calculateTTK(
   mode: GameMode,
   weapon: TTKWeaponInfo,
   multiplier: number,
   pvpHp: number,
-  enemyHealth: number,
+  enemyTier: string,
 ): TTKResult | null {
   const entry = lookupWeaponStat(
     weapon.itemSubType,
@@ -253,8 +272,9 @@ export function calculateTTK(
     weapon.intrinsicTrait?.name ?? null,
   );
   if (!entry) return null;
-  const hp = mode === 'pvp' ? pvpHp : enemyHealth;
-  return calcFromEntry(entry, hp, multiplier, mode);
+  const hp        = mode === 'pvp' ? pvpHp : (PVE_HEALTH_TIERS[enemyTier] ?? 336);
+  const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
+  return calcFromEntry(entry, hp, multiplier, mode, pveScalar);
 }
 
 // ── TTK vs Distance (breakpoint visualization) ────────────────────────────────
@@ -277,8 +297,9 @@ function calcTTKAtFalloff(
   multiplier: number,
   mode: GameMode,
   falloffFraction: number,
+  pveScalar = PVE_DAMAGE_SCALAR,
 ): TTKResult | null {
-  const modeScalar = mode === 'pve' ? PVE_DAMAGE_SCALAR : 1.0;
+  const modeScalar = mode === 'pve' ? pveScalar : 1.0;
   const effectiveMult = multiplier * falloffFraction;
 
   if (isChargeWeapon(entry)) {
@@ -342,7 +363,7 @@ export function calculateTTKCurve(
   weapon: TTKWeaponInfo,
   multiplier: number,
   pvpHp: number,
-  enemyHealth: number,
+  enemyTier: string,
   falloffStart: number,
   maxDist: number,
   falloffFloor = 0.5,
@@ -354,7 +375,8 @@ export function calculateTTKCurve(
   );
   if (!entry) return [];
 
-  const hp = mode === 'pvp' ? pvpHp : enemyHealth;
+  const hp        = mode === 'pvp' ? pvpHp : (PVE_HEALTH_TIERS[enemyTier] ?? 336);
+  const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
   const steps = 40;
   const result: TTKBreakpoint[] = [];
 
@@ -368,7 +390,7 @@ export function calculateTTKCurve(
       frac = 1.0 - (1.0 - falloffFloor) * t;
     }
 
-    const ttkResult = calcTTKAtFalloff(entry, hp, multiplier, mode, frac);
+    const ttkResult = calcTTKAtFalloff(entry, hp, multiplier, mode, frac, pveScalar);
     if (ttkResult) {
       result.push({
         distance: dist,
