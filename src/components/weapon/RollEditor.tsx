@@ -13,19 +13,17 @@ import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 // ── Column accent styles ──────────────────────────────────────────────────────
 
 const COL_ACCENT_BAR: Record<string, string> = {
-  intrinsic: 'bg-violet-500/40',
-  barrel:    'bg-orange-500/40',
-  mag:       'bg-blue-500/40',
-  perk:      'bg-slate-500/40',
-  origin:    'bg-emerald-500/40',
+  barrel: 'bg-orange-500/40',
+  mag:    'bg-blue-500/40',
+  perk:   'bg-slate-500/40',
+  origin: 'bg-emerald-500/40',
 };
 
 const COL_LEFT_BORDER: Record<string, string> = {
-  intrinsic: 'border-violet-500/60',
-  barrel:    'border-orange-500/60',
-  mag:       'border-blue-500/60',
-  perk:      'border-slate-400/60',
-  origin:    'border-emerald-500/60',
+  barrel: 'border-orange-500/60',
+  mag:    'border-blue-500/60',
+  perk:   'border-slate-400/60',
+  origin: 'border-emerald-500/60',
 };
 
 // ── Fixed perk row (identity block) ──────────────────────────────────────────
@@ -126,10 +124,10 @@ export const RollEditor: React.FC = () => {
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
   // ── Split columns into zones ─────────────────────────────────────────────
-  const fixedColumns    = activeWeapon.perkSockets.filter((col) => col.perks.length === 1);
+  const fixedColumns     = activeWeapon.perkSockets.filter((col) => col.perks.length === 1);
   const choosableColumns = activeWeapon.perkSockets.filter((col) => col.perks.length > 1);
 
-  const hasFixedZone     = activeWeapon.intrinsicTrait !== null || fixedColumns.length > 0;
+  const hasFixedZone     = fixedColumns.length > 0;
   const hasChoosableZone = choosableColumns.length > 0;
   const hasBothZones     = hasFixedZone && hasChoosableZone;
 
@@ -158,15 +156,6 @@ export const RollEditor: React.FC = () => {
             </h3>
           )}
           <div className="flex flex-col gap-1.5">
-            {/* Intrinsic frame perk */}
-            {activeWeapon.intrinsicTrait && (
-              <FixedPerkRow
-                perk={activeWeapon.intrinsicTrait}
-                columnType="intrinsic"
-                description={compendiumPerks?.[activeWeapon.intrinsicTrait.name]?.baseDescription}
-              />
-            )}
-            {/* Single-option perk columns */}
             {fixedColumns.map((col) => {
               const perk   = col.perks[0];
               const dimmed = col.columnType === 'origin' && isLegacy;

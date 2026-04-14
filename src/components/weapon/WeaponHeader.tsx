@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { isLegacyVariant } from '../../lib/weaponGroups';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
+import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 
 // ── Colour maps ───────────────────────────────────────────────────────────────
 
@@ -93,6 +94,7 @@ export const WeaponHeader: React.FC = () => {
       toggleCrafted: s.toggleCrafted,
     }))
   );
+  const { data: compendiumPerks } = useCompendiumPerks();
   const [imgError, setImgError] = useState(false);
 
   useEffect(() => { setImgError(false); }, [activeWeapon?.hash]);
@@ -309,29 +311,35 @@ export const WeaponHeader: React.FC = () => {
         </div>
 
         {/* Intrinsic trait — constrained to left column */}
-        {activeWeapon.intrinsicTrait && (
-          <div className="flex gap-3 p-3 bg-black/50 rounded-lg border border-white/10 backdrop-blur-sm max-w-sm">
-            <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
-              <Image
-                src={BUNGIE_URL + activeWeapon.intrinsicTrait.icon}
-                alt={activeWeapon.intrinsicTrait.name}
-                fill
-                sizes="40px"
-                className="object-cover"
-                unoptimized
-              />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Intrinsic</span>
-                <span className="font-semibold text-sm text-amber-300">{activeWeapon.intrinsicTrait.name}</span>
+        {activeWeapon.intrinsicTrait && (() => {
+          const trait = activeWeapon.intrinsicTrait!;
+          const desc  = compendiumPerks?.[trait.name]?.baseDescription ?? null;
+          return (
+            <div className="flex gap-3 p-3 bg-black/50 rounded-lg border border-white/10 backdrop-blur-sm max-w-sm">
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
+                <Image
+                  src={BUNGIE_URL + trait.icon}
+                  alt={trait.name}
+                  fill
+                  sizes="40px"
+                  className="object-cover"
+                  unoptimized
+                />
               </div>
-              <p className="text-xs text-slate-500 mt-0.5 leading-relaxed line-clamp-2">
-                {activeWeapon.intrinsicTrait.description}
-              </p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Intrinsic</span>
+                  <span className="font-semibold text-sm text-amber-300">{trait.name}</span>
+                </div>
+                {desc && (
+                  <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                    {desc}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Flavor text */}
         {activeWeapon.flavorText && (
