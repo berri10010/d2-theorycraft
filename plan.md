@@ -208,6 +208,24 @@ Minor UX and display fixes to the weapon browser sidebar.
 
 ---
 
+### Stage 11 — PvE Damage Model Accuracy
+
+Source-accurate PvE scalars and power-level delta scaling, sourced from MossyMax's Outgoing Damage Scaling spreadsheet.
+
+| Task | Status |
+|------|--------|
+| `src/data/combatantScalars.json` — per-archetype PvE damage scalars for 20 weapon subtypes, normalised to Major/Elite = 3.0, keyed by Bungie `itemSubType` integer | ✅ Done |
+| `src/data/plDeltaCurve.json` — EoF Standard PL delta → damage multiplier curve (δ −50 to +30, 81 entries, normalised so δ0 = 1.0) | ✅ Done |
+| `src/lib/plDelta.ts` — `getPlDeltaMultiplier(delta)` + `fmtPlDelta(delta)` helpers | ✅ Done |
+| `src/lib/damageMath.ts` — replace global `PVE_DAMAGE_SCALAR = 3.0` with `getCombatantScalar(itemSubType, tier)`; expand `PVE_HEALTH_TIERS` from 3 tiers (Minor/Major/Champion) to 5 (add Miniboss 2500 HP, Boss 4000 HP); change `calculateTTK` / `calculateTTKCurve` API to accept `enemyTier: string` instead of `enemyHealth: number` | ✅ Done |
+| Update all call sites: `TTKPanel`, `TTKAndFalloffPanel`, `ComparisonGrid`, `editor/page.tsx` | ✅ Done |
+| `TTKAndFalloffPanel` — PL delta slider (−30 to +10, presets −20/−10/−5/0/+5/+10, colour-coded label); `effectiveMultiplier = multiplier × plMult` flows into TTK, breakpoint sparkline, and falloff chart Y-axis | ✅ Done |
+| `TTKPanel` — same PL delta slider added to PvE section | ✅ Done |
+
+**Stage 11 progress: 100%**
+
+---
+
 ## Overall Progress
 
 | Stage | Progress | Notes |
@@ -222,6 +240,7 @@ Minor UX and display fixes to the weapon browser sidebar.
 | 8 — Default Variant Selection | 100% | Complete |
 | 9 — God Roll Database Refresh | 100% | Complete |
 | 10 — Weapon List Polish | 100% | Complete |
+| 11 — PvE Damage Model Accuracy | 100% | Complete |
 | **Overall** | **100%** | |
 
 ---
@@ -270,6 +289,9 @@ Minor UX and display fixes to the weapon browser sidebar.
 | `src/lib/weaponSystemAdapter.ts` | Bridge: D2 stat bars → weapon-system typed stat blocks |
 | `src/app/page.tsx` | Homepage — search, Featured God Rolls, collapsible tools section |
 | `src/components/layout/SearchSidebar.tsx` | Editor sidebar — weapon list with season/event labels |
+| `src/data/combatantScalars.json` | Per-archetype PvE damage scalars (20 weapon subtypes, 5 enemy tiers) |
+| `src/data/plDeltaCurve.json` | EoF Standard PL delta curve (δ −50 to +30, normalised) |
+| `src/lib/plDelta.ts` | `getPlDeltaMultiplier` + `fmtPlDelta` helpers |
 | `build_perk_audit_json.py` | Generates perkAudit.json from Clarity + VERIFIED dict |
 | `weapon-system/src/` | Standalone weapon stat architecture module |
 | `.github/workflows/deploy.yml` | GitHub Actions — build + Wrangler deploy on push to main |
@@ -316,4 +338,4 @@ npm run build
 
 ---
 
-*Last updated: 2026-04-13 — Stage 10 complete. Weapon list polish: collapsible sidebar/god-roll panel, portal-based graph overlay, event weapon season back-fill, Season 1 "The Red War" label, ammo type color update (Primary gray, Special green, Heavy purple).*
+*Last updated: 2026-04-14 — Stage 11 complete. PvE damage model accuracy pass sourced from MossyMax's Outgoing Damage Scaling spreadsheet: per-archetype combatant scalars (20 weapon subtypes × 5 enemy tiers, normalised to Elite = 3.0), expanded enemy tiers (Minor / Major·Elite / Miniboss / Boss / Champion), and power-level delta scaling slider (δ −30 to +10 with presets) in both TTKPanel and TTKAndFalloffPanel. Commits 9a7dbe7 + ee21f5f.*
