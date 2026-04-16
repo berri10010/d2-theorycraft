@@ -21,6 +21,7 @@
 import { GameMode } from '../types/weapon';
 import { lookupWeaponStat, isChargeWeapon, isBurstWeapon, WeaponStatEntry } from './weaponStats';
 import rawCombatantScalars from '../data/combatantScalars.json';
+import { roundTo3 } from './math';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -173,72 +174,77 @@ function ttkBurst(
 
 // ── Core calculation ──────────────────────────────────────────────────────────
 
-function calcFromEntry(
+type TTKCalculator = (targetHp: number, effectiveMult: number, mode: GameMode, pveScalar: number) => TTKResult | null;
+
+function getTtkCalculator(entry: WeaponStatEntry): TTKCalculator {
+  if (isChargeWeapon(entry)) {
+    return (targetHp, effectiveMult, mode, pveScalar) => {
+      const modeScalar = mode === 'pve' ? pveScalar : 1.0;
+      const finalMult = effectiveMult * modeScalar;
+      const spb = entry.shotsPerBurst ?? 1;
+      const body = entry.bodyDamage * spb * finalMult;
+      const crit = entry.critDamage * spb * finalMult;
+      const found = findOptimalShots(body, crit, targetHp);
+      if (!found) return null;
+      const [shots, crits, bodies] = found;
+      return {
+        ttk: roundTo3(ttkCharge(shots, entry.chargeMs!, entry.shotDelay)),
+        shotsToKill: shots,
+        crits,
+        bodies,
+        optimalPattern: fmtPattern(crits, bodies),
+      };
+    };
+  }
+
+  if (isBurstWeapon(entry)) {
+    return (targetHp, effectiveMult, mode, pveScalar) => {
+      if (entry.burstDelay == null || entry.shotDelay == null) return null;
+      const modeScalar = mode === 'pve' ? pveScalar : 1.0;
+      const finalMult = effectiveMult * modeScalar;
+      const body = entry.bodyDamage * finalMult;
+      const crit = entry.critDamage * finalMult;
+      const found = findOptimalShots(body, crit, targetHp);
+      if (!found) return null;
+      const [shots, crits, bodies] = found;
+      return {
+        ttk: roundTo3(ttkBurst(shots, entry.shotsPerBurst!, entry.burstDelay, entry.shotDelay)),
+        shotsToKill: shots,
+        crits,
+        bodies,
+        optimalPattern: fmtPattern(crits, bodies),
+      };
+    };
+  }
+
+  return (targetHp, effectiveMult, mode, pveScalar) => {
+    if (entry.shotDelay == null) return null;
+    const modeScalar = mode === 'pve' ? pveScalar : 1.0;
+    const finalMult = effectiveMult * modeScalar;
+    const spb = entry.shotsPerBurst ?? 1;
+    const body = entry.bodyDamage * spb * finalMult;
+    const crit = entry.critDamage * spb * finalMult;
+    const found = findOptimalShots(body, crit, targetHp);
+    if (!found) return null;
+    const [shots, crits, bodies] = found;
+    return {
+      ttk: roundTo3(ttkStandard(shots, entry.shotDelay)),
+      shotsToKill: shots,
+      crits,
+      bodies,
+      optimalPattern: fmtPattern(crits, bodies),
+    };
+  };
+}
+
+function calcTTKCore(
   entry: WeaponStatEntry,
   targetHp: number,
-  multiplier: number,
+  effectiveMultiplier: number,
   mode: GameMode,
   pveScalar = PVE_DAMAGE_SCALAR,
 ): TTKResult | null {
-  const modeScalar = mode === 'pve' ? pveScalar : 1.0;
-
-  if (isChargeWeapon(entry)) {
-    // Damage per trigger pull = per-projectile × projectiles-per-trigger.
-    const spb  = entry.shotsPerBurst ?? 1;
-    const body = entry.bodyDamage * spb * modeScalar * multiplier;
-    const crit = entry.critDamage  * spb * modeScalar * multiplier;
-
-    const found = findOptimalShots(body, crit, targetHp);
-    if (!found) return null;
-    const [shots, crits, bodies] = found;
-
-    return {
-      ttk: Math.round(ttkCharge(shots, entry.chargeMs!, entry.shotDelay) * 1000) / 1000,
-      shotsToKill: shots,
-      crits,
-      bodies,
-      optimalPattern: fmtPattern(crits, bodies),
-    };
-
-  } else if (isBurstWeapon(entry)) {
-    if (entry.burstDelay == null || entry.shotDelay == null) return null;
-
-    const body = entry.bodyDamage * modeScalar * multiplier;
-    const crit = entry.critDamage  * modeScalar * multiplier;
-
-    const found = findOptimalShots(body, crit, targetHp);
-    if (!found) return null;
-    const [shots, crits, bodies] = found;
-
-    return {
-      ttk: Math.round(ttkBurst(shots, entry.shotsPerBurst!, entry.burstDelay, entry.shotDelay) * 1000) / 1000,
-      shotsToKill: shots,
-      crits,
-      bodies,
-      optimalPattern: fmtPattern(crits, bodies),
-    };
-
-  } else {
-    if (entry.shotDelay == null) return null;
-
-    // shotsPerBurst on a standard weapon = pellets fired simultaneously per shot
-    // (e.g. shotgun pellet count).  Null → 1 pellet / standard single projectile.
-    const spb  = entry.shotsPerBurst ?? 1;
-    const body = entry.bodyDamage * spb * modeScalar * multiplier;
-    const crit = entry.critDamage  * spb * modeScalar * multiplier;
-
-    const found = findOptimalShots(body, crit, targetHp);
-    if (!found) return null;
-    const [shots, crits, bodies] = found;
-
-    return {
-      ttk: Math.round(ttkStandard(shots, entry.shotDelay) * 1000) / 1000,
-      shotsToKill: shots,
-      crits,
-      bodies,
-      optimalPattern: fmtPattern(crits, bodies),
-    };
-  }
+  return getTtkCalculator(entry)(targetHp, effectiveMultiplier, mode, pveScalar);
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -274,7 +280,7 @@ export function calculateTTK(
   if (!entry) return null;
   const hp        = mode === 'pvp' ? pvpHp : (PVE_HEALTH_TIERS[enemyTier] ?? 336);
   const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
-  return calcFromEntry(entry, hp, multiplier, mode, pveScalar);
+  return calcTTKCore(entry, hp, multiplier, mode, pveScalar);
 }
 
 // ── TTK vs Distance (breakpoint visualization) ────────────────────────────────
@@ -285,67 +291,6 @@ export interface TTKBreakpoint {
   shotsToKill: number;
   crits: number;
   bodies: number;
-}
-
-/**
- * Compute TTK at a specific damage falloff fraction.
- * Used by the breakpoint sparkline to show how TTK changes across distance.
- */
-function calcTTKAtFalloff(
-  entry: WeaponStatEntry,
-  targetHp: number,
-  multiplier: number,
-  mode: GameMode,
-  falloffFraction: number,
-  pveScalar = PVE_DAMAGE_SCALAR,
-): TTKResult | null {
-  const modeScalar = mode === 'pve' ? pveScalar : 1.0;
-  const effectiveMult = multiplier * falloffFraction;
-
-  if (isChargeWeapon(entry)) {
-    const spb  = entry.shotsPerBurst ?? 1;
-    const body = entry.bodyDamage * spb * modeScalar * effectiveMult;
-    const crit = entry.critDamage  * spb * modeScalar * effectiveMult;
-    const found = findOptimalShots(body, crit, targetHp);
-    if (!found) return null;
-    const [shots, crits, bodies] = found;
-    return {
-      ttk: Math.round(ttkCharge(shots, entry.chargeMs!, entry.shotDelay) * 1000) / 1000,
-      shotsToKill: shots,
-      crits,
-      bodies,
-      optimalPattern: fmtPattern(crits, bodies),
-    };
-  } else if (isBurstWeapon(entry)) {
-    if (entry.burstDelay == null || entry.shotDelay == null) return null;
-    const body = entry.bodyDamage * modeScalar * effectiveMult;
-    const crit = entry.critDamage  * modeScalar * effectiveMult;
-    const found = findOptimalShots(body, crit, targetHp);
-    if (!found) return null;
-    const [shots, crits, bodies] = found;
-    return {
-      ttk: Math.round(ttkBurst(shots, entry.shotsPerBurst!, entry.burstDelay, entry.shotDelay) * 1000) / 1000,
-      shotsToKill: shots,
-      crits,
-      bodies,
-      optimalPattern: fmtPattern(crits, bodies),
-    };
-  } else {
-    if (entry.shotDelay == null) return null;
-    const spb  = entry.shotsPerBurst ?? 1;
-    const body = entry.bodyDamage * spb * modeScalar * effectiveMult;
-    const crit = entry.critDamage  * spb * modeScalar * effectiveMult;
-    const found = findOptimalShots(body, crit, targetHp);
-    if (!found) return null;
-    const [shots, crits, bodies] = found;
-    return {
-      ttk: Math.round(ttkStandard(shots, entry.shotDelay) * 1000) / 1000,
-      shotsToKill: shots,
-      crits,
-      bodies,
-      optimalPattern: fmtPattern(crits, bodies),
-    };
-  }
 }
 
 /**
@@ -379,6 +324,7 @@ export function calculateTTKCurve(
   const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
   const steps = 40;
   const result: TTKBreakpoint[] = [];
+  const calc = getTtkCalculator(entry);
 
   for (let i = 0; i <= steps; i++) {
     const dist = (i / steps) * maxDist;
@@ -390,7 +336,7 @@ export function calculateTTKCurve(
       frac = 1.0 - (1.0 - falloffFloor) * t;
     }
 
-    const ttkResult = calcTTKAtFalloff(entry, hp, multiplier, mode, frac, pveScalar);
+    const ttkResult = calc(hp, multiplier * frac, mode, pveScalar);
     if (ttkResult) {
       result.push({
         distance: dist,

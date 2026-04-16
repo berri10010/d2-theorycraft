@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls C:\\\\Users\\\\husse\\\\Documents\\\\d2-theorycraft/*.py)",
+      "Bash(ls C:\\\\Users\\\\husse\\\\Documents\\\\d2-theorycraft/*.txt)",
+      "Bash(python3 -c ':*)",
+      "Bash(py -3 -c ':*)",
+      "Bash(py -3 -c \"import sys,json; json.load\\(sys.stdin\\)\")",
+      "Bash(py -3 -c \"import sys,json; json.load\\(sys.stdin\\); print\\('VALID'\\)\")",
+      "Bash(npx tsc:*)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(npm run:*)",
+      "Bash(node_modules/.bin/next build:*)",
+      "Bash(node C:/Users/husse/Documents/d2-theorycraft/node_modules/typescript/bin/tsc --noEmit --project C:/Users/husse/Documents/d2-theorycraft/tsconfig.json)",
+      "Bash(npm install:*)",
+      "Bash(node node_modules/typescript/bin/tsc --noEmit)"
+    ]
+  }
+}

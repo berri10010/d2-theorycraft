@@ -17,3 +17,12 @@ export function interpolateStat(statValue: number, curve?: StatCurveNode[]): num
   }
   return null;
 }
+
+export function adsMultiplier(zoom: number): number {
+  return 1 + Math.max(0, zoom - 10) * 0.033;
+}
+
+export function roundTo3(val: number): number {
+  return Math.round(val * 1000) / 1000;
+}
+

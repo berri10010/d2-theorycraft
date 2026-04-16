@@ -6,6 +6,7 @@ import { useCompareStore } from '../../store/useCompareStore';
 import { CompareSnapshot, StatCurveNode } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
+import { interpolateStat, adsMultiplier } from '../../lib/math';
 
 // ─── Stat keys shown in the comparison card ────────────────────────────────────
 // Mirrors the keys in StatDisplay so the Compare view has full parity.
@@ -15,24 +16,6 @@ const ALL_BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload',
 const NUMERIC_STAT_KEYS = ['Zoom', 'Airborne Effectiveness', 'Magazine', 'Recoil Direction'];
 
 const PVP_GUARDIAN_HP = 230;
-
-// ─── Curve interpolation (mirrors TTKAndFalloffPanel logic) ───────────────────
-function interpolateCurve(curve: StatCurveNode[], statVal: number): number {
-  if (!curve || curve.length === 0) return 0;
-  const clamped = Math.max(curve[0].stat, Math.min(curve[curve.length - 1].stat, statVal));
-  for (let i = 0; i < curve.length - 1; i++) {
-    const a = curve[i], b = curve[i + 1];
-    if (clamped >= a.stat && clamped <= b.stat) {
-      const t = (clamped - a.stat) / (b.stat - a.stat);
-      return a.value + t * (b.value - a.value);
-    }
-  }
-  return curve[curve.length - 1].value;
-}
-
-function adsMultiplier(zoom: number): number {
-  return 1 + Math.max(0, zoom - 10) * 0.033;
-}
 
 // ─── Delta colour scale ────────────────────────────────────────────────────────
 function deltaColorClass(delta: number): string {
@@ -81,14 +64,15 @@ function SnapshotCard({
   const rangeStat  = snapshot.calculatedStats['Range'] ?? 0;
   const zoomStat   = snapshot.calculatedStats['Zoom']  ?? 14;
 
-  const hipFalloff = useMemo(() => {
-    if (!rangeCurve || rangeCurve.length === 0) return null;
-    return interpolateCurve(rangeCurve, rangeStat);
-  }, [rangeCurve, rangeStat]);
+   const hipFalloff = useMemo(() => {
+     if (!rangeCurve || rangeCurve.length === 0) return null;
+     return interpolateStat(rangeStat, rangeCurve) ?? 0;
+   }, [rangeCurve, rangeStat]);
 
-  const adsFalloff = hipFalloff !== null
-    ? hipFalloff * adsMultiplier(zoomStat)
-    : null;
+   const adsFalloff = hipFalloff !== null
+     ? hipFalloff * adsMultiplier(zoomStat)
+     : null;
+
 
   // ── Build selected perk list from weapon socket data ─────────────────────
   const selectedPerkList = useMemo(() => {

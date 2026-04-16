@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Weapon, StatMap, GameMode, WeaponGroup } from '../types/weapon';
+import { Weapon, StatMap, GameMode, WeaponGroup, Perk, PerkColumn } from '../types/weapon';
 import { BUFF_DATABASE, getBuffMultiplier } from '../lib/buffDatabase';
 
 // ─── Weapon Mods ────────────────────────────────────────────────────────────
@@ -269,6 +269,13 @@ interface WeaponState {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+function resolveBasePerk(column: PerkColumn | undefined, hash: string): Perk | null {
+  if (!column) return null;
+  const direct = column.perks.find((p) => p.hash === hash);
+  if (direct) return direct;
+  return column.perks.find((p) => p.enhancedVersion?.hash === hash) ?? null;
+}
+
 /**
  * Pre-select every single-option perk column so their stat modifiers are
  * always active in calculations without any user interaction required.
@@ -396,28 +403,16 @@ export const useWeaponStore = create<WeaponState>()(
         });
       },
 
-      selectPerk: (columnName, perkHash) =>
-        set((state) => {
-          if (!state.activeWeapon) return state;
+       selectPerk: (columnName, perkHash) =>
+         set((state) => {
+           if (!state.activeWeapon) return state;
 
-          const column = state.activeWeapon.perkSockets.find((c) => c.name === columnName);
+           const column = state.activeWeapon.perkSockets.find((c) => c.name === columnName);
 
-          /**
-           * Resolve a perk hash to the perk that owns the buffKey.
-           * Enhanced version hashes are NOT in column.perks directly — they live on
-           * basePerk.enhancedVersion.  In that case we return the base perk so that
-           * buffKey (which always lives on the base) is correctly found.
-           */
-          const resolvePerk = (hash: string) => {
-            if (!column) return null;
-            const direct = column.perks.find((p) => p.hash === hash);
-            if (direct) return direct;
-            return column.perks.find((p) => p.enhancedVersion?.hash === hash) ?? null;
-          };
+           const oldPerk = resolveBasePerk(column, state.selectedPerks[columnName]);
 
-          const oldPerk = resolvePerk(state.selectedPerks[columnName]);
+           let activeBuffs = [...state.activeBuffs];
 
-          let activeBuffs = [...state.activeBuffs];
           let buffStacks  = { ...state.buffStacks };
           if (oldPerk?.buffKey && activeBuffs.includes(oldPerk.buffKey)) {
             activeBuffs = activeBuffs.filter((b) => b !== oldPerk.buffKey);
@@ -429,19 +424,16 @@ export const useWeaponStore = create<WeaponState>()(
           return { selectedPerks: { ...state.selectedPerks, [columnName]: perkHash }, activeBuffs, buffStacks, activeEffects };
         }),
 
-      clearPerk: (columnName) =>
-        set((state) => {
-          if (!state.activeWeapon) return state;
-          const column = state.activeWeapon.perkSockets.find((c) => c.name === columnName);
-          const oldPerkHash = state.selectedPerks[columnName];
+       clearPerk: (columnName) =>
+         set((state) => {
+           if (!state.activeWeapon) return state;
+           const column = state.activeWeapon.perkSockets.find((c) => c.name === columnName);
+           const oldPerkHash = state.selectedPerks[columnName];
 
-          const oldPerk = oldPerkHash
-            ? (column?.perks.find((p) => p.hash === oldPerkHash)
-                ?? column?.perks.find((p) => p.enhancedVersion?.hash === oldPerkHash)
-                ?? null)
-            : null;
+           const oldPerk = oldPerkHash ? resolveBasePerk(column, oldPerkHash) : null;
 
-          let activeBuffs = [...state.activeBuffs];
+           let activeBuffs = [...state.activeBuffs];
+
           let buffStacks  = { ...state.buffStacks };
           if (oldPerk?.buffKey) {
             activeBuffs = activeBuffs.filter((b) => b !== oldPerk.buffKey);
@@ -501,16 +493,19 @@ export const useWeaponStore = create<WeaponState>()(
         const finalStats: StatMap = { ...activeWeapon.baseStats };
 
         // Perk stat modifiers.
-        for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
-          const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
-          if (!column) continue;
+         for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+           const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+           if (!column) continue;
 
-          let perk = column.perks.find((p) => p.hash === perkHash) ?? null;
-          const basePerk = perk ?? column.perks.find((p) => p.enhancedVersion?.hash === perkHash) ?? null;
-          if (!perk && basePerk) perk = basePerk.enhancedVersion ?? null;
-          if (!perk) continue;
+           const basePerk = resolveBasePerk(column, perkHash);
+           if (!basePerk) continue;
 
-          const effectState    = activeEffects[perkHash] ?? 0;
+           const perk = basePerk.enhancedVersion && perkHash === basePerk.enhancedVersion.hash
+             ? basePerk.enhancedVersion
+             : basePerk;
+
+           const effectState    = activeEffects[perkHash] ?? 0;
+
           const isEffectActive = effectState > 0;
 
           for (const mod of perk.statModifiers) {
@@ -553,7 +548,6 @@ export const useWeaponStore = create<WeaponState>()(
         }
 
         // isCrafted is tracked in state; stat impact is via perk slot availability
-        void isCrafted;
 
         return finalStats;
       },
@@ -562,24 +556,22 @@ export const useWeaponStore = create<WeaponState>()(
         const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, activeMod, surgeStacks, mode, weaponsStat } = get();
 
         const effectBuffEntries: Array<{ key: string; stackIndex: number }> = [];
-        if (activeWeapon) {
-          for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
-            const effectState = activeEffects[perkHash] ?? 0;
-            if (effectState === 0) continue;
+         if (activeWeapon) {
+           for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+             const effectState = activeEffects[perkHash] ?? 0;
+             if (effectState === 0) continue;
 
-            const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
-            if (!column) continue;
-            const basePerk = column.perks.find((p) => p.hash === perkHash)
-              ?? column.perks.find((p) => p.enhancedVersion?.hash === perkHash)
-              ?? null;
-            const buffKey = basePerk?.buffKey ?? null;
-            if (!buffKey) continue;
+             const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+             const basePerk = resolveBasePerk(column, perkHash);
+             const buffKey = basePerk?.buffKey ?? null;
+             if (!buffKey) continue;
 
-            effectBuffEntries.push({ key: buffKey, stackIndex: effectState - 1 });
-          }
-        }
+             effectBuffEntries.push({ key: buffKey, stackIndex: effectState - 1 });
+           }
+         }
 
-        const seenBuffKeys     = new Set<string>();
+         const seenBuffKeys     = new Set<string>();
+
         const allActiveBuffs:  string[] = [];
         const effectStackByKey: Record<string, number> = {};
 

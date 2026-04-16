@@ -295,6 +295,10 @@ function deduplicateColumnNames(columns: PerkColumn[]): PerkColumn[] {
 // Main parser
 // ──────────────────────────────────────────────────
 
+function getCanonicalName(name: string): string {
+  return name.replace(/^Enhanced\s+/i, '').toLowerCase();
+}
+
 export function parseWeapons(
   items: Record<string, BungieInventoryItem>,
   socketCategoryDefs: Record<string, BungieSocketCategoryDefinition>,
@@ -352,7 +356,8 @@ export function parseWeapons(
       'Zoom', 'Recoil Direction', 'Magazine', 'Airborne Effectiveness',
     ]);
 
-    const rawColumns: PerkColumn[] = [];
+     let rawColumns: PerkColumn[] = [];
+
     let intrinsicTrait: Perk | null = null;
     // Running count of 'perk' (trait) columns emitted for this weapon — used for "Perk N" labels
     let traitColumnCount = 0;
@@ -505,8 +510,9 @@ export function parseWeapons(
           const enhancedMap = new Map<string, Perk>();
           for (const p of rawPerks) {
             if (p.isEnhanced) {
-              const key = p.name.replace(/^Enhanced\s+/i, '').toLowerCase();
-              enhancedMap.set(key, p);
+               const key = getCanonicalName(p.name);
+               enhancedMap.set(key, p);
+
             }
           }
 
@@ -517,15 +523,17 @@ export function parseWeapons(
           for (const p of rawPerks) {
             if (p.isEnhanced) {
               // Drop if a base perk with the same canonical name exists in this socket.
-              const key = p.name.replace(/^Enhanced\s+/i, '').toLowerCase();
-              const hasBase = rawPerks.some(
-                (b) => !b.isEnhanced && b.name.replace(/^Enhanced\s+/i, '').toLowerCase() === key
-              );
+               const key = getCanonicalName(p.name);
+               const hasBase = rawPerks.some(
+                 (b) => !b.isEnhanced && getCanonicalName(b.name) === key
+               );
+
               if (!hasBase) perks.push({ ...p, enhancedVersion: null });
               continue;
             }
-            const key = p.name.replace(/^Enhanced\s+/i, '').toLowerCase();
-            const enhanced = enhancedMap.get(key) ?? null;
+             const key = getCanonicalName(p.name);
+             const enhanced = enhancedMap.get(key) ?? null;
+
             perks.push({ ...p, enhancedVersion: enhanced });
           }
 
@@ -572,9 +580,10 @@ export function parseWeapons(
         // Build a map: canonical perk name (lowercase) → enhanced Perk
         const crossEnhancedMap = new Map<string, Perk>();
         for (const idx of enhancedOnlyIdxs) {
-          for (const enhPerk of rawColumns[idx].perks) {
-            const key = enhPerk.name.replace(/^Enhanced\s+/i, '').toLowerCase();
-            if (!crossEnhancedMap.has(key)) {
+           for (const enhPerk of rawColumns[idx].perks) {
+             const key = getCanonicalName(enhPerk.name);
+             if (!crossEnhancedMap.has(key)) {
+
               crossEnhancedMap.set(key, enhPerk);
             }
           }
@@ -587,19 +596,18 @@ export function parseWeapons(
           const col = rawColumns[i];
           if (col.columnType !== 'perk') continue;
 
-          const updatedPerks = col.perks.map((p): Perk => {
-            if (p.isEnhanced || p.enhancedVersion) return p;
-            const key = p.name.replace(/^Enhanced\s+/i, '').toLowerCase();
-            const enh = crossEnhancedMap.get(key) ?? null;
+           const updatedPerks = col.perks.map((p): Perk => {
+             if (p.isEnhanced || p.enhancedVersion) return p;
+             const key = getCanonicalName(p.name);
+             const enh = crossEnhancedMap.get(key) ?? null;
+
             return enh ? { ...p, enhancedVersion: enh } : p;
           });
           rawColumns[i] = { ...col, perks: updatedPerks };
         }
 
-        // Remove the now-merged enhanced-only columns (highest index first)
-        for (let i = enhancedOnlyIdxs.length - 1; i >= 0; i--) {
-          rawColumns.splice(enhancedOnlyIdxs[i], 1);
-        }
+        // Remove the now-merged enhanced-only columns
+        rawColumns = rawColumns.filter((_, idx) => !enhancedOnlySet.has(idx));
       }
     }
 

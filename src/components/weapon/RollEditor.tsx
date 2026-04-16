@@ -124,15 +124,15 @@ export const RollEditor: React.FC = () => {
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
   // ── Split columns into zones ─────────────────────────────────────────────
-  const fixedColumns     = activeWeapon.perkSockets.filter((col) => col.perks.length === 1);
-  const choosableColumns = activeWeapon.perkSockets.filter((col) => col.perks.length > 1);
+  const { fixedColumns, choosableColumns } = useMemo(() => {
+    const fixed = activeWeapon.perkSockets.filter((col) => col.perks.length === 1);
+    const choosable = activeWeapon.perkSockets.filter((col) => col.perks.length > 1);
+    return { fixedColumns: fixed, choosableColumns: choosable };
+  }, [activeWeapon]);
 
   const hasFixedZone     = fixedColumns.length > 0;
   const hasChoosableZone = choosableColumns.length > 0;
   const hasBothZones     = hasFixedZone && hasChoosableZone;
-
-  // Suppress unused-variable warning for isCrafted (used by parent context, kept in selector for future use)
-  void isCrafted;
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">

@@ -137,15 +137,12 @@ function runExampleCombat() {
   const context = { targetPosition: blastEpicenter, allEntities: mockEntities };
 
   const rocketResult = combat.resolveHit(gjallarhorn, context);
-  console.log(rocketResult.summary);
   // "RocketLauncher: 1916.7 direct + 1380.0 splash across 2 targets (r=6.5m, v=45m/s)"
 
   const shotgunResult = combat.resolveHit(trenchgun, context);
-  console.log(shotgunResult.summary);
   // "Shotgun: 8/12 pellets landed on enemy_01 = 413.3 dmg (range falloff: 100%, spread: 18°)"
 
   const swordResult = combat.resolveHit(dawnblade, context);
-  console.log(swordResult.summary);
   // "Sword: 1 target(s) hit within 2.1m arc (120°) — 1800.0 total dmg"
 }
 
