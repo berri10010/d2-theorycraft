@@ -52,7 +52,7 @@ export const WEAPON_STAT_MAPPINGS: Record<WeaponType, FrameMapping> = {
     'The Rest': ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
   },
   'Bow': {
-    'High-Impact Frame': ['Velocity', 'Persistence', 'Impact', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Magazine'],
+    'High-Impact Frame': ['Impact', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Magazine'],
     'Bolt Thrower': ['Velocity', 'Persistence', 'Impact', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Magazine'],
     'The Rest': ['Draw Time', 'Impact', 'Accuracy', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
   },

@@ -79,6 +79,10 @@ export const StatDisplay: React.FC = () => {
           const base    = baseStats[statName] ?? 0;
           const current = calcStats[statName] ?? base;
           const diff    = current - base;
+          // skip Velocity/Persistence if no data exists
+          if ((statName === 'Velocity' || statName === 'Persistence') && base === 0 && current === 0) {
+            return null;
+          }
           const curve   = activeWeapon.statCurves[statName];
           const translated = interpolateStat(current, curve);
           const info    = STAT_TRANSLATIONS[statName];
