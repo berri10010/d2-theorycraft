@@ -20,7 +20,7 @@ const STAT_LABEL_MAP: Record<string, string> = {
 };
 
 // Superset of all possible bar stats across weapon types.
-const ALL_BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance'];
+const ALL_BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Velocity', 'Persistence'];
 
 // Stats shown as plain numbers (no meaningful 0-100 bar)
 const NUMERIC_STAT_KEYS = ['Zoom', 'Airborne Effectiveness', 'Inventory Size', 'Recoil Direction', 'Magazine'];

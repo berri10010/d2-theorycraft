@@ -84,9 +84,9 @@ const STAT_HASH_MAP: Record<number, string> = {
 
 // Stats stored in baseStats (used for display + stat modifier math)
 const DISPLAY_STATS = new Set([
-  'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
-  'Zoom', 'Recoil Direction', 'Magazine', 'Airborne Effectiveness',
-]);
+      'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
+      'Zoom', 'Recoil Direction', 'Magazine', 'Airborne Effectiveness', 'Velocity', 'Persistence',
+    ]);
 
 const DAMAGE_TYPE_MAP: Record<number, Weapon['damageType']> = {
   3373582085: 'kinetic',
