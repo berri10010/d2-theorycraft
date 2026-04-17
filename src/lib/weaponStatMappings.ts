@@ -3,23 +3,23 @@
  * Based on provided reference documentation.
  */
 
-export type WeaponType = 
-  | 'Auto Rifle' 
-  | 'Hand Cannon' 
-  | 'Pulse Rifle' 
-  | 'Scout Rifle' 
-  | 'Sidearm' 
-  | 'Bow' 
-  | 'Submachine Gun' 
-  | 'Fusion Rifle' 
-  | 'Sniper Rifle' 
-  | 'Shotgun' 
-  | 'Special/Heavy Grenade Launcher' 
-  | 'Trace Rifle' 
-  | 'Glaive' 
-  | 'Machine Gun' 
-  | 'Sword' 
-  | 'Rocket Launcher' 
+export type WeaponType =
+  | 'Auto Rifle'
+  | 'Hand Cannon'
+  | 'Pulse Rifle'
+  | 'Scout Rifle'
+  | 'Sidearm'
+  | 'Combat Bow'
+  | 'Submachine Gun'
+  | 'Fusion Rifle'
+  | 'Sniper Rifle'
+  | 'Shotgun'
+  | 'Special/Heavy Grenade Launcher'
+  | 'Trace Rifle'
+  | 'Glaive'
+  | 'Machine Gun'
+  | 'Sword'
+  | 'Rocket Launcher'
   | 'Linear Fusion Rifle'
   | 'All';
 
@@ -51,10 +51,8 @@ export const WEAPON_STAT_MAPPINGS: Record<WeaponType, FrameMapping> = {
     'Micro-Missile': ['RPM', 'Blast Radius', 'Velocity', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
     'The Rest': ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
   },
-  'Bow': {
-    'High-Impact Frame': ['Velocity', 'Persistence', 'Impact', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Magazine'],
-    'Bolt Thrower': ['Velocity', 'Persistence', 'Impact', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Magazine'],
-    'The Rest': ['Draw Time', 'Impact', 'Accuracy', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
+  'Combat Bow': {
+    'All': ['Draw Time', 'Impact', 'Accuracy', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction'],
   },
   'Submachine Gun': {
     'The Rest': ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],

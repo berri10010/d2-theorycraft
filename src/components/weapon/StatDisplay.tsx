@@ -20,7 +20,11 @@ const STAT_LABEL_MAP: Record<string, string> = {
 };
 
 // Superset of all possible bar stats across weapon types.
-const ALL_BAR_STAT_KEYS = ['Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Velocity', 'Persistence'];
+const ALL_BAR_STAT_KEYS = [
+  'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
+  'Velocity', 'Blast Radius', 'Accuracy',
+  'Swing Speed', 'Guard Resistance', 'Charge Rate', 'Guard Endurance', 'Shield Duration',
+];
 
 // Stats shown as plain numbers (no meaningful 0-100 bar)
 const NUMERIC_STAT_KEYS = ['Zoom', 'Airborne Effectiveness', 'Inventory Size', 'Recoil Direction', 'Magazine'];
@@ -79,8 +83,8 @@ export const StatDisplay: React.FC = () => {
           const base    = baseStats[statName] ?? 0;
           const current = calcStats[statName] ?? base;
           const diff    = current - base;
-          // skip Velocity/Persistence if no data exists
-          if ((statName === 'Velocity' || statName === 'Persistence') && base === 0 && current === 0) {
+          // Skip stats that have no manifest data for this weapon type
+          if (base === 0 && current === 0) {
             return null;
           }
           const curve   = activeWeapon.statCurves[statName];

@@ -80,13 +80,26 @@ const STAT_HASH_MAP: Record<number, string> = {
   3871231066: 'Magazine',
   2168534779: 'Charge Time',
   1935470627: 'Draw Time',
+  3614673599: 'Blast Radius',
+  2523465841: 'Velocity',
+  1591432999: 'Accuracy',
+  1931675084: 'Ammo Generation',
+  2837207746: 'Swing Speed',
+  209426660:  'Guard Resistance',
+  3022301683: 'Charge Rate',
+  3736848092: 'Guard Endurance',
+  1842278586: 'Shield Duration',
+  925767036:  'Ammo Capacity',
 };
 
 // Stats stored in baseStats (used for display + stat modifier math)
 const DISPLAY_STATS = new Set([
-      'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
-      'Zoom', 'Recoil Direction', 'Magazine', 'Airborne Effectiveness', 'Velocity', 'Persistence',
-    ]);
+  'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
+  'Zoom', 'Recoil Direction', 'Magazine', 'Airborne Effectiveness',
+  'RPM', 'Draw Time', 'Charge Time',
+  'Blast Radius', 'Velocity', 'Accuracy', 'Ammo Generation',
+  'Swing Speed', 'Guard Resistance', 'Charge Rate', 'Guard Endurance', 'Shield Duration', 'Ammo Capacity',
+]);
 
 const DAMAGE_TYPE_MAP: Record<number, Weapon['damageType']> = {
   3373582085: 'kinetic',
@@ -354,6 +367,8 @@ export function parseWeapons(
     const BAR_STATS = new Set([
       'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
       'Zoom', 'Recoil Direction', 'Magazine', 'Airborne Effectiveness',
+      'Blast Radius', 'Velocity', 'Accuracy', 'Ammo Generation',
+      'Swing Speed', 'Guard Resistance', 'Charge Rate', 'Guard Endurance', 'Shield Duration',
     ]);
 
      let rawColumns: PerkColumn[] = [];
