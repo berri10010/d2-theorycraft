@@ -124,9 +124,18 @@ export const RollEditor: React.FC = () => {
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
   // ── Split columns into zones ─────────────────────────────────────────────
+  // Barrel/Mag stay as fixed rows; single-option perk/origin columns merge
+  // into the choosable grid so they each get their own column header (as they
+  // would be if the weapon didn't have a fixed roll).
   const { fixedColumns, choosableColumns } = useMemo(() => {
-    const fixed = activeWeapon.perkSockets.filter((col) => col.perks.length === 1);
-    const choosable = activeWeapon.perkSockets.filter((col) => col.perks.length > 1);
+    const fixed    = activeWeapon.perkSockets.filter(
+      (col) => col.perks.length === 1 && (col.columnType === 'barrel' || col.columnType === 'mag'),
+    );
+    const choosable = activeWeapon.perkSockets.filter(
+      (col) =>
+        col.perks.length > 1 ||
+        (col.perks.length === 1 && col.columnType !== 'barrel' && col.columnType !== 'mag'),
+    );
     return { fixedColumns: fixed, choosableColumns: choosable };
   }, [activeWeapon]);
 

@@ -20,6 +20,8 @@ export interface BuffStack {
   multiplier: number;
 }
 
+export type ClassType = 'neutral' | 'hunter' | 'warlock' | 'titan';
+
 export interface DamageBuff {
   hash: string;
   name: string;
@@ -27,6 +29,8 @@ export interface DamageBuff {
   category: BuffCategory;
   /** Stacking rule — see StackType */
   stackType: StackType;
+  /** Which class section to display in (undefined = class-neutral empowering/debuff sections) */
+  classType?: ClassType;
   /**
    * Default / max multiplier.
    * For stackable perks this is the max-stack value; the active stack is
