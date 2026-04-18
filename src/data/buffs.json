@@ -403,9 +403,10 @@
     "stackType": "multiplicative",
     "classType": "neutral",
     "multiplier": 1.0,
-    "description": "Arc fragment. Rapid pulse/scout/auto rifle final blows create an Ionic Trace. (Utility — no direct damage bonus.)",
+    "description": "Arc fragment. 0.80× Reload Duration Multiplier — Arc weapon hits with Bolt Charge stack reload speed to near-instant.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "statBonuses": { "Reload": 40 }
   },
   "amplified": {
     "hash": "amplified",
@@ -414,9 +415,10 @@
     "stackType": "multiplicative",
     "classType": "neutral",
     "multiplier": 1.0,
-    "description": "Arc keyword. Improves weapon handling, airborne effectiveness, and sprint speed. (Utility — no direct damage bonus.)",
+    "description": "Arc keyword. +40 Handling, 0.95× Ready/Stow Duration Multiplier, improved airborne effectiveness and sprint speed.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "statBonuses": { "Handling": 40, "Airborne Effectiveness": 20 }
   },
   "ember_of_tempering": {
     "hash": "ember_of_tempering",
@@ -458,9 +460,10 @@
     "stackType": "multiplicative",
     "classType": "neutral",
     "multiplier": 1.0,
-    "description": "Strand fragment. Activating grenade reloads your equipped weapon and boosts airborne effectiveness and mobility. (Utility — no direct damage bonus.)",
+    "description": "Strand fragment. Activating grenade reloads your equipped weapon and grants +30 Airborne Effectiveness and +30 Reload Speed.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "statBonuses": { "Airborne Effectiveness": 30, "Reload": 30 }
   },
   "flow_state": {
     "hash": "flow_state",
@@ -469,9 +472,10 @@
     "stackType": "multiplicative",
     "classType": "hunter",
     "multiplier": 1.0,
-    "description": "Arc Hunter keyword. Improves weapon reload speed, handling, and dodge cooldown. (Utility — no direct damage bonus.)",
+    "description": "Arc Hunter keyword. +40 Reload Speed and +20 Handling while active.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "statBonuses": { "Reload": 40, "Handling": 20 }
   },
   "on_your_mark": {
     "hash": "on_your_mark",
@@ -513,9 +517,10 @@
     "stackType": "empowering",
     "classType": "warlock",
     "multiplier": 1.10,
-    "description": "Solar Warlock Dawnblade aspect. Grants Radiant and enhanced aerial weapon performance while airborne.",
+    "description": "Solar Warlock Dawnblade aspect. +10% weapon damage and +30 Airborne Effectiveness while airborne.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "statBonuses": { "Airborne Effectiveness": 30 }
   },
   "rally_barricade": {
     "hash": "rally_barricade",
@@ -524,9 +529,10 @@
     "stackType": "multiplicative",
     "classType": "titan",
     "multiplier": 1.0,
-    "description": "Titan class ability. Crouching behind the barricade instantly reloads your equipped weapon and boosts reload speed. (Utility — no direct damage bonus.)",
+    "description": "Titan class ability. Crouching behind the barricade instantly reloads your weapon and grants +50 Reload Speed.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "statBonuses": { "Reload": 50 }
   },
   "sentinel_shield": {
     "hash": "sentinel_shield",

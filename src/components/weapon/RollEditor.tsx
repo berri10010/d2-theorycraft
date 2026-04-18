@@ -19,74 +19,6 @@ const COL_ACCENT_BAR: Record<string, string> = {
   origin: 'bg-emerald-500/40',
 };
 
-const COL_LEFT_BORDER: Record<string, string> = {
-  barrel: 'border-orange-500/60',
-  mag:    'border-blue-500/60',
-  perk:   'border-slate-400/60',
-  origin: 'border-emerald-500/60',
-};
-
-// ── Fixed perk row (identity block) ──────────────────────────────────────────
-
-interface FixedPerkRowProps {
-  perk:        Perk;
-  columnType:  string;
-  description: string | undefined;
-  dimmed?:     boolean;
-}
-
-function FixedPerkRow({ perk, columnType, description, dimmed }: FixedPerkRowProps) {
-  const borderClass = COL_LEFT_BORDER[columnType] ?? COL_LEFT_BORDER.perk;
-
-  return (
-    <div
-      className={[
-        'flex items-start gap-3 py-2.5 px-3 rounded-lg bg-white/[0.03] border-l-2',
-        borderClass,
-        dimmed ? 'opacity-30' : '',
-      ].join(' ')}
-    >
-      {/* Icon */}
-      <div className="relative w-10 h-10 rounded-full border border-white/20 overflow-hidden shrink-0 mt-0.5">
-        <Image
-          src={BUNGIE_URL + perk.icon}
-          alt={perk.name}
-          fill
-          sizes="40px"
-          className="object-cover"
-          unoptimized
-        />
-        {perk.buffKey && (
-          <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-green-400 rounded-full border border-black/60" />
-        )}
-      </div>
-
-      {/* Name + stat mods + description */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap mb-0.5">
-          <span className="text-sm font-semibold text-white leading-tight">{perk.name}</span>
-          {perk.statModifiers.map((mod) => (
-            <span
-              key={mod.statName}
-              className={[
-                'text-[10px] font-mono font-bold',
-                mod.isConditional
-                  ? 'text-amber-400/80'
-                  : mod.value > 0 ? 'text-green-400' : 'text-red-400',
-              ].join(' ')}
-            >
-              {mod.value > 0 ? '+' : ''}{mod.value} {mod.statName}
-            </span>
-          ))}
-        </div>
-        {description && (
-          <p className="text-[11px] text-slate-400 leading-snug line-clamp-3">{description}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ── Main component ────────────────────────────────────────────────────────────
 
 export const RollEditor: React.FC = () => {
@@ -123,25 +55,13 @@ export const RollEditor: React.FC = () => {
 
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
-  // ── Split columns into zones ─────────────────────────────────────────────
-  // Barrel/Mag stay as fixed rows; single-option perk/origin columns merge
-  // into the choosable grid so they each get their own column header (as they
-  // would be if the weapon didn't have a fixed roll).
-  const { fixedColumns, choosableColumns } = useMemo(() => {
-    const fixed    = activeWeapon.perkSockets.filter(
-      (col) => col.perks.length === 1 && (col.columnType === 'barrel' || col.columnType === 'mag'),
-    );
-    const choosable = activeWeapon.perkSockets.filter(
-      (col) =>
-        col.perks.length > 1 ||
-        (col.perks.length === 1 && col.columnType !== 'barrel' && col.columnType !== 'mag'),
-    );
-    return { fixedColumns: fixed, choosableColumns: choosable };
-  }, [activeWeapon]);
-
-  const hasFixedZone     = fixedColumns.length > 0;
+  // All perk columns go into the choosable grid regardless of type.
+  // Single-option columns are auto-selected and show their Clarity description inline.
+  const choosableColumns = useMemo(
+    () => activeWeapon.perkSockets,
+    [activeWeapon],
+  );
   const hasChoosableZone = choosableColumns.length > 0;
-  const hasBothZones     = hasFixedZone && hasChoosableZone;
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
@@ -156,40 +76,9 @@ export const RollEditor: React.FC = () => {
         )}
       </div>
 
-      {/* ── Fixed Traits zone ─────────────────────────────────────────────── */}
-      {hasFixedZone && (
-        <div className={hasBothZones ? 'mb-6' : ''}>
-          {hasBothZones && (
-            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">
-              Fixed Traits
-            </h3>
-          )}
-          <div className="flex flex-col gap-1.5">
-            {fixedColumns.map((col) => {
-              const perk   = col.perks[0];
-              const dimmed = col.columnType === 'origin' && isLegacy;
-              return (
-                <FixedPerkRow
-                  key={col.name}
-                  perk={perk}
-                  columnType={col.columnType}
-                  description={compendiumPerks?.[perk.name]?.baseDescription}
-                  dimmed={dimmed}
-                />
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── Choosable Mods zone ───────────────────────────────────────────── */}
+      {/* ── All Perk Columns ─────────────────────────────────────────────── */}
       {hasChoosableZone && (
         <>
-          {hasBothZones && (
-            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2.5">
-              Choosable Mods
-            </h3>
-          )}
           <div className="flex overflow-x-auto pb-4 md:grid md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 md:pb-0">
             {choosableColumns.map((column, colIdx) => {
               const isOriginTraitCol = column.columnType === 'origin';

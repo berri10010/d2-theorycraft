@@ -489,7 +489,7 @@ export const useWeaponStore = create<WeaponState>()(
       setArmorMods:      (mods)   => set((s) => ({ armorMods: { ...s.armorMods, ...mods } })),
 
       getCalculatedStats: () => {
-        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, activeMod, armorMods } = get();
+        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, activeMod, armorMods, activeBuffs } = get();
         if (!activeWeapon) return {};
 
         const finalStats: StatMap = { ...activeWeapon.baseStats };
@@ -546,6 +546,25 @@ export const useWeaponStore = create<WeaponState>()(
         for (const [stat, delta] of Object.entries(armorModStatDeltas(armorMods))) {
           if (delta && finalStats[stat] !== undefined) {
             finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + delta));
+          }
+        }
+
+        // Active external buff stat bonuses (e.g. Amplified +40 Handling)
+        // Collect buff keys from: manual activeBuffs + perk-linked buffs where effect is on
+        const activeBuffKeys = new Set<string>(activeBuffs);
+        for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+          if ((activeEffects[perkHash] ?? 0) === 0) continue;
+          const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+          const basePerk = resolveBasePerk(column, perkHash);
+          if (basePerk?.buffKey) activeBuffKeys.add(basePerk.buffKey);
+        }
+        for (const buffKey of activeBuffKeys) {
+          const buff = BUFF_DATABASE[buffKey];
+          if (!buff?.statBonuses) continue;
+          for (const [stat, bonus] of Object.entries(buff.statBonuses)) {
+            if (finalStats[stat] !== undefined) {
+              finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + bonus));
+            }
           }
         }
 

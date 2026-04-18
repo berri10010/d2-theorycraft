@@ -51,6 +51,12 @@ export interface DamageBuff {
    * When present the UI shows a stack selector instead of a single toggle.
    */
   stacks?: BuffStack[];
+  /**
+   * Flat weapon stat bonuses applied to the stat bars when this buff is active.
+   * Keys are stat names (e.g. "Handling", "Reload"). Values are added on top of
+   * base + perk modifiers, clamped to [0, 100].
+   */
+  statBonuses?: Record<string, number>;
 }
 
 export const BUFF_DATABASE = buffData as Record<string, DamageBuff>;

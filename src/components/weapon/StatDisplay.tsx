@@ -31,43 +31,49 @@ const COMPACT_STAT_KEYS = [
   'Zoom', 'Airborne Effectiveness', 'Ammo Generation', 'Recoil Direction', 'Magazine', 'Inventory Size',
 ];
 
-// ── Recoil direction chart ──────────────────────────────────────────────────────
+// ── Recoil direction chart (DIM-style) ─────────────────────────────────────────
+// Ones digit of recoil value determines horizontal bias: 5 = straight up,
+// 0 = hard right (+45°), 9 = left (-36°). Higher overall value = tighter cone.
 
 function RecoilChart({ value }: { value: number }) {
-  // Map recoil direction (0–100) to angle from vertical (−90° to +90°)
-  // 50 ≈ straight up, 0 = far left, 100 = far right
-  const angleDeg = (value - 50) * 1.8;
-  const angleRad = (angleDeg - 90) * (Math.PI / 180);
+  const W = 56, H = 36;
+  const cx = W / 2;
+  const cy = H - 2; // pivot at bottom
+  const R = 27;
 
-  const cx = 28, cy = 28, r = 20;
-  const lineX = cx + r * Math.cos(angleRad);
-  const lineY = cy + r * Math.sin(angleRad);
+  // Direction from vertical: ones digit 5 = 0°, 0 = +45° (right), 9 = -36° (left)
+  const onesDigit = value % 10;
+  const directionDeg = (5 - onesDigit) * 9;
 
-  // Arc: from -90° to +90° (top semicircle)
-  const arcStart = { x: cx - r, y: cy };
-  const arcEnd   = { x: cx + r, y: cy };
+  // Spread half-angle: wider at low values, tight at high values
+  const spreadHalfDeg = Math.max(3, (1 - value / 100) * 45);
 
-  const stabilityColor =
-    value >= 80 ? '#22c55e'
-    : value >= 60 ? '#84cc16'
-    : value >= 40 ? '#eab308'
-    : '#f97316';
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const centerRad = toRad(-90 + directionDeg);
+  const leftRad   = toRad(-90 + directionDeg - spreadHalfDeg);
+  const rightRad  = toRad(-90 + directionDeg + spreadHalfDeg);
+
+  const lx = (cx + R * Math.cos(leftRad)).toFixed(1);
+  const ly = (cy + R * Math.sin(leftRad)).toFixed(1);
+  const rx = (cx + R * Math.cos(rightRad)).toFixed(1);
+  const ry = (cy + R * Math.sin(rightRad)).toFixed(1);
+  const tipX = (cx + R * Math.cos(centerRad)).toFixed(1);
+  const tipY = (cy + R * Math.sin(centerRad)).toFixed(1);
+
+  const largeArc = spreadHalfDeg * 2 > 180 ? 1 : 0;
+  const sectorPath = `M ${cx} ${cy} L ${lx} ${ly} A ${R} ${R} 0 ${largeArc} 1 ${rx} ${ry} Z`;
+  const bgPath = `M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`;
 
   return (
-    <svg width={56} height={40} viewBox="0 0 56 40" className="shrink-0">
-      {/* Background arc */}
-      <path
-        d={`M ${arcStart.x} ${arcStart.y} A ${r} ${r} 0 0 1 ${arcEnd.x} ${arcEnd.y}`}
-        fill="none" stroke="#334155" strokeWidth={3} strokeLinecap="round"
-      />
-      {/* Direction line */}
-      <line
-        x1={cx} y1={cy}
-        x2={lineX} y2={lineY}
-        stroke={stabilityColor} strokeWidth={2.5} strokeLinecap="round"
-      />
-      {/* Center dot */}
-      <circle cx={cx} cy={cy} r={2.5} fill={stabilityColor} />
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="shrink-0">
+      {/* Background semicircle */}
+      <path d={bgPath} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
+      {/* Recoil cone */}
+      <path d={sectorPath} fill="rgba(255,255,255,0.18)" />
+      {/* Center line */}
+      <line x1={cx} y1={cy} x2={tipX} y2={tipY} stroke="white" strokeWidth={1.5} strokeLinecap="round" />
+      {/* Pivot dot */}
+      <circle cx={cx} cy={cy} r={2} fill="white" />
     </svg>
   );
 }
@@ -84,6 +90,7 @@ export const StatDisplay: React.FC = () => {
     activeMod,
     armorMods,
     activeEffects,
+    activeBuffs,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:       s.activeWeapon,
@@ -94,12 +101,13 @@ export const StatDisplay: React.FC = () => {
       activeMod:          s.activeMod,
       armorMods:          s.armorMods,
       activeEffects:      s.activeEffects,
+      activeBuffs:        s.activeBuffs,
     }))
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const calcStats = useMemo(() => getCalculatedStats(), [
-    activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods, activeEffects,
+    activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods, activeEffects, activeBuffs,
   ]);
 
   if (!activeWeapon) return null;
