@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { useWeaponStore } from '../../store/useWeaponStore';
 import {
+  useWeaponStore,
   ArmorModTier,
   dexterityReadout,
   unflinchingReduction,
@@ -10,6 +10,8 @@ import {
   TARGETING_AA,
   LOADER_RELOAD,
   INFLIGHT_AE,
+  SURGE_PVE,
+  SURGE_PVP,
 } from '../../store/useWeaponStore';
 
 // ─── Tier dot selector (0 = none, 1–3 = tier) ────────────────────────────────
@@ -75,7 +77,7 @@ function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProp
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export const ArmorModPanel: React.FC = () => {
-  const { activeWeapon, armorMods, setArmorMods } = useWeaponStore();
+  const { activeWeapon, armorMods, setArmorMods, surgeStacks, setSurgeStacks, mode } = useWeaponStore();
   const { targeting, loader, dexterity, unflinching, inFlight, ammoGeneration } = armorMods;
 
   if (!activeWeapon) return null;
@@ -160,6 +162,51 @@ export const ArmorModPanel: React.FC = () => {
           color="bg-yellow-400"
           readout={ammoGenReadout(ammoGeneration) || undefined}
         />
+      </div>
+
+      {/* ── Weapon Surge ──────────────────────────────────────────────── */}
+      <div className="pt-3 border-t border-white/5">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Weapon Surge
+          </h3>
+          {surgeStacks > 0 && (
+            <span className="text-[10px] font-semibold text-amber-400">
+              +{(((mode === 'pve' ? SURGE_PVE : SURGE_PVP)[surgeStacks] ?? 1) - 1) * 100}% dmg
+            </span>
+          )}
+        </div>
+
+        <div className="flex gap-1.5">
+          {([0, 1, 2, 3, 4] as const).map((stacks) => (
+            <button
+              key={stacks}
+              onClick={() => setSurgeStacks(stacks)}
+              title={stacks === 4 ? 'Stack 4 — Artifact or Exotic Armor only' : undefined}
+              className={[
+                'flex-1 text-xs font-bold py-2 rounded-md border transition-all',
+                surgeStacks === stacks
+                  ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
+                  : 'bg-white/5 text-slate-500 border-white/10 hover:border-white/20 hover:text-slate-300',
+                stacks === 4 ? 'opacity-60' : '',
+              ].join(' ')}
+            >
+              {stacks === 0 ? 'Off' : `${stacks}×`}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-3 mt-2 text-[10px] text-slate-600">
+          <div>
+            <span className="text-blue-400 font-bold">PvE:</span>{' '}
+            {[1, 2, 3, 4].map((s) => `${((SURGE_PVE[s] - 1) * 100).toFixed(0)}%`).join(' | ')}
+          </div>
+          <div>
+            <span className="text-red-400 font-bold">PvP:</span>{' '}
+            {[1, 2, 3, 4].map((s) => `${((SURGE_PVP[s] - 1) * 100).toFixed(1)}%`).join(' | ')}
+          </div>
+        </div>
+        <p className="text-[10px] text-slate-700 mt-0.5">×4 via Artifact or Exotic Armor only.</p>
       </div>
 
       <div className="mt-4 pt-3 border-t border-white/5 space-y-1">
