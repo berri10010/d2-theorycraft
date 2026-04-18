@@ -201,13 +201,14 @@ export const RollEditor: React.FC = () => {
                 <div
                   key={column.name}
                   className={[
-                    'flex flex-col items-center min-w-[60px]',
+                    'flex flex-col',
+                    column.perks.length === 1 ? 'items-start min-w-[180px]' : 'items-center min-w-[60px]',
                     columnDisabled ? 'opacity-30 pointer-events-none' : '',
                     !isLast ? 'border-r border-white/5 pr-3 md:pr-4' : '',
                   ].join(' ')}
                 >
                   {/* Column header */}
-                  <div className="w-full flex flex-col items-center gap-1 mb-3">
+                  <div className="w-full flex flex-col gap-1 mb-3" style={{ alignItems: column.perks.length === 1 ? 'flex-start' : 'center' }}>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
                       {columnDisabled ? `${column.name} ·` : column.name}
                     </span>
@@ -215,7 +216,10 @@ export const RollEditor: React.FC = () => {
                   </div>
 
                   {/* Perk icons */}
-                  <div className="flex flex-col gap-2.5 items-center">
+                  <div className={[
+                    'flex gap-2.5 items-center',
+                    column.perks.length === 1 ? 'flex-row w-full' : 'flex-col',
+                  ].join(' ')}>
                     {column.perks.map((perk) => {
                       const selectedHash     = selectedPerks[column.name];
                       const isBaseActive     = selectedHash === perk.hash;
@@ -289,6 +293,34 @@ export const RollEditor: React.FC = () => {
                         </div>
                       );
                     })}
+
+                    {/* Description for single-option (fixed) perk columns */}
+                    {column.perks.length === 1 && (() => {
+                      const perk = column.perks[0];
+                      const desc = compendiumPerks?.[perk.name]?.baseDescription;
+                      if (!desc) return null;
+                      return (
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-semibold text-white/70 leading-tight mb-0.5">{perk.name}</p>
+                          {perk.statModifiers.length > 0 && (
+                            <div className="flex flex-wrap gap-x-1.5 mb-0.5">
+                              {perk.statModifiers.map((mod) => (
+                                <span
+                                  key={mod.statName}
+                                  className={[
+                                    'text-[9px] font-mono font-bold',
+                                    mod.isConditional ? 'text-amber-400/80' : mod.value > 0 ? 'text-green-400' : 'text-red-400',
+                                  ].join(' ')}
+                                >
+                                  {mod.value > 0 ? '+' : ''}{mod.value} {mod.statName}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <p className="text-[10px] text-slate-400 leading-snug line-clamp-4">{desc}</p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               );

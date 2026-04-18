@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import ammoData from '../../data/ammoData.json';
 
@@ -18,6 +19,8 @@ interface AmmoEntry {
 }
 
 const DB = ammoData as Record<string, AmmoEntry>;
+
+const AMMO_NUM_TO_STR: Record<number, string> = { 1: 'Primary', 2: 'Special', 3: 'Heavy' };
 
 // ── Ammo type styling ─────────────────────────────────────────────────
 const AMMO_STYLE: Record<string, { bg: string; text: string; dot: string }> = {
@@ -42,24 +45,37 @@ function ReserveBar({ label, value, max, color }: { label: string; value: number
 }
 
 export const AmmoPanel: React.FC = () => {
-  const { activeWeapon } = useWeaponStore();
+  const { activeWeapon, getCalculatedStats } = useWeaponStore(
+    useShallow((s) => ({ activeWeapon: s.activeWeapon, getCalculatedStats: s.getCalculatedStats }))
+  );
   const [showMods, setShowMods] = useState(false);
 
   if (!activeWeapon) return null;
 
-  const entry = DB[activeWeapon.name];
-  if (!entry) return null;
+  // ── Manifest (Bungie API) data ────────────────────────────────────
+  const ammoTypeStr  = AMMO_NUM_TO_STR[activeWeapon.ammoType] ?? 'Primary';
+  const isPrimary    = activeWeapon.ammoType === 1;
+  const calcStats    = getCalculatedStats();
+  const magStatApi   = calcStats['Magazine'] ?? activeWeapon.baseStats['Magazine'] ?? null;
+  const reservesApi  = activeWeapon.baseStats['Ammo Capacity'] ?? null;
 
-  const ammoStyle = AMMO_STYLE[entry.ammoType ?? ''] ?? AMMO_STYLE.Primary;
-  const isPrimary = entry.ammoType === 'Primary';
-  const hasResMods = !isPrimary && (entry.res1x != null || entry.res2x != null || entry.res3x != null);
+  // ── MossyMax fallback data ────────────────────────────────────────
+  const entry        = DB[activeWeapon.name] as AmmoEntry | undefined;
+  const magSize      = entry?.magSize ?? null;
+  const baseReserves = reservesApi ?? entry?.baseReserves ?? null;
+  const hasResMods   = !isPrimary && entry != null &&
+    (entry.res1x != null || entry.res2x != null || entry.res3x != null);
 
-  // For the reserve bar we need a sensible max
+  // Nothing to show at all
+  if (magStatApi == null && magSize == null && baseReserves == null) return null;
+
+  const ammoStyle = AMMO_STYLE[ammoTypeStr] ?? AMMO_STYLE.Primary;
+
   const maxReserves = Math.max(
-    entry.baseReserves ?? 0,
-    entry.res1x ?? 0,
-    entry.res2x ?? 0,
-    entry.res3x ?? 0,
+    baseReserves ?? 0,
+    entry?.res1x ?? 0,
+    entry?.res2x ?? 0,
+    entry?.res3x ?? 0,
     1,
   );
 
@@ -68,12 +84,10 @@ export const AmmoPanel: React.FC = () => {
       {/* Header row */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-white">Ammo</h2>
-        {entry.ammoType && (
-          <span className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-lg border border-white/10 ${ammoStyle.bg} ${ammoStyle.text}`}>
-            <span className={`w-2 h-2 rounded-full ${ammoStyle.dot}`} />
-            {entry.ammoType}
-          </span>
-        )}
+        <span className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-lg border border-white/10 ${ammoStyle.bg} ${ammoStyle.text}`}>
+          <span className={`w-2 h-2 rounded-full ${ammoStyle.dot}`} />
+          {ammoTypeStr}
+        </span>
       </div>
 
       {/* Top stats grid */}
@@ -81,16 +95,16 @@ export const AmmoPanel: React.FC = () => {
         {/* Magazine */}
         <div className="bg-black/40 rounded-lg p-3 border border-white/10 text-center">
           <div className="text-xs text-slate-500 mb-1">Magazine</div>
-          <div className="text-2xl font-mono font-bold text-white">{entry.magSize ?? '—'}</div>
-          {entry.magStat != null && (
-            <div className="text-[10px] text-slate-600 mt-0.5">stat {entry.magStat}</div>
+          <div className="text-2xl font-mono font-bold text-white">{magSize ?? '—'}</div>
+          {magStatApi != null && (
+            <div className="text-[10px] text-slate-600 mt-0.5">stat {magStatApi}</div>
           )}
         </div>
 
         {/* Base Reserves */}
         <div className="bg-black/40 rounded-lg p-3 border border-white/10 text-center">
           <div className="text-xs text-slate-500 mb-1">Reserves</div>
-          <div className="text-2xl font-mono font-bold text-white">{isPrimary ? '∞' : (entry.baseReserves ?? '—')}</div>
+          <div className="text-2xl font-mono font-bold text-white">{isPrimary ? '∞' : (baseReserves ?? '—')}</div>
           <div className="text-[10px] text-slate-600 mt-0.5">{isPrimary ? 'infinite' : 'base'}</div>
         </div>
 
@@ -98,8 +112,8 @@ export const AmmoPanel: React.FC = () => {
         <div className="bg-black/40 rounded-lg p-3 border border-white/10 text-center">
           <div className="text-xs text-slate-500 mb-1">Total</div>
           <div className="text-2xl font-mono font-bold text-white">
-            {isPrimary ? '∞' : (entry.magSize != null && entry.baseReserves != null
-              ? entry.magSize + entry.baseReserves
+            {isPrimary ? '∞' : (magSize != null && baseReserves != null
+              ? magSize + baseReserves
               : '—')}
           </div>
           <div className="text-[10px] text-slate-600 mt-0.5">mag + reserves</div>
@@ -121,10 +135,10 @@ export const AmmoPanel: React.FC = () => {
 
           {showMods && (
             <div className="space-y-2 mt-1">
-              <ReserveBar label="Base" value={entry.baseReserves} max={maxReserves} color="bg-slate-500" />
-              <ReserveBar label="1×"   value={entry.res1x}        max={maxReserves} color="bg-green-500" />
-              <ReserveBar label="2×"   value={entry.res2x}        max={maxReserves} color="bg-green-400" />
-              <ReserveBar label="3×"   value={entry.res3x}        max={maxReserves} color="bg-green-300" />
+              <ReserveBar label="Base" value={baseReserves}  max={maxReserves} color="bg-slate-500" />
+              <ReserveBar label="1×"   value={entry!.res1x}  max={maxReserves} color="bg-green-500" />
+              <ReserveBar label="2×"   value={entry!.res2x}  max={maxReserves} color="bg-green-400" />
+              <ReserveBar label="3×"   value={entry!.res3x}  max={maxReserves} color="bg-green-300" />
             </div>
           )}
         </div>
@@ -132,7 +146,9 @@ export const AmmoPanel: React.FC = () => {
 
       {/* Source note */}
       <p className="text-[10px] text-slate-700 mt-3 text-right">
-        Source: Weapon Reserves &amp; Mag Database · MossyMax
+        {entry
+          ? 'Bungie manifest · reserve mods: MossyMax'
+          : 'Source: Bungie manifest'}
       </p>
     </div>
   );
