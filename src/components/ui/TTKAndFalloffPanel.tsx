@@ -378,6 +378,51 @@ export const TTKAndFalloffPanel: React.FC = () => {
             </div>
           )}
 
+          {/* Weapons Stat */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm text-slate-400">Weapons Stat</span>
+              <span className={[
+                'text-xs font-bold tabular-nums',
+                weaponsStat > 100 ? 'text-amber-400' : 'text-green-400',
+              ].join(' ')}>
+                {weaponsStat}/200
+                {' · '}
+                +{((Math.min(weaponsStat, 100) / 100 * 0.15 + Math.max(0, weaponsStat - 100) / 100 * 0.15) * 100).toFixed(1)}%
+              </span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={200}
+              value={weaponsStat}
+              onChange={(e) => setWeaponsStat(Number(e.target.value))}
+              className="w-full accent-amber-500 h-1.5 rounded-full cursor-pointer"
+            />
+            <div className="flex gap-1.5 flex-wrap mt-1.5">
+              {[30, 50, 70, 100, 130, 150, 200].map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setWeaponsStat(v)}
+                  className={[
+                    'text-[10px] font-bold px-2 py-0.5 rounded border transition-colors',
+                    weaponsStat === v
+                      ? v > 100
+                        ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
+                        : 'bg-green-500/20 border-green-500/50 text-green-400'
+                      : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-300',
+                  ].join(' ')}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+            <div className="text-[10px] text-slate-600 mt-1 space-y-0.5">
+              <p><span className="text-green-600">1–100:</span> 0–15% vs minors &amp; majors, 0–10% for Heavy.</p>
+              <p><span className="text-amber-600">101–200:</span> additional 0–15% vs bosses.</p>
+            </div>
+          </div>
+
           {/* Power-level delta slider */}
           <div>
             <div className="flex items-center justify-between mb-1">

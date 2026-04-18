@@ -257,6 +257,7 @@ interface WeaponState {
   setMode:           (mode: GameMode) => void;
   setMasterworkStat: (stat: MasterworkStat | null) => void;
   toggleCrafted:     () => void;
+  setCrafted:        (val: boolean) => void;
   setActiveMod:      (mod: WeaponMod) => void;
   setSurgeStacks:    (stacks: 0 | 1 | 2 | 3 | 4) => void;
   setWeaponsStat:    (stat: number) => void;
@@ -375,12 +376,12 @@ export const useWeaponStore = create<WeaponState>()(
           activeWeaponHash: weapon.hash,
           variantGroup:     group ?? [weapon],
           weaponRolls,
-          selectedPerks:    saved ? { ...fixedPerks, ...saved.selectedPerks } : fixedPerks,
-          masterworkStat:   saved?.masterworkStat ?? null,
-          isCrafted:        saved?.isCrafted      ?? false,
-          activeMod:        newMod,
-          armorMods:        saved?.armorMods      ?? DEFAULT_ARMOR_MODS,
-          activeEffects:    saved?.activeEffects  ?? {},
+          selectedPerks:    fixedPerks,
+          masterworkStat:   null,
+          isCrafted:        false,
+          activeMod:        WEAPON_MODS[0],
+          armorMods:        DEFAULT_ARMOR_MODS,
+          activeEffects:    {},
           // activeBuffs / buffStacks intentionally preserved (global)
         });
       },
@@ -481,6 +482,7 @@ export const useWeaponStore = create<WeaponState>()(
       setMode:           (mode)   => set({ mode }),
       setMasterworkStat: (stat)   => set({ masterworkStat: stat }),
       toggleCrafted:     ()       => set((s) => ({ isCrafted: !s.isCrafted })),
+      setCrafted:        (val)    => set({ isCrafted: val }),
       setActiveMod:      (mod)    => set({ activeMod: mod }),
       setSurgeStacks:    (stacks) => set({ surgeStacks: stacks }),
       setWeaponsStat:    (stat)   => set({ weaponsStat: Math.max(0, Math.min(200, stat)) }),

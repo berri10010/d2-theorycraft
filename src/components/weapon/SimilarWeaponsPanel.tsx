@@ -8,16 +8,27 @@ import { groupWeapons } from '../../lib/weaponGroups';
 
 // ─── Scoring ──────────────────────────────────────────────────────────────────
 
+function d2Year(seasonNumber: number): number {
+  if (seasonNumber <= 3) return 1;
+  return Math.floor((seasonNumber - 4) / 4) + 2;
+}
+
 /**
- * Scan all variants in the group for the first non-null season name/number.
- * Base weapons often lack seasonHash in the manifest; adept/variant copies usually have it.
+ * Scan all variants in the group for the first non-null season name/number,
+ * and return a label like "Echoes (Season 24, Year 7)".
  */
 function bestSeasonLabel(group: WeaponGroup): string | null {
-  const name = group.variants.map((v) => v.seasonName).find(Boolean);
-  if (name) return name;
-  const num = group.variants.map((v) => v.seasonNumber).find((n) => n != null);
-  if (num != null) return `Season ${num}`;
-  return null;
+  const seasonName = group.variants.map((v) => v.seasonName).find(Boolean) ?? null;
+  const seasonNumber = group.variants.map((v) => v.seasonNumber).find((n) => n != null) ?? null;
+  if (!seasonName && seasonNumber === null) return null;
+  const isEpisode = seasonNumber !== null && seasonNumber >= 24;
+  const displayName = seasonName
+    ? (isEpisode ? `Episode: ${seasonName}` : seasonName)
+    : `Season ${seasonNumber}`;
+  if (seasonNumber !== null) {
+    return `${displayName} (Season ${seasonNumber}, Year ${d2Year(seasonNumber)})`;
+  }
+  return displayName;
 }
 
 /** Archetype label from intrinsic trait name (e.g. "Adaptive Frame"). */

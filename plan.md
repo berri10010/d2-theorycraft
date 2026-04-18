@@ -226,6 +226,93 @@ Source-accurate PvE scalars and power-level delta scaling, sourced from MossyMax
 
 ---
 
+### Stage 12 — Feature Backlog
+
+A broad set of UI, data, and UX improvements requested for the next development cycle.
+
+#### 12A — Combat Mechanics
+
+| Task | Status |
+|------|--------|
+| Handling breakdown: surface Ready / ADS / Stow times as separate stats | ⬜ Pending |
+| Damage vs Distance chart: interactive line chart showing actual damage values per meter (hip-fire vs ADS) | ⬜ Pending |
+| Flinch resistance: show flinch resist derived from Stability + Health (0–100 → 0–10%); weapon stat can start at 0 in PvP; PvP damage bonus behaviour unchanged | ⬜ Pending |
+| Perfect Draw Window: show exact window in seconds alongside Draw Time (Bows) | ⬜ Pending |
+| Per-activity PvE scaling: Activity + Difficulty + Enemy Type dropdown scales all damage numbers; include custom option | ⬜ Pending |
+
+#### 12B — Sharing & Presentation
+
+| Task | Status |
+|------|--------|
+| Screenshot mode: Destiny-style weapon card renderer for social sharing | ⬜ Pending |
+| Screenshot mode: multi-select (weapons can have more than one perk per column; only one active at a time) | ⬜ Pending |
+| Share button: offer choice between "DIM Wishlist Item" and "Roll Permalink" | ⬜ Pending |
+
+#### 12C — Perk & Annotation System
+
+| Task | Status |
+|------|--------|
+| Community research annotations: show empirically verified perk values on hover | ⬜ Pending |
+
+#### 12D — External Buffs Panel
+
+| Task | Status |
+|------|--------|
+| Exotic armor selector in External Buffs panel | ⬜ Pending |
+| — Hunter exotics: Foetracer, Knucklehead Radar, Mask of Bakris, Mechaneer's Tricksleeves, Oathkeeper, Sealed Ahamkara Grasps, Triton Vice, The Dragon's Shadow, Lucky Pants, Speedloader Slacks | ⬜ Pending |
+| — Warlock exotics: Astrocyte Verse, Eye of Another World, Felwinter's Helm, Ballidorse Wrathweavers, Necrotic Grips, Ophidian Aspect, Mantle of Battle Harmony, Sanguine Alchemy, Wings of Sacred Dawn, Boots of the Assembler, Lunafaction Boots, Rain of Fire | ⬜ Pending |
+| — Titan exotics: Eternal Warrior, Icefall Mantle, No Backup Plans, Actium War Rig, Doom Fang Pauldron, Hallowfire Heart, Lion Rampant, The Path of Burning Steps, Peacekeepers, Peregrine Greaves | ⬜ Pending |
+| Add class-neutral buffs: Sect of Force, Sect of Insight, Blessing of the Sky, Disruption Break, Judgment, Tractor Cannon, Worm Byproduct, Spark of Frequency, Amplified, Ember of Tempering, Radiant, Weaken, Sever, Whisper of Hedrons, Thread of Ascent | ⬜ Pending |
+| Add Hunter buffs: Flow State, On Your Mark, Moebius Quiver, Deadfall | ⬜ Pending |
+| Add Warlock buffs: Empowering Rift, Well of Radiance, Heat Rises | ⬜ Pending |
+| Add Titan buffs: Rally Barricade, Ward of Dawn, Sentinel Shield | ⬜ Pending |
+
+#### 12E — Weapon Stats Panel Rework
+
+| Task | Status |
+|------|--------|
+| Show ALL weapon stats in the Weapon Stats panel (e.g. Ammo Generation is currently missing) | ⬜ Pending |
+| Make Airborne, Zoom, Ammo Gen, Recoil, Magazine display more compact | ⬜ Pending |
+| Add recoil direction pie chart to the Recoil stat (like DIM / D2 Foundry) | ⬜ Pending |
+
+#### 12F — Search Panel Rework (Homepage & Editor)
+
+| Task | Status |
+|------|--------|
+| Filters in Search Panel function like D2 Foundry | ⬜ Pending |
+| Allow perk/trait search: show every weapon with that perk; let user choose which column to filter by | ⬜ Pending |
+| Recent searches shown on search focus; hidden when typing begins | ⬜ Pending |
+
+#### 12G — Homepage & Navigation
+
+| Task | Status |
+|------|--------|
+| Consolidate the three "go to editor" buttons into one: "Browse All Weapons" (no arrow) | ⬜ Pending |
+
+#### 12H — UI / UX Polish
+
+| Task | Status |
+|------|--------|
+| Improve tooltip GUI styling | ⬜ Pending |
+| Retrieve weapon mods and masterworks from the Bungie API | ⬜ Pending |
+| Adept/Craftable mutual exclusion: clicking Adept disables Craftable and vice versa (no double-disable bug) | ⬜ Pending |
+| Move Weapon Stat row in PvE Masterwork & Mods panel into TTK & Falloff panel (mirrors PvP layout) | ⬜ Pending |
+| Clear weapon perks when switching to a different weapon | ⬜ Pending |
+| Combine "Armor Mods" and "Masterwork & Mods" panels into one panel | ⬜ Pending |
+| Primary weapons show infinite reserves | ⬜ Pending |
+| High-Impact Frame Combat Bows: surface Persistence and Velocity stats | ⬜ Pending |
+| God Roll panel hidden when weapon has no god roll | ⬜ Pending |
+| Add weapon acquisition info (how to obtain each weapon) | ⬜ Pending |
+| Fixed-trait columns: if any column contains a perk that wouldn't appear as a fixed trait, show it in its own column as if fixed traits didn't exist | ⬜ Pending |
+| Rename "Perk 3" label in Weapon Perks panel to "Origin Trait" | ⬜ Pending |
+| When all perks are fixed: hide Effects panel; any perk with activation options can be toggled in the Weapon Perks panel with Clarity info shown | ⬜ Pending |
+| Similar Weapons panel: show season number and year (e.g. "Echoes (Season 24, Year 7)") | ⬜ Pending |
+| Improve intrinsic bonuses information display | ⬜ Pending |
+
+**Stage 12 progress: 0%**
+
+---
+
 ## Overall Progress
 
 | Stage | Progress | Notes |
@@ -241,7 +328,8 @@ Source-accurate PvE scalars and power-level delta scaling, sourced from MossyMax
 | 9 — God Roll Database Refresh | 100% | Complete |
 | 10 — Weapon List Polish | 100% | Complete |
 | 11 — PvE Damage Model Accuracy | 100% | Complete |
-| **Overall** | **100%** | |
+| 12 — Feature Backlog | 0% | Pending |
+| **Overall** | **~92%** | |
 
 ---
 
@@ -257,7 +345,16 @@ Source-accurate PvE scalars and power-level delta scaling, sourced from MossyMax
 
 > These are ordered by priority. Claude should start from the top.
 
-*All planned work is complete. No outstanding actions.*
+Stage 12 is the active work. All sub-stages (12A–12H) are pending. Suggested starting order:
+
+1. **12H** — UI/UX polish items that are self-contained and high-visibility (fixed-trait column layout, "Origin Trait" label, God Roll panel visibility, Similar Weapons season format, perk clear on weapon switch, adept/craftable mutual exclusion, primary weapon infinite reserves)
+2. **12E** — Weapon Stats panel rework (missing stats, compact layout, recoil pie chart)
+3. **12F** — Search panel rework (D2 Foundry-style filters, perk search, recent searches)
+4. **12D** — External Buffs panel additions (class buffs + exotic armor selector)
+5. **12G** — Homepage navigation consolidation
+6. **12A** — Combat mechanics (handling breakdown, damage-vs-distance chart, flinch resist, perfect draw window, per-activity PvE scaling)
+7. **12B** — Screenshot mode + share options
+8. **12C** — Community research annotations
 
 ---
 

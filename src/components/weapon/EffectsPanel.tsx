@@ -319,6 +319,9 @@ export const EffectsPanel: React.FC = () => {
 
   if (!activeWeapon) return null;
 
+  const allPerksFixed = activeWeapon.perkSockets.every((col) => col.perks.length === 1);
+  if (allPerksFixed) return null;
+
   const isEmpty = activePerkEntries.length === 0 && manualBuffEntries.length === 0;
 
   // Split perks into conditional (need toggle) and passive (always-on)

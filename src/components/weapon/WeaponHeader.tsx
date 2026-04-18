@@ -85,13 +85,14 @@ function formatSeasonLabel(
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export const WeaponHeader: React.FC = () => {
-  const { activeWeapon, variantGroup, loadWeapon, isCrafted, toggleCrafted } = useWeaponStore(
+  const { activeWeapon, variantGroup, loadWeapon, isCrafted, toggleCrafted, setCrafted } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:  s.activeWeapon,
       variantGroup:  s.variantGroup,
       loadWeapon:    s.loadWeapon,
       isCrafted:     s.isCrafted,
       toggleCrafted: s.toggleCrafted,
+      setCrafted:    s.setCrafted,
     }))
   );
   const { data: compendiumPerks } = useCompendiumPerks();
@@ -290,8 +291,10 @@ export const WeaponHeader: React.FC = () => {
                     if (activeWeapon.isAdept) {
                       const base = variantGroup.find((v) => !v.variantLabel && !v.isAdept);
                       if (base) loadWeapon(base, variantGroup);
+                      setCrafted(true);
+                    } else {
+                      toggleCrafted();
                     }
-                    toggleCrafted();
                   }}
                   title="This weapon has a craftable pattern — click to enable crafted mode (+2 stats, enhanced perks)"
                   className="text-xs font-medium px-2 py-1 rounded-md border transition-all flex items-center gap-1.5 bg-white/3 text-slate-500 border-white/8 hover:border-red-500/30 hover:text-red-400 hover:bg-red-500/8"

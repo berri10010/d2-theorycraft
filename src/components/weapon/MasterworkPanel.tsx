@@ -17,7 +17,6 @@ export const MasterworkPanel: React.FC = () => {
     masterworkStat, setMasterworkStat,
     activeMod, setActiveMod,
     surgeStacks, setSurgeStacks,
-    weaponsStat, setWeaponsStat,
     mode,
   } = useWeaponStore();
 
@@ -106,59 +105,6 @@ export const MasterworkPanel: React.FC = () => {
           <p className="text-xs text-slate-500 mt-2">{activeMod.description}</p>
         )}
       </div>
-
-      {/* ── PvE-only section ──────────────────────────── */}
-      {mode === 'pve' && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Weapons Stat
-            </h3>
-            <span className={[
-              'text-[10px] font-semibold tabular-nums',
-              weaponsStat > 100 ? 'text-amber-400' : 'text-green-400',
-            ].join(' ')}>
-              {weaponsStat}/200
-              {' · '}
-              +{((Math.min(weaponsStat, 100) / 100 * 0.15 + Math.max(0, weaponsStat - 100) / 100 * 0.15) * 100).toFixed(1)}%
-            </span>
-          </div>
-
-          <input
-            type="range"
-            min={0}
-            max={200}
-            value={weaponsStat}
-            onChange={(e) => setWeaponsStat(Number(e.target.value))}
-            className="w-full accent-amber-500 h-1.5 rounded-full cursor-pointer"
-          />
-
-          <div className="flex gap-1.5 mt-2 flex-wrap">
-            {[30, 50, 70, 100, 130, 150, 200].map((v) => (
-              <button
-                key={v}
-                onClick={() => setWeaponsStat(v)}
-                className={[
-                  'text-[10px] font-bold px-2 py-1 rounded border transition-all',
-                  weaponsStat === v
-                    ? v > 100
-                      ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                      : 'bg-green-500/20 text-green-400 border-green-500/40'
-                    : 'bg-white/5 text-slate-500 border-white/10 hover:text-slate-300',
-                ].join(' ')}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
-
-          <div className="text-[10px] text-slate-600 mt-1.5 space-y-0.5">
-            <p><span className="text-green-500">1–100:</span> 0–15% vs minors &amp; majors (Primary/Special), 0–10% for Heavy.</p>
-            <p><span className="text-amber-500">101–200:</span> additional 0–15% vs bosses (Primary/Special), 0–5% vs Guardians.</p>
-            <p className="text-slate-700">Formerly the Mobility stat.</p>
-          </div>
-        </div>
-      )}
 
       {/* ── Weapon Surge — shown in both modes, values differ ─── */}
       <div>

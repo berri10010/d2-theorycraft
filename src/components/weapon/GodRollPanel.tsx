@@ -59,16 +59,7 @@ export const GodRollPanel: React.FC = () => {
 
   const entry = godRollDb?.[activeWeapon.name];
 
-  if (!entry) {
-    return (
-      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-        <h2 className="text-xl font-bold mb-4 text-white">God Roll</h2>
-        <p className="text-slate-600 text-sm text-center py-6">
-          No community data found for <span className="text-slate-400">{activeWeapon.name}</span>.
-        </p>
-      </div>
-    );
-  }
+  if (!entry) return null;
 
   const tierCfg = entry.tier ? WEAPON_TIER_CONFIG[entry.tier] : null;
 

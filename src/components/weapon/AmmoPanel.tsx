@@ -51,7 +51,8 @@ export const AmmoPanel: React.FC = () => {
   if (!entry) return null;
 
   const ammoStyle = AMMO_STYLE[entry.ammoType ?? ''] ?? AMMO_STYLE.Primary;
-  const hasResMods = entry.res1x != null || entry.res2x != null || entry.res3x != null;
+  const isPrimary = entry.ammoType === 'Primary';
+  const hasResMods = !isPrimary && (entry.res1x != null || entry.res2x != null || entry.res3x != null);
 
   // For the reserve bar we need a sensible max
   const maxReserves = Math.max(
@@ -89,17 +90,17 @@ export const AmmoPanel: React.FC = () => {
         {/* Base Reserves */}
         <div className="bg-black/40 rounded-lg p-3 border border-white/10 text-center">
           <div className="text-xs text-slate-500 mb-1">Reserves</div>
-          <div className="text-2xl font-mono font-bold text-white">{entry.baseReserves ?? '—'}</div>
-          <div className="text-[10px] text-slate-600 mt-0.5">base</div>
+          <div className="text-2xl font-mono font-bold text-white">{isPrimary ? '∞' : (entry.baseReserves ?? '—')}</div>
+          <div className="text-[10px] text-slate-600 mt-0.5">{isPrimary ? 'infinite' : 'base'}</div>
         </div>
 
         {/* Total (mag + reserves) */}
         <div className="bg-black/40 rounded-lg p-3 border border-white/10 text-center">
           <div className="text-xs text-slate-500 mb-1">Total</div>
           <div className="text-2xl font-mono font-bold text-white">
-            {entry.magSize != null && entry.baseReserves != null
+            {isPrimary ? '∞' : (entry.magSize != null && entry.baseReserves != null
               ? entry.magSize + entry.baseReserves
-              : '—'}
+              : '—')}
           </div>
           <div className="text-[10px] text-slate-600 mt-0.5">mag + reserves</div>
         </div>

@@ -15,7 +15,6 @@ type PanelKey =
   | 'ammo'
   | 'ttk-falloff'
   | 'damage-profile'
-  | 'armor-mods'
   | 'subclass';
 
 interface PanelOption {
@@ -28,7 +27,6 @@ const OPTIONS: PanelOption[] = [
   { key: 'ammo',           label: 'Ammo'                 },
   { key: 'ttk-falloff',    label: 'TTK & Falloff'        },
   { key: 'damage-profile', label: 'Damage Profile'       },
-  { key: 'armor-mods',     label: 'Armor Mods'           },
   { key: 'subclass',       label: 'Subclass Verb Math'   },
 ];
 
@@ -76,11 +74,17 @@ export function WeaponDataPanel() {
 
       {/* Panel content */}
       <div>
-        {active === 'masterwork'     && <MasterworkPanel />}
+        {active === 'masterwork' && (
+          <>
+            <MasterworkPanel />
+            <div className="mt-4">
+              <ArmorModPanel />
+            </div>
+          </>
+        )}
         {active === 'ammo'           && <AmmoPanel />}
         {active === 'ttk-falloff'    && <TTKAndFalloffPanel />}
         {active === 'damage-profile' && <DamageProfilePanel />}
-        {active === 'armor-mods'     && <ArmorModPanel />}
         {active === 'subclass'       && <SubclassVerbPanel />}
       </div>
     </div>
