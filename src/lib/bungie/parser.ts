@@ -416,7 +416,11 @@ export function parseWeapons(
             for (const plugHash of plugHashes) {
               const plugItem = items[plugHash.toString()];
               if (!plugItem?.investmentStats?.length) continue;
-              if (isTrackerPlug(plugItem.displayProperties?.name ?? '')) continue;
+              const mwPlugName = plugItem.displayProperties?.name ?? '';
+              if (isTrackerPlug(mwPlugName)) continue;
+              // Skip tier-progression plugs (e.g. "Masterwork Tier 1" through "Tier 9").
+              // Only stat-choice plugs (e.g. "Handling Masterwork") are relevant.
+              if (/\btier\b/i.test(mwPlugName)) continue;
               for (const s of plugItem.investmentStats) {
                 if (s.value === 0) continue;
                 const statName = STAT_HASH_MAP[s.statTypeHash];
@@ -749,7 +753,10 @@ export function parseWeapons(
       source: item.collectibleHash
         ? (collectibleMap[item.collectibleHash.toString()] ?? null)
         : null,
-      masterworkOptions,
+      // Only keep masterwork options for stats this weapon actually has (e.g. no
+      // Draw Time on Auto Rifles, no Impact on Bows). The plug sets in the manifest
+      // are often shared across weapon types, so this filters down to applicable stats.
+      masterworkOptions: masterworkOptions.filter((s) => baseStats[s] !== undefined),
       weaponMods,
     });
   }

@@ -30,29 +30,26 @@ export const MasterworkPanel: React.FC = () => {
   // Weapon mod list built from the manifest's weaponMods array (+ NONE_MOD sentinel).
   const availableMods = buildWeaponModsList(activeWeapon);
 
+  const hasMw   = mwOptions.length > 0;
+  const hasMods = availableMods.length > 1; // more than just NONE_MOD
+
   // Nothing to show if the manifest supplied neither masterwork nor mod options.
-  if (mwOptions.length === 0 && availableMods.length <= 1) return null;
+  if (!hasMw && !hasMods) return null;
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 space-y-5">
-      <h2 className="text-xl font-bold text-white">Masterwork & Mods</h2>
-
-      {/* ── Masterwork stat selector ───────────────────── */}
-      {mwOptions.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Masterwork
-            </h3>
+    <>
+      {/* ── Masterwork card ─────────────────────────────────────────────── */}
+      {hasMw && (
+        <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-bold text-white">Masterwork</h2>
             {isAdept && (
               <span className="text-[10px] text-amber-400 font-semibold">
-                Adept: +10 chosen, +3 all others
+                +10 chosen · +3 all others
               </span>
             )}
             {!isAdept && masterworkStat && (
-              <span className="text-[10px] text-slate-500">
-                +10 to {masterworkStat}
-              </span>
+              <span className="text-[10px] text-slate-500">+10 to {masterworkStat}</span>
             )}
           </div>
 
@@ -78,13 +75,15 @@ export const MasterworkPanel: React.FC = () => {
         </div>
       )}
 
-      {/* ── Weapon mod selector ────────────────────────── */}
-      {availableMods.length > 1 && (
-        <div>
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            Weapon Mod
-            {isAdept && <span className="ml-2 text-amber-400/60 normal-case tracking-normal">Adept mods available</span>}
-          </h3>
+      {/* ── Weapon Mod card ─────────────────────────────────────────────── */}
+      {hasMods && (
+        <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-bold text-white">Weapon Mod</h2>
+            {isAdept && (
+              <span className="text-[10px] text-amber-400/70">Adept mods available</span>
+            )}
+          </div>
 
           <div className="flex flex-wrap gap-1.5">
             {availableMods.map((mod) => {
@@ -114,6 +113,6 @@ export const MasterworkPanel: React.FC = () => {
           )}
         </div>
       )}
-    </div>
+    </>
   );
 };

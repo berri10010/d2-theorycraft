@@ -75,12 +75,10 @@ export function WeaponDataPanel() {
       {/* Panel content */}
       <div>
         {active === 'masterwork' && (
-          <>
+          <div className="space-y-4">
             <MasterworkPanel />
-            <div className="mt-4">
-              <ArmorModPanel />
-            </div>
-          </>
+            <ArmorModPanel />
+          </div>
         )}
         {active === 'ammo'           && <AmmoPanel />}
         {active === 'ttk-falloff'    && <TTKAndFalloffPanel />}
