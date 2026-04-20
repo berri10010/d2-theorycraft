@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE, DamageBuff, ClassType, getBuffMultiplier } from '../../lib/buffDatabase';
+import { EXOTIC_ARMOR, ExoticClassType } from '../../data/exoticArmor';
 
 // Pre-compute buff groups
 const _allBuffs = Object.values(BUFF_DATABASE);
@@ -224,6 +225,101 @@ function ExternalMultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] })
   );
 }
 
+// ─── Exotic armor selector ────────────────────────────────────────────────────
+
+interface ExoticArmorSectionProps {
+  classType: ExoticClassType;
+  activeWeaponType: string | null;
+  activeExoticArmor: Record<ExoticClassType, string | null>;
+  setExoticArmor: (cls: ExoticClassType, id: string | null) => void;
+}
+
+function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, setExoticArmor }: ExoticArmorSectionProps) {
+  const [open, setOpen] = useState(false);
+  const exotics   = EXOTIC_ARMOR[classType];
+  const selectedId = activeExoticArmor[classType] ?? null;
+  const selected   = selectedId ? exotics.find((e) => e.id === selectedId) ?? null : null;
+
+  // Determine which stat bonuses apply for the current weapon type
+  const universalBonuses   = selected?.statBonuses ?? null;
+  const typeSpecific        = selected?.weaponTypeStatBonuses ?? null;
+  const typeMatches         = typeSpecific && activeWeaponType
+    ? typeSpecific.types.includes(activeWeaponType)
+    : false;
+
+  return (
+    <CollapsibleSection
+      label="Exotic Armor"
+      activeCount={selected ? 1 : 0}
+      open={open}
+      onToggle={() => setOpen((v) => !v)}
+    >
+      <div className="space-y-2">
+        {/* Dropdown */}
+        <select
+          value={selectedId ?? ''}
+          onChange={(e) => setExoticArmor(classType, e.target.value || null)}
+          className="w-full bg-black/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500/40 transition-colors"
+        >
+          <option value="">— None equipped —</option>
+          {exotics.map((e) => (
+            <option key={e.id} value={e.id}>{e.name}</option>
+          ))}
+        </select>
+
+        {/* Selected exotic details */}
+        {selected && (
+          <div className="p-2.5 bg-amber-500/5 rounded-lg border border-amber-500/15 space-y-1.5">
+            <p className="text-[10px] text-slate-400 leading-relaxed">{selected.description}</p>
+
+            {/* Universal stat bonuses */}
+            {universalBonuses && (
+              <div className="flex flex-wrap gap-1">
+                {Object.entries(universalBonuses).map(([stat, bonus]) => (
+                  <span key={stat} className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-green-400/10 border border-green-400/20 text-green-400">
+                    +{bonus} {stat}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Weapon-type-specific stat bonuses */}
+            {typeSpecific && (
+              <div className="space-y-1">
+                <div className="flex flex-wrap gap-1">
+                  {Object.entries(typeSpecific.bonuses).map(([stat, bonus]) => (
+                    <span
+                      key={stat}
+                      className={[
+                        'text-[9px] font-bold font-mono px-1.5 py-0.5 rounded border',
+                        typeMatches
+                          ? 'bg-green-400/10 border-green-400/20 text-green-400'
+                          : 'bg-white/5 border-white/10 text-slate-500',
+                      ].join(' ')}
+                    >
+                      +{bonus} {stat}
+                    </span>
+                  ))}
+                </div>
+                {!typeMatches && (
+                  <p className="text-[9px] text-slate-600 italic">
+                    Applies to: {typeSpecific.types.join(', ')}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Effect note for complex mechanics */}
+            {selected.effectNote && (
+              <p className="text-[9px] text-slate-600 italic">{selected.effectNote}</p>
+            )}
+          </div>
+        )}
+      </div>
+    </CollapsibleSection>
+  );
+}
+
 // ─── Class buff section ───────────────────────────────────────────────────────
 
 interface ClassSectionProps {
@@ -277,14 +373,18 @@ function ClassSection({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export const BuffToggle: React.FC = () => {
-  const { activeBuffs, toggleBuff, buffStacks, setBuffStack } = useWeaponStore(
+  const { activeBuffs, toggleBuff, buffStacks, setBuffStack, activeExoticArmor, setExoticArmor, activeWeapon } = useWeaponStore(
     useShallow((s) => ({
-      activeBuffs:  s.activeBuffs,
-      toggleBuff:   s.toggleBuff,
-      buffStacks:   s.buffStacks,
-      setBuffStack: s.setBuffStack,
+      activeBuffs:       s.activeBuffs,
+      toggleBuff:        s.toggleBuff,
+      buffStacks:        s.buffStacks,
+      setBuffStack:      s.setBuffStack,
+      activeExoticArmor: s.activeExoticArmor,
+      setExoticArmor:    s.setExoticArmor,
+      activeWeapon:      s.activeWeapon,
     }))
   );
+  const activeWeaponType = activeWeapon?.itemTypeDisplayName ?? null;
 
   const [empoweringOpen, setEmpoweringOpen] = useState(false);
   const [debuffOpen,     setDebuffOpen]     = useState(false);
@@ -412,13 +512,22 @@ export const BuffToggle: React.FC = () => {
         </CollapsibleSection>
 
         {/* Hunter */}
-        <ClassSection label="Hunter" buffs={_hunterBuffs}  {...classSectionProps} />
+        <div className="space-y-2">
+          <ExoticArmorSection classType="hunter"  activeWeaponType={activeWeaponType} activeExoticArmor={activeExoticArmor} setExoticArmor={setExoticArmor} />
+          <ClassSection label="Hunter Abilities" buffs={_hunterBuffs}  {...classSectionProps} />
+        </div>
 
         {/* Warlock */}
-        <ClassSection label="Warlock" buffs={_warlockBuffs} {...classSectionProps} />
+        <div className="space-y-2">
+          <ExoticArmorSection classType="warlock" activeWeaponType={activeWeaponType} activeExoticArmor={activeExoticArmor} setExoticArmor={setExoticArmor} />
+          <ClassSection label="Warlock Abilities" buffs={_warlockBuffs} {...classSectionProps} />
+        </div>
 
         {/* Titan */}
-        <ClassSection label="Titan" buffs={_titanBuffs}   {...classSectionProps} />
+        <div className="space-y-2">
+          <ExoticArmorSection classType="titan"   activeWeaponType={activeWeaponType} activeExoticArmor={activeExoticArmor} setExoticArmor={setExoticArmor} />
+          <ClassSection label="Titan Abilities"   buffs={_titanBuffs}   {...classSectionProps} />
+        </div>
 
       </div>
     </div>

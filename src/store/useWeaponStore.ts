@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Weapon, StatMap, GameMode, WeaponGroup, Perk, PerkColumn } from '../types/weapon';
 import { BUFF_DATABASE, getBuffMultiplier } from '../lib/buffDatabase';
+import { EXOTIC_ARMOR, ExoticClassType } from '../data/exoticArmor';
 
 // ─── Weapon Mods ────────────────────────────────────────────────────────────
 
@@ -245,6 +246,9 @@ interface WeaponState {
   /** Per-weapon roll cache, keyed by weapon hash. Persisted to localStorage. */
   weaponRolls:       Record<string, WeaponRoll>;
 
+  /** Exotic armor selected per class — null means none equipped. */
+  activeExoticArmor: Record<ExoticClassType, string | null>;
+
   // Actions
   loadWeapon:        (weapon: Weapon, group?: Weapon[]) => void;
   selectPerk:        (columnName: string, perkHash: string) => void;
@@ -262,6 +266,7 @@ interface WeaponState {
   setSurgeStacks:    (stacks: 0 | 1 | 2 | 3 | 4) => void;
   setWeaponsStat:    (stat: number) => void;
   setArmorMods:      (mods: Partial<ArmorModState>) => void;
+  setExoticArmor:    (classType: ExoticClassType, id: string | null) => void;
 
   // Computed
   getCalculatedStats:  () => StatMap;
@@ -344,6 +349,7 @@ export const useWeaponStore = create<WeaponState>()(
       weaponsStat:       0,
       armorMods:         DEFAULT_ARMOR_MODS,
       weaponRolls:       {},
+      activeExoticArmor: { hunter: null, warlock: null, titan: null },
 
       // ── loadWeapon ──────────────────────────────────────────────────────────
       // Saves the outgoing weapon's roll, then restores the incoming weapon's
@@ -487,9 +493,10 @@ export const useWeaponStore = create<WeaponState>()(
       setSurgeStacks:    (stacks) => set({ surgeStacks: stacks }),
       setWeaponsStat:    (stat)   => set({ weaponsStat: Math.max(0, Math.min(200, stat)) }),
       setArmorMods:      (mods)   => set((s) => ({ armorMods: { ...s.armorMods, ...mods } })),
+      setExoticArmor:    (cls, id) => set((s) => ({ activeExoticArmor: { ...s.activeExoticArmor, [cls]: id } })),
 
       getCalculatedStats: () => {
-        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, activeMod, armorMods, activeBuffs } = get();
+        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, activeMod, armorMods, activeBuffs, activeExoticArmor } = get();
         if (!activeWeapon) return {};
 
         const finalStats: StatMap = { ...activeWeapon.baseStats };
@@ -564,6 +571,28 @@ export const useWeaponStore = create<WeaponState>()(
           for (const [stat, bonus] of Object.entries(buff.statBonuses)) {
             if (finalStats[stat] !== undefined) {
               finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + bonus));
+            }
+          }
+        }
+
+        // Exotic armor stat bonuses
+        for (const [cls, exoticId] of Object.entries(activeExoticArmor) as [ExoticClassType, string | null][]) {
+          if (!exoticId) continue;
+          const piece = EXOTIC_ARMOR[cls]?.find((e) => e.id === exoticId);
+          if (!piece) continue;
+          if (piece.statBonuses) {
+            for (const [stat, bonus] of Object.entries(piece.statBonuses)) {
+              if (finalStats[stat] !== undefined)
+                finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + bonus));
+            }
+          }
+          if (piece.weaponTypeStatBonuses && activeWeapon.itemTypeDisplayName) {
+            const { types, bonuses } = piece.weaponTypeStatBonuses;
+            if (types.includes(activeWeapon.itemTypeDisplayName)) {
+              for (const [stat, bonus] of Object.entries(bonuses)) {
+                if (finalStats[stat] !== undefined)
+                  finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + bonus));
+              }
             }
           }
         }
