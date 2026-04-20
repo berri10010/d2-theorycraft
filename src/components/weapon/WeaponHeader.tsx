@@ -7,11 +7,24 @@ import { useWeaponStore } from '../../store/useWeaponStore';
 import { isLegacyVariant } from '../../lib/weaponGroups';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
+import { useClarityPerks } from '../../lib/useClarityPerks';
+import { ClarityEntry } from '../../lib/clarity';
 
 // Compendium placeholder strings that should not be shown to users
 const BAD_COMPENDIUM_DESCRIPTIONS = new Set([
   'No intrinsic bonuses whatsoever.',
 ]);
+
+/** Flattens a Clarity entry's English description into plain text. */
+function clarityPlainText(entry: ClarityEntry): string | null {
+  const lines: string[] = [];
+  for (const group of entry.descriptions?.en ?? []) {
+    if (!group.linesContent?.length) continue;
+    const line = group.linesContent.map((seg) => seg.text ?? '').join('').trim();
+    if (line) lines.push(line);
+  }
+  return lines.length ? lines.join(' ') : null;
+}
 
 // ── Colour maps ───────────────────────────────────────────────────────────────
 
@@ -101,6 +114,7 @@ export const WeaponHeader: React.FC = () => {
     }))
   );
   const { data: compendiumPerks } = useCompendiumPerks();
+  const { data: clarityPerks }   = useClarityPerks();
   const [imgError, setImgError] = useState(false);
 
   useEffect(() => { setImgError(false); }, [activeWeapon?.hash]);
@@ -321,12 +335,18 @@ export const WeaponHeader: React.FC = () => {
         {/* Intrinsic trait — constrained to left column */}
         {activeWeapon.intrinsicTrait && (() => {
           const trait = activeWeapon.intrinsicTrait!;
-          // Cascade: manifest description → compendium (filtered) → null
-          const manifestDesc   = trait.description || null;
-          const compendiumDesc = compendiumPerks?.[trait.name]?.baseDescription ?? null;
-          const filteredCompendium = compendiumDesc && !BAD_COMPENDIUM_DESCRIPTIONS.has(compendiumDesc)
-            ? compendiumDesc : null;
-          const desc = manifestDesc ?? filteredCompendium;
+          // Cascade: manifest → Clarity (plain text) → compendium (filtered) → null
+          // Compendium is filtered for: known placeholder strings, and
+          // trigger-only lines that end with ":" (e.g. "Upon reload while empty:")
+          const manifestDesc = trait.description || null;
+          const clarityDesc  = clarityPerks?.[trait.hash]
+            ? clarityPlainText(clarityPerks[trait.hash]) : null;
+          const rawCompendium = compendiumPerks?.[trait.name]?.baseDescription ?? null;
+          const compendiumDesc = rawCompendium &&
+            !BAD_COMPENDIUM_DESCRIPTIONS.has(rawCompendium) &&
+            !rawCompendium.trimEnd().endsWith(':')
+            ? rawCompendium : null;
+          const desc = manifestDesc ?? clarityDesc ?? compendiumDesc;
           return (
             <div className="flex gap-3 p-3 bg-black/50 rounded-lg border border-white/10 backdrop-blur-sm max-w-sm">
               <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
