@@ -15,8 +15,9 @@
  *   BUNGIE_API_KEY  — your Bungie developer API key
  *
  * Outputs:
- *   public/data/weapons-0.json        Parsed Weapon[] — first half (perk.description stripped)
- *   public/data/weapons-1.json        Parsed Weapon[] — second half (perk.description stripped)
+ *   public/data/weapons-0.json        Parsed Weapon[] — first third (perk.description stripped)
+ *   public/data/weapons-1.json        Parsed Weapon[] — second third (perk.description stripped)
+ *   public/data/weapons-2.json        Parsed Weapon[] — third third (perk.description stripped)
  *   public/data/clarity.json          Filtered Clarity perk descriptions
  *   public/data/god-rolls.json        God roll recommendations
  *   public/data/perk-descriptions.json Destiny Data Compendium perk text
@@ -60,7 +61,7 @@ function write(name: string, data: unknown) {
 // DATA_FORMAT_VERSION: bump this whenever parser logic changes in a way that
 // would produce different weapons-*.json output from the same manifest.
 // This forces a re-parse even when the Bungie manifest version is unchanged.
-const DATA_FORMAT_VERSION = '4';
+const DATA_FORMAT_VERSION = '5';
 
 const NEXT_CACHE_DIR     = path.join(ROOT, '.next', 'cache');
 const MANIFEST_VER_CACHE = path.join(NEXT_CACHE_DIR, 'bungie-manifest-version');
@@ -200,7 +201,7 @@ async function buildWeapons() {
   // ── Cache check: skip the ~24 MB table download if version unchanged ──────
   const cacheKey = `${DATA_FORMAT_VERSION}:${version}`;
   const cachedVersion = readCachedManifestVersion();
-  if (cachedVersion === cacheKey && fs.existsSync(outPath('weapons-0.json')) && fs.existsSync(outPath('weapons-1.json'))) {
+  if (cachedVersion === cacheKey && fs.existsSync(outPath('weapons-0.json')) && fs.existsSync(outPath('weapons-1.json')) && fs.existsSync(outPath('weapons-2.json'))) {
     console.log(`  ✓ Manifest unchanged since last build — skipping table download`);
     console.log(`    (delete .next/cache/bungie-manifest-version to force a refresh)`);
     return;
@@ -396,8 +397,9 @@ async function patchEventWeaponSeasons() {
   const grPath = outPath('god-rolls.json');
   const w0Path = outPath('weapons-0.json');
   const w1Path = outPath('weapons-1.json');
+  const w2Path = outPath('weapons-2.json');
 
-  if (!fs.existsSync(grPath) || !fs.existsSync(w0Path) || !fs.existsSync(w1Path)) {
+  if (!fs.existsSync(grPath) || !fs.existsSync(w0Path) || !fs.existsSync(w1Path) || !fs.existsSync(w2Path)) {
     console.log('  Skipping — required files not present.');
     return;
   }
@@ -414,7 +416,7 @@ async function patchEventWeaponSeasons() {
   }
 
   let patchCount = 0;
-  for (const file of ['weapons-0.json', 'weapons-1.json'] as const) {
+  for (const file of ['weapons-0.json', 'weapons-1.json', 'weapons-2.json'] as const) {
     const weapons = JSON.parse(fs.readFileSync(outPath(file), 'utf8')) as Array<{ name: string; seasonNumber: number | null }>;
     let changed = false;
     for (const w of weapons) {
