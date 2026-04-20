@@ -74,6 +74,20 @@ export interface Perk {
   enhancedVersion: Perk | null;
 }
 
+/**
+ * A single weapon mod option extracted from the weapon's mod socket plug set
+ * in the Bungie manifest. Names, descriptions, and stat changes all come from
+ * the manifest — damage multipliers are kept in a separate store lookup table.
+ */
+export interface WeaponModOption {
+  hash: string;
+  name: string;
+  /** Short description from displayProperties — typically 1–2 sentences. */
+  description: string;
+  /** Flat stat changes from investmentStats (e.g. Backup Mag: { Reload: -10 }). */
+  statChanges: Partial<Record<string, number>>;
+}
+
 /** Semantic slot type — used for column labelling and UI rendering */
 export type ColumnType = 'barrel' | 'mag' | 'perk' | 'origin';
 
@@ -140,10 +154,15 @@ export interface Weapon {
   /**
    * Masterwork stat options available for this weapon, derived from its
    * masterwork socket plug set in the Bungie manifest.
-   * Empty for exotics / weapons where no masterwork socket was found.
-   * UI falls back to the generic MASTERWORK_STATS list when empty.
+   * Empty for exotic weapons (which use catalysts) and weapons with no
+   * masterwork socket. The UI hides the masterwork section when empty.
    */
   masterworkOptions: string[];
+  /**
+   * Weapon mod options available for this weapon, extracted from the mod
+   * socket plug set in the Bungie manifest. Empty for exotic weapons.
+   */
+  weaponMods: WeaponModOption[];
 }
 
 /** A named group of weapon variants sharing the same base name */

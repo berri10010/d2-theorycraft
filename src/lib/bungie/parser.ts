@@ -144,6 +144,11 @@ function isTrackerCategory(name: string): boolean {
 function isMasterworkCategory(name: string): boolean {
   return name.toLowerCase().includes('masterwork');
 }
+function isWeaponModCategory(name: string): boolean {
+  const l = name.toLowerCase();
+  // Match "WEAPON MODS" style categories; exclude masterwork, intrinsic, cosmetic sockets
+  return l.includes('weapon mod') && !l.includes('masterwork') && !l.includes('intrinsic') && !l.includes('cosmetic');
+}
 
 // ──────────────────────────────────────────────────
 // Tracker plug-level blocklist — belt-and-suspenders
@@ -379,6 +384,7 @@ export function parseWeapons(
 
      let rawColumns: PerkColumn[] = [];
     const masterworkOptions: string[] = [];
+    const weaponMods: Weapon['weaponMods'] = [];
 
     let intrinsicTrait: Perk | null = null;
     // Running count of 'perk' (trait) columns emitted for this weapon — used for "Perk N" labels
@@ -422,6 +428,55 @@ export function parseWeapons(
             }
           }
           continue; // masterwork sockets don't produce perk columns
+        }
+
+        // ── Weapon mod socket: extract available mod options ──
+        if (isWeaponModCategory(catName)) {
+          for (const socketIndex of category.socketIndexes) {
+            const modSocket = item.sockets!.socketEntries[socketIndex];
+            if (!modSocket) continue;
+            // Mod options live in reusablePlugSetHash (choosable by player)
+            const modPs = modSocket.reusablePlugSetHash
+              ? plugSetDefs[modSocket.reusablePlugSetHash.toString()]
+              : null;
+            const modPlugHashes: number[] = modPs
+              ? modPs.reusablePlugItems.map((p: { plugItemHash: number }) => p.plugItemHash)
+              : modSocket.singleInitialItemHash
+                ? [modSocket.singleInitialItemHash]
+                : [];
+            for (const modPlugHash of modPlugHashes) {
+              const modPlug = items[modPlugHash.toString()];
+              if (!modPlug) continue;
+              const modName = modPlug.displayProperties?.name?.trim();
+              if (!modName) continue;
+              // Skip empty socket placeholders and trackers
+              if (modName.toLowerCase().includes('empty')) continue;
+              if (isTrackerPlug(modName)) continue;
+              // Must look like a real mod: has "Weapon Mod" itemTypeDisplayName
+              // OR has at least one non-zero stat investment
+              const modHasStats = (modPlug.investmentStats ?? []).some(
+                (s: { value: number }) => s.value !== 0,
+              );
+              const looksLikeMod = (modPlug.itemTypeDisplayName ?? '').toLowerCase().includes('mod');
+              if (!modHasStats && !looksLikeMod) continue;
+              // Extract stat changes from investmentStats
+              const modStatChanges: Partial<Record<string, number>> = {};
+              for (const s of (modPlug.investmentStats ?? [])) {
+                const inv = s as { statTypeHash: number; value: number };
+                if (inv.value === 0) continue;
+                const statName = STAT_HASH_MAP[inv.statTypeHash];
+                if (!statName || !BAR_STATS.has(statName)) continue;
+                modStatChanges[statName] = (modStatChanges[statName] ?? 0) + inv.value;
+              }
+              weaponMods.push({
+                hash: modPlugHash.toString(),
+                name: modName,
+                description: modPlug.displayProperties.description?.trim() ?? '',
+                statChanges: modStatChanges,
+              });
+            }
+          }
+          continue; // weapon mod sockets don't produce perk columns
         }
 
         const isIntrinsic   = isIntrinsicCategory(catName);
@@ -695,6 +750,7 @@ export function parseWeapons(
         ? (collectibleMap[item.collectibleHash.toString()] ?? null)
         : null,
       masterworkOptions,
+      weaponMods,
     });
   }
 

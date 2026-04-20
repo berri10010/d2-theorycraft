@@ -7,115 +7,60 @@ import { EXOTIC_ARMOR, ExoticClassType } from '../data/exoticArmor';
 // ─── Weapon Mods ────────────────────────────────────────────────────────────
 
 export interface WeaponMod {
+  /** mod hash from the Bungie manifest, or 'none' for the no-mod sentinel */
   id: string;
   name: string;
   description: string;
-  /** Stat changes this mod applies */
+  /** Stat changes extracted from the manifest investmentStats */
   statChanges: Partial<Record<string, number>>;
-  /** PvE damage multiplier this mod provides (1.0 = none) */
+  /** PvE damage multiplier — not in the manifest, derived from MOD_DAMAGE_MULTIPLIERS lookup */
   damageMultiplier: number;
-  /** Whether this is an Adept-only mod */
+  /** True for "Adept *" mods (detected by name prefix) */
   adeptOnly: boolean;
 }
 
-export const WEAPON_MODS: WeaponMod[] = [
-  {
-    id: 'none',
-    name: 'No Mod',
-    description: 'No weapon mod equipped.',
-    statChanges: {},
-    damageMultiplier: 1.0,
-    adeptOnly: false,
-  },
-  {
-    id: 'major_spec',
-    name: 'Major Spec',
-    description: '+7.7% damage to Majors, Ultras, and Bosses.',
-    statChanges: {},
-    damageMultiplier: 1.077,
-    adeptOnly: false,
-  },
-  {
-    id: 'minor_spec',
-    name: 'Minor Spec',
-    description: '+7.7% damage to Minors.',
-    statChanges: {},
-    damageMultiplier: 1.077,
-    adeptOnly: false,
-  },
-  {
-    id: 'backup_mag',
-    name: 'Backup Mag',
-    description: 'Increases magazine size. -10 Reload.',
-    statChanges: { Reload: -10 },
-    damageMultiplier: 1.0,
-    adeptOnly: false,
-  },
-  {
-    id: 'icarus_grip',
-    name: 'Icarus Grip',
-    description: '+20 Airborne Effectiveness, -5 Handling.',
-    statChanges: { 'Airborne Effectiveness': 20, Handling: -5 },
-    damageMultiplier: 1.0,
-    adeptOnly: false,
-  },
-  {
-    id: 'radar_tuner',
-    name: 'Radar Tuner',
-    description: '+50 Airborne Effectiveness while airborne.',
-    statChanges: { 'Airborne Effectiveness': 50 },
-    damageMultiplier: 1.0,
-    adeptOnly: false,
-  },
-  {
-    id: 'adept_impact',
-    name: 'Adept Impact',
-    description: '+3 Impact.',
-    statChanges: { Impact: 3 },
-    damageMultiplier: 1.0,
-    adeptOnly: true,
-  },
-  {
-    id: 'adept_range',
-    name: 'Adept Range',
-    description: '+3 Range.',
-    statChanges: { Range: 3 },
-    damageMultiplier: 1.0,
-    adeptOnly: true,
-  },
-  {
-    id: 'adept_stability',
-    name: 'Adept Stability',
-    description: '+3 Stability.',
-    statChanges: { Stability: 3 },
-    damageMultiplier: 1.0,
-    adeptOnly: true,
-  },
-  {
-    id: 'adept_handling',
-    name: 'Adept Handling',
-    description: '+3 Handling.',
-    statChanges: { Handling: 3 },
-    damageMultiplier: 1.0,
-    adeptOnly: true,
-  },
-  {
-    id: 'adept_reload',
-    name: 'Adept Reload',
-    description: '+3 Reload.',
-    statChanges: { Reload: 3 },
-    damageMultiplier: 1.0,
-    adeptOnly: true,
-  },
-  {
-    id: 'adept_mag',
-    name: 'Adept Mag',
-    description: '+10 Magazine.',
-    statChanges: { Magazine: 10 },
-    damageMultiplier: 1.0,
-    adeptOnly: true,
-  },
-];
+/**
+ * Damage multipliers for mods that boost PvE damage.
+ * Not present in the Bungie manifest; sourced from in-game testing.
+ * All mods default to 1.0 (no damage change) unless listed here.
+ */
+const MOD_DAMAGE_MULTIPLIERS: Record<string, number> = {
+  'Major Spec':   1.077,
+  'Minor Spec':   1.077,
+  'Boss Spec':    1.077,
+  'Taken Spec':   1.100,
+  'Piercing Sidearm': 1.077,
+};
+
+/** The "no mod equipped" sentinel — always the first item in the mod list. */
+export const NONE_MOD: WeaponMod = {
+  id: 'none',
+  name: 'No Mod',
+  description: 'No weapon mod equipped.',
+  statChanges: {},
+  damageMultiplier: 1.0,
+  adeptOnly: false,
+};
+
+/**
+ * Build a ready-to-use WeaponMod list for a weapon from its manifest-derived
+ * weaponMods array. The NONE_MOD sentinel is always prepended.
+ * Returns [NONE_MOD] for exotic weapons (empty weaponMods array).
+ */
+export function buildWeaponModsList(weapon: Weapon): WeaponMod[] {
+  const mods: WeaponMod[] = [NONE_MOD];
+  for (const opt of (weapon.weaponMods ?? [])) {
+    mods.push({
+      id: opt.hash,
+      name: opt.name,
+      description: opt.description,
+      statChanges: opt.statChanges,
+      damageMultiplier: MOD_DAMAGE_MULTIPLIERS[opt.name] ?? 1.0,
+      adeptOnly: opt.name.toLowerCase().startsWith('adept '),
+    });
+  }
+  return mods;
+}
 
 // ─── Armor Mods ──────────────────────────────────────────────────────────────
 //
@@ -350,7 +295,7 @@ export const useWeaponStore = create<WeaponState>()(
       mode:              'pve',
       masterworkStat:    null,
       isCrafted:         false,
-      activeMod:         WEAPON_MODS[0],
+      activeMod:         NONE_MOD,
       surgeStacks:       0,
       weaponsStat:       0,
       armorMods:         DEFAULT_ARMOR_MODS,
@@ -379,9 +324,10 @@ export const useWeaponStore = create<WeaponState>()(
         // columns are always active — saved user choices overlay on top.
         const saved      = weaponRolls[weapon.hash];
         const fixedPerks = autoSelectFixedPerks(weapon);
+        const availableMods = buildWeaponModsList(weapon);
         const newMod = saved
-          ? (WEAPON_MODS.find((m) => m.id === saved.activeModId) ?? WEAPON_MODS[0])
-          : WEAPON_MODS[0];
+          ? (availableMods.find((m) => m.id === saved.activeModId) ?? NONE_MOD)
+          : NONE_MOD;
 
         set({
           activeWeapon:     weapon,
@@ -391,7 +337,7 @@ export const useWeaponStore = create<WeaponState>()(
           selectedPerks:    fixedPerks,
           masterworkStat:   null,
           isCrafted:        false,
-          activeMod:        WEAPON_MODS[0],
+          activeMod:        newMod,
           armorMods:        DEFAULT_ARMOR_MODS,
           activeEffects:    {},
           // activeBuffs / buffStacks intentionally preserved (global)
@@ -409,7 +355,7 @@ export const useWeaponStore = create<WeaponState>()(
           selectedPerks:  autoSelectFixedPerks(activeWeapon),
           masterworkStat: null,
           isCrafted:      false,
-          activeMod:      WEAPON_MODS[0],
+          activeMod:      NONE_MOD,
           armorMods:      DEFAULT_ARMOR_MODS,
           activeEffects:  {},
           weaponRolls:    remainingRolls,

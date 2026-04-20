@@ -3,9 +3,8 @@
 import React from 'react';
 import {
   useWeaponStore,
-  MASTERWORK_STATS,
-  WEAPON_MODS,
-  MasterworkStat,
+  buildWeaponModsList,
+  NONE_MOD,
 } from '../../store/useWeaponStore';
 
 export const MasterworkPanel: React.FC = () => {
@@ -17,97 +16,104 @@ export const MasterworkPanel: React.FC = () => {
 
   if (!activeWeapon) return null;
 
+  // Exotic weapons use catalysts instead of masterworks and weapon mods.
+  // The manifest returns no masterwork socket and no mod socket for exotics,
+  // so we hide the panel entirely rather than showing empty/incorrect data.
+  if (activeWeapon.rarity === 'Exotic') return null;
+
   const isAdept = activeWeapon.isAdept;
 
-  // Use weapon-specific masterwork options from the manifest when available.
-  // Falls back to the generic MASTERWORK_STATS list for weapons loaded from
-  // older cached data or exotics whose masterwork socket is a catalyst.
-  const mwOptions: string[] = activeWeapon.masterworkOptions?.length
-    ? activeWeapon.masterworkOptions
-    : [...MASTERWORK_STATS];
+  // Masterwork options come exclusively from the manifest (weapon.masterworkOptions).
+  // No fallback — if the manifest returned nothing, there are no options to show.
+  const mwOptions: string[] = activeWeapon.masterworkOptions ?? [];
 
-  // Filter mods: non-adept weapons can't use Adept mods
-  const availableMods = WEAPON_MODS.filter((m) => !m.adeptOnly || isAdept);
+  // Weapon mod list built from the manifest's weaponMods array (+ NONE_MOD sentinel).
+  const availableMods = buildWeaponModsList(activeWeapon);
+
+  // Nothing to show if the manifest supplied neither masterwork nor mod options.
+  if (mwOptions.length === 0 && availableMods.length <= 1) return null;
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 space-y-5">
       <h2 className="text-xl font-bold text-white">Masterwork & Mods</h2>
 
       {/* ── Masterwork stat selector ───────────────────── */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-            Masterwork
-          </h3>
-          {isAdept && (
-            <span className="text-[10px] text-amber-400 font-semibold">
-              Adept: +10 chosen, +3 all others
-            </span>
-          )}
-          {!isAdept && masterworkStat && (
-            <span className="text-[10px] text-slate-500">
-              +10 to {masterworkStat}
-            </span>
-          )}
-        </div>
+      {mwOptions.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              Masterwork
+            </h3>
+            {isAdept && (
+              <span className="text-[10px] text-amber-400 font-semibold">
+                Adept: +10 chosen, +3 all others
+              </span>
+            )}
+            {!isAdept && masterworkStat && (
+              <span className="text-[10px] text-slate-500">
+                +10 to {masterworkStat}
+              </span>
+            )}
+          </div>
 
-        <div className="flex flex-wrap gap-1.5">
-          {mwOptions.map((stat) => {
-            const isActive = masterworkStat === stat;
-            return (
-              <button
-                key={stat}
-                onClick={() => setMasterworkStat(isActive ? null : stat)}
-                className={[
-                  'text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
-                  isActive
-                    ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
-                    : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
-                ].join(' ')}
-              >
-                {stat}
-              </button>
-            );
-          })}
+          <div className="flex flex-wrap gap-1.5">
+            {mwOptions.map((stat) => {
+              const isActive = masterworkStat === stat;
+              return (
+                <button
+                  key={stat}
+                  onClick={() => setMasterworkStat(isActive ? null : stat)}
+                  className={[
+                    'text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
+                    isActive
+                      ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
+                      : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
+                  ].join(' ')}
+                >
+                  {stat}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Weapon mod selector ────────────────────────── */}
-      <div>
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-          Weapon Mod
-          {isAdept && <span className="ml-2 text-amber-400/60 normal-case tracking-normal">Adept mods available</span>}
-        </h3>
+      {availableMods.length > 1 && (
+        <div>
+          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            Weapon Mod
+            {isAdept && <span className="ml-2 text-amber-400/60 normal-case tracking-normal">Adept mods available</span>}
+          </h3>
 
-        <div className="flex flex-wrap gap-1.5">
-          {availableMods.map((mod) => {
-            const isActive = activeMod.id === mod.id;
-            return (
-              <button
-                key={mod.id}
-                onClick={() => setActiveMod(mod)}
-                title={mod.description}
-                className={[
-                  'text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
-                  isActive
-                    ? mod.adeptOnly
-                      ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
-                      : 'bg-blue-500/20 text-blue-400 border-blue-500/50'
-                    : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
-                  mod.adeptOnly && !isActive ? 'border-amber-900/40 text-amber-600' : '',
-                ].join(' ')}
-              >
-                {mod.name}
-              </button>
-            );
-          })}
+          <div className="flex flex-wrap gap-1.5">
+            {availableMods.map((mod) => {
+              const isActive = activeMod.id === mod.id;
+              return (
+                <button
+                  key={mod.id}
+                  onClick={() => setActiveMod(isActive && mod.id !== NONE_MOD.id ? NONE_MOD : mod)}
+                  className={[
+                    'text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
+                    isActive && mod.id !== NONE_MOD.id
+                      ? mod.adeptOnly
+                        ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
+                        : 'bg-blue-500/20 text-blue-400 border-blue-500/50'
+                      : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
+                    mod.adeptOnly && !(isActive && mod.id !== NONE_MOD.id) ? 'border-amber-900/40 text-amber-600' : '',
+                  ].join(' ')}
+                >
+                  {mod.name}
+                </button>
+              );
+            })}
+          </div>
+
+          {activeMod.id !== NONE_MOD.id && activeMod.description && (
+            <p className="text-xs text-slate-500 mt-2">{activeMod.description}</p>
+          )}
         </div>
-
-        {activeMod.id !== 'none' && (
-          <p className="text-xs text-slate-500 mt-2">{activeMod.description}</p>
-        )}
-      </div>
-
+      )}
     </div>
   );
 };
