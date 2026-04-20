@@ -330,12 +330,31 @@ export const WeaponHeader: React.FC = () => {
                 />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Intrinsic</span>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Intrinsic</span>
                   <span className="font-semibold text-sm text-amber-300">{trait.name}</span>
                 </div>
+                {trait.statModifiers.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-1">
+                    {trait.statModifiers.map((mod) => (
+                      <span
+                        key={mod.statName}
+                        className={[
+                          'text-[9px] font-bold font-mono px-1.5 py-0.5 rounded leading-none',
+                          mod.isConditional
+                            ? 'text-amber-400 bg-amber-400/10 border border-amber-400/20'
+                            : mod.value > 0
+                              ? 'text-green-400 bg-green-400/10 border border-green-400/20'
+                              : 'text-red-400 bg-red-400/10 border border-red-400/20',
+                        ].join(' ')}
+                      >
+                        {mod.value > 0 ? '+' : ''}{mod.value} {mod.statName}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 {desc && (
-                  <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                  <p className="text-xs text-slate-400 leading-relaxed">
                     {desc}
                   </p>
                 )}

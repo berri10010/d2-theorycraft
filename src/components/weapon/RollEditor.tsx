@@ -8,6 +8,7 @@ import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { isLegacyVariant } from '../../lib/weaponGroups';
 import { Perk } from '../../types/weapon';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
+import { Tooltip } from '../ui/Tooltip';
 
 // ── Column accent styles ──────────────────────────────────────────────────────
 
@@ -127,11 +128,28 @@ export const RollEditor: React.FC = () => {
                         ? `Enhance → ${perk.enhancedVersion.name}`
                         : `Deselect ${displayPerk.name}`;
 
+                    const tooltipContent = (
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-[11px] font-bold text-white leading-tight">{displayPerk.name}</span>
+                          {perk.tier && (
+                            <span className={`text-[9px] font-black px-1 py-px rounded leading-none ${
+                              perk.tier === 'S' ? 'bg-amber-500/30 text-amber-300' :
+                              perk.tier === 'A' ? 'bg-emerald-500/25 text-emerald-300' :
+                              perk.tier === 'B' ? 'bg-blue-500/25 text-blue-300' :
+                              'bg-white/10 text-slate-400'
+                            }`}>{perk.tier}</span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-400 leading-relaxed">{displayPerk.description}</p>
+                      </div>
+                    );
+
                     return (
-                      <div key={perk.hash} className="relative shrink-0">
+                      <Tooltip key={perk.hash} content={tooltipContent}>
+                      <div className="relative shrink-0">
                         <button
                           onClick={handleClick}
-                          title={`${nextAction}${perk.tier ? ` [${perk.tier}]` : ''}: ${displayPerk.description}`}
                           aria-pressed={isActive}
                           className={[
                             'relative w-12 h-12 md:w-13 md:h-13 rounded-full border-2 transition-all duration-150 overflow-hidden block',
@@ -167,6 +185,7 @@ export const RollEditor: React.FC = () => {
                           </span>
                         )}
                       </div>
+                      </Tooltip>
                     );
                   })}
                 </div>
