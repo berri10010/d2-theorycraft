@@ -10,3 +10,7 @@ main = "worker.ts"
 [assets]
 directory = "./out"
 binding = "ASSETS"
+
+[observability.logs]
+enabled = false
+invocation_logs = true
