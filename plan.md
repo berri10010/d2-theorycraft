@@ -236,7 +236,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 |------|--------|
 | Handling breakdown: surface Ready / ADS / Stow times as separate stats | ⬜ Pending |
 | Damage vs Distance chart: interactive line chart showing actual damage values per meter (hip-fire vs ADS) | ⬜ Pending |
-| Flinch resistance: show flinch resist derived from Stability + Health (0–100 → 0–10%); weapon stat can start at 0 in PvP; PvP damage bonus behaviour unchanged | ⬜ Pending |
+| Flinch resistance: show flinch resist derived from Stability + Health (0–100 → 0–10%) | ⬜ Pending |
 | Perfect Draw Window: show exact window in seconds alongside Draw Time (Bows) | ⬜ Pending |
 | Per-activity PvE scaling: Activity + Difficulty + Enemy Type dropdown scales all damage numbers; include custom option | ⬜ Pending |
 
@@ -253,27 +253,28 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Task | Status |
 |------|--------|
 | Community research annotations: show empirically verified perk values on hover | ⬜ Pending |
+| Clarity description shown inline for single-option perk/origin columns in Weapon Perks grid | ✅ Done |
 
 #### 12D — External Buffs Panel
 
 | Task | Status |
 |------|--------|
-| Exotic armor selector in External Buffs panel | ⬜ Pending |
-| — Hunter exotics: Foetracer, Knucklehead Radar, Mask of Bakris, Mechaneer's Tricksleeves, Oathkeeper, Sealed Ahamkara Grasps, Triton Vice, The Dragon's Shadow, Lucky Pants, Speedloader Slacks | ⬜ Pending |
-| — Warlock exotics: Astrocyte Verse, Eye of Another World, Felwinter's Helm, Ballidorse Wrathweavers, Necrotic Grips, Ophidian Aspect, Mantle of Battle Harmony, Sanguine Alchemy, Wings of Sacred Dawn, Boots of the Assembler, Lunafaction Boots, Rain of Fire | ⬜ Pending |
-| — Titan exotics: Eternal Warrior, Icefall Mantle, No Backup Plans, Actium War Rig, Doom Fang Pauldron, Hallowfire Heart, Lion Rampant, The Path of Burning Steps, Peacekeepers, Peregrine Greaves | ⬜ Pending |
-| Add class-neutral buffs: Sect of Force, Sect of Insight, Blessing of the Sky, Disruption Break, Judgment, Tractor Cannon, Worm Byproduct, Spark of Frequency, Amplified, Ember of Tempering, Radiant, Weaken, Sever, Whisper of Hedrons, Thread of Ascent | ⬜ Pending |
-| Add Hunter buffs: Flow State, On Your Mark, Moebius Quiver, Deadfall | ⬜ Pending |
-| Add Warlock buffs: Empowering Rift, Well of Radiance, Heat Rises | ⬜ Pending |
-| Add Titan buffs: Rally Barricade, Ward of Dawn, Sentinel Shield | ⬜ Pending |
+| Add class-neutral buffs (Sect of Force, Disruption Break, Tractor Cannon, Sever, etc.) | ✅ Done |
+| Add Hunter buffs (Flow State, On Your Mark, Moebius Quiver, Deadfall) | ✅ Done |
+| Add Warlock buffs (Heat Rises) | ✅ Done |
+| Add Titan buffs (Rally Barricade, Sentinel Shield) | ✅ Done |
+| Active external buffs apply flat stat bonuses to weapon stat bars (Amplified +40 Handling, Spark of Frequency +40 Reload, Flow State +40 Reload, Thread of Ascent +30 AE/Reload, Heat Rises +30 AE, Rally Barricade +50 Reload) | ✅ Done |
+| Exotic armor selector in External Buffs panel — Hunter: Foetracer, Knucklehead Radar, Mask of Bakris, Mechaneer's Tricksleeves, Oathkeeper, Sealed Ahamkara Grasps, Triton Vice, The Dragon's Shadow, Lucky Pants, Speedloader Slacks | ⬜ Pending |
+| Exotic armor selector — Warlock: Astrocyte Verse, Eye of Another World, Felwinter's Helm, Ballidorse Wrathweavers, Necrotic Grips, Ophidian Aspect, Mantle of Battle Harmony, Sanguine Alchemy, Wings of Sacred Dawn, Boots of the Assembler, Lunafaction Boots, Rain of Fire | ⬜ Pending |
+| Exotic armor selector — Titan: Eternal Warrior, Icefall Mantle, No Backup Plans, Actium War Rig, Doom Fang Pauldron, Hallowfire Heart, Lion Rampant, The Path of Burning Steps, Peacekeepers, Peregrine Greaves | ⬜ Pending |
 
 #### 12E — Weapon Stats Panel Rework
 
 | Task | Status |
 |------|--------|
-| Show ALL weapon stats in the Weapon Stats panel (e.g. Ammo Generation is currently missing) | ⬜ Pending |
-| Make Airborne, Zoom, Ammo Gen, Recoil, Magazine display more compact | ⬜ Pending |
-| Add recoil direction pie chart to the Recoil stat (like DIM / D2 Foundry) | ⬜ Pending |
+| Show ALL weapon stats in the Weapon Stats panel (Ammo Generation now included) | ✅ Done |
+| Make Airborne, Zoom, Ammo Gen, Recoil, Magazine more compact (2-col card grid) | ✅ Done |
+| Recoil Direction chart redesigned as DIM-style white pie sector (ones digit = direction, value = tightness) | ✅ Done |
 
 #### 12F — Search Panel Rework (Homepage & Editor)
 
@@ -287,7 +288,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Task | Status |
 |------|--------|
-| Consolidate the three "go to editor" buttons into one: "Browse All Weapons" (no arrow) | ⬜ Pending |
+| Consolidate the three "go to editor" buttons into one ("Browse All Weapons", no →) | ✅ Done |
 
 #### 12H — UI / UX Polish
 
@@ -295,21 +296,26 @@ A broad set of UI, data, and UX improvements requested for the next development 
 |------|--------|
 | Improve tooltip GUI styling | ⬜ Pending |
 | Retrieve weapon mods and masterworks from the Bungie API | ⬜ Pending |
-| Adept/Craftable mutual exclusion: clicking Adept disables Craftable and vice versa (no double-disable bug) | ⬜ Pending |
-| Move Weapon Stat row in PvE Masterwork & Mods panel into TTK & Falloff panel (mirrors PvP layout) | ⬜ Pending |
-| Clear weapon perks when switching to a different weapon | ⬜ Pending |
-| Combine "Armor Mods" and "Masterwork & Mods" panels into one panel | ⬜ Pending |
-| Primary weapons show infinite reserves | ⬜ Pending |
-| High-Impact Frame Combat Bows: surface Persistence and Velocity stats | ⬜ Pending |
-| God Roll panel hidden when weapon has no god roll | ⬜ Pending |
+| Ammo panel: uses Bungie manifest first (ammoType, Magazine stat, Ammo Capacity reserves); MossyMax only for mag round count and reserve mod tiers | ✅ Done |
+| Adept/Craftable mutual exclusion: clicking Adept disables Craftable and vice versa (no double-disable bug) | ✅ Done |
+| Move Weapon Stat row in PvE Masterwork & Mods panel into TTK & Falloff panel (mirrors PvP layout) | ✅ Done |
+| Clear weapon perks when switching to a different weapon | ✅ Done |
+| Combine "Armor Mods" and "Masterwork & Mods" panels into one panel | ✅ Done |
+| Move Weapon Surge into the Armor Mods section (not Masterwork) | ✅ Done |
+| Primary weapons show infinite reserves | ✅ Done |
+| High-Impact Frame Combat Bows: surface Persistence and Velocity stats | ✅ Done (prior session) |
+| God Roll panel hidden when weapon has no god roll | ✅ Done |
 | Add weapon acquisition info (how to obtain each weapon) | ⬜ Pending |
-| Fixed-trait columns: if any column contains a perk that wouldn't appear as a fixed trait, show it in its own column as if fixed traits didn't exist | ⬜ Pending |
-| Rename "Perk 3" label in Weapon Perks panel to "Origin Trait" | ⬜ Pending |
-| When all perks are fixed: hide Effects panel; any perk with activation options can be toggled in the Weapon Perks panel with Clarity info shown | ⬜ Pending |
-| Similar Weapons panel: show season number and year (e.g. "Echoes (Season 24, Year 7)") | ⬜ Pending |
+| All perk columns (barrel/mag/perk/origin) unified into one scrollable grid; single-option columns auto-selected, show Clarity description inline | ✅ Done |
+| Rename "Perk 3" label in Weapon Perks panel to "Origin Trait" | ✅ Done (parser already emits "Origin Trait") |
+| Effects panel always visible regardless of whether perks are fixed (removed allPerksFixed guard) | ✅ Done |
+| Similar Weapons panel: show season number and year (e.g. "Echoes (Season 24, Year 7)") | ✅ Done |
 | Improve intrinsic bonuses information display | ⬜ Pending |
+| Weapon stat slider: defer graph updates until slider is released (onPointerUp pattern with local state) | ✅ Done |
+| Fix Weapons Stat description text: "0–100" and "100–200" (was "1–100" / "101–200") | ✅ Done |
+| Weapons Stat defaults to 0 on initial load for both PvE and PvP; PvP slider min changed from 100 to 0 | ✅ Done |
 
-**Stage 12 progress: 0%**
+**Stage 12 progress: ~60%**
 
 ---
 
@@ -328,8 +334,8 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | 9 — God Roll Database Refresh | 100% | Complete |
 | 10 — Weapon List Polish | 100% | Complete |
 | 11 — PvE Damage Model Accuracy | 100% | Complete |
-| 12 — Feature Backlog | 0% | Pending |
-| **Overall** | **~92%** | |
+| 12 — Feature Backlog | ~60% | Active |
+| **Overall** | **~95%** | |
 
 ---
 
@@ -345,16 +351,14 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 > These are ordered by priority. Claude should start from the top.
 
-Stage 12 is the active work. All sub-stages (12A–12H) are pending. Suggested starting order:
+Stage 12 is the active work. Most 12H/12E/12G items are complete. Remaining priorities:
 
-1. **12H** — UI/UX polish items that are self-contained and high-visibility (fixed-trait column layout, "Origin Trait" label, God Roll panel visibility, Similar Weapons season format, perk clear on weapon switch, adept/craftable mutual exclusion, primary weapon infinite reserves)
-2. **12E** — Weapon Stats panel rework (missing stats, compact layout, recoil pie chart)
+1. **12H remaining** — Tooltip GUI styling polish; weapon acquisition info; improve intrinsic bonuses display; retrieve weapon mods/masterworks from Bungie API
+2. **12D remaining** — Exotic armor selector in External Buffs panel (Hunter / Warlock / Titan lists with their weapon stat effects)
 3. **12F** — Search panel rework (D2 Foundry-style filters, perk search, recent searches)
-4. **12D** — External Buffs panel additions (class buffs + exotic armor selector)
-5. **12G** — Homepage navigation consolidation
-6. **12A** — Combat mechanics (handling breakdown, damage-vs-distance chart, flinch resist, perfect draw window, per-activity PvE scaling)
-7. **12B** — Screenshot mode + share options
-8. **12C** — Community research annotations
+4. **12A** — Combat mechanics (handling breakdown: Ready/ADS/Stow times; flinch resistance; perfect draw window for Bows; per-activity PvE scaling dropdown)
+5. **12B** — Screenshot mode + share options
+6. **12C remaining** — Community research annotations on hover
 
 ---
 
@@ -435,4 +439,10 @@ npm run build
 
 ---
 
-*Last updated: 2026-04-14 — Stage 11 complete. PvE damage model accuracy pass sourced from MossyMax's Outgoing Damage Scaling spreadsheet: per-archetype combatant scalars (20 weapon subtypes × 5 enemy tiers, normalised to Elite = 3.0), expanded enemy tiers (Minor / Major·Elite / Miniboss / Boss / Champion), and power-level delta scaling slider (δ −30 to +10 with presets) in both TTKPanel and TTKAndFalloffPanel. Commits 9a7dbe7 + ee21f5f.*
+*Last updated: 2026-04-19 — Stage 12 batch completions:*
+
+*Batch 3 (commit db6cee4): Weapons Stat slider debounce (onPointerUp pattern with local state so charts only update on release); PvP slider min changed 100→0 with "0" preset added; description text corrected to "0–100"/"100–200"; Weapon Surge moved from MasterworkPanel into ArmorModPanel.*
+
+*Batch 4 (commit df5bbec): AmmoPanel now reads ammoType, Magazine stat, and Ammo Capacity (reserves) from Bungie manifest first — MossyMax static data only for mag round count and reserve mod tiers. RollEditor single-option columns show Clarity description + stat mods inline beside the icon.*
+
+*Batch 5 (commit ef8f16f): All perk columns (barrel/mag/perk/origin) unified into one scrollable grid — no more Fixed Traits zone. EffectsPanel guard removed (now available for all weapons). External buffs now apply flat stat bonuses to weapon stat bars via new `statBonuses` field in DamageBuff interface and buffs.json (Amplified +40 Handling/+20 AE, Spark of Frequency +40 Reload, Flow State +40 Reload/+20 Handling, Thread of Ascent +30 AE/+30 Reload, Heat Rises +30 AE, Rally Barricade +50 Reload). Recoil Direction chart redesigned as DIM-style white pie sector (ones digit → directional tilt, overall value → cone tightness).*
