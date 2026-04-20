@@ -6,6 +6,12 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { isLegacyVariant } from '../../lib/weaponGroups';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
+import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
+
+// Compendium placeholder strings that should not be shown to users
+const BAD_COMPENDIUM_DESCRIPTIONS = new Set([
+  'No intrinsic bonuses whatsoever.',
+]);
 
 // ── Colour maps ───────────────────────────────────────────────────────────────
 
@@ -94,6 +100,7 @@ export const WeaponHeader: React.FC = () => {
       setCrafted:    s.setCrafted,
     }))
   );
+  const { data: compendiumPerks } = useCompendiumPerks();
   const [imgError, setImgError] = useState(false);
 
   useEffect(() => { setImgError(false); }, [activeWeapon?.hash]);
@@ -314,7 +321,12 @@ export const WeaponHeader: React.FC = () => {
         {/* Intrinsic trait — constrained to left column */}
         {activeWeapon.intrinsicTrait && (() => {
           const trait = activeWeapon.intrinsicTrait!;
-          const desc  = trait.description || null;
+          // Cascade: manifest description → compendium (filtered) → null
+          const manifestDesc   = trait.description || null;
+          const compendiumDesc = compendiumPerks?.[trait.name]?.baseDescription ?? null;
+          const filteredCompendium = compendiumDesc && !BAD_COMPENDIUM_DESCRIPTIONS.has(compendiumDesc)
+            ? compendiumDesc : null;
+          const desc = manifestDesc ?? filteredCompendium;
           return (
             <div className="flex gap-3 p-3 bg-black/50 rounded-lg border border-white/10 backdrop-blur-sm max-w-sm">
               <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
