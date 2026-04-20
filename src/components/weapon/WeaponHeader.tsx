@@ -274,13 +274,7 @@ export const WeaponHeader: React.FC = () => {
                 <p className="text-xs text-slate-500">{seasonLabel}</p>
               )}
               {activeWeapon.source && (
-                <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                  {/* Location pin icon */}
-                  <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0 text-slate-600">
-                    <path fillRule="evenodd" d="M8 1.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zM2 6a6 6 0 1110.174 4.31c-.203.196-.359.4-.453.619l-1.256 2.853A.5.5 0 0110 14H6a.5.5 0 01-.466-.317l-1.256-2.853c-.094-.22-.25-.424-.452-.619A5.985 5.985 0 012 6zm3.5 0a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0z" clipRule="evenodd" />
-                  </svg>
-                  {activeWeapon.source}
-                </p>
+                <p className="text-xs text-slate-500">{activeWeapon.source}</p>
               )}
             </div>
           )}
