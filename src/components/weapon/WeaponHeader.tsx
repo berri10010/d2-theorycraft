@@ -6,7 +6,6 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { isLegacyVariant } from '../../lib/weaponGroups';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
-import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 
 // ── Colour maps ───────────────────────────────────────────────────────────────
 
@@ -95,7 +94,6 @@ export const WeaponHeader: React.FC = () => {
       setCrafted:    s.setCrafted,
     }))
   );
-  const { data: compendiumPerks } = useCompendiumPerks();
   const [imgError, setImgError] = useState(false);
 
   useEffect(() => { setImgError(false); }, [activeWeapon?.hash]);
@@ -316,7 +314,7 @@ export const WeaponHeader: React.FC = () => {
         {/* Intrinsic trait — constrained to left column */}
         {activeWeapon.intrinsicTrait && (() => {
           const trait = activeWeapon.intrinsicTrait!;
-          const desc  = compendiumPerks?.[trait.name]?.baseDescription ?? null;
+          const desc  = trait.description || null;
           return (
             <div className="flex gap-3 p-3 bg-black/50 rounded-lg border border-white/10 backdrop-blur-sm max-w-sm">
               <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
