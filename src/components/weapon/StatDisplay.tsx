@@ -41,7 +41,9 @@ function RecoilChart({ value }: { value: number }) {
 
   // Visual coordinate system: 0°=right, 90°=up, 180°=left.
   // To draw in SVG (y-axis down): x = cx + R·cos θ,  y = cy − R·sin θ
-  const centerAngle = 90 + Math.sin((value + 5) * 2 * Math.PI / 20) * (100 - value) * 0.45;
+  // Formula: sin((x+5)·2π/20)·(100-x). Negated because increasing angle is leftward,
+  // but positive formula output means rightward (60→right, 50→left, 55→center).
+  const centerAngle = 90 - Math.sin((value + 5) * 2 * Math.PI / 20) * (100 - value);
   const arcWidth    = ((100 - value) / 100) * 180;
 
   const startAngle = centerAngle - arcWidth / 2;
