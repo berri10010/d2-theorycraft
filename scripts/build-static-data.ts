@@ -251,12 +251,15 @@ async function buildWeapons() {
   // Null out 404 screenshot URLs for tie-breaking candidates before writing.
   const weapons = await validateTieBreakerScreenshots(rawWeapons);
 
-  // Strip perk descriptions and split into two chunks to stay under the
-  // Cloudflare Pages 25 MiB per-file asset limit.
+  // Strip perk descriptions and split into three chunks to stay under the
+  // Cloudflare Workers 25 MiB per-file asset limit.
+  // (Two chunks were sufficient before weaponMods was added; three keeps each
+  //  chunk well under the limit with room for future data growth.)
   const stripped = stripDescriptions(weapons);
-  const mid = Math.ceil(stripped.length / 2);
-  write('weapons-0.json', stripped.slice(0, mid));
-  write('weapons-1.json', stripped.slice(mid));
+  const third = Math.ceil(stripped.length / 3);
+  write('weapons-0.json', stripped.slice(0, third));
+  write('weapons-1.json', stripped.slice(third, third * 2));
+  write('weapons-2.json', stripped.slice(third * 2));
 
   // Persist the version so the next build can skip this download if unchanged.
   writeCachedManifestVersion(version);
