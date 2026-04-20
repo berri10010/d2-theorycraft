@@ -8,7 +8,6 @@ import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { isLegacyVariant } from '../../lib/weaponGroups';
 import { Perk } from '../../types/weapon';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
-import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 
 // ── Column accent styles ──────────────────────────────────────────────────────
 
@@ -37,8 +36,6 @@ export const RollEditor: React.FC = () => {
     }))
   );
 
-  const { data: compendiumPerks } = useCompendiumPerks();
-
   const isLegacy = useMemo(() => {
     if (!activeWeapon) return false;
     return isLegacyVariant(activeWeapon, {
@@ -55,13 +52,8 @@ export const RollEditor: React.FC = () => {
 
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
-  // All perk columns go into the choosable grid regardless of type.
-  // Single-option columns are auto-selected and show their Clarity description inline.
-  const choosableColumns = useMemo(
-    () => activeWeapon.perkSockets,
-    [activeWeapon],
-  );
-  const hasChoosableZone = choosableColumns.length > 0;
+  // Suppress unused-variable warning — isCrafted is subscribed to trigger re-renders
+  void isCrafted;
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
@@ -76,146 +68,112 @@ export const RollEditor: React.FC = () => {
         )}
       </div>
 
-      {/* ── All Perk Columns ─────────────────────────────────────────────── */}
-      {hasChoosableZone && (
-        <>
-          <div className="flex overflow-x-auto pb-4 md:grid md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 md:pb-0">
-            {choosableColumns.map((column, colIdx) => {
-              const isOriginTraitCol = column.columnType === 'origin';
-              const columnDisabled   = isOriginTraitCol && isLegacy;
-              const accentBar        = COL_ACCENT_BAR[column.columnType] ?? 'bg-slate-500/40';
-              const isLast           = colIdx === choosableColumns.length - 1;
+      {/* ── Perk columns — identical layout regardless of single vs. multiple options ── */}
+      {activeWeapon.perkSockets.length > 0 && (
+        <div className="flex overflow-x-auto pb-4 md:grid md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 md:pb-0">
+          {activeWeapon.perkSockets.map((column, colIdx) => {
+            const isOriginTraitCol = column.columnType === 'origin';
+            const columnDisabled   = isOriginTraitCol && isLegacy;
+            const accentBar        = COL_ACCENT_BAR[column.columnType] ?? 'bg-slate-500/40';
+            const isLast           = colIdx === activeWeapon.perkSockets.length - 1;
 
-              return (
-                <div
-                  key={column.name}
-                  className={[
-                    'flex flex-col',
-                    column.perks.length === 1 ? 'items-start min-w-[180px]' : 'items-center min-w-[60px]',
-                    columnDisabled ? 'opacity-30 pointer-events-none' : '',
-                    !isLast ? 'border-r border-white/5 pr-3 md:pr-4' : '',
-                  ].join(' ')}
-                >
-                  {/* Column header */}
-                  <div className="w-full flex flex-col gap-1 mb-3" style={{ alignItems: column.perks.length === 1 ? 'flex-start' : 'center' }}>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                      {columnDisabled ? `${column.name} ·` : column.name}
-                    </span>
-                    <div className={`h-0.5 w-8 rounded-full ${accentBar}`} />
-                  </div>
-
-                  {/* Perk icons */}
-                  <div className={[
-                    'flex gap-2.5 items-center',
-                    column.perks.length === 1 ? 'flex-row w-full' : 'flex-col',
-                  ].join(' ')}>
-                    {column.perks.map((perk) => {
-                      const selectedHash     = selectedPerks[column.name];
-                      const isBaseActive     = selectedHash === perk.hash;
-                      const isEnhancedActive = perk.enhancedVersion
-                        ? selectedHash === perk.enhancedVersion.hash
-                        : false;
-                      const isActive   = isBaseActive || isEnhancedActive;
-                      const isUpgraded = isEnhancedActive;
-
-                      const displayPerk: Perk = (isEnhancedActive && perk.enhancedVersion)
-                        ? perk.enhancedVersion
-                        : perk;
-
-                      const tierCfg = perk.tier ? TIER_CONFIG[perk.tier as PerkTier] : null;
-
-                      const handleClick = () => {
-                        if (!isActive) {
-                          selectPerk(column.name, perk.hash);
-                        } else if (isBaseActive && perk.enhancedVersion) {
-                          selectPerk(column.name, perk.enhancedVersion.hash);
-                        } else {
-                          clearPerk(column.name);
-                        }
-                      };
-
-                      const nextAction = !isActive
-                        ? displayPerk.name
-                        : isBaseActive && perk.enhancedVersion
-                          ? `Enhance → ${perk.enhancedVersion.name}`
-                          : `Deselect ${displayPerk.name}`;
-
-                      return (
-                        <div key={perk.hash} className="relative shrink-0">
-                          <button
-                            onClick={handleClick}
-                            title={`${nextAction}${perk.tier ? ` [${perk.tier}]` : ''}: ${displayPerk.description}`}
-                            aria-pressed={isActive}
-                            className={[
-                              'relative w-12 h-12 md:w-13 md:h-13 rounded-full border-2 transition-all duration-150 overflow-hidden block',
-                              isActive
-                                ? isUpgraded
-                                  ? 'border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.45)] scale-110 opacity-100'
-                                  : 'border-white/80 shadow-[0_0_10px_rgba(255,255,255,0.15)] scale-105 opacity-100'
-                                : 'border-white/15 opacity-50 hover:opacity-85 hover:scale-105 hover:border-white/35',
-                            ].join(' ')}
-                          >
-                            <Image
-                              src={BUNGIE_URL + displayPerk.icon}
-                              alt={displayPerk.name}
-                              fill
-                              sizes="52px"
-                              className="object-cover"
-                              unoptimized
-                            />
-                            {displayPerk.buffKey && (
-                              <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-green-400 rounded-full border border-black/60" />
-                            )}
-                          </button>
-
-                          {mode === 'pve' && tierCfg && !isUpgraded && (
-                            <span className={`absolute -bottom-1 -right-1 text-[8px] font-black leading-none px-1 py-px rounded-full z-10 ${tierCfg.badge}`}>
-                              {tierCfg.label}
-                            </span>
-                          )}
-
-                          {isUpgraded && (
-                            <span className="absolute -bottom-1 -right-1 text-[7px] font-black leading-none px-1 py-px rounded-full z-10 bg-amber-400 text-black">
-                              ENH
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-
-                    {/* Description for single-option (fixed) perk columns */}
-                    {column.perks.length === 1 && (() => {
-                      const perk = column.perks[0];
-                      const desc = compendiumPerks?.[perk.name]?.baseDescription;
-                      if (!desc) return null;
-                      return (
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-semibold text-white/70 leading-tight mb-0.5">{perk.name}</p>
-                          {perk.statModifiers.length > 0 && (
-                            <div className="flex flex-wrap gap-x-1.5 mb-0.5">
-                              {perk.statModifiers.map((mod) => (
-                                <span
-                                  key={mod.statName}
-                                  className={[
-                                    'text-[9px] font-mono font-bold',
-                                    mod.isConditional ? 'text-amber-400/80' : mod.value > 0 ? 'text-green-400' : 'text-red-400',
-                                  ].join(' ')}
-                                >
-                                  {mod.value > 0 ? '+' : ''}{mod.value} {mod.statName}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                          <p className="text-[10px] text-slate-400 leading-snug line-clamp-4">{desc}</p>
-                        </div>
-                      );
-                    })()}
-                  </div>
+            return (
+              <div
+                key={column.name}
+                className={[
+                  'flex flex-col items-center min-w-[60px]',
+                  columnDisabled ? 'opacity-30 pointer-events-none' : '',
+                  !isLast ? 'border-r border-white/5 pr-3 md:pr-4' : '',
+                ].join(' ')}
+              >
+                {/* Column header */}
+                <div className="w-full flex flex-col items-center gap-1 mb-3">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                    {columnDisabled ? `${column.name} ·` : column.name}
+                  </span>
+                  <div className={`h-0.5 w-8 rounded-full ${accentBar}`} />
                 </div>
-              );
-            })}
-          </div>
-        </>
+
+                {/* Perk icons — same grid layout for every column */}
+                <div className="flex flex-col gap-2.5 items-center">
+                  {column.perks.map((perk) => {
+                    const selectedHash     = selectedPerks[column.name];
+                    const isBaseActive     = selectedHash === perk.hash;
+                    const isEnhancedActive = perk.enhancedVersion
+                      ? selectedHash === perk.enhancedVersion.hash
+                      : false;
+                    const isActive   = isBaseActive || isEnhancedActive;
+                    const isUpgraded = isEnhancedActive;
+
+                    const displayPerk: Perk = (isEnhancedActive && perk.enhancedVersion)
+                      ? perk.enhancedVersion
+                      : perk;
+
+                    const tierCfg = perk.tier ? TIER_CONFIG[perk.tier as PerkTier] : null;
+
+                    const handleClick = () => {
+                      if (!isActive) {
+                        selectPerk(column.name, perk.hash);
+                      } else if (isBaseActive && perk.enhancedVersion) {
+                        selectPerk(column.name, perk.enhancedVersion.hash);
+                      } else {
+                        clearPerk(column.name);
+                      }
+                    };
+
+                    const nextAction = !isActive
+                      ? displayPerk.name
+                      : isBaseActive && perk.enhancedVersion
+                        ? `Enhance → ${perk.enhancedVersion.name}`
+                        : `Deselect ${displayPerk.name}`;
+
+                    return (
+                      <div key={perk.hash} className="relative shrink-0">
+                        <button
+                          onClick={handleClick}
+                          title={`${nextAction}${perk.tier ? ` [${perk.tier}]` : ''}: ${displayPerk.description}`}
+                          aria-pressed={isActive}
+                          className={[
+                            'relative w-12 h-12 md:w-13 md:h-13 rounded-full border-2 transition-all duration-150 overflow-hidden block',
+                            isActive
+                              ? isUpgraded
+                                ? 'border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.45)] scale-110 opacity-100'
+                                : 'border-white/80 shadow-[0_0_10px_rgba(255,255,255,0.15)] scale-105 opacity-100'
+                              : 'border-white/15 opacity-50 hover:opacity-85 hover:scale-105 hover:border-white/35',
+                          ].join(' ')}
+                        >
+                          <Image
+                            src={BUNGIE_URL + displayPerk.icon}
+                            alt={displayPerk.name}
+                            fill
+                            sizes="52px"
+                            className="object-cover"
+                            unoptimized
+                          />
+                          {displayPerk.buffKey && (
+                            <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-green-400 rounded-full border border-black/60" />
+                          )}
+                        </button>
+
+                        {mode === 'pve' && tierCfg && !isUpgraded && (
+                          <span className={`absolute -bottom-1 -right-1 text-[8px] font-black leading-none px-1 py-px rounded-full z-10 ${tierCfg.badge}`}>
+                            {tierCfg.label}
+                          </span>
+                        )}
+
+                        {isUpgraded && (
+                          <span className="absolute -bottom-1 -right-1 text-[7px] font-black leading-none px-1 py-px rounded-full z-10 bg-amber-400 text-black">
+                            ENH
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
 
     </div>

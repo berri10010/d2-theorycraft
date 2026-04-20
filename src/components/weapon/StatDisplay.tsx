@@ -31,49 +31,43 @@ const COMPACT_STAT_KEYS = [
   'Zoom', 'Airborne Effectiveness', 'Ammo Generation', 'Recoil Direction', 'Magazine', 'Inventory Size',
 ];
 
-// ── Recoil direction chart (DIM-style) ─────────────────────────────────────────
-// Ones digit of recoil value determines horizontal bias: 5 = straight up,
-// 0 = hard right (+45°), 9 = left (-36°). Higher overall value = tighter cone.
-
 function RecoilChart({ value }: { value: number }) {
-  const W = 56, H = 36;
+  const W = 56, H = 28;
   const cx = W / 2;
-  const cy = H - 2; // pivot at bottom
-  const R = 27;
+  // cy = H puts the pivot exactly on the SVG bottom edge.
+  // overflow="hidden" on the <svg> clips anything below, giving a perfect semi-circle mask.
+  const cy = H;
+  const R = 26;
 
-  // Direction from vertical: ones digit 5 = 0°, 0 = +45° (right), 9 = -36° (left)
-  const onesDigit = value % 10;
-  const directionDeg = (5 - onesDigit) * 9;
+  // Visual coordinate system: 0°=right, 90°=up, 180°=left.
+  // To draw in SVG (y-axis down): x = cx + R·cos θ,  y = cy − R·sin θ
+  const centerAngle = 90 + Math.sin((value + 5) * 2 * Math.PI / 20) * (100 - value) * 0.45;
+  const arcWidth    = ((100 - value) / 100) * 180;
 
-  // Spread half-angle: wider at low values, tight at high values
-  const spreadHalfDeg = Math.max(3, (1 - value / 100) * 45);
+  const startAngle = centerAngle - arcWidth / 2;
+  const endAngle   = centerAngle + arcWidth / 2;
 
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const centerRad = toRad(-90 + directionDeg);
-  const leftRad   = toRad(-90 + directionDeg - spreadHalfDeg);
-  const rightRad  = toRad(-90 + directionDeg + spreadHalfDeg);
+  const toPoint = (deg: number) => ({
+    x: cx + R * Math.cos((deg * Math.PI) / 180),
+    y: cy - R * Math.sin((deg * Math.PI) / 180),
+  });
 
-  const lx = (cx + R * Math.cos(leftRad)).toFixed(1);
-  const ly = (cy + R * Math.sin(leftRad)).toFixed(1);
-  const rx = (cx + R * Math.cos(rightRad)).toFixed(1);
-  const ry = (cy + R * Math.sin(rightRad)).toFixed(1);
-  const tipX = (cx + R * Math.cos(centerRad)).toFixed(1);
-  const tipY = (cy + R * Math.sin(centerRad)).toFixed(1);
+  const p1 = toPoint(startAngle);
+  const p2 = toPoint(endAngle);
+  const f  = (n: number) => n.toFixed(2);
 
-  const largeArc = spreadHalfDeg * 2 > 180 ? 1 : 0;
-  const sectorPath = `M ${cx} ${cy} L ${lx} ${ly} A ${R} ${R} 0 ${largeArc} 1 ${rx} ${ry} Z`;
-  const bgPath = `M ${cx - R} ${cy} A ${R} ${R} 0 0 1 ${cx + R} ${cy}`;
+  // sweep=0 (screen CCW) draws the arc from p1 to p2 going upward through the top — correct.
+  const largeArc   = arcWidth > 180 ? 1 : 0;
+  const bgPath     = `M ${cx} ${cy} L ${cx + R} ${cy} A ${R} ${R} 0 0 0 ${cx - R} ${cy} Z`;
+  const sectorPath = `M ${cx} ${cy} L ${f(p1.x)} ${f(p1.y)} A ${R} ${R} 0 ${largeArc} 0 ${f(p2.x)} ${f(p2.y)} Z`;
 
   return (
-    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="shrink-0">
-      {/* Background semicircle */}
-      <path d={bgPath} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
-      {/* Recoil cone */}
-      <path d={sectorPath} fill="rgba(255,255,255,0.18)" />
-      {/* Center line */}
-      <line x1={cx} y1={cy} x2={tipX} y2={tipY} stroke="white" strokeWidth={1.5} strokeLinecap="round" />
-      {/* Pivot dot */}
-      <circle cx={cx} cy={cy} r={2} fill="white" />
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} overflow="hidden" className="shrink-0">
+      <path d={bgPath}     fill="#323232" />
+      <path d={sectorPath} fill="#FFFFFF" />
+      {/* Stroke only the two straight radial edges — no arc outline, no center dot */}
+      <line x1={cx} y1={cy} x2={f(p1.x)} y2={f(p1.y)} stroke="#FFFFFF" strokeWidth={1} />
+      <line x1={cx} y1={cy} x2={f(p2.x)} y2={f(p2.y)} stroke="#FFFFFF" strokeWidth={1} />
     </svg>
   );
 }
