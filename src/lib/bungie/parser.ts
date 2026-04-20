@@ -141,6 +141,9 @@ function isTrackerCategory(name: string): boolean {
   const l = name.toLowerCase();
   return l.includes('tracker') || l.includes('tracking');
 }
+function isMasterworkCategory(name: string): boolean {
+  return name.toLowerCase().includes('masterwork');
+}
 
 // ──────────────────────────────────────────────────
 // Tracker plug-level blocklist — belt-and-suspenders
@@ -321,6 +324,9 @@ export function parseWeapons(
   // Bungie does not populate seasonHash on weapons, so this is the only
   // reliable source covering all seasons, raids, dungeons, and events.
   dimWatermarkToSeason: Record<string, number> = {},
+  // collectibleHash (string) → sourceString from DestinyCollectibleDefinition.
+  // Used to populate the weapon's acquisition source string.
+  collectibleMap: Record<string, string> = {},
 ): Weapon[] {
   const seasonNumberToName = buildSeasonNumberToName(seasonDefs);
 
@@ -372,6 +378,7 @@ export function parseWeapons(
     ]);
 
      let rawColumns: PerkColumn[] = [];
+    const masterworkOptions: string[] = [];
 
     let intrinsicTrait: Perk | null = null;
     // Running count of 'perk' (trait) columns emitted for this weapon — used for "Perk N" labels
@@ -385,6 +392,37 @@ export function parseWeapons(
 
         // ── Hard-skip tracker socket categories ────────
         if (isTrackerCategory(catName)) continue;
+
+        // ── Masterwork socket: extract available stat options ──
+        if (isMasterworkCategory(catName)) {
+          for (const socketIndex of category.socketIndexes) {
+            const socket = item.sockets!.socketEntries[socketIndex];
+            if (!socket) continue;
+            // Masterwork options live in reusablePlugSetHash
+            const ps = socket.reusablePlugSetHash
+              ? plugSetDefs[socket.reusablePlugSetHash.toString()]
+              : null;
+            const plugHashes = ps
+              ? ps.reusablePlugItems.map((p) => p.plugItemHash)
+              : socket.singleInitialItemHash
+                ? [socket.singleInitialItemHash]
+                : [];
+            for (const plugHash of plugHashes) {
+              const plugItem = items[plugHash.toString()];
+              if (!plugItem?.investmentStats?.length) continue;
+              if (isTrackerPlug(plugItem.displayProperties?.name ?? '')) continue;
+              for (const s of plugItem.investmentStats) {
+                if (s.value === 0) continue;
+                const statName = STAT_HASH_MAP[s.statTypeHash];
+                if (!statName || !DISPLAY_STATS.has(statName)) continue;
+                if (!masterworkOptions.includes(statName)) {
+                  masterworkOptions.push(statName);
+                }
+              }
+            }
+          }
+          continue; // masterwork sockets don't produce perk columns
+        }
 
         const isIntrinsic   = isIntrinsicCategory(catName);
         const isOriginTrait = isOriginTraitCategory(catName);
@@ -653,6 +691,10 @@ export function parseWeapons(
       intrinsicTrait,
       perkSockets,
       statCurves,
+      source: item.collectibleHash
+        ? (collectibleMap[item.collectibleHash.toString()] ?? null)
+        : null,
+      masterworkOptions,
     });
   }
 

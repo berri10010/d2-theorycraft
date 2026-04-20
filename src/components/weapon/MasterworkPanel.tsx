@@ -19,6 +19,13 @@ export const MasterworkPanel: React.FC = () => {
 
   const isAdept = activeWeapon.isAdept;
 
+  // Use weapon-specific masterwork options from the manifest when available.
+  // Falls back to the generic MASTERWORK_STATS list for weapons loaded from
+  // older cached data or exotics whose masterwork socket is a catalyst.
+  const mwOptions: string[] = activeWeapon.masterworkOptions?.length
+    ? activeWeapon.masterworkOptions
+    : [...MASTERWORK_STATS];
+
   // Filter mods: non-adept weapons can't use Adept mods
   const availableMods = WEAPON_MODS.filter((m) => !m.adeptOnly || isAdept);
 
@@ -45,12 +52,12 @@ export const MasterworkPanel: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          {MASTERWORK_STATS.map((stat) => {
+          {mwOptions.map((stat) => {
             const isActive = masterworkStat === stat;
             return (
               <button
                 key={stat}
-                onClick={() => setMasterworkStat(isActive ? null : stat as MasterworkStat)}
+                onClick={() => setMasterworkStat(isActive ? null : stat)}
                 className={[
                   'text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
                   isActive

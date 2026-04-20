@@ -8,6 +8,7 @@ export interface BungieManifestResponse {
         DestinySocketCategoryDefinition: string;
         DestinyPlugSetDefinition: string;
         DestinySeasonDefinition: string;
+        DestinyCollectibleDefinition: string;
       };
     };
   };
@@ -31,8 +32,16 @@ export interface BungieDisplayProperties {
   hasIcon: boolean;
 }
 
+export interface BungieCollectibleDefinition {
+  hash: number;
+  sourceString?: string;
+  displayProperties: { name: string; description: string };
+}
+
 export interface BungieInventoryItem {
   hash: number;
+  /** Points to a DestinyCollectibleDefinition whose sourceString says how to obtain this item */
+  collectibleHash?: number;
   displayProperties: BungieDisplayProperties;
   itemType: number;
   itemSubType: number;

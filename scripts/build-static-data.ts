@@ -60,7 +60,7 @@ function write(name: string, data: unknown) {
 // DATA_FORMAT_VERSION: bump this whenever parser logic changes in a way that
 // would produce different weapons-*.json output from the same manifest.
 // This forces a re-parse even when the Bungie manifest version is unchanged.
-const DATA_FORMAT_VERSION = '2';
+const DATA_FORMAT_VERSION = '3';
 
 const NEXT_CACHE_DIR     = path.join(ROOT, '.next', 'cache');
 const MANIFEST_VER_CACHE = path.join(NEXT_CACHE_DIR, 'bungie-manifest-version');
@@ -211,11 +211,12 @@ async function buildWeapons() {
   // ─────────────────────────────────────────────────────────────────────────
 
   console.log('  Downloading tables (parallel)...');
-  const [items, socketCategoryDefs, plugSetDefs, seasonDefs, dimWatermarkMap] = await Promise.all([
+  const [items, socketCategoryDefs, plugSetDefs, seasonDefs, collectibleDefs, dimWatermarkMap] = await Promise.all([
     fetchTable(paths.DestinyInventoryItemDefinition),
     fetchTable(paths.DestinySocketCategoryDefinition),
     fetchTable(paths.DestinyPlugSetDefinition),
     fetchTable(paths.DestinySeasonDefinition),
+    fetchTable(paths.DestinyCollectibleDefinition),
     fetch('https://raw.githubusercontent.com/DestinyItemManager/d2-additional-info/master/output/watermark-to-season.json')
       .then(r => r.ok ? r.json() : {})
       .catch(() => ({})),
@@ -234,8 +235,17 @@ async function buildWeapons() {
   const combinedWatermarkMap = { ...artifactWatermarkMap, ...dimWatermarkMap };
   console.log(`  Watermark map: ${Object.keys(dimWatermarkMap).length} DIM + ${Object.keys(artifactWatermarkMap).length} artifact entries`);
 
+  // Build collectibleHash → sourceString map for weapon acquisition info
+  const collectibleMap: Record<string, string> = {};
+  for (const coll of Object.values(collectibleDefs as Record<string, { hash?: number; sourceString?: string }>)) {
+    if (coll.hash && coll.sourceString?.trim()) {
+      collectibleMap[coll.hash.toString()] = coll.sourceString.trim();
+    }
+  }
+  console.log(`  Collectibles: ${Object.keys(collectibleMap).length} entries with sourceString`);
+
   console.log('  Parsing weapons...');
-  const rawWeapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs, combinedWatermarkMap);
+  const rawWeapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs, combinedWatermarkMap, collectibleMap);
   console.log(`  Parsed ${rawWeapons.length} weapons`);
 
   // Null out 404 screenshot URLs for tie-breaking candidates before writing.

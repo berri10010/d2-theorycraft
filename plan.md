@@ -264,9 +264,9 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Add Warlock buffs (Heat Rises) | ✅ Done |
 | Add Titan buffs (Rally Barricade, Sentinel Shield) | ✅ Done |
 | Active external buffs apply flat stat bonuses to weapon stat bars (Amplified +40 Handling, Spark of Frequency +40 Reload, Flow State +40 Reload, Thread of Ascent +30 AE/Reload, Heat Rises +30 AE, Rally Barricade +50 Reload) | ✅ Done |
-| Exotic armor selector in External Buffs panel — Hunter: Foetracer, Knucklehead Radar, Mask of Bakris, Mechaneer's Tricksleeves, Oathkeeper, Sealed Ahamkara Grasps, Triton Vice, The Dragon's Shadow, Lucky Pants, Speedloader Slacks | ⬜ Pending |
-| Exotic armor selector — Warlock: Astrocyte Verse, Eye of Another World, Felwinter's Helm, Ballidorse Wrathweavers, Necrotic Grips, Ophidian Aspect, Mantle of Battle Harmony, Sanguine Alchemy, Wings of Sacred Dawn, Boots of the Assembler, Lunafaction Boots, Rain of Fire | ⬜ Pending |
-| Exotic armor selector — Titan: Eternal Warrior, Icefall Mantle, No Backup Plans, Actium War Rig, Doom Fang Pauldron, Hallowfire Heart, Lion Rampant, The Path of Burning Steps, Peacekeepers, Peregrine Greaves | ⬜ Pending |
+| Exotic armor selector in External Buffs panel — Hunter: Foetracer, Knucklehead Radar, Mask of Bakris, Mechaneer's Tricksleeves, Oathkeeper, Sealed Ahamkara Grasps, Triton Vice, The Dragon's Shadow, Lucky Pants, Speedloader Slacks | ✅ Done |
+| Exotic armor selector — Warlock: Astrocyte Verse, Eye of Another World, Felwinter's Helm, Ballidorse Wrathweavers, Necrotic Grips, Ophidian Aspect, Mantle of Battle Harmony, Sanguine Alchemy, Wings of Sacred Dawn, Boots of the Assembler, Lunafaction Boots, Rain of Fire | ✅ Done |
+| Exotic armor selector — Titan: Eternal Warrior, Icefall Mantle, No Backup Plans, Actium War Rig, Doom Fang Pauldron, Hallowfire Heart, Lion Rampant, The Path of Burning Steps, Peacekeepers, Peregrine Greaves | ✅ Done |
 
 #### 12E — Weapon Stats Panel Rework
 
@@ -294,7 +294,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Task | Status |
 |------|--------|
-| Improve tooltip GUI styling | ⬜ Pending |
+| Improve tooltip GUI styling | ✅ Done |
 | Retrieve weapon mods and masterworks from the Bungie API | ⬜ Pending |
 | Ammo panel: uses Bungie manifest first (ammoType, Magazine stat, Ammo Capacity reserves); MossyMax only for mag round count and reserve mod tiers | ✅ Done |
 | Adept/Craftable mutual exclusion: clicking Adept disables Craftable and vice versa (no double-disable bug) | ✅ Done |
@@ -310,12 +310,12 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Rename "Perk 3" label in Weapon Perks panel to "Origin Trait" | ✅ Done (parser already emits "Origin Trait") |
 | Effects panel always visible regardless of whether perks are fixed (removed allPerksFixed guard) | ✅ Done |
 | Similar Weapons panel: show season number and year (e.g. "Echoes (Season 24, Year 7)") | ✅ Done |
-| Improve intrinsic bonuses information display | ⬜ Pending |
+| Improve intrinsic bonuses information display | ✅ Done |
 | Weapon stat slider: defer graph updates until slider is released (onPointerUp pattern with local state) | ✅ Done |
 | Fix Weapons Stat description text: "0–100" and "100–200" (was "1–100" / "101–200") | ✅ Done |
 | Weapons Stat defaults to 0 on initial load for both PvE and PvP; PvP slider min changed from 100 to 0 | ✅ Done |
 
-**Stage 12 progress: ~60%**
+**Stage 12 progress: ~75%**
 
 ---
 
@@ -334,7 +334,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | 9 — God Roll Database Refresh | 100% | Complete |
 | 10 — Weapon List Polish | 100% | Complete |
 | 11 — PvE Damage Model Accuracy | 100% | Complete |
-| 12 — Feature Backlog | ~60% | Active |
+| 12 — Feature Backlog | ~75% | Active |
 | **Overall** | **~95%** | |
 
 ---
@@ -351,14 +351,13 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 > These are ordered by priority. Claude should start from the top.
 
-Stage 12 is the active work. Most 12H/12E/12G items are complete. Remaining priorities:
+Stage 12 is the active work. 12D is complete. 12E/12G/most 12H are complete. Remaining priorities:
 
-1. **12H remaining** — Tooltip GUI styling polish; weapon acquisition info; improve intrinsic bonuses display; retrieve weapon mods/masterworks from Bungie API
-2. **12D remaining** — Exotic armor selector in External Buffs panel (Hunter / Warlock / Titan lists with their weapon stat effects)
-3. **12F** — Search panel rework (D2 Foundry-style filters, perk search, recent searches)
-4. **12A** — Combat mechanics (handling breakdown: Ready/ADS/Stow times; flinch resistance; perfect draw window for Bows; per-activity PvE scaling dropdown)
-5. **12B** — Screenshot mode + share options
-6. **12C remaining** — Community research annotations on hover
+1. **12H remaining** — Weapon acquisition info (how to obtain each weapon); retrieve weapon mods/masterworks from Bungie API
+2. **12F** — Search panel rework (D2 Foundry-style filters, perk search, recent searches)
+3. **12A** — Combat mechanics (handling breakdown: Ready/ADS/Stow times; flinch resistance; perfect draw window for Bows; per-activity PvE scaling dropdown)
+4. **12B** — Screenshot mode + share options
+5. **12C remaining** — Community research annotations on hover
 
 ---
 
@@ -397,6 +396,8 @@ Stage 12 is the active work. Most 12H/12E/12G items are complete. Remaining prio
 | `weapon-system/src/` | Standalone weapon stat architecture module |
 | `.github/workflows/deploy.yml` | GitHub Actions — build + Wrangler deploy on push to main |
 | `wrangler.toml` | Cloudflare Worker config — static assets from `./out` |
+| `src/components/ui/Tooltip.tsx` | Portal-based tooltip component (renders to `document.body` to escape overflow-hidden ancestors) |
+| `src/data/exoticArmor.ts` | Exotic armor data: stat bonuses per exotic per class, weapon-type-specific bonuses |
 | `claude_perk_audit_prompt_v2.txt` | Detailed instructions for perk audit cleanup session |
 
 ---
@@ -446,3 +447,19 @@ npm run build
 *Batch 4 (commit df5bbec): AmmoPanel now reads ammoType, Magazine stat, and Ammo Capacity (reserves) from Bungie manifest first — MossyMax static data only for mag round count and reserve mod tiers. RollEditor single-option columns show Clarity description + stat mods inline beside the icon.*
 
 *Batch 5 (commit ef8f16f): All perk columns (barrel/mag/perk/origin) unified into one scrollable grid — no more Fixed Traits zone. EffectsPanel guard removed (now available for all weapons). External buffs now apply flat stat bonuses to weapon stat bars via new `statBonuses` field in DamageBuff interface and buffs.json (Amplified +40 Handling/+20 AE, Spark of Frequency +40 Reload, Flow State +40 Reload/+20 Handling, Thread of Ascent +30 AE/+30 Reload, Heat Rises +30 AE, Rally Barricade +50 Reload). Recoil Direction chart redesigned as DIM-style white pie sector (ones digit → directional tilt, overall value → cone tightness).*
+
+---
+
+*Last updated: 2026-04-20 — Session summary:*
+
+*1. RecoilChart formula fix: corrected arc direction so recoil 60→right, 50→left, 55→center (was inverted — changed `90 +` to `90 −`). Also removed erroneous `× 0.45` scaling factor. Final formula: `centerAngle = 90 − sin((x+5)·2π/20)·(100−x)`, `arcWidth = ((100−x)/100)·180`.*
+
+*2. Unified perk column layout: removed all single-option column special-casing in RollEditor.tsx that caused inline text to bleed behind adjacent icons. All columns now use identical layout (`flex-col`, `items-center`, `min-w-[60px]`). Single-option perks auto-selected on weapon load.*
+
+*3. Portal-based Tooltip component (`src/components/ui/Tooltip.tsx`): escapes overflow-hidden parents via `createPortal` to `document.body` with `position: fixed` + `getBoundingClientRect()`. 220 ms show delay, instant hide, flips above/below based on trigger y-position. Wrapped around all perk icons in RollEditor.*
+
+*4. Intrinsic stat modifier pills in WeaponHeader: intrinsic trait card now shows green/red stat mod pills (e.g. "+5 Handling"). Description resolved via 4-source cascade: manifest → Clarity DB (by hash) → compendium (filtered, colon-terminated entries rejected) → FRAME_FALLBACK hardcoded map (20 common archetypes). Fixes blank descriptions for exotic intrinsics, Rapid-Fire Frame, Adaptive Frame, and others.*
+
+*5. Exotic armor selector (12D complete): `src/data/exoticArmor.ts` with 10 Hunter / 12 Warlock / 10 Titan exotics, each with `statBonuses` and optional `weaponTypeStatBonuses` (e.g. Lucky Pants +100 Handling for Hand Cannons). BuffToggle.tsx gains ExoticArmorSection per class — `<select>` dropdown + stat pills (green when active weapon type matches, grey otherwise). `useWeaponStore` extended with `activeExoticArmor` state and `setExoticArmor` action; `getCalculatedStats` applies exotic bonuses after buff bonuses, clamped 0–100.*
+
+*6. wrangler.toml observability sync: added full `[observability]`, `[observability.logs]`, and `[observability.traces]` sections to match Cloudflare dashboard configuration.*

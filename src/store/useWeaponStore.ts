@@ -192,7 +192,13 @@ export const MASTERWORK_STATS = [
   'Aim Assistance', 'Magazine',
 ] as const;
 
-export type MasterworkStat = typeof MASTERWORK_STATS[number];
+/**
+ * Any stat name can be a masterwork option — the specific union above is the
+ * generic fallback for weapons that don't have per-weapon MW data from the manifest.
+ * Swords, bows, and exotic weapons will have different options (e.g. Swing Speed,
+ * Draw Time) so we use string here to allow those through.
+ */
+export type MasterworkStat = string;
 
 // Weapon Surge multipliers — actual in-game values from Weapon Surge mod description.
 export const SURGE_PVE: Record<number, number> = { 0: 1.00, 1: 1.10, 2: 1.17, 3: 1.22, 4: 1.25 };

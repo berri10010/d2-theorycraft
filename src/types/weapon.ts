@@ -131,6 +131,19 @@ export interface Weapon {
   perkSockets: PerkColumn[];
   /** Populated from archetypes.json at parse time */
   statCurves: Record<string, StatCurveNode[]>;
+  /**
+   * Human-readable acquisition source from Bungie's DestinyCollectibleDefinition.
+   * Examples: "Complete the Deep Stone Crypt raid.", "Sold by Banshee-44, Gunsmith."
+   * Null for weapons without a collectible entry (e.g. sunset / unobtainable).
+   */
+  source: string | null;
+  /**
+   * Masterwork stat options available for this weapon, derived from its
+   * masterwork socket plug set in the Bungie manifest.
+   * Empty for exotics / weapons where no masterwork socket was found.
+   * UI falls back to the generic MASTERWORK_STATS list when empty.
+   */
+  masterworkOptions: string[];
 }
 
 /** A named group of weapon variants sharing the same base name */
