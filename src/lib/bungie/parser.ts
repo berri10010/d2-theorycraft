@@ -82,7 +82,7 @@ const MW_WHITELIST_BY_TYPE: Record<string, string[]> = {
  */
 function getMwWhitelist(weaponType: string, frameName: string): string[] | null {
   // Frame-level exceptions (apply regardless of weapon type for the first two)
-  if (frameName === 'Micro-Missile Frame')
+  if (frameName === 'Micro-Missile Frame' || frameName === 'Micro-Missile')
     return ['Velocity', 'Stability', 'Handling', 'Blast Radius', 'Reload'];
   if (frameName === 'Balanced Heat Weapon' || frameName === 'Dynamic Heat Weapon')
     return ['Range', 'Stability', 'Handling', 'Cooling Efficiency', 'Reload'];

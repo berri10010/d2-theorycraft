@@ -52,7 +52,8 @@ export const WEAPON_STAT_MAPPINGS: Record<WeaponType, FrameMapping> = {
     'LN2 Burst': ['RPM', 'Charge Time', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
     'Close the Gap': ['RPM', 'Charge Time', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
     'All at Once': ['RPM', 'Charge Time', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
-    'Micro-Missile': ['RPM', 'Blast Radius', 'Velocity', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
+    'Micro-Missile':       ['RPM', 'Blast Radius', 'Velocity', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
+    'Micro-Missile Frame': ['RPM', 'Blast Radius', 'Velocity', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
     'The Rest': ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
   },
   'Combat Bow': {

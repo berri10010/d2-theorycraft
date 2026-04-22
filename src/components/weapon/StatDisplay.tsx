@@ -24,7 +24,7 @@ const ALL_BAR_STAT_KEYS = [
   'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
   'Velocity', 'Blast Radius', 'Accuracy',
   'Draw Time', 'Charge Time',
-  'Swing Speed', 'Guard Resistance', 'Charge Rate', 'Guard Endurance', 'Shield Duration',
+  'Swing Speed', 'Guard Resistance', 'Charge Rate', 'Guard Endurance', 'Shield Duration', 'Ammo Capacity',
   'Cooling Efficiency', 'Heat Generated', 'Vent Speed', 'Persistence',
 ];
 
