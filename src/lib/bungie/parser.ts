@@ -6,6 +6,11 @@ import {
   BungiePlugSetDefinition,
   BungieSeasonDefinition,
 } from './bungieTypes';
+// Explicit type alias used to annotate variables whose type TypeScript cannot
+// infer without circularity when the same BungieInventoryItem graph is traversed
+// across multiple closures in the same outer function.
+type SocketEntry = NonNullable<BungieInventoryItem['sockets']>['socketEntries'][number];
+
 import { getCurves } from '../archetypes';
 import { getBuffKeyForPerk } from '../buffDatabase';
 import { getPerkTier } from '../perkTierDatabase';
@@ -406,7 +411,7 @@ export function parseWeapons(
         // ── Masterwork socket: extract available stat options ──
         if (isMasterworkCategory(catName)) {
           for (const socketIndex of category.socketIndexes) {
-            const mwSocket = item.sockets!.socketEntries[socketIndex];
+            const mwSocket: SocketEntry | undefined = item.sockets!.socketEntries[socketIndex];
             if (!mwSocket) continue;
             // Masterwork options live in reusablePlugSetHash
             const ps = mwSocket.reusablePlugSetHash
