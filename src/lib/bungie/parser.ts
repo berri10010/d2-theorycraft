@@ -414,11 +414,11 @@ export function parseWeapons(
             const mwSocket: SocketEntry | undefined = item.sockets!.socketEntries[socketIndex];
             if (!mwSocket) continue;
             // Masterwork options live in reusablePlugSetHash
-            const ps = mwSocket.reusablePlugSetHash
+            const mwPs: BungiePlugSetDefinition | null = mwSocket.reusablePlugSetHash
               ? plugSetDefs[mwSocket.reusablePlugSetHash.toString()]
               : null;
-            const plugHashes = ps
-              ? ps.reusablePlugItems.map((p) => p.plugItemHash)
+            const plugHashes: number[] = mwPs
+              ? mwPs.reusablePlugItems.map((p: { plugItemHash: number }) => p.plugItemHash)
               : mwSocket.singleInitialItemHash
                 ? [mwSocket.singleInitialItemHash]
                 : [];
@@ -478,10 +478,10 @@ export function parseWeapons(
         // ── Weapon mod socket: extract available mod options ──
         if (isWeaponModCategory(catName)) {
           for (const socketIndex of category.socketIndexes) {
-            const modSocket = item.sockets!.socketEntries[socketIndex];
+            const modSocket: SocketEntry | undefined = item.sockets!.socketEntries[socketIndex];
             if (!modSocket) continue;
             // Mod options live in reusablePlugSetHash (choosable by player)
-            const modPs = modSocket.reusablePlugSetHash
+            const modPs: BungiePlugSetDefinition | null = modSocket.reusablePlugSetHash
               ? plugSetDefs[modSocket.reusablePlugSetHash.toString()]
               : null;
             // Only include mods that currentlyCanRoll — Bungie sets this false on mods
@@ -589,7 +589,7 @@ export function parseWeapons(
         // One PerkColumn per physical socket slot in this category.
         // "WEAPON PERKS" has 2 indexes → Trait 1 / Trait 2 each become their own column.
         socketIndexes.forEach((socketIndex, slotPos) => {
-          const socket = item.sockets!.socketEntries[socketIndex];
+          const socket: SocketEntry | undefined = item.sockets!.socketEntries[socketIndex];
           if (!socket) return;
 
           // Collect plug hashes from BOTH plug sets and merge by hash uniqueness.
