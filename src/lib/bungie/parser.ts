@@ -462,6 +462,10 @@ export function parseWeapons(
               // Bungie shares plug sets across socket types.
               if (/\btier\b/i.test(modName)) continue;
               if (/\bmasterwork/i.test(modName)) continue;
+              // Skip crafting-related plugs. "Extract Pattern" is labeled "Weapon Mod"
+              // in the manifest but is a crafting action, not an equippable mod.
+              if (/extract\s+pattern/i.test(modName)) continue;
+              if (/\bpattern\b/i.test(modName)) continue;
               // Strictly require the plug to identify itself as a weapon mod.
               // This filters out barrel perks, sight options, and other non-mod
               // plugs that happen to have stat investments in their investmentStats.
