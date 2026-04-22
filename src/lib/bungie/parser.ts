@@ -456,13 +456,17 @@ export function parseWeapons(
               // Skip empty socket placeholders and trackers
               if (modName.toLowerCase().includes('empty')) continue;
               if (isTrackerPlug(modName)) continue;
-              // Must look like a real mod: has "Weapon Mod" itemTypeDisplayName
-              // OR has at least one non-zero stat investment
-              const modHasStats = (modPlug.investmentStats ?? []).some(
-                (s: { value: number }) => s.value !== 0,
-              );
+              // Skip masterwork tier-progression plugs ("Tier 1: Stability", etc.)
+              // and masterwork completion plugs ("Masterworked: Stability", etc.).
+              // These leak into the weapon mod plug set on some weapons because
+              // Bungie shares plug sets across socket types.
+              if (/\btier\b/i.test(modName)) continue;
+              if (/\bmasterwork/i.test(modName)) continue;
+              // Strictly require the plug to identify itself as a weapon mod.
+              // This filters out barrel perks, sight options, and other non-mod
+              // plugs that happen to have stat investments in their investmentStats.
               const looksLikeMod = (modPlug.itemTypeDisplayName ?? '').toLowerCase().includes('mod');
-              if (!modHasStats && !looksLikeMod) continue;
+              if (!looksLikeMod) continue;
               // Extract stat changes from investmentStats
               const modStatChanges: Partial<Record<string, number>> = {};
               for (const s of (modPlug.investmentStats ?? [])) {
