@@ -45,6 +45,54 @@ function auditActivationFor(perkName: string): { act: PerkActivation | null; act
 
 const WEAPON_ITEM_TYPE = 3;
 
+// ── Per-weapon-type masterwork stat whitelist ─────────────────────────────────
+// Restricts masterwork options to stats that are actually valid for each weapon
+// type, preventing shared-plug-set bleed (e.g. Impact showing on bows, Charge
+// Time showing on swords).
+//
+// Frame-based exceptions (Micro-Missile, Heat Weapon, High-Impact Bow) override
+// the weapon-type entry and are checked first in getMwWhitelist().
+
+const MW_WHITELIST_BY_TYPE: Record<string, string[]> = {
+  'Auto Rifle':              ['Range', 'Stability', 'Handling', 'Reload'],
+  'Pulse Rifle':             ['Range', 'Stability', 'Handling', 'Reload'],
+  'Scout Rifle':             ['Range', 'Stability', 'Handling', 'Reload'],
+  'Hand Cannon':             ['Range', 'Stability', 'Handling', 'Reload'],
+  'Submachine Gun':          ['Range', 'Stability', 'Handling', 'Reload'],
+  'Sidearm':                 ['Range', 'Stability', 'Handling', 'Reload'],
+  'Combat Bow':              ['Draw Time', 'Accuracy', 'Stability', 'Reload', 'Handling'],
+  'Shotgun':                 ['Range', 'Stability', 'Handling', 'Reload'],
+  'Sniper Rifle':            ['Range', 'Stability', 'Handling', 'Reload'],
+  'Fusion Rifle':            ['Charge Time', 'Range', 'Stability', 'Handling', 'Reload'],
+  'Grenade Launcher':        ['Blast Radius', 'Velocity', 'Stability', 'Handling', 'Reload'],
+  'Trace Rifle':             ['Range', 'Stability', 'Handling', 'Reload'],
+  'Glaive':                  ['Shield Duration', 'Range', 'Handling', 'Reload'],
+  'Rocket Launcher':         ['Blast Radius', 'Velocity', 'Stability', 'Handling', 'Reload'],
+  'Linear Fusion Rifle':     ['Charge Time', 'Range', 'Stability', 'Handling', 'Reload'],
+  'Machine Gun':             ['Range', 'Stability', 'Handling', 'Reload'],
+  'Sword':                   ['Impact'],
+};
+
+/**
+ * Returns the allowed primary masterwork stat names for a given weapon type and
+ * intrinsic frame.  Frame-based exceptions are checked first (Micro-Missile,
+ * Heat Weapon frames, High-Impact Bow).  Returns null if the type is unknown —
+ * callers should skip whitelist filtering in that case so exotic / future weapon
+ * types still display their MW options.
+ */
+function getMwWhitelist(weaponType: string, frameName: string): string[] | null {
+  // Frame-level exceptions (apply regardless of weapon type for the first two)
+  if (frameName === 'Micro-Missile Frame')
+    return ['Velocity', 'Stability', 'Handling', 'Blast Radius', 'Reload'];
+  if (frameName === 'Balanced Heat Weapon' || frameName === 'Dynamic Heat Weapon')
+    return ['Range', 'Stability', 'Handling', 'Cooling Efficiency', 'Reload'];
+  // High-Impact Frame is a valid exception ONLY for Combat Bows
+  if (weaponType === 'Combat Bow' && frameName === 'High-Impact Frame')
+    return ['Velocity', 'Persistence', 'Handling', 'Reload'];
+
+  return MW_WHITELIST_BY_TYPE[weaponType] ?? null;
+}
+
 // ──────────────────────────────────────────────────
 // Variant / family detection
 // ──────────────────────────────────────────────────
@@ -869,6 +917,50 @@ export function parseWeapons(
     // Guard: deduplicate column names so selectedPerks keys never collide
     const perkSockets = deduplicateColumnNames(rawColumns);
 
+    // ── MW option cleanup (runs before weapons.push) ──────────────────────────
+    // Step 1: For Combat Bows the Draw Time masterwork plug sometimes uses the
+    // Charge Time stat hash (2961396640) internally.  Rename "Charge Time" →
+    // "Draw Time" so it resolves against the bow's actual baseStats key and
+    // displays correctly.  When both keys are already present, drop the duplicate.
+    if ((item.itemTypeDisplayName ?? '') === 'Combat Bow') {
+      const ctIdx = masterworkOptions.indexOf('Charge Time');
+      if (ctIdx !== -1) {
+        const hasDrawTime = masterworkOptions.includes('Draw Time');
+        if (!hasDrawTime) {
+          masterworkOptions[ctIdx] = 'Draw Time';
+          if (masterworkBonuses['Charge Time'] !== undefined && masterworkBonuses['Draw Time'] === undefined) {
+            masterworkBonuses['Draw Time'] = masterworkBonuses['Charge Time'];
+          }
+        }
+        // Remove Charge Time entry regardless (renamed or was a duplicate)
+        delete masterworkBonuses['Charge Time'];
+        if (masterworkOptions.indexOf('Charge Time') !== -1)
+          masterworkOptions.splice(masterworkOptions.indexOf('Charge Time'), 1);
+      }
+    }
+
+    // Step 2: Draw Time and Charge Time are "lower is better" stats.  The Bungie
+    // manifest stores their MW investment as a positive integer but the actual
+    // game effect is a reduction in milliseconds.  Negate so getCalculatedStats
+    // subtracts from the raw value and the stat display shows a correct negative delta.
+    for (const negStat of ['Draw Time', 'Charge Time'] as const) {
+      if ((masterworkBonuses[negStat] ?? 0) > 0) {
+        masterworkBonuses[negStat] = -masterworkBonuses[negStat];
+      }
+    }
+
+    // Step 3: Apply per-type / per-frame whitelist to block cross-plug-set bleed
+    // (e.g. Impact appearing on bows, Charge Time on swords).
+    // Returns null for unknown weapon types → no whitelist applied (safe fallback).
+    const mwFrameName = intrinsicTrait !== null ? (intrinsicTrait as { name: string }).name : '';
+    const mwWhitelist = getMwWhitelist(
+      item.itemTypeDisplayName ?? '',
+      mwFrameName,
+    );
+    const finalMwOptions = masterworkOptions
+      .filter((s) => baseStats[s] !== undefined)
+      .filter((s) => mwWhitelist === null || mwWhitelist.includes(s));
+
     const weaponName = item.displayProperties.name;
     weapons.push({
       hash: item.hash.toString(),
@@ -896,17 +988,17 @@ export function parseWeapons(
       source: item.collectibleHash
         ? (collectibleMap[item.collectibleHash.toString()] ?? null)
         : null,
-      // Only keep masterwork options for stats this weapon actually has (e.g. no
-      // Draw Time on Auto Rifles, no Impact on Bows). The plug sets in the manifest
-      // are often shared across weapon types, so this filters down to applicable stats.
-      masterworkOptions: masterworkOptions.filter((s) => baseStats[s] !== undefined),
+      // Whitelist-filtered MW options (cross-plug-set bleed already removed above)
+      masterworkOptions: finalMwOptions,
       masterworkBonuses: Object.fromEntries(
-        Object.entries(masterworkBonuses).filter(([s]) => baseStats[s] !== undefined)
+        Object.entries(masterworkBonuses)
+          .filter(([s]) => baseStats[s] !== undefined)
+          .filter(([s]) => mwWhitelist === null || mwWhitelist.includes(s))
       ),
       // Secondary bonus stats that are not MW options but still receive adept bonuses.
       // Must exist on this weapon's baseStats (same guard as masterworkOptions).
       masterworkSecondaryStats: [...secondaryMwStats].filter(
-        (s) => !masterworkOptions.includes(s) && baseStats[s] !== undefined
+        (s) => !finalMwOptions.includes(s) && baseStats[s] !== undefined
       ),
       weaponMods,
     });
