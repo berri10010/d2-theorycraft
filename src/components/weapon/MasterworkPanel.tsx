@@ -86,18 +86,17 @@ export const MasterworkPanel: React.FC = () => {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-bold text-white">Masterwork</h2>
             {(() => {
-              const baseTierBonus = (activeWeapon.seasonNumber ?? 0) >= 27 ? 5 : 0;
-              const secondaryBonus =
-                baseTierBonus +
-                (isAdept && isCrafted ? 4 :
-                 isAdept              ? 3 :
-                 (isCrafted || isEnhanced) ? 2 : 0);
+              const isTiered = (activeWeapon.seasonNumber ?? 0) >= 27;
+              const secondaryBonus = isTiered ? 5 : (
+                isAdept && isCrafted ? 4 :
+                isAdept              ? 3 :
+                (isCrafted || isEnhanced) ? 2 : 0);
               const labelColor =
-                isAdept           ? 'text-amber-400'  :
-                isCrafted         ? 'text-emerald-400':
-                isEnhanced        ? 'text-violet-400' :
-                baseTierBonus > 0 ? 'text-slate-300'  :
-                                    'text-slate-500';
+                isAdept    ? 'text-amber-400'  :
+                isCrafted  ? 'text-emerald-400':
+                isEnhanced ? 'text-violet-400' :
+                isTiered   ? 'text-slate-300'  :
+                             'text-slate-500';
 
               if (masterworkStat) {
                 const primaryBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
