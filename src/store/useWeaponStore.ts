@@ -23,13 +23,22 @@ export interface WeaponMod {
  * Damage multipliers for mods that boost PvE damage.
  * Not present in the Bungie manifest; sourced from in-game testing.
  * All mods default to 1.0 (no damage change) unless listed here.
+ * Adept variants always match their base counterparts.
  */
 const MOD_DAMAGE_MULTIPLIERS: Record<string, number> = {
-  'Major Spec':   1.077,
-  'Minor Spec':   1.077,
-  'Boss Spec':    1.077,
-  'Taken Spec':   1.100,
-  'Piercing Sidearm': 1.077,
+  // Base spec mods
+  'Minor Spec':          1.077,
+  'Major Spec':          1.077,
+  'Boss Spec':           1.077,
+  'Big Ones Spec':       1.077,
+  'Taken Spec':          1.100,
+  'Piercing Sidearm':    1.077,
+  // Adept variants (same multipliers as base)
+  'Adept Minor Spec':    1.077,
+  'Adept Major Spec':    1.077,
+  'Adept Boss Spec':     1.077,
+  'Adept Big Ones Spec': 1.077,
+  'Adept Taken Spec':    1.100,
 };
 
 /** The "no mod equipped" sentinel — always the first item in the mod list. */
@@ -56,7 +65,7 @@ export function buildWeaponModsList(weapon: Weapon): WeaponMod[] {
       description: opt.description,
       statChanges: opt.statChanges,
       damageMultiplier: MOD_DAMAGE_MULTIPLIERS[opt.name] ?? 1.0,
-      adeptOnly: opt.name.toLowerCase().startsWith('adept '),
+      adeptOnly: /\badept\b/i.test(opt.name),
     });
   }
   return mods;
