@@ -526,16 +526,19 @@ export const useWeaponStore = create<WeaponState>()(
         // Secondary bonus: applied to all OTHER masterwork option stats, plus any
         //   weapon-specific secondary stats (e.g. sword Charge Rate / Guard stats).
         //   Amount depends on weapon tier:
-        //     Enhanced Adept (adept + crafted) → +4
-        //     Base Adept (fully masterworked)   → +3
-        //     Crafted Legendary (level 20)       → +2
-        //     Standard Legendary                 → 0
+        //     Season 27+ weapons are "tiered" and always receive a base +5 secondary bonus.
+        //     Enhanced Adept (adept + crafted) → baseTierBonus + 4
+        //     Base Adept (fully masterworked)   → baseTierBonus + 3
+        //     Crafted Legendary (level 20)       → baseTierBonus + 2
+        //     Standard Legendary                 → baseTierBonus (0 for pre-s27, 5 for s27+)
         if (masterworkStat) {
           const primaryBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
+          const baseTierBonus = (activeWeapon.seasonNumber ?? 0) >= 27 ? 5 : 0;
           const secondaryBonus =
-            activeWeapon.isAdept && isCrafted ? 4 :
-            activeWeapon.isAdept              ? 3 :
-            (isCrafted || isEnhanced)         ? 2 : 0;
+            baseTierBonus +
+            (activeWeapon.isAdept && isCrafted ? 4 :
+             activeWeapon.isAdept              ? 3 :
+             (isCrafted || isEnhanced)         ? 2 : 0);
 
           // Primary stat
           if (finalStats[masterworkStat] !== undefined) {

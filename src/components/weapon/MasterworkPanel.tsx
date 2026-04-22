@@ -85,47 +85,39 @@ export const MasterworkPanel: React.FC = () => {
         <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-bold text-white">Masterwork</h2>
-            {masterworkStat ? (() => {
-              const primaryBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
-              const primaryLabel = primaryBonus < 0
-                ? `${primaryBonus} ${masterworkStat}`
-                : `+${primaryBonus} ${masterworkStat}`;
-              if (isAdept && isCrafted) return (
-                <span className="text-[10px] text-amber-400 font-semibold">
-                  {primaryLabel} · +4 others
-                </span>
-              );
-              if (isAdept) return (
-                <span className="text-[10px] text-amber-400 font-semibold">
-                  {primaryLabel} · +3 others
-                </span>
-              );
-              if (isCrafted) return (
-                <span className="text-[10px] text-emerald-400 font-semibold">
-                  {primaryLabel} · +2 others
-                </span>
-              );
-              if (isEnhanced) return (
-                <span className="text-[10px] text-violet-400 font-semibold">
-                  {primaryLabel} · +2 others
-                </span>
-              );
+            {(() => {
+              const baseTierBonus = (activeWeapon.seasonNumber ?? 0) >= 27 ? 5 : 0;
+              const secondaryBonus =
+                baseTierBonus +
+                (isAdept && isCrafted ? 4 :
+                 isAdept              ? 3 :
+                 (isCrafted || isEnhanced) ? 2 : 0);
+              const labelColor =
+                isAdept           ? 'text-amber-400'  :
+                isCrafted         ? 'text-emerald-400':
+                isEnhanced        ? 'text-violet-400' :
+                baseTierBonus > 0 ? 'text-slate-300'  :
+                                    'text-slate-500';
+
+              if (masterworkStat) {
+                const primaryBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
+                const primaryLabel = primaryBonus < 0
+                  ? `${primaryBonus} ${masterworkStat}`
+                  : `+${primaryBonus} ${masterworkStat}`;
+                return (
+                  <span className={`text-[10px] ${labelColor} font-semibold`}>
+                    {primaryLabel}
+                    {secondaryBonus > 0 && ` · +${secondaryBonus} others`}
+                  </span>
+                );
+              }
+              if (secondaryBonus === 0) return null;
               return (
-                <span className="text-[10px] text-slate-500">{primaryLabel}</span>
+                <span className={`text-[10px] ${labelColor} font-semibold`}>
+                  +10 chosen · +{secondaryBonus} others
+                </span>
               );
-            })() : isAdept ? (
-              <span className="text-[10px] text-amber-400 font-semibold">
-                +10 chosen · +3 others
-              </span>
-            ) : isCrafted ? (
-              <span className="text-[10px] text-emerald-400 font-semibold">
-                +10 chosen · +2 others
-              </span>
-            ) : isEnhanced ? (
-              <span className="text-[10px] text-violet-400 font-semibold">
-                +10 chosen · +2 others
-              </span>
-            ) : null}
+            })()}
           </div>
 
           <div className="flex flex-wrap gap-1.5">
