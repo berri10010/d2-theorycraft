@@ -159,6 +159,25 @@ export interface Weapon {
    */
   masterworkOptions: string[];
   /**
+   * Full bonus value (signed) per masterwork stat at the maximum tier, sourced
+   * from the manifest's tier-plug investmentStats.
+   * Examples: { Range: 10, Stability: 10 } for a Hand Cannon,
+   *           { Impact: 4 } for a Sword,
+   *           { 'Draw Time': -34, Accuracy: 10 } for a Combat Bow.
+   * Optional for backward-compatibility with cached data built before this field.
+   */
+  masterworkBonuses?: Record<string, number>;
+  /**
+   * Stats that receive the secondary adept masterwork bonus (+3/+4) even though
+   * they are not selectable masterwork options. Populated from the secondary
+   * investmentStats in the weapon's tier plugs.
+   * Key use-case: Swords where Charge Rate, Guard Resistance, and Guard Endurance
+   * receive a bonus alongside the Impact masterwork even though Impact is the
+   * only choosable MW stat.
+   * Optional for backward-compatibility with cached data built before this field.
+   */
+  masterworkSecondaryStats?: string[];
+  /**
    * Weapon mod options available for this weapon, extracted from the mod
    * socket plug set in the Bungie manifest. Empty for exotic weapons.
    */

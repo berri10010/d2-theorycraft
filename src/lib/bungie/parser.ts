@@ -384,6 +384,10 @@ export function parseWeapons(
 
      let rawColumns: PerkColumn[] = [];
     const masterworkOptions: string[] = [];
+    /** Signed max-tier bonus per MW stat (from investmentStats of the highest-value tier plug). */
+    const masterworkBonuses: Record<string, number> = {};
+    /** Non-primary stats that still receive secondary adept bonuses (e.g. sword Charge Rate). */
+    const secondaryMwStats = new Set<string>();
     const weaponMods: Weapon['weaponMods'] = [];
 
     let intrinsicTrait: Perk | null = null;
@@ -422,17 +426,31 @@ export function parseWeapons(
               if (/\btier\b/i.test(mwPlugName)) {
                 // Tier-progression plugs ("Tier 1: Stability", "Tier 9: Range") encode the
                 // masterwork stat choice in their investmentStats rather than their name.
-                // Extract the stat with the HIGHEST positive value — that's the primary
-                // masterwork stat, not a secondary adept bonus (+3 to all others).
+                // The PRIMARY stat is the one with the LARGEST ABSOLUTE VALUE — this handles
+                // weapons like Combat Bows where the Draw Time MW has a negative value (−34).
                 let bestStat: string | null = null;
-                let bestVal = -Infinity;
+                let bestAbsVal = 0;
+                let bestSignedVal = 0;
                 for (const s of plugItem.investmentStats) {
-                  if (s.value <= 0) continue;
+                  if (s.value === 0) continue;
                   const statName = STAT_HASH_MAP[s.statTypeHash];
                   if (!statName || !DISPLAY_STATS.has(statName)) continue;
-                  if (s.value > bestVal) { bestVal = s.value; bestStat = statName; }
+                  const absVal = Math.abs(s.value);
+                  if (absVal > bestAbsVal) { bestAbsVal = absVal; bestStat = statName; bestSignedVal = s.value; }
                 }
-                if (bestStat && !masterworkOptions.includes(bestStat)) masterworkOptions.push(bestStat);
+                if (bestStat) {
+                  if (!masterworkOptions.includes(bestStat)) masterworkOptions.push(bestStat);
+                  // Track the highest-tier bonus seen for this stat (largest abs value = Tier 10)
+                  if (bestAbsVal > Math.abs(masterworkBonuses[bestStat] ?? 0)) {
+                    masterworkBonuses[bestStat] = bestSignedVal;
+                  }
+                  // Secondary stats in the same plug = adept bonus stats (e.g. sword Charge Rate)
+                  for (const s of plugItem.investmentStats) {
+                    if (s.value === 0) continue;
+                    const sn = STAT_HASH_MAP[s.statTypeHash];
+                    if (sn && DISPLAY_STATS.has(sn) && sn !== bestStat) secondaryMwStats.add(sn);
+                  }
+                }
                 continue;
               }
 
@@ -441,8 +459,10 @@ export function parseWeapons(
                 if (s.value === 0) continue;
                 const statName = STAT_HASH_MAP[s.statTypeHash];
                 if (!statName || !DISPLAY_STATS.has(statName)) continue;
-                if (!masterworkOptions.includes(statName)) {
-                  masterworkOptions.push(statName);
+                if (!masterworkOptions.includes(statName)) masterworkOptions.push(statName);
+                const absVal = Math.abs(s.value);
+                if (absVal > Math.abs(masterworkBonuses[statName] ?? 0)) {
+                  masterworkBonuses[statName] = s.value;
                 }
               }
             }
@@ -482,20 +502,34 @@ export function parseWeapons(
               // socket category rather than a separate masterwork category, so this is the
               // only place we can capture masterwork stat options for those weapons.
               if (/\btier\b/i.test(modName)) {
+                // Primary stat = largest absolute value (handles Draw Time −34, Charge Time −34)
                 let bestStat: string | null = null;
-                let bestVal = -Infinity;
+                let bestAbsVal = 0;
+                let bestSignedVal = 0;
                 for (const s of (modPlug.investmentStats ?? [])) {
                   const inv = s as { statTypeHash: number; value: number };
-                  if (inv.value <= 0) continue;
+                  if (inv.value === 0) continue;
                   const statName = STAT_HASH_MAP[inv.statTypeHash];
                   if (!statName || !DISPLAY_STATS.has(statName)) continue;
-                  if (inv.value > bestVal) { bestVal = inv.value; bestStat = statName; }
+                  const absVal = Math.abs(inv.value);
+                  if (absVal > bestAbsVal) { bestAbsVal = absVal; bestStat = statName; bestSignedVal = inv.value; }
                 }
-                if (bestStat && !masterworkOptions.includes(bestStat)) masterworkOptions.push(bestStat);
+                if (bestStat) {
+                  if (!masterworkOptions.includes(bestStat)) masterworkOptions.push(bestStat);
+                  if (bestAbsVal > Math.abs(masterworkBonuses[bestStat] ?? 0)) {
+                    masterworkBonuses[bestStat] = bestSignedVal;
+                  }
+                  // Secondary stats (e.g. sword's Charge Rate from the same plug)
+                  for (const s of (modPlug.investmentStats ?? [])) {
+                    const inv = s as { statTypeHash: number; value: number };
+                    if (inv.value === 0) continue;
+                    const sn = STAT_HASH_MAP[inv.statTypeHash];
+                    if (sn && DISPLAY_STATS.has(sn) && sn !== bestStat) secondaryMwStats.add(sn);
+                  }
+                }
                 continue;
               }
               // Named masterwork plugs ("Reload Masterwork", "Masterworked: Stability").
-              // Extract all positive stats as masterwork options.
               if (/\bmasterwork/i.test(modName)) {
                 for (const s of (modPlug.investmentStats ?? [])) {
                   const inv = s as { statTypeHash: number; value: number };
@@ -503,6 +537,10 @@ export function parseWeapons(
                   const statName = STAT_HASH_MAP[inv.statTypeHash];
                   if (!statName || !DISPLAY_STATS.has(statName)) continue;
                   if (!masterworkOptions.includes(statName)) masterworkOptions.push(statName);
+                  const absVal = Math.abs(inv.value);
+                  if (absVal > Math.abs(masterworkBonuses[statName] ?? 0)) {
+                    masterworkBonuses[statName] = inv.value;
+                  }
                 }
                 continue;
               }
@@ -809,6 +847,14 @@ export function parseWeapons(
       // Draw Time on Auto Rifles, no Impact on Bows). The plug sets in the manifest
       // are often shared across weapon types, so this filters down to applicable stats.
       masterworkOptions: masterworkOptions.filter((s) => baseStats[s] !== undefined),
+      masterworkBonuses: Object.fromEntries(
+        Object.entries(masterworkBonuses).filter(([s]) => baseStats[s] !== undefined)
+      ),
+      // Secondary bonus stats that are not MW options but still receive adept bonuses.
+      // Must exist on this weapon's baseStats (same guard as masterworkOptions).
+      masterworkSecondaryStats: [...secondaryMwStats].filter(
+        (s) => !masterworkOptions.includes(s) && baseStats[s] !== undefined
+      ),
       weaponMods,
     });
   }

@@ -51,6 +51,7 @@ export const MasterworkPanel: React.FC = () => {
   const {
     activeWeapon,
     masterworkStat, setMasterworkStat,
+    isCrafted,
     activeMod, setActiveMod,
   } = useWeaponStore();
   const { data: clarityPerks } = useClarityPerks();
@@ -83,14 +84,39 @@ export const MasterworkPanel: React.FC = () => {
         <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-bold text-white">Masterwork</h2>
-            {isAdept && (
+            {masterworkStat ? (() => {
+              const primaryBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
+              const primaryLabel = primaryBonus < 0
+                ? `${primaryBonus} ${masterworkStat}`
+                : `+${primaryBonus} ${masterworkStat}`;
+              const isEnhancedAdept = isAdept && isCrafted;
+              if (isEnhancedAdept) return (
+                <span className="text-[10px] text-amber-400 font-semibold">
+                  {primaryLabel} · +4 others
+                </span>
+              );
+              if (isAdept) return (
+                <span className="text-[10px] text-amber-400 font-semibold">
+                  {primaryLabel} · +3 others
+                </span>
+              );
+              if (isCrafted) return (
+                <span className="text-[10px] text-emerald-400 font-semibold">
+                  {primaryLabel} · +2 others
+                </span>
+              );
+              return (
+                <span className="text-[10px] text-slate-500">{primaryLabel}</span>
+              );
+            })() : isAdept ? (
               <span className="text-[10px] text-amber-400 font-semibold">
-                +10 chosen · +3 all others
+                +10 chosen · +3 others
               </span>
-            )}
-            {!isAdept && masterworkStat && (
-              <span className="text-[10px] text-slate-500">+10 to {masterworkStat}</span>
-            )}
+            ) : isCrafted ? (
+              <span className="text-[10px] text-emerald-400 font-semibold">
+                +10 chosen · +2 others
+              </span>
+            ) : null}
           </div>
 
           <div className="flex flex-wrap gap-1.5">

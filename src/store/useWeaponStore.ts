@@ -486,19 +486,39 @@ export const useWeaponStore = create<WeaponState>()(
           }
         }
 
-        // Masterwork: +10 to chosen stat; if Adept, +3 to all other base stats
+        // ── Masterwork stat bonuses ──────────────────────────────────────────────
+        // Primary bonus: use manifest-derived value (e.g. −34 for Bow Draw Time,
+        //   +4 for Sword Impact, +10 for everything else). Falls back to +10.
+        // Secondary bonus: applied to all OTHER masterwork option stats, plus any
+        //   weapon-specific secondary stats (e.g. sword Charge Rate / Guard stats).
+        //   Amount depends on weapon tier:
+        //     Enhanced Adept (adept + crafted) → +4
+        //     Base Adept (fully masterworked)   → +3
+        //     Crafted Legendary (level 20)       → +2
+        //     Standard Legendary                 → 0
         if (masterworkStat) {
-          if (activeWeapon.isAdept) {
-            for (const stat of Object.keys(finalStats)) {
-              if (stat === masterworkStat) {
-                finalStats[stat] = Math.min(100, finalStats[stat] + 10);
-              } else {
-                finalStats[stat] = Math.min(100, finalStats[stat] + 3);
+          const primaryBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
+          const secondaryBonus =
+            activeWeapon.isAdept && isCrafted ? 4 :
+            activeWeapon.isAdept              ? 3 :
+            isCrafted                         ? 2 : 0;
+
+          // Primary stat
+          if (finalStats[masterworkStat] !== undefined) {
+            finalStats[masterworkStat] = Math.max(0, Math.min(100,
+              finalStats[masterworkStat] + primaryBonus));
+          }
+
+          // Secondary bonus: other choosable MW stats + weapon-specific secondary stats
+          if (secondaryBonus > 0) {
+            const secondaryStats = new Set<string>([
+              ...(activeWeapon.masterworkOptions ?? []).filter(s => s !== masterworkStat),
+              ...(activeWeapon.masterworkSecondaryStats ?? []),
+            ]);
+            for (const stat of secondaryStats) {
+              if (finalStats[stat] !== undefined) {
+                finalStats[stat] = Math.min(100, finalStats[stat] + secondaryBonus);
               }
-            }
-          } else {
-            if (finalStats[masterworkStat] !== undefined) {
-              finalStats[masterworkStat] = Math.min(100, finalStats[masterworkStat] + 10);
             }
           }
         }
