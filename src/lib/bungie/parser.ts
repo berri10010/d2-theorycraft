@@ -83,8 +83,11 @@ const STAT_HASH_MAP: Record<number, string> = {
   2714457168: 'Airborne Effectiveness',
   4284893193: 'RPM',
   3871231066: 'Magazine',
-  2168534779: 'Charge Time',
-  1935470627: 'Draw Time',
+  // Charge Time / Draw Time — corrected hashes (old entries were stale and unmapped):
+  //   2168534779 = undefined in the manifest (was never valid)
+  //   1935470627 = "Power" (character power level — not a weapon stat)
+  2961396640: 'Charge Time',  // "The time in milliseconds before a weapon fires" (Fusion/LFR)
+  447667954:  'Draw Time',    // "The time in milliseconds it takes to draw an arrow" (Combat Bow)
   3614673599: 'Blast Radius',
   2523465841: 'Velocity',
   1591432999: 'Accuracy',
@@ -95,6 +98,12 @@ const STAT_HASH_MAP: Record<number, string> = {
   3736848092: 'Guard Endurance',
   1842278586: 'Shield Duration',
   925767036:  'Ammo Capacity',
+  // Heat-weapon stats (added in Renegades, Dec 2025):
+  4006394725: 'Cooling Efficiency', // How quickly the weapon cools per second when not fired
+  3481294762: 'Heat Generated',     // The amount of heat generated per shot fired
+  602570185:  'Vent Speed',         // The time it takes to vent this weapon
+  // Bow-specific stat:
+  3085395333: 'Persistence',        // Increases the amount of time that bolts linger
 };
 
 // Stats stored in baseStats (used for display + stat modifier math)
@@ -104,6 +113,10 @@ const DISPLAY_STATS = new Set([
   'RPM', 'Draw Time', 'Charge Time',
   'Blast Radius', 'Velocity', 'Accuracy', 'Ammo Generation',
   'Swing Speed', 'Guard Resistance', 'Charge Rate', 'Guard Endurance', 'Shield Duration', 'Ammo Capacity',
+  // Heat-weapon stats (Renegades)
+  'Cooling Efficiency', 'Heat Generated', 'Vent Speed',
+  // Bow-specific
+  'Persistence',
 ]);
 
 const DAMAGE_TYPE_MAP: Record<number, Weapon['damageType']> = {
@@ -384,7 +397,9 @@ export function parseWeapons(
       'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
       'Zoom', 'Recoil Direction', 'Magazine', 'Airborne Effectiveness',
       'Blast Radius', 'Velocity', 'Accuracy', 'Ammo Generation',
+      'Draw Time', 'Charge Time',
       'Swing Speed', 'Guard Resistance', 'Charge Rate', 'Guard Endurance', 'Shield Duration',
+      'Cooling Efficiency', 'Heat Generated', 'Vent Speed', 'Persistence',
     ]);
 
      let rawColumns: PerkColumn[] = [];
@@ -459,15 +474,30 @@ export function parseWeapons(
                 continue;
               }
 
-              // Non-tier plugs (e.g. "Handling Masterwork"): extract all stat choices normally.
-              for (const s of plugItem.investmentStats) {
-                if (s.value === 0) continue;
-                const statName = STAT_HASH_MAP[s.statTypeHash];
-                if (!statName || !DISPLAY_STATS.has(statName)) continue;
-                if (!masterworkOptions.includes(statName)) masterworkOptions.push(statName);
-                const absVal = Math.abs(s.value);
-                if (absVal > Math.abs(masterworkBonuses[statName] ?? 0)) {
-                  masterworkBonuses[statName] = s.value;
+              // Non-tier plugs (e.g. "Handling Masterwork", "Masterworked: Stability").
+              // Use the same abs-value primary/secondary split: the stat with the
+              // largest absolute value is the primary MW option; the rest are secondary.
+              {
+                let nBestStat: string | null = null;
+                let nBestAbs = 0;
+                let nBestSigned = 0;
+                for (const s of plugItem.investmentStats) {
+                  if (s.value === 0) continue;
+                  const statName = STAT_HASH_MAP[s.statTypeHash];
+                  if (!statName || !DISPLAY_STATS.has(statName)) continue;
+                  const absVal = Math.abs(s.value);
+                  if (absVal > nBestAbs) { nBestAbs = absVal; nBestStat = statName; nBestSigned = s.value; }
+                }
+                if (nBestStat) {
+                  if (!masterworkOptions.includes(nBestStat)) masterworkOptions.push(nBestStat);
+                  if (nBestAbs > Math.abs(masterworkBonuses[nBestStat] ?? 0)) {
+                    masterworkBonuses[nBestStat] = nBestSigned;
+                  }
+                  for (const s of plugItem.investmentStats) {
+                    if (s.value === 0) continue;
+                    const sn = STAT_HASH_MAP[s.statTypeHash];
+                    if (sn && DISPLAY_STATS.has(sn) && sn !== nBestStat) secondaryMwStats.add(sn);
+                  }
                 }
               }
             }
@@ -534,17 +564,35 @@ export function parseWeapons(
                 }
                 continue;
               }
-              // Named masterwork plugs ("Reload Masterwork", "Masterworked: Stability").
+              // Named masterwork plugs ("Reload Masterwork", "Masterworked: Stability",
+              // "Masterworked: Impact"). Many of these full-tier plugs carry secondary-stat
+              // bonuses alongside the primary stat (e.g. Masterworked: Impact on swords also
+              // gives +3 Guard Resistance, +3 Charge Rate, +3 Guard Endurance).
+              // Apply the same abs-value primary/secondary split used for tier plugs so that
+              // only the primary stat is added to masterworkOptions; the rest go to
+              // secondaryMwStats and receive the adept secondary bonus, not primary.
               if (/\bmasterwork/i.test(modName)) {
+                let mwBestStat: string | null = null;
+                let mwBestAbs = 0;
+                let mwBestSigned = 0;
                 for (const s of (modPlug.investmentStats ?? [])) {
                   const inv = s as { statTypeHash: number; value: number };
                   if (inv.value === 0) continue;
                   const statName = STAT_HASH_MAP[inv.statTypeHash];
                   if (!statName || !DISPLAY_STATS.has(statName)) continue;
-                  if (!masterworkOptions.includes(statName)) masterworkOptions.push(statName);
                   const absVal = Math.abs(inv.value);
-                  if (absVal > Math.abs(masterworkBonuses[statName] ?? 0)) {
-                    masterworkBonuses[statName] = inv.value;
+                  if (absVal > mwBestAbs) { mwBestAbs = absVal; mwBestStat = statName; mwBestSigned = inv.value; }
+                }
+                if (mwBestStat) {
+                  if (!masterworkOptions.includes(mwBestStat)) masterworkOptions.push(mwBestStat);
+                  if (mwBestAbs > Math.abs(masterworkBonuses[mwBestStat] ?? 0)) {
+                    masterworkBonuses[mwBestStat] = mwBestSigned;
+                  }
+                  for (const s of (modPlug.investmentStats ?? [])) {
+                    const inv = s as { statTypeHash: number; value: number };
+                    if (inv.value === 0) continue;
+                    const sn = STAT_HASH_MAP[inv.statTypeHash];
+                    if (sn && DISPLAY_STATS.has(sn) && sn !== mwBestStat) secondaryMwStats.add(sn);
                   }
                 }
                 continue;

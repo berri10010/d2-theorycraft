@@ -132,14 +132,16 @@ function formatSeasonLabel(
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export const WeaponHeader: React.FC = () => {
-  const { activeWeapon, variantGroup, loadWeapon, isCrafted, toggleCrafted, setCrafted } = useWeaponStore(
+  const { activeWeapon, variantGroup, loadWeapon, isCrafted, toggleCrafted, setCrafted, isEnhanced, toggleEnhanced } = useWeaponStore(
     useShallow((s) => ({
-      activeWeapon:  s.activeWeapon,
-      variantGroup:  s.variantGroup,
-      loadWeapon:    s.loadWeapon,
-      isCrafted:     s.isCrafted,
-      toggleCrafted: s.toggleCrafted,
-      setCrafted:    s.setCrafted,
+      activeWeapon:    s.activeWeapon,
+      variantGroup:    s.variantGroup,
+      loadWeapon:      s.loadWeapon,
+      isCrafted:       s.isCrafted,
+      toggleCrafted:   s.toggleCrafted,
+      setCrafted:      s.setCrafted,
+      isEnhanced:      s.isEnhanced,
+      toggleEnhanced:  s.toggleEnhanced,
     }))
   );
   const { data: compendiumPerks } = useCompendiumPerks();
@@ -341,24 +343,54 @@ export const WeaponHeader: React.FC = () => {
                   Crafted
                 </button>
               ) : (
-                <button
-                  onClick={() => {
-                    if (activeWeapon.isAdept) {
-                      const base = variantGroup.find((v) => !v.variantLabel && !v.isAdept);
-                      if (base) loadWeapon(base, variantGroup);
-                      setCrafted(true);
-                    } else {
-                      toggleCrafted();
-                    }
-                  }}
-                  title="This weapon has a craftable pattern — click to enable crafted mode (+2 stats, enhanced perks)"
-                  className="text-xs font-medium px-2 py-1 rounded-md border transition-all flex items-center gap-1.5 bg-white/3 text-slate-500 border-white/8 hover:border-red-500/30 hover:text-red-400 hover:bg-red-500/8"
-                >
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 shrink-0">
-                    <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
-                  </svg>
-                  Craftable
-                </button>
+                <>
+                  <button
+                    onClick={() => {
+                      if (activeWeapon.isAdept) {
+                        const base = variantGroup.find((v) => !v.variantLabel && !v.isAdept);
+                        if (base) loadWeapon(base, variantGroup);
+                        setCrafted(true);
+                      } else {
+                        toggleCrafted();
+                      }
+                    }}
+                    title="This weapon has a craftable pattern — click to enable crafted mode (+2 stats, enhanced perks)"
+                    className="text-xs font-medium px-2 py-1 rounded-md border transition-all flex items-center gap-1.5 bg-white/3 text-slate-500 border-white/8 hover:border-red-500/30 hover:text-red-400 hover:bg-red-500/8"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 shrink-0">
+                      <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
+                    </svg>
+                    Craftable
+                  </button>
+
+                  {/* Enhanced toggle — visible only when the weapon has at least one enhanced
+                      perk version available and Crafted is NOT active */}
+                  {activeWeapon.perkSockets.some((col) => col.perks.some((p) => !!p.enhancedVersion)) && (
+                    isEnhanced ? (
+                      <button
+                        onClick={toggleEnhanced}
+                        title="Enhanced mode active — click to disable"
+                        className="text-xs font-semibold px-2 py-1 rounded-md border transition-all flex items-center gap-1.5 bg-violet-500/20 text-violet-400 border-violet-500/50 hover:bg-violet-500/30"
+                      >
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 shrink-0">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        Enhanced
+                      </button>
+                    ) : (
+                      <button
+                        onClick={toggleEnhanced}
+                        title="This weapon has enhanced perk versions — click to enable enhanced mode (+2 stats, enhanced perks)"
+                        className="text-xs font-medium px-2 py-1 rounded-md border transition-all flex items-center gap-1.5 bg-white/3 text-slate-500 border-white/8 hover:border-violet-500/30 hover:text-violet-400 hover:bg-violet-500/8"
+                      >
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 shrink-0">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        Enhanced
+                      </button>
+                    )
+                  )}
+                </>
               )
             )}
 

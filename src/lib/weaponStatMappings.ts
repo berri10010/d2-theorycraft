@@ -28,8 +28,12 @@ export interface FrameMapping {
 }
 
 export const WEAPON_STAT_MAPPINGS: Record<WeaponType, FrameMapping> = {
+  // The 'All' category contains cross-type frame overrides that apply regardless of weapon type.
+  // getStatsForWeapon checks this as a fallback when a frame name isn't found in the weapon's
+  // own type mapping — this powers heat weapon (Blaster) stat layouts for Sidearms, ARs, etc.
   'All': {
-    'Balanced/Dynamic Heat weapon': ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Heat generated', 'Cooling Efficiency', 'Recoil Direction'],
+    'Balanced Heat Weapon':  ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Heat Generated', 'Cooling Efficiency', 'Vent Speed', 'Recoil Direction'],
+    'Dynamic Heat Weapon':   ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Heat Generated', 'Cooling Efficiency', 'Vent Speed', 'Recoil Direction'],
   },
   'Auto Rifle': {
     'The Rest': ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
@@ -52,7 +56,7 @@ export const WEAPON_STAT_MAPPINGS: Record<WeaponType, FrameMapping> = {
     'The Rest': ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
   },
   'Combat Bow': {
-    'All': ['Draw Time', 'Impact', 'Accuracy', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction'],
+    'All': ['Draw Time', 'Impact', 'Accuracy', 'Persistence', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction'],
   },
   'Submachine Gun': {
     'The Rest': ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
@@ -92,23 +96,34 @@ export const WEAPON_STAT_MAPPINGS: Record<WeaponType, FrameMapping> = {
 
 /**
  * Resolve the list of stats to display based on weapon type and frame.
+ *
+ * Lookup order:
+ *   1. Exact frame name within the weapon's own type mapping
+ *   2. Exact frame name in the cross-type 'All' mapping (e.g. heat weapon frames
+ *      that appear on Sidearms, Auto Rifles, etc.)
+ *   3. "All" catch-all within the weapon's own type
+ *   4. "The Rest" fallback within the weapon's own type
  */
 export function getStatsForWeapon(type: string, frame: string | null): string[] {
-  const typeKey = (Object.keys(WEAPON_STAT_MAPPINGS).find(k => k === type) || 'All') as WeaponType;
-  const frameMapping = WEAPON_STAT_MAPPINGS[typeKey];
-  
-  if (!frameMapping) return [];
+  const typeKey = (Object.keys(WEAPON_STAT_MAPPINGS).find(k => k === type)) as WeaponType | undefined;
+  const frameMapping = typeKey ? WEAPON_STAT_MAPPINGS[typeKey] : null;
 
-  // 1. Check for specific frame match
-  if (frame && frameMapping[frame]) {
+  // 1. Specific frame match within own type
+  if (frame && frameMapping?.[frame]) {
     return frameMapping[frame];
   }
 
-  // 2. Check for "All" frame
-  if (frameMapping['All']) {
+  // 2. Cross-type 'All' frame override (e.g. "Dynamic Heat Weapon" on any weapon type)
+  if (frame) {
+    const allFrames = WEAPON_STAT_MAPPINGS['All'];
+    if (allFrames?.[frame]) return allFrames[frame];
+  }
+
+  // 3. "All" catch-all within own type
+  if (frameMapping?.['All']) {
     return frameMapping['All'];
   }
 
-  // 3. Fallback to "The Rest"
-  return frameMapping['The Rest'] ?? [];
+  // 4. "The Rest" fallback
+  return frameMapping?.['The Rest'] ?? [];
 }

@@ -139,6 +139,16 @@ export function ammoGenReadout(tier: ArmorModTier): string {
 // Re-export tier tables for use in UI components
 export { TARGETING_AA, LOADER_RELOAD, DEXTERITY_MULT, UNFLINCHING_PCT, INFLIGHT_AE, AMMO_GEN };
 
+// ─── Stats that are NOT on a 0-100 scale ─────────────────────────────────────
+// Draw Time / Charge Time are in milliseconds (e.g. 667ms), Cooling Efficiency
+// and Heat Generated also use their own scales.  For these, the 0-100 clamp used
+// by standard stat bars would corrupt the value, so we skip it entirely and let
+// the bar renderer handle display clamping on its own.
+const UNCAPPED_STATS = new Set([
+  'Draw Time', 'Charge Time', 'RPM', 'Magazine', 'Ammo Capacity',
+  'Cooling Efficiency', 'Heat Generated', 'Vent Speed', 'Persistence',
+]);
+
 // ─── Masterwork stats ────────────────────────────────────────────────────────
 
 export const MASTERWORK_STATS = [
@@ -172,6 +182,8 @@ interface WeaponRoll {
   selectedPerks:  Record<string, string>;
   masterworkStat: MasterworkStat | null;
   isCrafted:      boolean;
+  /** Enhanced Legendary: enhanced perks active, +2 secondary bonus, weapon NOT pattern-crafted */
+  isEnhanced:     boolean;
   activeModId:    string;           // id field from WEAPON_MODS
   armorMods:      ArmorModState;
   activeEffects:  Record<string, number>;
@@ -198,6 +210,8 @@ interface WeaponState {
 
   masterworkStat:    MasterworkStat | null;
   isCrafted:         boolean;
+  /** Enhanced Legendary state — enhanced perks active without crafted pattern. +2 secondary MW bonus. */
+  isEnhanced:        boolean;
   activeMod:         WeaponMod;
   surgeStacks:       0 | 1 | 2 | 3 | 4;
   weaponsStat:       number;
@@ -222,6 +236,8 @@ interface WeaponState {
   setMasterworkStat: (stat: MasterworkStat | null) => void;
   toggleCrafted:     () => void;
   setCrafted:        (val: boolean) => void;
+  toggleEnhanced:    () => void;
+  setEnhanced:       (val: boolean) => void;
   setActiveMod:      (mod: WeaponMod) => void;
   setSurgeStacks:    (stacks: 0 | 1 | 2 | 3 | 4) => void;
   setWeaponsStat:    (stat: number) => void;
@@ -263,6 +279,7 @@ function captureRoll(state: WeaponState): WeaponRoll {
     selectedPerks:  state.selectedPerks,
     masterworkStat: state.masterworkStat,
     isCrafted:      state.isCrafted,
+    isEnhanced:     state.isEnhanced,
     activeModId:    state.activeMod.id,
     armorMods:      state.armorMods,
     activeEffects:  state.activeEffects,
@@ -283,6 +300,7 @@ function isDefaultRoll(roll: WeaponRoll, weapon: Weapon): boolean {
     userSelectedKeys.length === 0 &&
     roll.masterworkStat === null &&
     !roll.isCrafted &&
+    !roll.isEnhanced &&
     roll.activeModId === 'none' &&
     Object.values(roll.armorMods).every((v) => v === 0) &&
     Object.keys(roll.activeEffects).length === 0
@@ -304,6 +322,7 @@ export const useWeaponStore = create<WeaponState>()(
       mode:              'pve',
       masterworkStat:    null,
       isCrafted:         false,
+      isEnhanced:        false,
       activeMod:         NONE_MOD,
       surgeStacks:       0,
       weaponsStat:       0,
@@ -346,6 +365,7 @@ export const useWeaponStore = create<WeaponState>()(
           selectedPerks:    fixedPerks,
           masterworkStat:   null,
           isCrafted:        false,
+          isEnhanced:       false,
           activeMod:        newMod,
           armorMods:        DEFAULT_ARMOR_MODS,
           activeEffects:    {},
@@ -364,6 +384,7 @@ export const useWeaponStore = create<WeaponState>()(
           selectedPerks:  autoSelectFixedPerks(activeWeapon),
           masterworkStat: null,
           isCrafted:      false,
+          isEnhanced:     false,
           activeMod:      NONE_MOD,
           armorMods:      DEFAULT_ARMOR_MODS,
           activeEffects:  {},
@@ -448,8 +469,15 @@ export const useWeaponStore = create<WeaponState>()(
 
       setMode:           (mode)   => set({ mode }),
       setMasterworkStat: (stat)   => set({ masterworkStat: stat }),
-      toggleCrafted:     ()       => set((s) => ({ isCrafted: !s.isCrafted })),
-      setCrafted:        (val)    => set({ isCrafted: val }),
+      // Crafted and Enhanced are mutually exclusive — activating one clears the other.
+      toggleCrafted:     ()       => set((s) => s.isCrafted
+        ? { isCrafted: false }
+        : { isCrafted: true, isEnhanced: false }),
+      setCrafted:        (val)    => set(val ? { isCrafted: true, isEnhanced: false } : { isCrafted: false }),
+      toggleEnhanced:    ()       => set((s) => s.isEnhanced
+        ? { isEnhanced: false }
+        : { isEnhanced: true, isCrafted: false }),
+      setEnhanced:       (val)    => set(val ? { isEnhanced: true, isCrafted: false } : { isEnhanced: false }),
       setActiveMod:      (mod)    => set({ activeMod: mod }),
       setSurgeStacks:    (stacks) => set({ surgeStacks: stacks }),
       setWeaponsStat:    (stat)   => set({ weaponsStat: Math.max(0, Math.min(200, stat)) }),
@@ -457,7 +485,7 @@ export const useWeaponStore = create<WeaponState>()(
       setExoticArmor:    (cls, id) => set((s) => ({ activeExoticArmor: { ...s.activeExoticArmor, [cls]: id } })),
 
       getCalculatedStats: () => {
-        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, activeMod, armorMods, activeBuffs, activeExoticArmor } = get();
+        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, isEnhanced, activeMod, armorMods, activeBuffs, activeExoticArmor } = get();
         if (!activeWeapon) return {};
 
         const finalStats: StatMap = { ...activeWeapon.baseStats };
@@ -470,9 +498,12 @@ export const useWeaponStore = create<WeaponState>()(
            const basePerk = resolveBasePerk(column, perkHash);
            if (!basePerk) continue;
 
-           const perk = basePerk.enhancedVersion && perkHash === basePerk.enhancedVersion.hash
+           // In Enhanced or Crafted mode, use the enhanced perk version if one exists
+           // and the user hasn't explicitly selected the enhanced hash themselves.
+           const isUsingEnhanced = isCrafted || isEnhanced;
+           const perk = perkHash === basePerk.enhancedVersion?.hash
              ? basePerk.enhancedVersion
-             : basePerk;
+             : (isUsingEnhanced && basePerk.enhancedVersion ? basePerk.enhancedVersion : basePerk);
 
            const effectState    = activeEffects[perkHash] ?? 0;
 
@@ -481,7 +512,10 @@ export const useWeaponStore = create<WeaponState>()(
           for (const mod of perk.statModifiers) {
             if ((mod.isConditional ?? false) && !isEffectActive) continue;
             if (finalStats[mod.statName] !== undefined) {
-              finalStats[mod.statName] = Math.max(0, Math.min(100, finalStats[mod.statName] + mod.value));
+              const raw = finalStats[mod.statName] + mod.value;
+              finalStats[mod.statName] = UNCAPPED_STATS.has(mod.statName)
+                ? Math.max(0, raw)
+                : Math.max(0, Math.min(100, raw));
             }
           }
         }
@@ -501,12 +535,14 @@ export const useWeaponStore = create<WeaponState>()(
           const secondaryBonus =
             activeWeapon.isAdept && isCrafted ? 4 :
             activeWeapon.isAdept              ? 3 :
-            isCrafted                         ? 2 : 0;
+            (isCrafted || isEnhanced)         ? 2 : 0;
 
           // Primary stat
           if (finalStats[masterworkStat] !== undefined) {
-            finalStats[masterworkStat] = Math.max(0, Math.min(100,
-              finalStats[masterworkStat] + primaryBonus));
+            const raw = finalStats[masterworkStat] + primaryBonus;
+            finalStats[masterworkStat] = UNCAPPED_STATS.has(masterworkStat)
+              ? Math.max(0, raw)
+              : Math.max(0, Math.min(100, raw));
           }
 
           // Secondary bonus: other choosable MW stats + weapon-specific secondary stats
@@ -517,7 +553,10 @@ export const useWeaponStore = create<WeaponState>()(
             ]);
             for (const stat of secondaryStats) {
               if (finalStats[stat] !== undefined) {
-                finalStats[stat] = Math.min(100, finalStats[stat] + secondaryBonus);
+                const raw = finalStats[stat] + secondaryBonus;
+                finalStats[stat] = UNCAPPED_STATS.has(stat)
+                  ? Math.max(0, raw)
+                  : Math.max(0, Math.min(100, raw));
               }
             }
           }
@@ -526,14 +565,20 @@ export const useWeaponStore = create<WeaponState>()(
         // Weapon mod stat changes
         for (const [stat, delta] of Object.entries(activeMod.statChanges)) {
           if (delta && finalStats[stat] !== undefined) {
-            finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + delta));
+            const raw = finalStats[stat] + delta;
+            finalStats[stat] = UNCAPPED_STATS.has(stat)
+              ? Math.max(0, raw)
+              : Math.max(0, Math.min(100, raw));
           }
         }
 
         // Armor mod stat bonuses
         for (const [stat, delta] of Object.entries(armorModStatDeltas(armorMods))) {
           if (delta && finalStats[stat] !== undefined) {
-            finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + delta));
+            const raw = finalStats[stat] + delta;
+            finalStats[stat] = UNCAPPED_STATS.has(stat)
+              ? Math.max(0, raw)
+              : Math.max(0, Math.min(100, raw));
           }
         }
 
@@ -551,7 +596,10 @@ export const useWeaponStore = create<WeaponState>()(
           if (!buff?.statBonuses) continue;
           for (const [stat, bonus] of Object.entries(buff.statBonuses)) {
             if (finalStats[stat] !== undefined) {
-              finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + bonus));
+              const raw = finalStats[stat] + bonus;
+              finalStats[stat] = UNCAPPED_STATS.has(stat)
+                ? Math.max(0, raw)
+                : Math.max(0, Math.min(100, raw));
             }
           }
         }
@@ -563,16 +611,24 @@ export const useWeaponStore = create<WeaponState>()(
           if (!piece) continue;
           if (piece.statBonuses) {
             for (const [stat, bonus] of Object.entries(piece.statBonuses)) {
-              if (finalStats[stat] !== undefined)
-                finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + bonus));
+              if (finalStats[stat] !== undefined) {
+                const raw = finalStats[stat] + bonus;
+                finalStats[stat] = UNCAPPED_STATS.has(stat)
+                  ? Math.max(0, raw)
+                  : Math.max(0, Math.min(100, raw));
+              }
             }
           }
           if (piece.weaponTypeStatBonuses && activeWeapon.itemTypeDisplayName) {
             const { types, bonuses } = piece.weaponTypeStatBonuses;
             if (types.includes(activeWeapon.itemTypeDisplayName)) {
               for (const [stat, bonus] of Object.entries(bonuses)) {
-                if (finalStats[stat] !== undefined)
-                  finalStats[stat] = Math.max(0, Math.min(100, finalStats[stat] + bonus));
+                if (finalStats[stat] !== undefined) {
+                  const raw = finalStats[stat] + bonus;
+                  finalStats[stat] = UNCAPPED_STATS.has(stat)
+                    ? Math.max(0, raw)
+                    : Math.max(0, Math.min(100, raw));
+                }
               }
             }
           }

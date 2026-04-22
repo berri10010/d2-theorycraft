@@ -25,6 +25,7 @@ const ALL_BAR_STAT_KEYS = [
   'Velocity', 'Blast Radius', 'Accuracy',
   'Draw Time', 'Charge Time',
   'Swing Speed', 'Guard Resistance', 'Charge Rate', 'Guard Endurance', 'Shield Duration',
+  'Cooling Efficiency', 'Heat Generated', 'Vent Speed', 'Persistence',
 ];
 
 // Stats shown compactly in a grid (no meaningful 0-100 bar)

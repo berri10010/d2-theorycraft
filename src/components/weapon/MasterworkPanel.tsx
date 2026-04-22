@@ -52,6 +52,7 @@ export const MasterworkPanel: React.FC = () => {
     activeWeapon,
     masterworkStat, setMasterworkStat,
     isCrafted,
+    isEnhanced,
     activeMod, setActiveMod,
   } = useWeaponStore();
   const { data: clarityPerks } = useClarityPerks();
@@ -89,8 +90,7 @@ export const MasterworkPanel: React.FC = () => {
               const primaryLabel = primaryBonus < 0
                 ? `${primaryBonus} ${masterworkStat}`
                 : `+${primaryBonus} ${masterworkStat}`;
-              const isEnhancedAdept = isAdept && isCrafted;
-              if (isEnhancedAdept) return (
+              if (isAdept && isCrafted) return (
                 <span className="text-[10px] text-amber-400 font-semibold">
                   {primaryLabel} · +4 others
                 </span>
@@ -105,6 +105,11 @@ export const MasterworkPanel: React.FC = () => {
                   {primaryLabel} · +2 others
                 </span>
               );
+              if (isEnhanced) return (
+                <span className="text-[10px] text-violet-400 font-semibold">
+                  {primaryLabel} · +2 others
+                </span>
+              );
               return (
                 <span className="text-[10px] text-slate-500">{primaryLabel}</span>
               );
@@ -114,6 +119,10 @@ export const MasterworkPanel: React.FC = () => {
               </span>
             ) : isCrafted ? (
               <span className="text-[10px] text-emerald-400 font-semibold">
+                +10 chosen · +2 others
+              </span>
+            ) : isEnhanced ? (
+              <span className="text-[10px] text-violet-400 font-semibold">
                 +10 chosen · +2 others
               </span>
             ) : null}

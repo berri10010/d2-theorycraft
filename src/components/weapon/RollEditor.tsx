@@ -24,7 +24,7 @@ const COL_ACCENT_BAR: Record<string, string> = {
 export const RollEditor: React.FC = () => {
   const {
     activeWeapon, selectedPerks, selectPerk, clearPerk,
-    isCrafted, variantGroup, mode,
+    isCrafted, isEnhanced, variantGroup, mode,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:  s.activeWeapon,
@@ -32,6 +32,7 @@ export const RollEditor: React.FC = () => {
       selectPerk:    s.selectPerk,
       clearPerk:     s.clearPerk,
       isCrafted:     s.isCrafted,
+      isEnhanced:    s.isEnhanced,
       variantGroup:  s.variantGroup,
       mode:          s.mode,
     }))
@@ -53,8 +54,9 @@ export const RollEditor: React.FC = () => {
 
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
-  // Suppress unused-variable warning — isCrafted is subscribed to trigger re-renders
+  // Suppress unused-variable warnings — subscribed to trigger re-renders
   void isCrafted;
+  void isEnhanced;
 
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
@@ -62,7 +64,7 @@ export const RollEditor: React.FC = () => {
       {/* Header row */}
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl font-bold text-white">Weapon Perks</h2>
-        {hasEnhanceable && activeWeapon.hasCraftedPattern && (
+        {hasEnhanceable && (activeWeapon.hasCraftedPattern || isEnhanced) && (
           <span className="text-xs text-slate-500 font-normal tracking-wide">
             Click twice to enhance
           </span>
