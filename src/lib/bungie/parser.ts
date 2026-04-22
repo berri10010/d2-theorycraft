@@ -406,16 +406,16 @@ export function parseWeapons(
         // ── Masterwork socket: extract available stat options ──
         if (isMasterworkCategory(catName)) {
           for (const socketIndex of category.socketIndexes) {
-            const socket = item.sockets!.socketEntries[socketIndex];
-            if (!socket) continue;
+            const mwSocket = item.sockets!.socketEntries[socketIndex];
+            if (!mwSocket) continue;
             // Masterwork options live in reusablePlugSetHash
-            const ps = socket.reusablePlugSetHash
-              ? plugSetDefs[socket.reusablePlugSetHash.toString()]
+            const ps = mwSocket.reusablePlugSetHash
+              ? plugSetDefs[mwSocket.reusablePlugSetHash.toString()]
               : null;
             const plugHashes = ps
               ? ps.reusablePlugItems.map((p) => p.plugItemHash)
-              : socket.singleInitialItemHash
-                ? [socket.singleInitialItemHash]
+              : mwSocket.singleInitialItemHash
+                ? [mwSocket.singleInitialItemHash]
                 : [];
             for (const plugHash of plugHashes) {
               const plugItem = items[plugHash.toString()];
