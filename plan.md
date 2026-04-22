@@ -275,6 +275,10 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Show ALL weapon stats in the Weapon Stats panel (Ammo Generation now included) | ✅ Done |
 | Make Airborne, Zoom, Ammo Gen, Recoil, Magazine more compact (2-col card grid) | ✅ Done |
 | Recoil Direction chart redesigned as DIM-style white pie sector (ones digit = direction, value = tightness) | ✅ Done |
+| Sword Ammo Capacity bar missing — add `'Ammo Capacity'` to `ALL_BAR_STAT_KEYS` in StatDisplay.tsx | ✅ Done |
+| Sword Guard Resistance / Guard Endurance hidden when 0 (Legacy/Vortex frames have no guard) — added `ALWAYS_SHOW_STATS` bypass | ✅ Done |
+| Grenade Launcher stats blank — renamed mapping key `'Special/Heavy Grenade Launcher'` → `'Grenade Launcher'` in weaponStatMappings.ts | ✅ Done |
+| Micro-Missile Frame stat layout missing — added both `'Micro-Missile'` and `'Micro-Missile Frame'` keys to Sidearm mapping | ✅ Done |
 
 #### 12F — Search Panel Rework (Homepage & Editor)
 
@@ -296,6 +300,11 @@ A broad set of UI, data, and UX improvements requested for the next development 
 |------|--------|
 | Improve tooltip GUI styling | ✅ Done |
 | Retrieve weapon mods and masterworks from the Bungie API | ⬜ Pending |
+| MW whitelist — blocks cross-type stat bleed (e.g. Sword Impact showing on all weapons): per-type + per-frame whitelist in parser.ts (`MW_WHITELIST_BY_TYPE` + `getMwWhitelist()`) | ✅ Done |
+| Bow "Charge Time" MW renamed → "Draw Time" in parser; positive bonus negated (lower = better stat) | ✅ Done |
+| Charge Time MW for Fusion Rifles / LFRs: positive bonus also negated | ✅ Done |
+| Season 27+ tiered weapon secondary MW bonus: flat +5 to all other applicable stats (replaces old +2/+3/+4 adept/crafted/enhanced ladder for s27+) | ✅ Done |
+| MasterworkPanel labels updated to show correct season-aware secondary bonus count | ✅ Done |
 | Ammo panel: uses Bungie manifest first (ammoType, Magazine stat, Ammo Capacity reserves); MossyMax only for mag round count and reserve mod tiers | ✅ Done |
 | Adept/Craftable mutual exclusion: clicking Adept disables Craftable and vice versa (no double-disable bug) | ✅ Done |
 | Move Weapon Stat row in PvE Masterwork & Mods panel into TTK & Falloff panel (mirrors PvP layout) | ✅ Done |
@@ -347,17 +356,26 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 ---
 
+## Known Issues (deferred)
+
+| Issue | Notes |
+|-------|-------|
+| Draw Time / Charge Time / RPM display math is wrong | Raw manifest values shown directly; Bungie's in-game conversion formula (e.g. Draw Time ms → -34 displayed, RPM calculation) not yet implemented. Deferred by user. |
+
+---
+
 ## Next Actions
 
 > These are ordered by priority. Claude should start from the top.
 
 Stage 12 is the active work. 12D is complete. 12E/12G/most 12H are complete. Remaining priorities:
 
-1. **12H remaining** — Weapon acquisition info (how to obtain each weapon); retrieve weapon mods/masterworks from Bungie API
-2. **12F** — Search panel rework (D2 Foundry-style filters, perk search, recent searches)
-3. **12A** — Combat mechanics (handling breakdown: Ready/ADS/Stow times; flinch resistance; perfect draw window for Bows; per-activity PvE scaling dropdown)
-4. **12B** — Screenshot mode + share options
-5. **12C remaining** — Community research annotations on hover
+1. **Draw Time / Charge Time / RPM math** — implement correct in-game display values (see Known Issues above)
+2. **12H remaining** — Weapon acquisition info (how to obtain each weapon); retrieve weapon mods/masterworks from Bungie API
+3. **12F** — Search panel rework (D2 Foundry-style filters, perk search, recent searches)
+4. **12A** — Combat mechanics (handling breakdown: Ready/ADS/Stow times; flinch resistance; perfect draw window for Bows; per-activity PvE scaling dropdown)
+5. **12B** — Screenshot mode + share options
+6. **12C remaining** — Community research annotations on hover
 
 ---
 
@@ -463,3 +481,19 @@ npm run build
 *5. Exotic armor selector (12D complete): `src/data/exoticArmor.ts` with 10 Hunter / 12 Warlock / 10 Titan exotics, each with `statBonuses` and optional `weaponTypeStatBonuses` (e.g. Lucky Pants +100 Handling for Hand Cannons). BuffToggle.tsx gains ExoticArmorSection per class — `<select>` dropdown + stat pills (green when active weapon type matches, grey otherwise). `useWeaponStore` extended with `activeExoticArmor` state and `setExoticArmor` action; `getCalculatedStats` applies exotic bonuses after buff bonuses, clamped 0–100.*
 
 *6. wrangler.toml observability sync: added full `[observability]`, `[observability.logs]`, and `[observability.traces]` sections to match Cloudflare dashboard configuration.*
+
+---
+
+*Last updated: 2026-04-22 — Session summary:*
+
+*1. MW whitelist system (parser.ts, commits in this session): added `MW_WHITELIST_BY_TYPE` constant and `getMwWhitelist()` function. Blocks cross-type stat bleed — e.g. Sword `Impact` MW showing on Auto Rifles and Bows. Handles frame-level overrides: Micro-Missile, Balanced/Dynamic Heat Weapon, High-Impact Combat Bow.*
+
+*2. Draw Time / Charge Time fixes (parser.ts): bow "Charge Time" masterwork option renamed → "Draw Time"; positive bonuses on both Draw Time and Charge Time are negated at parse time (lower raw value = better, so +10 from Bungie → -10 displayed). Both `'Micro-Missile'` and `'Micro-Missile Frame'` intrinsic names now accepted.*
+
+*3. Grenade Launcher stat display fix (weaponStatMappings.ts): renamed key from `'Special/Heavy Grenade Launcher'` → `'Grenade Launcher'` to match the actual `itemTypeDisplayName` in Bungie's manifest. GL weapon stats were completely blank before this fix.*
+
+*4. Sword stat display fixes (StatDisplay.tsx): added `'Ammo Capacity'` to `ALL_BAR_STAT_KEYS` so sword reserve bar renders. Added `ALWAYS_SHOW_STATS = new Set(['Guard Resistance', 'Guard Endurance'])` so guard stats show even at 0 (Legacy/Vortex frames have no guard by design).*
+
+*5. Season 27+ tiered masterwork secondary bonus (useWeaponStore.ts + MasterworkPanel.tsx): weapons from season 27 onward always get a flat +5 secondary bonus — the old +2/+3/+4 adept/crafted/enhanced ladder only applies to pre-s27 weapons. MasterworkPanel label logic rewritten to compute the correct total from `isTiered` + role flags.*
+
+*Known issue logged: Draw Time / Charge Time / RPM display math is wrong (raw manifest values shown, not converted to in-game units). Deferred by user.*
