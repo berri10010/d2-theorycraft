@@ -7,6 +7,19 @@ import {
   NONE_MOD,
 } from '../../store/useWeaponStore';
 import { Tooltip } from '../ui/Tooltip';
+import { useClarityPerks } from '../../lib/useClarityPerks';
+import { ClarityEntry } from '../../lib/clarity';
+
+/** Flatten a Clarity entry's English description into plain text. */
+function clarityPlainText(entry: ClarityEntry): string | null {
+  const lines: string[] = [];
+  for (const group of entry.descriptions?.en ?? []) {
+    if (!group.linesContent?.length) continue;
+    const line = group.linesContent.map((seg) => seg.text ?? '').join('').trim();
+    if (line) lines.push(line);
+  }
+  return lines.length ? lines.join(' ') : null;
+}
 
 // ── Compact stat abbreviations for inline badges ──────────────────────────────
 
@@ -40,6 +53,7 @@ export const MasterworkPanel: React.FC = () => {
     masterworkStat, setMasterworkStat,
     activeMod, setActiveMod,
   } = useWeaponStore();
+  const { data: clarityPerks } = useClarityPerks();
 
   if (!activeWeapon) return null;
 
@@ -119,6 +133,11 @@ export const MasterworkPanel: React.FC = () => {
               const statEntries = Object.entries(mod.statChanges)
                 .filter(([, v]) => v !== undefined && v !== 0) as [string, number][];
 
+              // Prefer Clarity description over manifest description for mods
+              const clarityEntry = clarityPerks?.[mod.id];
+              const clarityDesc  = clarityEntry ? clarityPlainText(clarityEntry) : null;
+              const desc = clarityDesc || mod.description || null;
+
               // Tooltip content — null for No Mod (suppresses the portal entirely)
               const tooltipContent = isNone ? null : (
                 <div>
@@ -132,9 +151,9 @@ export const MasterworkPanel: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  {mod.description && (
+                  {desc && (
                     <p className="text-[10px] text-slate-400 leading-relaxed">
-                      {mod.description}
+                      {desc}
                     </p>
                   )}
                   {(statEntries.length > 0 || hasDmg) && (
@@ -168,10 +187,9 @@ export const MasterworkPanel: React.FC = () => {
                     className={[
                       'flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
                       isNone
-                        // "No Mod" — intentionally muted; italic to signal it's the clear action
                         ? isActive
-                          ? 'bg-white/5 text-slate-400 border-white/10 italic'
-                          : 'bg-transparent text-slate-600 border-white/5 hover:border-white/12 hover:text-slate-500 italic'
+                          ? 'bg-white/5 text-slate-400 border-white/10'
+                          : 'bg-transparent text-slate-600 border-white/5 hover:border-white/12 hover:text-slate-500'
                         : isActive
                           ? mod.adeptOnly
                             ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
@@ -179,11 +197,6 @@ export const MasterworkPanel: React.FC = () => {
                           : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
                     ].join(' ')}
                   >
-                    {/* "No Mod" gets a subtle × glyph to reinforce it's a clear action */}
-                    {isNone && (
-                      <span className="opacity-40 not-italic text-[11px] leading-none -mr-0.5">×</span>
-                    )}
-
                     <span>{mod.name}</span>
 
                     {/* Inline stat delta badges — abbreviated stat name, colour-coded */}

@@ -418,9 +418,25 @@ export function parseWeapons(
               if (!plugItem?.investmentStats?.length) continue;
               const mwPlugName = plugItem.displayProperties?.name ?? '';
               if (isTrackerPlug(mwPlugName)) continue;
-              // Skip tier-progression plugs (e.g. "Masterwork Tier 1" through "Tier 9").
-              // Only stat-choice plugs (e.g. "Handling Masterwork") are relevant.
-              if (/\btier\b/i.test(mwPlugName)) continue;
+
+              if (/\btier\b/i.test(mwPlugName)) {
+                // Tier-progression plugs ("Tier 1: Stability", "Tier 9: Range") encode the
+                // masterwork stat choice in their investmentStats rather than their name.
+                // Extract the stat with the HIGHEST positive value — that's the primary
+                // masterwork stat, not a secondary adept bonus (+3 to all others).
+                let bestStat: string | null = null;
+                let bestVal = -Infinity;
+                for (const s of plugItem.investmentStats) {
+                  if (s.value <= 0) continue;
+                  const statName = STAT_HASH_MAP[s.statTypeHash];
+                  if (!statName || !DISPLAY_STATS.has(statName)) continue;
+                  if (s.value > bestVal) { bestVal = s.value; bestStat = statName; }
+                }
+                if (bestStat && !masterworkOptions.includes(bestStat)) masterworkOptions.push(bestStat);
+                continue;
+              }
+
+              // Non-tier plugs (e.g. "Handling Masterwork"): extract all stat choices normally.
               for (const s of plugItem.investmentStats) {
                 if (s.value === 0) continue;
                 const statName = STAT_HASH_MAP[s.statTypeHash];
@@ -443,8 +459,12 @@ export function parseWeapons(
             const modPs = modSocket.reusablePlugSetHash
               ? plugSetDefs[modSocket.reusablePlugSetHash.toString()]
               : null;
+            // Only include mods that currentlyCanRoll — Bungie sets this false on mods
+            // that can no longer be equipped (old Year 1 barrel/sight mods, etc.).
             const modPlugHashes: number[] = modPs
-              ? modPs.reusablePlugItems.map((p: { plugItemHash: number }) => p.plugItemHash)
+              ? modPs.reusablePlugItems
+                  .filter((p: { plugItemHash: number; currentlyCanRoll: boolean }) => p.currentlyCanRoll)
+                  .map((p: { plugItemHash: number }) => p.plugItemHash)
               : modSocket.singleInitialItemHash
                 ? [modSocket.singleInitialItemHash]
                 : [];
