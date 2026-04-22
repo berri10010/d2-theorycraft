@@ -476,12 +476,36 @@ export function parseWeapons(
               // Skip empty socket placeholders and trackers
               if (modName.toLowerCase().includes('empty')) continue;
               if (isTrackerPlug(modName)) continue;
-              // Skip masterwork tier-progression plugs ("Tier 1: Stability", etc.)
-              // and masterwork completion plugs ("Masterworked: Stability", etc.).
-              // These leak into the weapon mod plug set on some weapons because
-              // Bungie shares plug sets across socket types.
-              if (/\btier\b/i.test(modName)) continue;
-              if (/\bmasterwork/i.test(modName)) continue;
+              // Tier-progression plugs ("Tier 1: Stability") encode the masterwork stat
+              // in investmentStats. Extract the stat name and add to masterworkOptions.
+              // On many weapons Bungie places the masterwork socket inside the "WEAPON MODS"
+              // socket category rather than a separate masterwork category, so this is the
+              // only place we can capture masterwork stat options for those weapons.
+              if (/\btier\b/i.test(modName)) {
+                let bestStat: string | null = null;
+                let bestVal = -Infinity;
+                for (const s of (modPlug.investmentStats ?? [])) {
+                  const inv = s as { statTypeHash: number; value: number };
+                  if (inv.value <= 0) continue;
+                  const statName = STAT_HASH_MAP[inv.statTypeHash];
+                  if (!statName || !DISPLAY_STATS.has(statName)) continue;
+                  if (inv.value > bestVal) { bestVal = inv.value; bestStat = statName; }
+                }
+                if (bestStat && !masterworkOptions.includes(bestStat)) masterworkOptions.push(bestStat);
+                continue;
+              }
+              // Named masterwork plugs ("Reload Masterwork", "Masterworked: Stability").
+              // Extract all positive stats as masterwork options.
+              if (/\bmasterwork/i.test(modName)) {
+                for (const s of (modPlug.investmentStats ?? [])) {
+                  const inv = s as { statTypeHash: number; value: number };
+                  if (inv.value === 0) continue;
+                  const statName = STAT_HASH_MAP[inv.statTypeHash];
+                  if (!statName || !DISPLAY_STATS.has(statName)) continue;
+                  if (!masterworkOptions.includes(statName)) masterworkOptions.push(statName);
+                }
+                continue;
+              }
               // Skip crafting-related plugs. "Extract Pattern" is labeled "Weapon Mod"
               // in the manifest but is a crafting action, not an equippable mod.
               if (/extract\s+pattern/i.test(modName)) continue;
