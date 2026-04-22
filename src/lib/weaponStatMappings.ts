@@ -14,7 +14,7 @@ export type WeaponType =
   | 'Fusion Rifle'
   | 'Sniper Rifle'
   | 'Shotgun'
-  | 'Special/Heavy Grenade Launcher'
+  | 'Grenade Launcher'
   | 'Trace Rifle'
   | 'Glaive'
   | 'Machine Gun'
@@ -72,7 +72,7 @@ export const WEAPON_STAT_MAPPINGS: Record<WeaponType, FrameMapping> = {
   'Shotgun': {
     'All': ['RPM', 'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
   },
-  'Special/Heavy Grenade Launcher': {
+  'Grenade Launcher': {
     'All': ['RPM', 'Blast Radius', 'Velocity', 'Stability', 'Handling', 'Reload', 'Aim Assistance', 'Airborne Effectiveness', 'Zoom', 'Ammo Generation', 'Recoil Direction', 'Magazine'],
   },
   'Trace Rifle': {

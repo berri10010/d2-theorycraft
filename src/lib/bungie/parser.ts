@@ -65,6 +65,7 @@ const MW_WHITELIST_BY_TYPE: Record<string, string[]> = {
   'Sniper Rifle':            ['Range', 'Stability', 'Handling', 'Reload'],
   'Fusion Rifle':            ['Charge Time', 'Range', 'Stability', 'Handling', 'Reload'],
   'Grenade Launcher':        ['Blast Radius', 'Velocity', 'Stability', 'Handling', 'Reload'],
+  'Heavy Grenade Launcher':  ['Blast Radius', 'Velocity', 'Stability', 'Handling', 'Reload'],
   'Trace Rifle':             ['Range', 'Stability', 'Handling', 'Reload'],
   'Glaive':                  ['Shield Duration', 'Range', 'Handling', 'Reload'],
   'Rocket Launcher':         ['Blast Radius', 'Velocity', 'Stability', 'Handling', 'Reload'],
