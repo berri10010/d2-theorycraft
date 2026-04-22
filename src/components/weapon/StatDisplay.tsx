@@ -19,6 +19,11 @@ const STAT_LABEL_MAP: Record<string, string> = {
   'Recoil Direction':        'Recoil',
 };
 
+// Stats that always render even when both base and current are 0.
+// Sword guard stats are legitimately 0 on frames with no guard (Legacy, Vortex, etc.)
+// but should still be visible so players know those frames have no guard.
+const ALWAYS_SHOW_STATS = new Set(['Guard Resistance', 'Guard Endurance']);
+
 // Stats shown as full-width bar charts
 const ALL_BAR_STAT_KEYS = [
   'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
@@ -131,7 +136,7 @@ export const StatDisplay: React.FC = () => {
           const base    = baseStats[statName] ?? 0;
           const current = calcStats[statName] ?? base;
           const diff    = current - base;
-          if (base === 0 && current === 0) return null;
+          if (base === 0 && current === 0 && !ALWAYS_SHOW_STATS.has(statName)) return null;
 
           const curve      = activeWeapon.statCurves[statName];
           const translated = interpolateStat(current, curve);
@@ -191,7 +196,7 @@ export const StatDisplay: React.FC = () => {
                 const base    = baseStats[statName] ?? 0;
                 const current = calcStats[statName] ?? base;
                 const diff    = current - base;
-                if (base === 0 && current === 0) return null;
+                if (base === 0 && current === 0 && !ALWAYS_SHOW_STATS.has(statName)) return null;
 
                 const label = STAT_LABEL_MAP[statName] ?? statName;
                 const isRecoil = statName === 'Recoil Direction';
