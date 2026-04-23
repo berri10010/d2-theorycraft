@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#09090b"/>
-  <text x="256" y="195" font-family="system-ui, -apple-system, sans-serif" font-size="112" font-weight="700" text-anchor="middle" fill="#475569" letter-spacing="6">D2</text>
-  <text x="256" y="370" font-family="system-ui, -apple-system, sans-serif" font-size="188" font-weight="900" text-anchor="middle" fill="#f59e0b" letter-spacing="-8">TC</text>
+  <rect width="512" height="512" fill="#000"/>
+  <!-- Triple chevron stripes — top -->
+  <polygon points="141,148 371,148 400,200 256,178 112,200" fill="#fff"/>
+  <!-- Middle -->
+  <polygon points="141,225 371,225 400,277 256,255 112,277" fill="#fff"/>
+  <!-- Bottom -->
+  <polygon points="141,302 371,302 400,354 256,332 112,354" fill="#fff"/>
 </svg>
