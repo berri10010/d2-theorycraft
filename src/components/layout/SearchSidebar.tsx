@@ -311,7 +311,7 @@ function FilterPanel({
   const activeCatDef = CATEGORIES.find(c => c.id === activeCat);
 
   return (
-    <div className="absolute left-0 right-0 top-full z-50 bg-[#0c0c0c] border border-white/10 rounded-b-xl shadow-2xl overflow-hidden">
+    <div className="bg-[#0c0c0c] border-b border-white/10 overflow-hidden">
 
       {/* ── Toggles ── */}
       <div className="px-3 pt-3 pb-2.5 border-b border-white/8">
@@ -327,7 +327,7 @@ function FilterPanel({
                   'flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-all text-left',
                   on
                     ? 'bg-amber-500/15 border-amber-500/35 text-amber-300'
-                    : 'bg-white/[0.03] border-white/8 text-slate-500 hover:text-slate-300 hover:border-white/15',
+                    : 'bg-white/[0.03] border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/15',
                 ].join(' ')}
               >
                 <span className={[
@@ -360,7 +360,7 @@ function FilterPanel({
                     ? 'bg-amber-500/20 border-amber-500/45 text-amber-300'
                     : count > 0
                     ? 'bg-amber-500/8 border-amber-500/25 text-amber-400'
-                    : 'bg-white/[0.03] border-white/8 text-slate-400 hover:text-slate-200 hover:border-white/15',
+                    : 'bg-white/[0.03] border-white/10 text-slate-400 hover:text-slate-200 hover:border-white/15',
                 ].join(' ')}
               >
                 <span className="text-[10px] font-semibold truncate">{cat.label}</span>
@@ -663,40 +663,80 @@ export const SearchSidebar: React.FC = () => {
   return (
     <nav aria-label="Weapon database" className="bg-black h-full flex flex-col">
 
-      {/* ── Header controls ─────────────────────────────────────────── */}
-      <div ref={headerRef} className="p-3 border-b border-white/10 space-y-2.5 relative">
+      {/* ── Header + filter panel (shared click-outside boundary) ───── */}
+      <div ref={headerRef}>
 
-        <h2 className="font-bold text-base text-white">Database</h2>
+        {/* Header controls */}
+        <div className="p-3 border-b border-white/10 space-y-2.5">
 
-        {/* Search + filter button */}
-        <div className="flex gap-2">
-          <input
-            ref={searchInputRef}
-            type="search" placeholder="Search weapons…" value={query}
-            onChange={e => setQuery(e.target.value)}
-            className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
-          />
-          <button
-            onClick={() => setFilterOpen(v => !v)} title="Filters" aria-expanded={filterOpen}
-            className={[
-              'shrink-0 w-9 h-9 rounded-md border flex items-center justify-center transition-all relative',
-              filterOpen || activeFilterCount > 0
-                ? 'bg-amber-500/15 border-amber-500/50 text-amber-400'
-                : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200 hover:border-white/20',
-            ].join(' ')}
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-              <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
-            </svg>
-            {activeFilterCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 text-slate-950 text-[8px] font-black rounded-full flex items-center justify-center leading-none">
-                {activeFilterCount}
-              </span>
+          <h2 className="font-bold text-base text-white">Database</h2>
+
+          {/* Search + filter button */}
+          <div className="flex gap-2">
+            <input
+              ref={searchInputRef}
+              type="search" placeholder="Search weapons…" value={query}
+              onChange={e => setQuery(e.target.value)}
+              className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+            />
+            <button
+              onClick={() => setFilterOpen(v => !v)} title="Filters" aria-expanded={filterOpen}
+              className={[
+                'shrink-0 w-9 h-9 rounded-md border flex items-center justify-center transition-all relative',
+                filterOpen || activeFilterCount > 0
+                  ? 'bg-amber-500/15 border-amber-500/50 text-amber-400'
+                  : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200 hover:border-white/20',
+              ].join(' ')}
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
+              </svg>
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 text-slate-950 text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Sort + clear row */}
+          <div className="flex items-center gap-2">
+            <div className="flex rounded-lg border border-white/10 overflow-hidden">
+              {(['alpha', 'season'] as SortMode[]).map((m, i) => (
+                <button
+                  key={m}
+                  onClick={() => handleSortClick(m)}
+                  className={[
+                    'text-[10px] font-bold px-3 py-1.5 transition-colors',
+                    i > 0 ? 'border-l border-white/10' : '',
+                    sortMode === m ? 'bg-white/10 text-slate-200' : 'text-slate-500 hover:text-slate-300',
+                  ].join(' ')}
+                >
+                  {m === 'alpha' ? `A–Z${dirArrow('alpha')}` : `Season${dirArrow('season')}`}
+                </button>
+              ))}
+            </div>
+            {anyFilter && (
+              <button
+                onClick={() => { setQuery(''); setFilters(DEFAULT_FILTERS); setActiveCat(null); setColSubcat(null); }}
+                className="text-[10px] text-slate-500 hover:text-amber-400 transition-colors ml-auto"
+              >
+                Clear all
+              </button>
             )}
-          </button>
+          </div>
+
+          {/* Active filter chips */}
+          {activeChips.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {activeChips.map((chip, i) => (
+                <ActiveChip key={`${chip.label}-${i}`} label={chip.label} isExclude={chip.isExclude} onRemove={chip.clear} />
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Filter panel */}
+        {/* Filter panel — in normal flow, directly below header, no gap */}
         {filterOpen && (
           <FilterPanel
             filters={filters}
@@ -709,42 +749,6 @@ export const SearchSidebar: React.FC = () => {
             onToggleFilter={handleToggleBool}
             onClearKey={key => setFilters(f => ({ ...f, [key]: emptyMF() }))}
           />
-        )}
-
-        {/* Sort + clear row */}
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-white/10 overflow-hidden">
-            {(['alpha', 'season'] as SortMode[]).map((m, i) => (
-              <button
-                key={m}
-                onClick={() => handleSortClick(m)}
-                className={[
-                  'text-[10px] font-bold px-3 py-1.5 transition-colors',
-                  i > 0 ? 'border-l border-white/10' : '',
-                  sortMode === m ? 'bg-white/10 text-slate-200' : 'text-slate-500 hover:text-slate-300',
-                ].join(' ')}
-              >
-                {m === 'alpha' ? `A–Z${dirArrow('alpha')}` : `Season${dirArrow('season')}`}
-              </button>
-            ))}
-          </div>
-          {anyFilter && (
-            <button
-              onClick={() => { setQuery(''); setFilters(DEFAULT_FILTERS); setActiveCat(null); setColSubcat(null); }}
-              className="text-[10px] text-slate-500 hover:text-amber-400 transition-colors ml-auto"
-            >
-              Clear all
-            </button>
-          )}
-        </div>
-
-        {/* Active filter chips */}
-        {activeChips.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {activeChips.map((chip, i) => (
-              <ActiveChip key={`${chip.label}-${i}`} label={chip.label} isExclude={chip.isExclude} onRemove={chip.clear} />
-            ))}
-          </div>
         )}
       </div>
 
