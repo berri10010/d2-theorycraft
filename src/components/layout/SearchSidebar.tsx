@@ -452,19 +452,58 @@ function FilterPanel({
   );
 }
 
+// ─── Recent searches ──────────────────────────────────────────────────────────
+
+const LS_RECENT_KEY = 'd2tc_recent_searches';
+const MAX_RECENT    = 8;
+
+function loadRecentSearches(): string[] {
+  try {
+    const raw = localStorage.getItem(LS_RECENT_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch { return []; }
+}
+
+function saveRecentSearches(searches: string[]) {
+  try { localStorage.setItem(LS_RECENT_KEY, JSON.stringify(searches)); } catch { /* ignore */ }
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export const SearchSidebar: React.FC = () => {
   const { loadWeapon, activeWeapon } = useWeaponStore();
   const { weapons, isLoading, error } = useWeaponDb();
 
-  const [query,      setQuery]      = useState('');
-  const [sortMode,   setSortMode]   = useState<SortMode>('alpha');
-  const [sortDir,    setSortDir]    = useState<SortDir>('asc');
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filters,    setFilters]    = useState<FilterState>(DEFAULT_FILTERS);
-  const [activeCat,  setActiveCat]  = useState<CategoryId | null>(null);
-  const [colSubcat,  setColSubcat]  = useState<MultiKey | null>(null);
+  const [query,         setQuery]         = useState('');
+  const [sortMode,      setSortMode]      = useState<SortMode>('alpha');
+  const [sortDir,       setSortDir]       = useState<SortDir>('asc');
+  const [filterOpen,    setFilterOpen]    = useState(false);
+  const [filters,       setFilters]       = useState<FilterState>(DEFAULT_FILTERS);
+  const [activeCat,     setActiveCat]     = useState<CategoryId | null>(null);
+  const [colSubcat,     setColSubcat]     = useState<MultiKey | null>(null);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  // Load recent searches from localStorage on mount
+  useEffect(() => { setRecentSearches(loadRecentSearches()); }, []);
+
+  const pushRecentSearch = useCallback((term: string) => {
+    const trimmed = term.trim();
+    if (!trimmed) return;
+    setRecentSearches(prev => {
+      const next = [trimmed, ...prev.filter(s => s !== trimmed)].slice(0, MAX_RECENT);
+      saveRecentSearches(next);
+      return next;
+    });
+  }, []);
+
+  const removeRecentSearch = useCallback((term: string) => {
+    setRecentSearches(prev => {
+      const next = prev.filter(s => s !== term);
+      saveRecentSearches(next);
+      return next;
+    });
+  }, []);
 
   const headerRef      = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -473,6 +512,11 @@ export const SearchSidebar: React.FC = () => {
     onSearch: () => searchInputRef.current?.focus(),
     onEscape: () => { if (query) setQuery(''); if (filterOpen) setFilterOpen(false); },
   });
+
+  const handleLoadWeapon = useCallback((weapon: Parameters<typeof loadWeapon>[0], variants?: Parameters<typeof loadWeapon>[1]) => {
+    if (query.trim()) pushRecentSearch(query);
+    loadWeapon(weapon, variants);
+  }, [loadWeapon, query, pushRecentSearch]);
 
   useEffect(() => {
     if (!filterOpen) return;
@@ -673,12 +717,45 @@ export const SearchSidebar: React.FC = () => {
 
           {/* Search + filter button */}
           <div className="flex gap-2">
-            <input
-              ref={searchInputRef}
-              type="search" placeholder="Search weapons…" value={query}
-              onChange={e => setQuery(e.target.value)}
-              className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
-            />
+            <div className="relative flex-1 min-w-0">
+              <input
+                ref={searchInputRef}
+                type="search" placeholder="Search weapons…" value={query}
+                onChange={e => setQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+                className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+              />
+
+              {/* Recent searches dropdown */}
+              {searchFocused && !query && recentSearches.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-[#111] border border-white/15 rounded-lg shadow-xl z-50 overflow-hidden">
+                  <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest px-3 pt-2.5 pb-1">Recent</p>
+                  {recentSearches.map(term => (
+                    <div
+                      key={term}
+                      className="flex items-center gap-2 px-3 py-1.5 hover:bg-white/6 group"
+                    >
+                      <svg className="w-3 h-3 text-slate-600 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      </svg>
+                      <button
+                        onMouseDown={e => { e.preventDefault(); setQuery(term); }}
+                        className="flex-1 text-left text-xs text-slate-400 group-hover:text-slate-200 truncate transition-colors"
+                      >
+                        {term}
+                      </button>
+                      <button
+                        onMouseDown={e => { e.preventDefault(); removeRecentSearch(term); }}
+                        className="shrink-0 text-slate-700 hover:text-slate-400 transition-colors text-sm leading-none"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               onClick={() => setFilterOpen(v => !v)} title="Filters" aria-expanded={filterOpen}
               className={[
@@ -791,7 +868,7 @@ export const SearchSidebar: React.FC = () => {
               ].join(' ')}
             >
               <button
-                onClick={() => loadWeapon(group.default, group.variants)}
+                onClick={() => handleLoadWeapon(group.default, group.variants)}
                 className="w-full text-left p-2 flex items-center gap-2.5 transition-all duration-150"
               >
                 <div className="relative w-14 h-14 shrink-0">
