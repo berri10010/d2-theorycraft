@@ -10,6 +10,11 @@ import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { ClarityEntry } from '../../lib/clarity';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
+import { Tooltip } from '../ui/Tooltip';
+import PERK_AUDIT_RAW from '../../data/perkAudit.json';
+
+type AuditAnnotation = { clarityVerified: boolean; notes: string };
+const PERK_AUDIT = PERK_AUDIT_RAW as Record<string, AuditAnnotation | undefined>;
 
 // ── Effect controls ───────────────────────────────────────────────────────────
 
@@ -215,14 +220,22 @@ function StatDelta({ value }: { value: number }) {
 }
 
 // ── StatModPills helper ───────────────────────────────────────────────────────
-/**
- * Renders each stat modifier as a compact pill badge.
- * Positive values are green-tinted; negative values are red-tinted.
- * Zero-value modifiers are omitted.
- */
-function StatModPills({ mods }: { mods: Array<{ statName: string; value: number; isConditional?: boolean }> }) {
+function StatModPills({
+  mods,
+  annotation,
+}: {
+  mods: Array<{ statName: string; value: number; isConditional?: boolean }>;
+  annotation?: AuditAnnotation | null;
+}) {
   const nonZero = mods.filter((m) => m.value !== 0);
   if (nonZero.length === 0) return null;
+
+  const sourceNode = annotation?.clarityVerified
+    ? <span className="text-emerald-400">✓ Clarity DB</span>
+    : annotation?.notes
+    ? <span className="text-slate-500">{annotation.notes}</span>
+    : null;
+
   return (
     <div className="flex flex-wrap gap-1 mt-1">
       {nonZero.map((mod) => {
@@ -230,13 +243,31 @@ function StatModPills({ mods }: { mods: Array<{ statName: string; value: number;
         const pillClass = positive
           ? 'bg-green-500/10 text-green-400 border-green-500/25'
           : 'bg-red-500/10 text-red-400 border-red-500/25';
-        return (
+        const pill = (
           <span
             key={mod.statName}
-            className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none ${pillClass}`}
+            className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none cursor-default ${pillClass}`}
           >
             {positive ? '+' : ''}{mod.value} {mod.statName}
           </span>
+        );
+        const tipContent = (
+          <div className="space-y-1 text-[11px]">
+            <p className="font-semibold text-slate-200">
+              {positive ? '+' : ''}{mod.value} {mod.statName}
+            </p>
+            {mod.isConditional && (
+              <p className="text-slate-400">Activates with perk</p>
+            )}
+            {sourceNode && (
+              <div className="border-t border-white/10 pt-1.5 mt-0.5 text-[10px]">{sourceNode}</div>
+            )}
+          </div>
+        );
+        return (
+          <Tooltip key={mod.statName} content={tipContent} delay={150}>
+            {pill}
+          </Tooltip>
         );
       })}
     </div>
@@ -417,6 +448,7 @@ export const EffectsPanel: React.FC = () => {
                           {(() => {
                             const acts = [activation, activation2].filter(Boolean) as NonNullable<typeof activation>[];
                             if (acts.length === 0) return null;
+                            const auditEntry = PERK_AUDIT[name] ?? null;
                             const TTA_COLORS: Record<string, string> = {
                               'Kill-Proc':      'bg-red-500/15 text-red-400 border-red-500/30',
                               'Reload-Proc':    'bg-blue-500/15 text-blue-400 border-blue-500/30',
@@ -438,14 +470,30 @@ export const EffectsPanel: React.FC = () => {
                                     ? `${act.estTtaSeconds}s wind-up`
                                     : act.ttaCategory;
                                   const durLabel = act.duration ? ` · ${act.duration}` : '';
+                                  const tipContent = (
+                                    <div className="space-y-1 text-[11px]">
+                                      <p className="font-semibold text-slate-200">{act.ttaCategory}</p>
+                                      <p className="text-slate-400">Trigger: <span className="text-slate-300">{act.trigger}</span></p>
+                                      {act.duration && <p className="text-slate-400">Duration: <span className="text-slate-300">{act.duration}</span></p>}
+                                      {act.estTtaSeconds && act.estTtaSeconds !== '0' && (
+                                        <p className="text-slate-400">Wind-up: <span className="text-slate-300">~{act.estTtaSeconds}s</span></p>
+                                      )}
+                                      {auditEntry && (
+                                        <div className="border-t border-white/10 pt-1.5 mt-0.5 text-[10px]">
+                                          {auditEntry.clarityVerified
+                                            ? <span className="text-emerald-400">✓ Clarity DB</span>
+                                            : <span className="text-slate-500">{auditEntry.notes}</span>
+                                          }
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
                                   return (
-                                    <span
-                                      key={i}
-                                      title={`Trigger: ${act.trigger}${durLabel}`}
-                                      className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none ${color}`}
-                                    >
-                                      {ttaLabel}{durLabel}
-                                    </span>
+                                    <Tooltip key={i} content={tipContent} delay={150}>
+                                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none cursor-default ${color}`}>
+                                        {ttaLabel}{durLabel}
+                                      </span>
+                                    </Tooltip>
                                   );
                                 })}
                               </div>
@@ -453,7 +501,7 @@ export const EffectsPanel: React.FC = () => {
                           })()}
 
                           {/* Stat modifier pills — inline below TTA badges */}
-                          <StatModPills mods={statModifiers} />
+                          <StatModPills mods={statModifiers} annotation={PERK_AUDIT[name]} />
                         </div>
 
                         {/* Right side: toggle control */}
@@ -601,7 +649,7 @@ export const EffectsPanel: React.FC = () => {
                         </div>
                         <span className="text-xs text-slate-500 uppercase tracking-wide">{columnName}</span>
                         {/* Stat modifier pills — passive perks show them below the column label */}
-                        <StatModPills mods={statModifiers} />
+                        <StatModPills mods={statModifiers} annotation={PERK_AUDIT[name]} />
                       </div>
                     </div>
 
