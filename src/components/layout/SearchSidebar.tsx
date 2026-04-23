@@ -314,7 +314,7 @@ function FilterPanel({
     <div className="bg-[#0c0c0c] border-b border-white/10 overflow-hidden">
 
       {/* ── Toggles ── */}
-      <div className="px-3 pt-3 pb-2.5 border-b border-white/8">
+      <div className="px-3 pt-3 pb-2.5">
         <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-2">Quick Filters</p>
         <div className="grid grid-cols-2 gap-1">
           {TOGGLE_DEFS.map(({ id, label }) => {
@@ -344,7 +344,7 @@ function FilterPanel({
       </div>
 
       {/* ── Category grid ── */}
-      <div className="px-3 py-2.5 border-b border-white/8">
+      <div className="px-3 py-2.5">
         <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-2">Filter by</p>
         <div className="grid grid-cols-2 gap-1">
           {CATEGORIES.map((cat) => {
