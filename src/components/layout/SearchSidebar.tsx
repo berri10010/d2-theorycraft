@@ -220,12 +220,13 @@ function ActiveChip({ label, isExclude, onRemove }: { label: string; isExclude: 
 }
 
 function OptionsPanel({
-  filterKey, options, mf, onToggle, optLabel,
+  filterKey, options, mf, onToggle, onClear, optLabel,
 }: {
   filterKey: MultiKey;
   options: string[];
   mf: MultiFilter;
   onToggle: (key: MultiKey, val: string) => void;
+  onClear: () => void;
   optLabel?: (v: string) => string;
 }) {
   const [search, setSearch] = useState('');
@@ -233,40 +234,61 @@ function OptionsPanel({
   const visible = search
     ? options.filter(o => label(o).toLowerCase().includes(search.toLowerCase()))
     : options;
+  const activeCount = mf.inc.length + mf.exc.length;
 
   return (
-    <div className="space-y-1.5">
-      <input
-        value={search} onChange={e => setSearch(e.target.value)}
-        placeholder="Search…"
-        className="w-full bg-white/5 border border-white/10 rounded px-2.5 py-1 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-amber-500/50 transition-colors"
-      />
-      <div className="max-h-44 overflow-y-auto space-y-0.5">
+    <div className="flex flex-col gap-2">
+      {/* Search + active count */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-600 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+          </svg>
+          <input
+            value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search options…"
+            className="w-full bg-white/[0.04] border border-white/10 rounded-md pl-7 pr-2.5 py-1.5 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-amber-500/40 transition-colors"
+          />
+        </div>
+        {activeCount > 0 && (
+          <button onClick={onClear} className="shrink-0 text-[10px] text-slate-500 hover:text-amber-400 transition-colors whitespace-nowrap">
+            Clear {activeCount}
+          </button>
+        )}
+      </div>
+
+      {/* Option list */}
+      <div className="max-h-48 overflow-y-auto -mx-1">
         {visible.map(opt => {
           const mode = chipMode(mf, opt);
           return (
             <button key={opt} onClick={() => onToggle(filterKey, opt)}
-              className="w-full text-left flex items-center gap-2 px-2 py-1 rounded hover:bg-white/5 transition-colors group"
+              className={[
+                'w-full text-left flex items-center gap-2.5 px-3 py-1.5 transition-colors group',
+                mode === 'inc' ? 'bg-amber-500/8' :
+                mode === 'exc' ? 'bg-red-500/6' :
+                'hover:bg-white/4',
+              ].join(' ')}
             >
               <span className={[
-                'w-3.5 h-3.5 rounded border flex items-center justify-center text-[8px] shrink-0 transition-colors',
-                mode === 'inc' ? 'bg-amber-500/30 border-amber-500 text-amber-300' :
+                'w-4 h-4 rounded-sm border-2 flex items-center justify-center text-[9px] shrink-0 transition-all',
+                mode === 'inc' ? 'bg-amber-500 border-amber-500 text-slate-950' :
                 mode === 'exc' ? 'bg-red-500/20 border-red-500 text-red-400' :
-                'border-white/20 group-hover:border-white/40',
+                'border-white/20 group-hover:border-white/35',
               ].join(' ')}>
                 {mode === 'inc' ? '✓' : mode === 'exc' ? '✕' : ''}
               </span>
               <span className={[
-                'text-xs truncate',
-                mode === 'inc' ? 'text-amber-300' :
-                mode === 'exc' ? 'text-red-400 line-through' :
-                'text-slate-300',
+                'text-xs truncate leading-none',
+                mode === 'inc' ? 'text-amber-200 font-medium' :
+                mode === 'exc' ? 'text-red-400/70 line-through' :
+                'text-slate-400 group-hover:text-slate-200',
               ].join(' ')} title={label(opt)}>{label(opt)}</span>
             </button>
           );
         })}
         {visible.length === 0 && (
-          <p className="text-slate-600 text-xs px-2 py-2">No options found.</p>
+          <p className="text-slate-600 text-xs px-3 py-3">No options found.</p>
         )}
       </div>
     </div>
@@ -274,7 +296,7 @@ function OptionsPanel({
 }
 
 function FilterPanel({
-  filters, allOptions, activeCat, activeColSubcat, onSetActiveCat, onSetColSubcat, onToggle, onToggleFilter,
+  filters, allOptions, activeCat, activeColSubcat, onSetActiveCat, onSetColSubcat, onToggle, onToggleFilter, onClearKey,
 }: {
   filters: FilterState;
   allOptions: Record<MultiKey, string[]>;
@@ -284,108 +306,146 @@ function FilterPanel({
   onSetColSubcat: (id: MultiKey | null) => void;
   onToggle: (key: MultiKey, val: string) => void;
   onToggleFilter: (key: ToggleKey) => void;
+  onClearKey: (key: MultiKey) => void;
 }) {
+  const activeCatDef = CATEGORIES.find(c => c.id === activeCat);
+
   return (
-    <div className="absolute left-0 right-0 top-full z-50 bg-[#0a0a0a] border border-white/10 rounded-b-xl shadow-2xl">
+    <div className="absolute left-0 right-0 top-full z-50 bg-[#0c0c0c] border border-white/10 rounded-b-xl shadow-2xl overflow-hidden">
 
-      {/* Toggles */}
-      <div className="px-3 pt-3 pb-2 border-b border-white/8 flex flex-wrap gap-1.5">
-        {TOGGLE_DEFS.map(({ id, label }) => (
-          <button
-            key={id}
-            onClick={() => onToggleFilter(id)}
-            className={[
-              'text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all',
-              filters[id]
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
-                : 'bg-white/5 text-slate-500 border-white/10 hover:text-slate-300 hover:border-white/20',
-            ].join(' ')}
-          >
-            {label}
-          </button>
-        ))}
+      {/* ── Toggles ── */}
+      <div className="px-3 pt-3 pb-2.5 border-b border-white/8">
+        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-2">Quick Filters</p>
+        <div className="grid grid-cols-2 gap-1">
+          {TOGGLE_DEFS.map(({ id, label }) => {
+            const on = filters[id];
+            return (
+              <button
+                key={id}
+                onClick={() => onToggleFilter(id)}
+                className={[
+                  'flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-all text-left',
+                  on
+                    ? 'bg-amber-500/15 border-amber-500/35 text-amber-300'
+                    : 'bg-white/[0.03] border-white/8 text-slate-500 hover:text-slate-300 hover:border-white/15',
+                ].join(' ')}
+              >
+                <span className={[
+                  'w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center text-[8px] shrink-0 transition-all',
+                  on ? 'bg-amber-500 border-amber-500 text-slate-950' : 'border-white/25',
+                ].join(' ')}>
+                  {on ? '✓' : ''}
+                </span>
+                <span className="text-[10px] font-semibold">{label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Category buttons */}
-      <div className="px-3 py-2 border-b border-white/8 flex flex-wrap gap-1">
-        {CATEGORIES.map((cat) => {
-          const count = categoryCount(filters, cat);
-          const isActive = activeCat === cat.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => onSetActiveCat(isActive ? null : cat.id)}
-              className={[
-                'text-[10px] font-bold px-2.5 py-1 rounded border transition-all',
-                isActive
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
-                  : count > 0
-                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                  : 'bg-white/5 text-slate-400 border-white/10 hover:text-slate-200 hover:border-white/20',
-              ].join(' ')}
-            >
-              {cat.label}
-              {count > 0 && <span className="ml-1 text-[9px] opacity-70">{count}</span>}
-            </button>
-          );
-        })}
+      {/* ── Category grid ── */}
+      <div className="px-3 py-2.5 border-b border-white/8">
+        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-2">Filter by</p>
+        <div className="grid grid-cols-2 gap-1">
+          {CATEGORIES.map((cat) => {
+            const count = categoryCount(filters, cat);
+            const isActive = activeCat === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => onSetActiveCat(isActive ? null : cat.id)}
+                className={[
+                  'flex items-center justify-between px-2.5 py-1.5 rounded-lg border transition-all text-left',
+                  isActive
+                    ? 'bg-amber-500/20 border-amber-500/45 text-amber-300'
+                    : count > 0
+                    ? 'bg-amber-500/8 border-amber-500/25 text-amber-400'
+                    : 'bg-white/[0.03] border-white/8 text-slate-400 hover:text-slate-200 hover:border-white/15',
+                ].join(' ')}
+              >
+                <span className="text-[10px] font-semibold truncate">{cat.label}</span>
+                {count > 0 && (
+                  <span className="ml-1.5 shrink-0 min-w-[16px] h-[14px] bg-amber-500 text-slate-950 text-[8px] font-black rounded-full flex items-center justify-center px-1 leading-none">
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Expanded options */}
+      {/* ── Expanded options ── */}
       {activeCat !== null && (
-        <div className="px-3 py-2.5">
+        <div className="px-3 pt-2.5 pb-3">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-2.5">
+            <p className="text-[10px] font-bold text-slate-300 uppercase tracking-wider">
+              {activeCatDef?.label}
+            </p>
+            {activeCat === 'column' && (
+              <span className="text-[9px] text-slate-600">Click once to include · again to exclude</span>
+            )}
+          </div>
+
           {activeCat === 'column' ? (
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-1">
-                {COL_SUBCATS.map(({ id, label }) => {
+            <div className="space-y-2.5">
+              {/* Tab-style sub-category selector */}
+              <div className="flex rounded-lg overflow-hidden border border-white/10">
+                {COL_SUBCATS.map(({ id, label }, i) => {
                   const cnt = countMF(filters[id]);
+                  const isSelected = activeColSubcat === id;
                   return (
                     <button
                       key={id}
-                      onClick={() => onSetColSubcat(activeColSubcat === id ? null : id)}
+                      onClick={() => onSetColSubcat(isSelected ? null : id)}
                       className={[
-                        'text-[10px] font-bold px-2 py-0.5 rounded border transition-all',
-                        activeColSubcat === id
-                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                        'flex-1 py-1.5 text-[9px] font-bold transition-colors relative',
+                        i > 0 ? 'border-l border-white/10' : '',
+                        isSelected
+                          ? 'bg-amber-500/20 text-amber-300'
                           : cnt > 0
-                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                          : 'bg-white/5 text-slate-400 border-white/10 hover:text-slate-200 hover:border-white/20',
+                          ? 'bg-amber-500/8 text-amber-400 hover:bg-amber-500/12'
+                          : 'text-slate-500 hover:text-slate-300 hover:bg-white/4',
                       ].join(' ')}
                     >
-                      {label}{cnt > 0 && <span className="ml-1 opacity-70">{cnt}</span>}
+                      {label}
+                      {cnt > 0 && (
+                        <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-amber-500" />
+                      )}
                     </button>
                   );
                 })}
               </div>
-              {activeColSubcat && (
+              {activeColSubcat ? (
                 <OptionsPanel
                   filterKey={activeColSubcat}
                   options={allOptions[activeColSubcat]}
                   mf={filters[activeColSubcat]}
                   onToggle={onToggle}
+                  onClear={() => onClearKey(activeColSubcat)}
                 />
+              ) : (
+                <p className="text-slate-600 text-xs text-center py-3">Select a column above</p>
               )}
             </div>
-          ) : (
-            (() => {
-              const cat = CATEGORIES.find(c => c.id === activeCat);
-              if (!cat?.filterKey) return null;
-              const fk = cat.filterKey;
-              return (
-                <OptionsPanel
-                  filterKey={fk}
-                  options={allOptions[fk]}
-                  mf={filters[fk]}
-                  onToggle={onToggle}
-                  optLabel={
-                    fk === 'energy' ? v => v.charAt(0).toUpperCase() + v.slice(1) :
-                    fk === 'frame'  ? v => v.replace(/ Frame$/, '') :
-                    undefined
-                  }
-                />
-              );
-            })()
-          )}
+          ) : activeCatDef?.filterKey ? (
+            <>
+              <p className="text-[9px] text-slate-600 mb-2">Click once to include · again to exclude · again to clear</p>
+              <OptionsPanel
+                filterKey={activeCatDef.filterKey}
+                options={allOptions[activeCatDef.filterKey]}
+                mf={filters[activeCatDef.filterKey]}
+                onToggle={onToggle}
+                onClear={() => onClearKey(activeCatDef.filterKey!)}
+                optLabel={
+                  activeCatDef.filterKey === 'energy' ? v => v.charAt(0).toUpperCase() + v.slice(1) :
+                  activeCatDef.filterKey === 'frame'  ? v => v.replace(/ Frame$/, '') :
+                  undefined
+                }
+              />
+            </>
+          ) : null}
         </div>
       )}
     </div>
@@ -647,6 +707,7 @@ export const SearchSidebar: React.FC = () => {
             onSetColSubcat={setColSubcat}
             onToggle={handleToggleFilter}
             onToggleFilter={handleToggleBool}
+            onClearKey={key => setFilters(f => ({ ...f, [key]: emptyMF() }))}
           />
         )}
 
