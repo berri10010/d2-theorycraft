@@ -1,0 +1,12 @@
+'use client';
+
+import { useEffect } from 'react';
+
+export function ServiceWorkerRegistration() {
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {/* silent — SW is enhancement only */});
+    }
+  }, []);
+  return null;
+}
