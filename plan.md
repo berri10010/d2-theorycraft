@@ -284,8 +284,11 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Task | Status |
 |------|--------|
-| Filters in Search Panel function like D2 Foundry | ⬜ Pending |
-| Allow perk/trait search: show every weapon with that perk; let user choose which column to filter by | ⬜ Pending |
+| Category-based filter panel: clickable category buttons expand searchable option lists | ✅ Done |
+| 3-state inc/exc selection on all filter options; active filters shown as dismissible chips | ✅ Done |
+| Toggles: Featured (exotics + s27+), Craftable, Adept, Sunset (season ≤ 12) | ✅ Done |
+| Filters: Weapon Type, Frame, Trait (cols 3&4), Energy, Ammo, Slot, Rarity, Perk (any col), Column 1–5 (nested subcats), Source, Season, Foundry | ✅ Done |
+| Foundry field added to parser (from Bungie traitIds), bungieTypes, and Weapon interface | ✅ Done |
 | Recent searches shown on search focus; hidden when typing begins | ⬜ Pending |
 
 #### 12G — Homepage & Navigation
@@ -324,7 +327,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Fix Weapons Stat description text: "0–100" and "100–200" (was "1–100" / "101–200") | ✅ Done |
 | Weapons Stat defaults to 0 on initial load for both PvE and PvP; PvP slider min changed from 100 to 0 | ✅ Done |
 
-**Stage 12 progress: ~75%**
+**Stage 12 progress: ~80%**
 
 ---
 
@@ -481,6 +484,12 @@ npm run build
 *5. Exotic armor selector (12D complete): `src/data/exoticArmor.ts` with 10 Hunter / 12 Warlock / 10 Titan exotics, each with `statBonuses` and optional `weaponTypeStatBonuses` (e.g. Lucky Pants +100 Handling for Hand Cannons). BuffToggle.tsx gains ExoticArmorSection per class — `<select>` dropdown + stat pills (green when active weapon type matches, grey otherwise). `useWeaponStore` extended with `activeExoticArmor` state and `setExoticArmor` action; `getCalculatedStats` applies exotic bonuses after buff bonuses, clamped 0–100.*
 
 *6. wrangler.toml observability sync: added full `[observability]`, `[observability.logs]`, and `[observability.traces]` sections to match Cloudflare dashboard configuration.*
+
+---
+
+*Last updated: 2026-04-23 — Session summary:*
+
+*Search filter panel rework (commit 1701572): FilterDrawer replaced with a category-button panel. Clicking a category (Weapon Type, Frame, Trait, Energy, Ammo, Slot, Rarity, Perk, Column 1–5, Source, Season, Foundry) expands a searchable options list with 3-state inc/exc picking. Column 1–5 is nested — shows Barrel/Magazine/Perk 1/Perk 2/Origin sub-categories. Toggles row (Featured, Craftable, Adept, Sunset) at top of panel. Foundry field added end-to-end: BungieInventoryItem.traitIds, parser extractFoundry(), Weapon.foundry. DATA_FORMAT_VERSION bumped 12→13 to force re-parse.*
 
 ---
 
