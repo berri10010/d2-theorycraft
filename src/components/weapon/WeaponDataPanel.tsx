@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { MasterworkPanel } from './MasterworkPanel';
 import { AmmoPanel } from './AmmoPanel';
 import { ArmorModPanel } from './ArmorModPanel';
@@ -54,40 +53,65 @@ function ChevronDown() {
 
 export function WeaponDataPanel() {
   const [active, setActive] = useState<PanelKey>('masterwork');
+  const [open, setOpen] = useState(true);
 
   return (
-    <CollapsiblePanel title="Weapon Data">
-    <div className="space-y-3">
-      {/* Dropdown selector */}
-      <div className="relative">
-        <select
-          value={active}
-          onChange={e => setActive(e.target.value as PanelKey)}
-          className="w-full appearance-none bg-white/5 border border-white/10 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-200 cursor-pointer focus:outline-none focus:border-amber-500/50 focus:bg-white/8 transition-colors"
+    <div>
+      {/* Collapsible header — no card background, sub-panels provide their own */}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between mb-3 group"
+        aria-expanded={open}
+      >
+        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">
+          Weapon Data
+        </span>
+        <svg
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className={`w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-all ${open ? 'rotate-180' : ''}`}
         >
-          {OPTIONS.map(o => (
-            <option key={o.key} value={o.key} className="bg-[#0d0d0d] text-slate-200">
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <ChevronDown />
-      </div>
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
 
-      {/* Panel content */}
-      <div>
-        {active === 'masterwork' && (
-          <div className="space-y-4">
-            <MasterworkPanel />
-            <ArmorModPanel />
+      {open && (
+        <div className="space-y-3">
+          {/* Dropdown selector */}
+          <div className="relative">
+            <select
+              value={active}
+              onChange={e => setActive(e.target.value as PanelKey)}
+              className="w-full appearance-none bg-white/5 border border-white/10 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-slate-200 cursor-pointer focus:outline-none focus:border-amber-500/50 focus:bg-white/8 transition-colors"
+            >
+              {OPTIONS.map(o => (
+                <option key={o.key} value={o.key} className="bg-[#0d0d0d] text-slate-200">
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown />
           </div>
-        )}
-        {active === 'ammo'           && <AmmoPanel />}
-        {active === 'ttk-falloff'    && <TTKAndFalloffPanel />}
-        {active === 'damage-profile' && <DamageProfilePanel />}
-        {active === 'subclass'       && <SubclassVerbPanel />}
-      </div>
+
+          {/* Panel content */}
+          <div>
+            {active === 'masterwork' && (
+              <div className="space-y-4">
+                <MasterworkPanel />
+                <ArmorModPanel />
+              </div>
+            )}
+            {active === 'ammo'           && <AmmoPanel />}
+            {active === 'ttk-falloff'    && <TTKAndFalloffPanel />}
+            {active === 'damage-profile' && <DamageProfilePanel />}
+            {active === 'subclass'       && <SubclassVerbPanel />}
+          </div>
+        </div>
+      )}
     </div>
-    </CollapsiblePanel>
   );
 }
