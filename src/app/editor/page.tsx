@@ -162,7 +162,7 @@ function Dashboard() {
     if (!activeWeapon) return;
     const perkHashes = Object.values(selectedPerks);
     let entry = `dimwishlist:item=${activeWeapon.hash}`;
-    if (perkHashes.length) entry += `#perks=${perkHashes.join(',')}`;
+    if (perkHashes.length) entry += `&perks=${perkHashes.join(',')}`;
     entry += `\n//notes:${activeWeapon.name} — via D2 Theorycraft`;
     navigator.clipboard.writeText(entry).then(() => {
       setCopiedType('dim');
