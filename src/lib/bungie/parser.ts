@@ -16,6 +16,27 @@ import { getBuffKeyForPerk } from '../buffDatabase';
 import { getPerkTier } from '../perkTierDatabase';
 import PERK_AUDIT from '../../data/perkAudit.json';
 
+// ── Foundry extraction ───────────────────────────────────────────────────────
+const FOUNDRY_NAMES: Record<string, string> = {
+  'foundry.hakke':         'Häkke',
+  'foundry.suros':         'SUROS',
+  'foundry.omolon':        'Omolon',
+  'foundry.tex_mechanica': 'Tex Mechanica',
+  'foundry.veist':         'Veist',
+  'foundry.daito':         'Daito',
+  'foundry.nadir':         'Nadir',
+  'foundry.crux_letheon':  'Crux/Letheon',
+  'foundry.cassoid':       'Cassoid',
+};
+
+function extractFoundry(traitIds: string[] | undefined): string | null {
+  if (!traitIds) return null;
+  const ft = traitIds.find(t => t.startsWith('foundry.'));
+  if (!ft) return null;
+  return FOUNDRY_NAMES[ft] ??
+    ft.replace('foundry.', '').split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
 // ── perkAudit helpers ────────────────────────────────────────────────────────
 type AuditEntry = {
   statModifiers: Array<{ statName: string; value: number; isConditional: boolean }>;
@@ -1002,6 +1023,7 @@ export function parseWeapons(
         (s) => !finalMwOptions.includes(s) && baseStats[s] !== undefined
       ),
       weaponMods,
+      foundry: extractFoundry(item.traitIds),
     });
   }
 

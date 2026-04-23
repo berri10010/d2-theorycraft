@@ -182,6 +182,11 @@ export interface Weapon {
    * socket plug set in the Bungie manifest. Empty for exotic weapons.
    */
   weaponMods: WeaponModOption[];
+  /**
+   * Manufacturer/foundry name derived from the weapon's traitIds in the Bungie
+   * manifest (e.g. "foundry.hakke" → "Häkke"). Null for weapons with no foundry tag.
+   */
+  foundry: string | null;
 }
 
 /** A named group of weapon variants sharing the same base name */

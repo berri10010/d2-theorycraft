@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
-import { WeaponGroup } from '../../types/weapon';
+import { Weapon, WeaponGroup } from '../../types/weapon';
 import { groupWeapons } from '../../lib/weaponGroups';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
@@ -14,73 +14,114 @@ const DAMAGE_COLORS: Record<string, string> = {
   kinetic: 'text-slate-200', solar: 'text-orange-400', arc: 'text-blue-400',
   void: 'text-purple-400', stasis: 'text-cyan-400', strand: 'text-emerald-400',
 };
-
 const AMMO_LABELS: Record<number, string> = { 1: 'Primary', 2: 'Special', 3: 'Heavy' };
-const AMMO_COLORS: Record<number, string> = {
-  1: 'text-slate-400', 2: 'text-green-400', 3: 'text-purple-400',
-};
-
-const DAMAGE_OPTIONS = ['kinetic', 'solar', 'arc', 'void', 'stasis', 'strand'];
-const AMMO_OPTIONS = [1, 2, 3];
-const RARITY_OPTIONS = ['Exotic', 'Legendary', 'Rare', 'Uncommon', 'Common'];
+const AMMO_COLORS: Record<number, string> = { 1: 'text-slate-400', 2: 'text-green-400', 3: 'text-purple-400' };
+const SLOT_LABELS: Record<number, string> = { 1: 'Kinetic', 2: 'Energy', 3: 'Power' };
 
 type SortMode = 'alpha' | 'season';
 type SortDir  = 'asc'   | 'desc';
-// Natural default direction per sort mode
 const DEFAULT_DIR: Record<SortMode, SortDir> = { alpha: 'asc', season: 'asc' };
 
-// ─── Filter state ─────────────────────────────────────────────────────────────
+// ─── Filter types ─────────────────────────────────────────────────────────────
 
 interface MultiFilter { inc: string[]; exc: string[] }
 
 interface FilterState {
-  damage:     MultiFilter;
-  ammo:       MultiFilter;
-  rarity:     MultiFilter;
   weaponType: MultiFilter;
-  /** Frame archetype filter — populated dynamically from visible weapons. */
   frame:      MultiFilter;
-  adeptOnly:     boolean;
+  trait:      MultiFilter;   // perks in 'perk' columnType columns (3 & 4)
+  energy:     MultiFilter;
+  ammo:       MultiFilter;
+  slot:       MultiFilter;   // Kinetic / Energy / Power (derived from ammoType)
+  rarity:     MultiFilter;
+  perk:       MultiFilter;   // any perk in any column
+  col1:       MultiFilter;
+  col2:       MultiFilter;
+  col3:       MultiFilter;
+  col4:       MultiFilter;
+  col5:       MultiFilter;
+  source:     MultiFilter;
+  season:     MultiFilter;
+  foundry:    MultiFilter;
+  featured:      boolean;
   craftableOnly: boolean;
+  adeptOnly:     boolean;
+  sunsetOnly:    boolean;
 }
+
+type MultiKey = Exclude<keyof FilterState, 'featured' | 'craftableOnly' | 'adeptOnly' | 'sunsetOnly'>;
+type ToggleKey = 'featured' | 'craftableOnly' | 'adeptOnly' | 'sunsetOnly';
 
 const emptyMF = (): MultiFilter => ({ inc: [], exc: [] });
 
 const DEFAULT_FILTERS: FilterState = {
-  damage:     emptyMF(),
-  ammo:       emptyMF(),
-  rarity:     emptyMF(),
-  weaponType: emptyMF(),
-  frame:      emptyMF(),
-  adeptOnly:     false,
-  craftableOnly: false,
+  weaponType: emptyMF(), frame: emptyMF(), trait: emptyMF(),
+  energy: emptyMF(), ammo: emptyMF(), slot: emptyMF(), rarity: emptyMF(),
+  perk: emptyMF(), col1: emptyMF(), col2: emptyMF(), col3: emptyMF(),
+  col4: emptyMF(), col5: emptyMF(), source: emptyMF(), season: emptyMF(),
+  foundry: emptyMF(),
+  featured: false, craftableOnly: false, adeptOnly: false, sunsetOnly: false,
 };
 
-type MultiKey = 'damage' | 'ammo' | 'rarity' | 'weaponType' | 'frame';
+// ─── Category / toggle config ─────────────────────────────────────────────────
 
-/** Strip " Frame" suffix for compact display: "Adaptive Frame" → "Adaptive" */
-function frameLabel(name: string): string {
-  return name.replace(/ Frame$/, '');
+type CategoryId = MultiKey | 'column';
+
+interface CategoryDef {
+  id: CategoryId;
+  label: string;
+  filterKey?: MultiKey;
 }
 
-// Three-state cycle per value: none → include (amber) → exclude (red) → none
+const CATEGORIES: CategoryDef[] = [
+  { id: 'weaponType', label: 'Weapon Type', filterKey: 'weaponType' },
+  { id: 'frame',      label: 'Frame',       filterKey: 'frame' },
+  { id: 'trait',      label: 'Trait',       filterKey: 'trait' },
+  { id: 'energy',     label: 'Energy',      filterKey: 'energy' },
+  { id: 'ammo',       label: 'Ammo',        filterKey: 'ammo' },
+  { id: 'slot',       label: 'Slot',        filterKey: 'slot' },
+  { id: 'rarity',     label: 'Rarity',      filterKey: 'rarity' },
+  { id: 'perk',       label: 'Perk',        filterKey: 'perk' },
+  { id: 'column',     label: 'Column 1–5' },
+  { id: 'source',     label: 'Source',      filterKey: 'source' },
+  { id: 'season',     label: 'Season',      filterKey: 'season' },
+  { id: 'foundry',    label: 'Foundry',     filterKey: 'foundry' },
+];
+
+const COL_SUBCATS: { id: MultiKey; label: string }[] = [
+  { id: 'col1', label: 'Barrel' },
+  { id: 'col2', label: 'Magazine' },
+  { id: 'col3', label: 'Perk 1' },
+  { id: 'col4', label: 'Perk 2' },
+  { id: 'col5', label: 'Origin' },
+];
+
+const TOGGLE_DEFS: { id: ToggleKey; label: string }[] = [
+  { id: 'featured',      label: 'Featured' },
+  { id: 'craftableOnly', label: 'Craftable' },
+  { id: 'adeptOnly',     label: 'Adept' },
+  { id: 'sunsetOnly',    label: 'Sunset' },
+];
+
+// ─── Filter logic helpers ─────────────────────────────────────────────────────
+
 function cycleFilter(f: FilterState, key: MultiKey, val: string): FilterState {
   const { inc, exc } = f[key];
-  if (inc.includes(val)) {
-    return { ...f, [key]: { inc: inc.filter(v => v !== val), exc: [...exc, val] } };
-  }
-  if (exc.includes(val)) {
-    return { ...f, [key]: { inc, exc: exc.filter(v => v !== val) } };
-  }
+  if (inc.includes(val)) return { ...f, [key]: { inc: inc.filter(v => v !== val), exc: [...exc, val] } };
+  if (exc.includes(val)) return { ...f, [key]: { inc, exc: exc.filter(v => v !== val) } };
   return { ...f, [key]: { inc: [...inc, val], exc } };
 }
 
-// A weapon passes a multi-filter if:
-//   • not in the exclude list, AND
-//   • include list is empty OR the weapon's value is in the include list
 function matchesMF(mf: MultiFilter, val: string): boolean {
   if (mf.exc.includes(val)) return false;
   if (mf.inc.length > 0 && !mf.inc.includes(val)) return false;
+  return true;
+}
+
+function matchesMFAny(mf: MultiFilter, vals: string[]): boolean {
+  if (mf.inc.length === 0 && mf.exc.length === 0) return true;
+  if (mf.exc.length > 0 && vals.some(v => mf.exc.includes(v))) return false;
+  if (mf.inc.length > 0 && !vals.some(v => mf.inc.includes(v))) return false;
   return true;
 }
 
@@ -92,14 +133,28 @@ function chipMode(mf: MultiFilter, val: string): 'none' | 'inc' | 'exc' {
 
 function countMF(mf: MultiFilter) { return mf.inc.length + mf.exc.length; }
 
-// Season numbers whose names are absent from the Bungie manifest.
-const UNLABELLED_SEASON_NAMES: Record<number, string> = {
-  1: 'The Red War',
-};
+function colCount(f: FilterState) {
+  return countMF(f.col1) + countMF(f.col2) + countMF(f.col3) + countMF(f.col4) + countMF(f.col5);
+}
 
-// Event watermark → display label (mirrors homepage logic)
-// These weapons have null seasonName because their watermarks are not in the
-// DIM watermark-to-season map. Show a human-readable event label instead.
+function categoryCount(f: FilterState, cat: CategoryDef): number {
+  if (cat.id === 'column') return colCount(f);
+  return cat.filterKey ? countMF(f[cat.filterKey]) : 0;
+}
+
+function totalFilterCount(f: FilterState): number {
+  return (
+    countMF(f.weaponType) + countMF(f.frame) + countMF(f.trait) +
+    countMF(f.energy) + countMF(f.ammo) + countMF(f.slot) + countMF(f.rarity) +
+    countMF(f.perk) + colCount(f) + countMF(f.source) + countMF(f.season) + countMF(f.foundry) +
+    (f.featured ? 1 : 0) + (f.craftableOnly ? 1 : 0) + (f.adeptOnly ? 1 : 0) + (f.sunsetOnly ? 1 : 0)
+  );
+}
+
+// ─── Season / event helpers ───────────────────────────────────────────────────
+
+const UNLABELLED_SEASON_NAMES: Record<number, string> = { 1: 'The Red War' };
+
 const EVENT_WATERMARKS: Record<string, string> = {
   '50c3ebe414c6946429934d79504922fa': 'Dawning',
   '83fbcacd223402c09af4b7ab067f8cce': 'Dawning',
@@ -114,42 +169,40 @@ function eventLabelFor(iconWatermark: string | null): string | null {
   return EVENT_WATERMARKS[hash] ?? null;
 }
 
+function weaponSeasonLabel(w: Weapon): string | null {
+  if (w.seasonName) return w.seasonName;
+  const ev = eventLabelFor(w.iconWatermark);
+  if (ev) return ev;
+  if (w.seasonNumber !== null) return UNLABELLED_SEASON_NAMES[w.seasonNumber] ?? null;
+  return null;
+}
+
 function bestSeasonNumber(g: WeaponGroup): number {
   return Math.max(...g.variants.map(v => v.seasonNumber ?? -1));
 }
+
 function bestSeasonName(g: WeaponGroup): string | null {
-  const fromSeason = g.variants.map(v => v.seasonName).find(Boolean) ?? null;
-  if (fromSeason) return fromSeason;
-  const watermark = g.variants.find(v => v.iconWatermark)?.iconWatermark ?? null;
-  const eventLabel = eventLabelFor(watermark);
-  if (eventLabel) return eventLabel;
-  const sn = bestSeasonNumber(g);
-  return UNLABELLED_SEASON_NAMES[sn] ?? null;
+  return g.variants.map(v => weaponSeasonLabel(v)).find(Boolean) ?? null;
+}
+
+// ─── Perk value extraction ────────────────────────────────────────────────────
+
+function getPerkValues(w: Weapon) {
+  const all: string[] = [];
+  const traits: string[] = [];
+  const cols: string[][] = [];
+  w.perkSockets.forEach((col, i) => {
+    const names = col.perks.map(p => p.name).filter(Boolean);
+    cols[i] = names;
+    all.push(...names);
+    if (col.columnType === 'perk') traits.push(...names);
+  });
+  return { all, traits, cols };
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function FilterChip({
-  label, mode, onClick,
-}: { label: string; mode: 'none' | 'inc' | 'exc'; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={[
-        'text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all',
-        mode === 'inc' ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
-          : mode === 'exc' ? 'bg-red-500/15 text-red-400 border-red-500/40 line-through'
-          : 'bg-white/5 text-slate-500 border-white/10 hover:text-slate-300 hover:border-white/20',
-      ].join(' ')}
-    >
-      {label}
-    </button>
-  );
-}
-
-function ActiveChip({
-  label, isExclude, onRemove,
-}: { label: string; isExclude: boolean; onRemove: () => void }) {
+function ActiveChip({ label, isExclude, onRemove }: { label: string; isExclude: boolean; onRemove: () => void }) {
   return (
     <button
       onClick={onRemove}
@@ -166,120 +219,175 @@ function ActiveChip({
   );
 }
 
-function Toggle({
-  checked, onChange, color = 'amber',
-}: { checked: boolean; onChange: () => void; color?: 'amber' | 'red' }) {
-  const on  = color === 'red' ? 'bg-red-500/40 border-red-500/60'     : 'bg-amber-500/40 border-amber-500/60';
-  const dot = color === 'red' ? 'bg-red-400'                           : 'bg-amber-400';
+function OptionsPanel({
+  filterKey, options, mf, onToggle, optLabel,
+}: {
+  filterKey: MultiKey;
+  options: string[];
+  mf: MultiFilter;
+  onToggle: (key: MultiKey, val: string) => void;
+  optLabel?: (v: string) => string;
+}) {
+  const [search, setSearch] = useState('');
+  const label = (v: string) => optLabel?.(v) ?? v;
+  const visible = search
+    ? options.filter(o => label(o).toLowerCase().includes(search.toLowerCase()))
+    : options;
+
   return (
-    <button
-      role="switch" aria-checked={checked} onClick={onChange}
-      className={['w-8 h-4 rounded-full border transition-all relative', checked ? on : 'bg-white/5 border-white/10'].join(' ')}
-    >
-      <span className={['absolute top-0.5 w-3 h-3 rounded-full transition-all', checked ? `left-4 ${dot}` : 'left-0.5 bg-slate-500'].join(' ')} />
-    </button>
+    <div className="space-y-1.5">
+      <input
+        value={search} onChange={e => setSearch(e.target.value)}
+        placeholder="Search…"
+        className="w-full bg-white/5 border border-white/10 rounded px-2.5 py-1 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-amber-500/50 transition-colors"
+      />
+      <div className="max-h-44 overflow-y-auto space-y-0.5">
+        {visible.map(opt => {
+          const mode = chipMode(mf, opt);
+          return (
+            <button key={opt} onClick={() => onToggle(filterKey, opt)}
+              className="w-full text-left flex items-center gap-2 px-2 py-1 rounded hover:bg-white/5 transition-colors group"
+            >
+              <span className={[
+                'w-3.5 h-3.5 rounded border flex items-center justify-center text-[8px] shrink-0 transition-colors',
+                mode === 'inc' ? 'bg-amber-500/30 border-amber-500 text-amber-300' :
+                mode === 'exc' ? 'bg-red-500/20 border-red-500 text-red-400' :
+                'border-white/20 group-hover:border-white/40',
+              ].join(' ')}>
+                {mode === 'inc' ? '✓' : mode === 'exc' ? '✕' : ''}
+              </span>
+              <span className={[
+                'text-xs truncate',
+                mode === 'inc' ? 'text-amber-300' :
+                mode === 'exc' ? 'text-red-400 line-through' :
+                'text-slate-300',
+              ].join(' ')} title={label(opt)}>{label(opt)}</span>
+            </button>
+          );
+        })}
+        {visible.length === 0 && (
+          <p className="text-slate-600 text-xs px-2 py-2">No options found.</p>
+        )}
+      </div>
+    </div>
   );
 }
 
-function FilterDrawer({
-  filters, onToggle, onClose, weaponTypes, availableFrames, onToggleAdept, onToggleCraftable,
+function FilterPanel({
+  filters, allOptions, activeCat, activeColSubcat, onSetActiveCat, onSetColSubcat, onToggle, onToggleFilter,
 }: {
   filters: FilterState;
+  allOptions: Record<MultiKey, string[]>;
+  activeCat: CategoryId | null;
+  activeColSubcat: MultiKey | null;
+  onSetActiveCat: (id: CategoryId | null) => void;
+  onSetColSubcat: (id: MultiKey | null) => void;
   onToggle: (key: MultiKey, val: string) => void;
-  onClose: () => void;
-  weaponTypes: string[];
-  /** Frame names derived from the current pre-frame filtered result set. */
-  availableFrames: string[];
-  onToggleAdept: () => void;
-  onToggleCraftable: () => void;
+  onToggleFilter: (key: ToggleKey) => void;
 }) {
   return (
-    <div className="absolute left-0 right-0 top-full z-50 bg-[#0a0a0a] border border-white/10 rounded-b-xl shadow-2xl p-4 space-y-4">
-
-      {/* Element */}
-      <div>
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Element</p>
-        <div className="flex flex-wrap gap-1.5">
-          {DAMAGE_OPTIONS.map((d) => (
-            <FilterChip key={d}
-              label={d.charAt(0).toUpperCase() + d.slice(1)}
-              mode={chipMode(filters.damage, d)}
-              onClick={() => onToggle('damage', d)} />
-          ))}
-        </div>
-      </div>
-
-      {/* Ammo */}
-      <div>
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Ammo</p>
-        <div className="flex gap-1.5">
-          {AMMO_OPTIONS.map((a) => (
-            <FilterChip key={a}
-              label={AMMO_LABELS[a]}
-              mode={chipMode(filters.ammo, String(a))}
-              onClick={() => onToggle('ammo', String(a))} />
-          ))}
-        </div>
-      </div>
-
-      {/* Rarity */}
-      <div>
-        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Rarity</p>
-        <div className="flex flex-wrap gap-1.5">
-          {RARITY_OPTIONS.map((r) => (
-            <FilterChip key={r}
-              label={r}
-              mode={chipMode(filters.rarity, r)}
-              onClick={() => onToggle('rarity', r)} />
-          ))}
-        </div>
-      </div>
-
-      {/* Weapon type */}
-      {weaponTypes.length > 0 && (
-        <div>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Weapon Type</p>
-          <div className="flex flex-wrap gap-1.5">
-            {weaponTypes.map((t) => (
-              <FilterChip key={t}
-                label={t}
-                mode={chipMode(filters.weaponType, t)}
-                onClick={() => onToggle('weaponType', t)} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Frame — only shown when the current result set has ≥2 distinct frames */}
-      {availableFrames.length >= 2 && (
-        <div>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Frame</p>
-          <div className="flex flex-wrap gap-1.5">
-            {availableFrames.map((f) => (
-              <FilterChip key={f}
-                label={frameLabel(f)}
-                mode={chipMode(filters.frame, f)}
-                onClick={() => onToggle('frame', f)} />
-            ))}
-          </div>
-        </div>
-      )}
+    <div className="absolute left-0 right-0 top-full z-50 bg-[#0a0a0a] border border-white/10 rounded-b-xl shadow-2xl">
 
       {/* Toggles */}
-      <div className="space-y-2.5 pt-2 border-t border-white/8">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400">Adept / Timelost only</span>
-          <Toggle checked={filters.adeptOnly} onChange={onToggleAdept} />
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400">Craftable only</span>
-          <Toggle color="red" checked={filters.craftableOnly} onChange={onToggleCraftable} />
-        </div>
+      <div className="px-3 pt-3 pb-2 border-b border-white/8 flex flex-wrap gap-1.5">
+        {TOGGLE_DEFS.map(({ id, label }) => (
+          <button
+            key={id}
+            onClick={() => onToggleFilter(id)}
+            className={[
+              'text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all',
+              filters[id]
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                : 'bg-white/5 text-slate-500 border-white/10 hover:text-slate-300 hover:border-white/20',
+            ].join(' ')}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
-      <button onClick={onClose} className="w-full text-center text-xs text-slate-500 hover:text-amber-400 transition-colors pt-1">
-        Done
-      </button>
+      {/* Category buttons */}
+      <div className="px-3 py-2 border-b border-white/8 flex flex-wrap gap-1">
+        {CATEGORIES.map((cat) => {
+          const count = categoryCount(filters, cat);
+          const isActive = activeCat === cat.id;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => onSetActiveCat(isActive ? null : cat.id)}
+              className={[
+                'text-[10px] font-bold px-2.5 py-1 rounded border transition-all',
+                isActive
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                  : count > 0
+                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                  : 'bg-white/5 text-slate-400 border-white/10 hover:text-slate-200 hover:border-white/20',
+              ].join(' ')}
+            >
+              {cat.label}
+              {count > 0 && <span className="ml-1 text-[9px] opacity-70">{count}</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Expanded options */}
+      {activeCat !== null && (
+        <div className="px-3 py-2.5">
+          {activeCat === 'column' ? (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-1">
+                {COL_SUBCATS.map(({ id, label }) => {
+                  const cnt = countMF(filters[id]);
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => onSetColSubcat(activeColSubcat === id ? null : id)}
+                      className={[
+                        'text-[10px] font-bold px-2 py-0.5 rounded border transition-all',
+                        activeColSubcat === id
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                          : cnt > 0
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                          : 'bg-white/5 text-slate-400 border-white/10 hover:text-slate-200 hover:border-white/20',
+                      ].join(' ')}
+                    >
+                      {label}{cnt > 0 && <span className="ml-1 opacity-70">{cnt}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              {activeColSubcat && (
+                <OptionsPanel
+                  filterKey={activeColSubcat}
+                  options={allOptions[activeColSubcat]}
+                  mf={filters[activeColSubcat]}
+                  onToggle={onToggle}
+                />
+              )}
+            </div>
+          ) : (
+            (() => {
+              const cat = CATEGORIES.find(c => c.id === activeCat);
+              if (!cat?.filterKey) return null;
+              const fk = cat.filterKey;
+              return (
+                <OptionsPanel
+                  filterKey={fk}
+                  options={allOptions[fk]}
+                  mf={filters[fk]}
+                  onToggle={onToggle}
+                  optLabel={
+                    fk === 'energy' ? v => v.charAt(0).toUpperCase() + v.slice(1) :
+                    fk === 'frame'  ? v => v.replace(/ Frame$/, '') :
+                    undefined
+                  }
+                />
+              );
+            })()
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -295,8 +403,10 @@ export const SearchSidebar: React.FC = () => {
   const [sortDir,    setSortDir]    = useState<SortDir>('asc');
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters,    setFilters]    = useState<FilterState>(DEFAULT_FILTERS);
+  const [activeCat,  setActiveCat]  = useState<CategoryId | null>(null);
+  const [colSubcat,  setColSubcat]  = useState<MultiKey | null>(null);
 
-  const headerRef = useRef<HTMLDivElement>(null);
+  const headerRef      = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useKeyboardShortcuts({
@@ -304,48 +414,90 @@ export const SearchSidebar: React.FC = () => {
     onEscape: () => { if (query) setQuery(''); if (filterOpen) setFilterOpen(false); },
   });
 
-  // Close filter drawer on outside click
   useEffect(() => {
     if (!filterOpen) return;
     const handler = (e: MouseEvent) => {
-      if (headerRef.current && !headerRef.current.contains(e.target as Node)) setFilterOpen(false);
+      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
+        setFilterOpen(false);
+        setActiveCat(null);
+        setColSubcat(null);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [filterOpen]);
 
-  const weaponTypes = useMemo(
-    () => Array.from(new Set(weapons.map((w) => w.itemTypeDisplayName).filter(Boolean))).sort(),
-    [weapons],
-  );
+  // Build option lists from the full weapons array
+  const allOptions = useMemo((): Record<MultiKey, string[]> => {
+    const weaponTypeSet = new Set<string>();
+    const frameSet      = new Set<string>();
+    const traitSet      = new Set<string>();
+    const perkSet       = new Set<string>();
+    const col1Set       = new Set<string>();
+    const col2Set       = new Set<string>();
+    const col3Set       = new Set<string>();
+    const col4Set       = new Set<string>();
+    const col5Set       = new Set<string>();
+    const sourceSet     = new Set<string>();
+    const seasonSet     = new Set<string>();
+    const foundrySet    = new Set<string>();
 
-  // Three-state toggle for multi-select filters
+    for (const w of weapons) {
+      weaponTypeSet.add(w.itemTypeDisplayName);
+      if (w.rarity !== 'Exotic' && w.intrinsicTrait?.name) frameSet.add(w.intrinsicTrait.name);
+      if (w.foundry) foundrySet.add(w.foundry);
+      if (w.source) sourceSet.add(w.source);
+      const sl = weaponSeasonLabel(w);
+      if (sl) seasonSet.add(sl);
+
+      w.perkSockets.forEach((col, i) => {
+        const names = col.perks.map(p => p.name).filter(Boolean);
+        if (i === 0) names.forEach(n => col1Set.add(n));
+        else if (i === 1) names.forEach(n => col2Set.add(n));
+        else if (i === 2) names.forEach(n => col3Set.add(n));
+        else if (i === 3) names.forEach(n => col4Set.add(n));
+        else if (i === 4) names.forEach(n => col5Set.add(n));
+        names.forEach(n => perkSet.add(n));
+        if (col.columnType === 'perk') names.forEach(n => traitSet.add(n));
+      });
+    }
+
+    const sorted = (s: Set<string>) => Array.from(s).sort();
+    return {
+      weaponType: sorted(weaponTypeSet),
+      frame:  sorted(frameSet),
+      trait:  sorted(traitSet),
+      energy: ['kinetic', 'solar', 'arc', 'void', 'stasis', 'strand'],
+      ammo:   ['Primary', 'Special', 'Heavy'],
+      slot:   ['Kinetic', 'Energy', 'Power'],
+      rarity: ['Exotic', 'Legendary', 'Rare', 'Uncommon', 'Common'],
+      perk:   sorted(perkSet),
+      col1:   sorted(col1Set),
+      col2:   sorted(col2Set),
+      col3:   sorted(col3Set),
+      col4:   sorted(col4Set),
+      col5:   sorted(col5Set),
+      source:  sorted(sourceSet),
+      season:  sorted(seasonSet),
+      foundry: sorted(foundrySet),
+    };
+  }, [weapons]);
+
   const handleToggleFilter = (key: MultiKey, val: string) =>
     setFilters(f => cycleFilter(f, key, val));
 
-  // Toggle booleans — need to wire up in the drawer
-  const handleToggleAdept     = () => setFilters(f => ({ ...f, adeptOnly:     !f.adeptOnly }));
-  const handleToggleCraftable = () => setFilters(f => ({ ...f, craftableOnly: !f.craftableOnly }));
+  const handleToggleBool = useCallback((key: ToggleKey) =>
+    setFilters(f => ({ ...f, [key]: !f[key] })), []);
 
-  // Sort: second click on active mode reverses; switching mode resets to natural default
   const handleSortClick = (m: SortMode) => {
-    if (m === sortMode) {
-      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortMode(m);
-      setSortDir(DEFAULT_DIR[m]);
-    }
+    if (m === sortMode) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortMode(m); setSortDir(DEFAULT_DIR[m]); }
   };
 
-  const activeFilterCount =
-    countMF(filters.damage) + countMF(filters.ammo) +
-    countMF(filters.rarity) + countMF(filters.weaponType) +
-    countMF(filters.frame) +
-    (filters.adeptOnly ? 1 : 0) + (filters.craftableOnly ? 1 : 0);
+  const activeFilterCount = useMemo(() => totalFilterCount(filters), [filters]);
 
   const groups = useMemo(() => groupWeapons(weapons), [weapons]);
 
-  // ── Helper: rank a weapon name against a query string ──────────────────────
   const makeRankFn = useCallback((q: string) => (name: string): number => {
     if (!q) return 0;
     if (name.startsWith(q)) return 0;
@@ -354,70 +506,48 @@ export const SearchSidebar: React.FC = () => {
     return 999;
   }, []);
 
-  // ── Pass 1: all filters EXCEPT frame ──────────────────────────────────────
-  // Used to derive the available frame chips without a circular dependency.
-  const preFrameGroups = useMemo(() => {
+  const filteredGroups = useMemo(() => {
     const q = query.toLowerCase().trim();
     const nameRank = makeRankFn(q);
 
-    return groups
-      .map((g) => {
-        const rank = q ? Math.min(...g.variants.map(v => nameRank(v.name.toLowerCase()))) : 0;
-        return { g, rank };
-      })
-      .filter(({ g, rank }) => {
-        if (rank === 999) return false;
-        const d = g.default;
-        return (
-          matchesMF(filters.damage,     d.damageType)         &&
-          matchesMF(filters.ammo,       String(d.ammoType))   &&
-          matchesMF(filters.rarity,     d.rarity ?? '')       &&
-          matchesMF(filters.weaponType, d.itemTypeDisplayName) &&
-          (!filters.adeptOnly     || g.variants.some(v => v.isAdept))          &&
-          (!filters.craftableOnly || g.variants.some(v => v.hasCraftedPattern))
-        );
-      });
-  }, [groups, query, filters.damage, filters.ammo, filters.rarity,
-      filters.weaponType, filters.adeptOnly, filters.craftableOnly, makeRankFn]);
+    const ranked = groups.map(g => ({
+      g,
+      rank: q ? Math.min(...g.variants.map(v => nameRank(v.name.toLowerCase()))) : 0,
+    })).filter(({ g, rank }) => {
+      if (rank === 999) return false;
+      const d = g.default;
+      const sl = bestSeasonName(g) ?? '';
 
-  // ── Available frames: derived from Pass 1 result, sorted alphabetically ──
-  const availableFrames = useMemo(() => {
-    const seen = new Set<string>();
-    for (const { g } of preFrameGroups) {
-      // Exotics have unique intrinsic perk names — skip them so the Frame
-      // filter only shows generic archetype frames (Adaptive, Precision, …).
-      if (g.default.rarity === 'Exotic') continue;
-      const name = g.default.intrinsicTrait?.name;
-      if (name) seen.add(name);
-    }
-    return Array.from(seen).sort();
-  }, [preFrameGroups]);
+      if (!matchesMF(filters.energy,     d.damageType))                    return false;
+      if (!matchesMF(filters.ammo,       AMMO_LABELS[d.ammoType] ?? ''))   return false;
+      if (!matchesMF(filters.slot,       SLOT_LABELS[d.ammoType] ?? ''))   return false;
+      if (!matchesMF(filters.rarity,     d.rarity ?? ''))                  return false;
+      if (!matchesMF(filters.weaponType, d.itemTypeDisplayName))           return false;
+      if (!matchesMF(filters.source,     d.source ?? ''))                  return false;
+      if (!matchesMF(filters.season,     sl))                               return false;
+      if (!matchesMF(filters.foundry,    d.foundry ?? ''))                 return false;
 
-  // Auto-clear the frame filter whenever no frames are available (e.g. filters/
-  // search was cleared). Targeted update — only touches filters.frame.
-  useEffect(() => {
-    if (availableFrames.length === 0 && (filters.frame.inc.length > 0 || filters.frame.exc.length > 0)) {
-      setFilters(f => ({ ...f, frame: emptyMF() }));
-    }
-  }, [availableFrames, filters.frame.inc.length, filters.frame.exc.length]);
+      const frameName = d.rarity === 'Exotic' ? '' : (d.intrinsicTrait?.name ?? '');
+      if (!matchesMF(filters.frame, frameName)) return false;
 
-  // ── Pass 2: apply frame filter on top of Pass 1 ───────────────────────────
-  const filteredGroups = useMemo(() => {
-    const q = query.toLowerCase().trim();
-    const hasFrameFilter = filters.frame.inc.length > 0 || filters.frame.exc.length > 0;
+      const perks = getPerkValues(d);
+      if (!matchesMFAny(filters.perk,  perks.all))          return false;
+      if (!matchesMFAny(filters.trait, perks.traits))        return false;
+      if (!matchesMFAny(filters.col1,  perks.cols[0] ?? [])) return false;
+      if (!matchesMFAny(filters.col2,  perks.cols[1] ?? [])) return false;
+      if (!matchesMFAny(filters.col3,  perks.cols[2] ?? [])) return false;
+      if (!matchesMFAny(filters.col4,  perks.cols[3] ?? [])) return false;
+      if (!matchesMFAny(filters.col5,  perks.cols[4] ?? [])) return false;
 
-    let result = preFrameGroups;
+      if (filters.adeptOnly     && !g.variants.some(v => v.isAdept))           return false;
+      if (filters.craftableOnly && !g.variants.some(v => v.hasCraftedPattern))  return false;
+      if (filters.featured      && !(d.rarity === 'Exotic' || (d.seasonNumber !== null && d.seasonNumber >= 27))) return false;
+      if (filters.sunsetOnly    && !(d.seasonNumber !== null && d.seasonNumber <= 12))                             return false;
 
-    if (hasFrameFilter) {
-      result = result.filter(({ g }) => {
-        const frameName = g.default.intrinsicTrait?.name ?? '';
-        return matchesMF(filters.frame, frameName);
-      });
-    }
+      return true;
+    });
 
-    // Apply sort — when there's a query, rank takes priority; otherwise pure sort
-    const sorted = [...result];
-    sorted.sort((a, b) => {
+    ranked.sort((a, b) => {
       if (q && a.rank !== b.rank) return a.rank - b.rank;
       let diff: number;
       if (sortMode === 'season') {
@@ -429,8 +559,8 @@ export const SearchSidebar: React.FC = () => {
       return sortDir === 'asc' ? diff : -diff;
     });
 
-    return sorted.map(({ g }) => g);
-  }, [preFrameGroups, filters.frame, query, sortMode, sortDir]);
+    return ranked.map(({ g }) => g);
+  }, [groups, query, filters, sortMode, sortDir, makeRankFn]);
 
   // Active dismissible chips
   const mkChips = (key: MultiKey, labelFn: (v: string) => string) => [
@@ -445,18 +575,29 @@ export const SearchSidebar: React.FC = () => {
   ];
 
   const activeChips = [
-    ...mkChips('damage',     v => v.charAt(0).toUpperCase() + v.slice(1)),
-    ...mkChips('ammo',       v => AMMO_LABELS[Number(v)] ?? v),
+    ...mkChips('energy',     v => v.charAt(0).toUpperCase() + v.slice(1)),
+    ...mkChips('ammo',       v => v),
+    ...mkChips('slot',       v => v),
     ...mkChips('rarity',     v => v),
     ...mkChips('weaponType', v => v),
-    ...mkChips('frame',      v => frameLabel(v)),
-    ...(filters.adeptOnly     ? [{ label: 'Adept only', isExclude: false, clear: handleToggleAdept }]     : []),
-    ...(filters.craftableOnly ? [{ label: 'Craftable',  isExclude: false, clear: handleToggleCraftable }] : []),
+    ...mkChips('frame',      v => v.replace(/ Frame$/, '')),
+    ...mkChips('trait',      v => v),
+    ...mkChips('perk',       v => v),
+    ...mkChips('col1',       v => `Barrel: ${v}`),
+    ...mkChips('col2',       v => `Mag: ${v}`),
+    ...mkChips('col3',       v => `P1: ${v}`),
+    ...mkChips('col4',       v => `P2: ${v}`),
+    ...mkChips('col5',       v => `Origin: ${v}`),
+    ...mkChips('source',     v => v.length > 30 ? v.slice(0, 28) + '…' : v),
+    ...mkChips('season',     v => v),
+    ...mkChips('foundry',    v => v),
+    ...(filters.featured      ? [{ label: 'Featured',  isExclude: false, clear: () => handleToggleBool('featured') }]      : []),
+    ...(filters.craftableOnly ? [{ label: 'Craftable', isExclude: false, clear: () => handleToggleBool('craftableOnly') }] : []),
+    ...(filters.adeptOnly     ? [{ label: 'Adept',     isExclude: false, clear: () => handleToggleBool('adeptOnly') }]     : []),
+    ...(filters.sunsetOnly    ? [{ label: 'Sunset',    isExclude: false, clear: () => handleToggleBool('sunsetOnly') }]    : []),
   ];
 
   const anyFilter = !!(query || activeFilterCount);
-
-  // Direction indicator arrow
   const dirArrow = (m: SortMode) => sortMode === m ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
 
   return (
@@ -465,7 +606,6 @@ export const SearchSidebar: React.FC = () => {
       {/* ── Header controls ─────────────────────────────────────────── */}
       <div ref={headerRef} className="p-3 border-b border-white/10 space-y-2.5 relative">
 
-        {/* Title */}
         <h2 className="font-bold text-base text-white">Database</h2>
 
         {/* Search + filter button */}
@@ -473,7 +613,7 @@ export const SearchSidebar: React.FC = () => {
           <input
             ref={searchInputRef}
             type="search" placeholder="Search weapons…" value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={e => setQuery(e.target.value)}
             className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
           />
           <button
@@ -496,16 +636,17 @@ export const SearchSidebar: React.FC = () => {
           </button>
         </div>
 
-        {/* Filter drawer */}
+        {/* Filter panel */}
         {filterOpen && (
-          <FilterDrawer
+          <FilterPanel
             filters={filters}
+            allOptions={allOptions}
+            activeCat={activeCat}
+            activeColSubcat={colSubcat}
+            onSetActiveCat={id => { setActiveCat(id); if (id !== 'column') setColSubcat(null); }}
+            onSetColSubcat={setColSubcat}
             onToggle={handleToggleFilter}
-            onClose={() => setFilterOpen(false)}
-            weaponTypes={weaponTypes}
-            availableFrames={availableFrames}
-            onToggleAdept={handleToggleAdept}
-            onToggleCraftable={handleToggleCraftable}
+            onToggleFilter={handleToggleBool}
           />
         )}
 
@@ -528,7 +669,7 @@ export const SearchSidebar: React.FC = () => {
           </div>
           {anyFilter && (
             <button
-              onClick={() => { setQuery(''); setFilters(DEFAULT_FILTERS); /* frame auto-clears via useEffect */ }}
+              onClick={() => { setQuery(''); setFilters(DEFAULT_FILTERS); setActiveCat(null); setColSubcat(null); }}
               className="text-[10px] text-slate-500 hover:text-amber-400 transition-colors ml-auto"
             >
               Clear all
@@ -562,7 +703,7 @@ export const SearchSidebar: React.FC = () => {
             ))}
           </div>
         )}
-        {error     && <p className="text-red-400 text-xs text-center mt-8 px-2">{error}</p>}
+        {error && <p className="text-red-400 text-xs text-center mt-8 px-2">{error}</p>}
         {!isLoading && !error && filteredGroups.length === 0 && (
           <p className="text-slate-500 text-sm text-center mt-8">
             {anyFilter ? 'No weapons match these filters.' : 'No weapons found.'}
