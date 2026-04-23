@@ -160,9 +160,30 @@ function Dashboard() {
 
   const handleShareDim = () => {
     if (!activeWeapon) return;
+
+    // Build hash → {socketIndex, isOrigin} lookup
+    const hashMeta = new Map<string, { idx: number; isOrigin: boolean }>();
+    activeWeapon.perkSockets.forEach((col, i) => {
+      const isOrigin = col.columnType === 'origin';
+      col.perks.forEach(p => {
+        hashMeta.set(p.hash, { idx: i, isOrigin });
+        if (p.enhancedVersion) hashMeta.set(p.enhancedVersion.hash, { idx: i, isOrigin });
+      });
+    });
+
+    // Sort: non-origin perks descending by socket index, then origin perks
     const perkHashes = Object.values(selectedPerks);
+    const sorted = [...perkHashes].sort((a, b) => {
+      const ma = hashMeta.get(a);
+      const mb = hashMeta.get(b);
+      const aOrigin = ma?.isOrigin ?? false;
+      const bOrigin = mb?.isOrigin ?? false;
+      if (aOrigin !== bOrigin) return aOrigin ? 1 : -1;
+      return (mb?.idx ?? 0) - (ma?.idx ?? 0);
+    });
+
     let entry = `dimwishlist:item=${activeWeapon.hash}`;
-    if (perkHashes.length) entry += `&perks=${perkHashes.join(',')}`;
+    if (sorted.length) entry += `&perks=${sorted.join(',')}`;
     entry += `\n//notes:${activeWeapon.name} — via D2 Theorycraft`;
     navigator.clipboard.writeText(entry).then(() => {
       setCopiedType('dim');
