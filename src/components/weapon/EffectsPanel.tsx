@@ -8,7 +8,7 @@ import { BUFF_DATABASE } from '../../lib/buffDatabase';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 import { useClarityPerks } from '../../lib/useClarityPerks';
-import { ClarityEntry } from '../../lib/clarity';
+import { renderClarityDesc } from '../../lib/clarityRender';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { Tooltip } from '../ui/Tooltip';
 import PERK_AUDIT_RAW from '../../data/perkAudit.json';
@@ -96,111 +96,6 @@ function EffectStackSelector({
       })}
     </div>
   );
-}
-
-// ── className → colour mapping ────────────────────────────────────────────────
-const CLASS_COLOURS: Record<string, string> = {
-  arc:     '#7dd3fc', // sky-300
-  void:    '#c4b5fd', // violet-300
-  stasis:  '#67e8f9', // cyan-300
-  solar:   '#fdba74', // orange-300
-  strand:  '#6ee7b7', // emerald-300
-  kinetic: '#cbd5e1', // slate-300
-  pvp:     '#f472b6', // pink-400
-  pve:     '#4ade80', // green-400
-  primary: '#cbd5e1', // slate-300
-  special: '#86efac', // green-300
-  heavy:   '#c4b5fd', // violet-300
-};
-
-/**
- * Renders a Clarity description as React nodes with proper line breaks and
- * coloured keywords.
- *
- * The Clarity JSON has three distinct segment shapes:
- *
- *   A) {text, classNames}  — text WITH a class applied (e.g. "20%" + "pve").
- *      The text IS the visible content; classNames gives it colour.
- *      Previously this was treated as shape B (classNames-only), causing the
- *      text to be silently dropped and values like "20%" to disappear.
- *
- *   B) {classNames}        — icon placeholder with no text (e.g. ammo type icon
- *      before "Primary Weapons:"). The colour is queued and applied to the
- *      immediately following plain-text segment so the icon word isn't doubled.
- *
- *   C) {text}              — plain text, rendered as-is (with any queued colour).
- *
- * Additionally, some groups carry a top-level {classNames:["spacer"]} instead
- * of linesContent — those insert a blank line between sections.
- *
- * Each group (line) is separated by a <br /> so bullet lists and multi-
- * sentence descriptions don't collapse into an unreadable wall of text.
- */
-function renderClarityDesc(entry: ClarityEntry): React.ReactNode {
-  const nodes: React.ReactNode[] = [];
-  const groups = entry.descriptions?.en ?? [];
-
-  groups.forEach((group, gi) => {
-    // ── Group-level spacer (no linesContent) ──────────────────────────────
-    if (!group.linesContent?.length) {
-      // Spacer adds an extra blank line; any other top-level class is ignored.
-      if (group.classNames?.includes('spacer')) {
-        nodes.push(<br key={`spacer-${gi}`} />);
-      }
-      return; // no line-break added here — the next group's separator handles it
-    }
-
-    // ── Line break before every group after the first ─────────────────────
-    if (gi > 0) nodes.push(<br key={`br-${gi}`} />);
-
-    // ── Render inline segments ─────────────────────────────────────────────
-    let pendingColour: string | null = null;
-
-    group.linesContent.forEach((seg, si) => {
-      const key = `${gi}-${si}`;
-
-      if (seg.text && seg.classNames?.length) {
-        // Shape A — text + classNames: render the text with the class colour.
-        // "link" class renders as underlined text.
-        const cls = seg.classNames[0];
-        if (cls === 'link') {
-          nodes.push(
-            <span key={key} className="underline decoration-slate-500 text-slate-200">
-              {seg.text}
-            </span>
-          );
-        } else {
-          const colour = CLASS_COLOURS[cls];
-          nodes.push(colour
-            ? <span key={key} style={{ color: colour }} className="font-semibold">{seg.text}</span>
-            : <React.Fragment key={key}>{seg.text}</React.Fragment>
-          );
-        }
-        pendingColour = null; // a coloured segment resets any queued colour
-
-      } else if (seg.classNames?.length) {
-        // Shape B — icon placeholder only: queue colour for the next text segment.
-        // Multiple consecutive icon segments → last one wins.
-        const cls = seg.classNames[0];
-        pendingColour = CLASS_COLOURS[cls] ?? null;
-
-      } else if (seg.text) {
-        // Shape C — plain text, apply queued colour if present.
-        if (pendingColour) {
-          nodes.push(
-            <span key={key} style={{ color: pendingColour }} className="font-semibold">
-              {seg.text}
-            </span>
-          );
-          pendingColour = null;
-        } else {
-          nodes.push(<React.Fragment key={key}>{seg.text}</React.Fragment>);
-        }
-      }
-    });
-  });
-
-  return nodes;
 }
 
 // ── StatDelta helper ──────────────────────────────────────────────────────────

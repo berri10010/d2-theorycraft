@@ -9,6 +9,8 @@ import { isLegacyVariant } from '../../lib/weaponGroups';
 import { Perk } from '../../types/weapon';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { Tooltip } from '../ui/Tooltip';
+import { useClarityPerks } from '../../lib/useClarityPerks';
+import { renderClarityDesc } from '../../lib/clarityRender';
 
 // ── Column accent styles ──────────────────────────────────────────────────────
 
@@ -37,6 +39,8 @@ export const RollEditor: React.FC = () => {
       mode:          s.mode,
     }))
   );
+
+  const { data: clarityData } = useClarityPerks();
 
   const isLegacy = useMemo(() => {
     if (!activeWeapon) return false;
@@ -130,6 +134,7 @@ export const RollEditor: React.FC = () => {
                         ? `Enhance → ${perk.enhancedVersion.name}`
                         : `Deselect ${displayPerk.name}`;
 
+                    const clarityEntry = clarityData?.[String(displayPerk.hash)] ?? clarityData?.[String(perk.hash)];
                     const tooltipContent = (
                       <div>
                         <div className="flex items-center gap-1.5 mb-1">
@@ -143,7 +148,9 @@ export const RollEditor: React.FC = () => {
                             }`}>{perk.tier}</span>
                           )}
                         </div>
-                        <p className="text-[10px] text-slate-400 leading-relaxed">{displayPerk.description}</p>
+                        <div className="text-[10px] text-slate-400 leading-relaxed">
+                          {clarityEntry ? renderClarityDesc(clarityEntry) : displayPerk.description}
+                        </div>
                       </div>
                     );
 
