@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, Suspense } from 'react';
+import React, { useEffect, useState, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useWeaponStore, MASTERWORK_STATS } from '../../store/useWeaponStore';
 import { useCompareStore } from '../../store/useCompareStore';
@@ -45,9 +45,11 @@ function Dashboard() {
   const searchParams = useSearchParams();
 
   const [activeTab, setActiveTab] = useState<'editor' | 'compare'>('editor');
-  const [copied, setCopied] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copiedType, setCopiedType] = useState<'permalink' | 'dim' | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -134,24 +136,50 @@ function Dashboard() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, weapons.length]);
 
-  const handleShare = () => {
-    if (!activeWeapon) return;
+  const buildPermalink = () => {
+    if (!activeWeapon) return '';
     const params = new URLSearchParams({ w: activeWeapon.hash });
-    // Perk hashes
     const perkHashes = Object.values(selectedPerks);
     if (perkHashes.length) params.set('p', perkHashes.join(','));
-    // Mode
     params.set('m', mode);
-    // Masterwork stat
     if (masterworkStat) params.set('mw', masterworkStat);
-    // Weapons stat (only if non-default)
     if (weaponsStat !== 0) params.set('ws', String(weaponsStat));
-    // Active buffs
     if (activeBuffs.length) params.set('b', activeBuffs.join(','));
-    navigator.clipboard
-      .writeText(`${window.location.origin}${window.location.pathname}?${params}`)
-      .then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+    return `${window.location.origin}${window.location.pathname}?${params}`;
   };
+
+  const handleSharePermalink = () => {
+    const url = buildPermalink();
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedType('permalink');
+      setTimeout(() => setCopiedType(null), 2000);
+    });
+    setShareOpen(false);
+  };
+
+  const handleShareDim = () => {
+    if (!activeWeapon) return;
+    const perkHashes = Object.values(selectedPerks);
+    let entry = `dimwishlist:item=${activeWeapon.hash}`;
+    if (perkHashes.length) entry += `#perks=${perkHashes.join(',')}`;
+    entry += `\n//notes:${activeWeapon.name} — via D2 Theorycraft`;
+    navigator.clipboard.writeText(entry).then(() => {
+      setCopiedType('dim');
+      setTimeout(() => setCopiedType(null), 2000);
+    });
+    setShareOpen(false);
+  };
+
+  // Close share dropdown on outside click
+  useEffect(() => {
+    if (!shareOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (shareRef.current && !shareRef.current.contains(e.target as Node)) setShareOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [shareOpen]);
 
   const handleAddToCompare = () => {
     if (!activeWeapon) return;
@@ -309,13 +337,57 @@ function Dashboard() {
 
             {activeTab === 'editor' && (
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handleShare}
-                  aria-label="Copy share link to clipboard"
-                  className="bg-white/5 hover:bg-white/10 text-slate-200 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border border-white/10 min-h-[44px]"
-                >
-                  {copied ? 'Copied!' : 'Share'}
-                </button>
+                {/* Share dropdown */}
+                <div className="relative" ref={shareRef}>
+                  <button
+                    onClick={() => setShareOpen(v => !v)}
+                    aria-label="Share options"
+                    aria-expanded={shareOpen}
+                    className={[
+                      'flex items-center gap-1.5 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border min-h-[44px]',
+                      copiedType
+                        ? 'bg-green-500/20 border-green-500/40 text-green-400'
+                        : 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10',
+                    ].join(' ')}
+                  >
+                    {copiedType === 'permalink' ? 'Link copied!' : copiedType === 'dim' ? 'DIM copied!' : 'Share'}
+                    {!copiedType && (
+                      <svg viewBox="0 0 20 20" fill="currentColor" className={`w-3 h-3 text-slate-500 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
+                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.937a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
+
+                  {shareOpen && (
+                    <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#111] border border-white/15 rounded-xl shadow-2xl z-50 overflow-hidden">
+                      <button
+                        onClick={handleSharePermalink}
+                        className="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/6 transition-colors text-left"
+                      >
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-sky-400 shrink-0 mt-0.5">
+                          <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+                        </svg>
+                        <div>
+                          <p className="text-xs font-semibold text-slate-200">Roll Permalink</p>
+                          <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Copies a URL with your full roll state</p>
+                        </div>
+                      </button>
+                      <div className="border-t border-white/8" />
+                      <button
+                        onClick={handleShareDim}
+                        className="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/6 transition-colors text-left"
+                      >
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-amber-400 shrink-0 mt-0.5">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <div>
+                          <p className="text-xs font-semibold text-slate-200">DIM Wishlist Item</p>
+                          <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Copies a wishlist entry to paste into DIM</p>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={() => {
                     if (window.confirm(`Clear all perks, mods, and masterwork for ${activeWeapon.name}?`)) {
