@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useGodRolls } from '../../lib/useGodRolls';
 
@@ -50,10 +51,9 @@ export const GodRollPanel: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-        <h2 className="text-xl font-bold mb-4 text-white">God Roll</h2>
+      <CollapsiblePanel title="God Roll">
         <p className="text-slate-600 text-sm text-center py-6 animate-pulse">Loading community analysis…</p>
-      </div>
+      </CollapsiblePanel>
     );
   }
 
@@ -72,13 +72,14 @@ export const GodRollPanel: React.FC = () => {
   ].filter(Boolean).join(' · ');
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+    <CollapsiblePanel
+      title={
         <div>
-          <h2 className="text-xl font-bold text-white">God Roll</h2>
-          <p className="text-xs text-slate-500 mt-0.5">{subtitleParts}</p>
+          <div>God Roll</div>
+          <p className="text-xs text-slate-500 mt-0.5 font-normal">{subtitleParts}</p>
         </div>
+      }
+      headerRight={
         <div className="flex flex-col items-end gap-1">
           {tierCfg && (
             <span className={`text-sm font-black px-3 py-1 rounded-lg leading-none ${tierCfg.bg} ${tierCfg.text}`}>
@@ -89,7 +90,8 @@ export const GodRollPanel: React.FC = () => {
             <span className="text-xs text-slate-500">{entry.frame}</span>
           )}
         </div>
-      </div>
+      }
+    >
 
       {/* Roll recommendations */}
       {(() => {
@@ -143,6 +145,6 @@ export const GodRollPanel: React.FC = () => {
       <p className="text-[10px] text-slate-700 mt-4 text-right">
         Source: Destiny 2 Endgame Analysis · @theaegisrelic
       </p>
-    </div>
+    </CollapsiblePanel>
   );
 };

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useEffect, useRef, useState } from 'react';
+import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { interpolateStat } from '../../lib/math';
@@ -232,8 +233,7 @@ export const StatDisplay: React.FC = () => {
   const compactStats = displayStats.filter((s) => COMPACT_STAT_KEYS.includes(s));
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-      <h2 className="text-xl font-bold mb-4 text-white">Weapon Stats</h2>
+    <CollapsiblePanel title="Weapon Stats">
 
       {/* ── Bar stats ────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 mb-4">
@@ -283,6 +283,6 @@ export const StatDisplay: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </CollapsiblePanel>
   );
 };

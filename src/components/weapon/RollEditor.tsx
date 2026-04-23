@@ -9,6 +9,7 @@ import { isLegacyVariant } from '../../lib/weaponGroups';
 import { Perk } from '../../types/weapon';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { Tooltip } from '../ui/Tooltip';
+import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
 
@@ -64,17 +65,14 @@ export const RollEditor: React.FC = () => {
   void isEnhanced;
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-
-      {/* Header row */}
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xl font-bold text-white">Weapon Perks</h2>
-        {hasEnhanceable && (activeWeapon.hasCraftedPattern || isEnhanced) && (
-          <span className="text-xs text-slate-500 font-normal tracking-wide">
-            Click twice to enhance
-          </span>
-        )}
-      </div>
+    <CollapsiblePanel
+      title="Weapon Perks"
+      headerRight={hasEnhanceable && (activeWeapon.hasCraftedPattern || isEnhanced) && (
+        <span className="text-xs text-slate-500 font-normal tracking-wide">
+          Click twice to enhance
+        </span>
+      )}
+    >
 
       {/* ── Perk columns — identical layout regardless of single vs. multiple options ── */}
       {activeWeapon.perkSockets.length > 0 && (
@@ -218,6 +216,6 @@ export const RollEditor: React.FC = () => {
         </div>
       )}
 
-    </div>
+    </CollapsiblePanel>
   );
 };

@@ -9,6 +9,7 @@ import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
+import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { Tooltip } from '../ui/Tooltip';
 import PERK_AUDIT_RAW from '../../data/perkAudit.json';
@@ -252,8 +253,7 @@ export const EffectsPanel: React.FC = () => {
   const passiveEntries     = activePerkEntries.filter((e) => !e.isConditional);
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-      <h2 className="text-xl font-bold mb-4 text-white">Effects</h2>
+    <CollapsiblePanel title="Effects">
 
       {isEmpty ? (
         <p className="text-slate-600 text-sm text-center py-6">
@@ -690,6 +690,6 @@ export const EffectsPanel: React.FC = () => {
           ))}
         </div>
       )}
-    </div>
+    </CollapsiblePanel>
   );
 };

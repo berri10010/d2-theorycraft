@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { CollapsiblePanel } from './CollapsiblePanel';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE, DamageBuff, ClassType, getBuffMultiplier } from '../../lib/buffDatabase';
@@ -416,16 +417,15 @@ export const BuffToggle: React.FC = () => {
   const classSectionProps = { activeSet, winningEmpowering, winningDebuff, buffStacks, toggleBuff, setBuffStack };
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white">External Buffs</h2>
-        {activeCount > 0 && (
-          <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-500/30">
-            {activeCount} active
-          </span>
-        )}
-      </div>
+    <CollapsiblePanel
+      defaultOpen={false}
+      title="External Buffs"
+      headerRight={activeCount > 0 && (
+        <span className="text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-500/30">
+          {activeCount} active
+        </span>
+      )}
+    >
 
       <ExternalMultiplierBreakdown activeBuffs={activeBuffs} />
 
@@ -530,6 +530,6 @@ export const BuffToggle: React.FC = () => {
         </div>
 
       </div>
-    </div>
+    </CollapsiblePanel>
   );
 };

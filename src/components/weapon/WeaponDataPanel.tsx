@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { MasterworkPanel } from './MasterworkPanel';
 import { AmmoPanel } from './AmmoPanel';
 import { ArmorModPanel } from './ArmorModPanel';
@@ -55,6 +56,7 @@ export function WeaponDataPanel() {
   const [active, setActive] = useState<PanelKey>('masterwork');
 
   return (
+    <CollapsiblePanel title="Weapon Data">
     <div className="space-y-3">
       {/* Dropdown selector */}
       <div className="relative">
@@ -86,5 +88,6 @@ export function WeaponDataPanel() {
         {active === 'subclass'       && <SubclassVerbPanel />}
       </div>
     </div>
+    </CollapsiblePanel>
   );
 }

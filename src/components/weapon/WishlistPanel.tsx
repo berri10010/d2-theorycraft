@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import {
   WishlistDb,
@@ -172,14 +173,15 @@ export const WishlistPanel: React.FC = () => {
   };
 
   return (
-    <div className={[
-      'bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border transition-all',
-      isMatch    ? 'border-yellow-500/60 shadow-[0_0_24px_rgba(234,179,8,0.2)]' :
-      isPersonal ? 'border-cyan-500/50 shadow-[0_0_24px_rgba(6,182,212,0.15)]' :
-                   'border-white/10',
-    ].join(' ')}>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+    <CollapsiblePanel
+      defaultOpen={false}
+      className={
+        isMatch    ? 'border-yellow-500/60 shadow-[0_0_24px_rgba(234,179,8,0.2)]' :
+        isPersonal ? 'border-cyan-500/50 shadow-[0_0_24px_rgba(6,182,212,0.15)]' :
+                     'border-white/10'
+      }
+      title={
+        <span className="flex items-center gap-2 flex-wrap">
           Wishlists
           {isMatch && (
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/40">
@@ -191,9 +193,9 @@ export const WishlistPanel: React.FC = () => {
               ★ Personal Roll
             </span>
           )}
-        </h2>
-
-        {/* Personal roll toggle */}
+        </span>
+      }
+      headerRight={
         <button
           onClick={handleMarkPersonal}
           disabled={!hasSelection}
@@ -208,7 +210,8 @@ export const WishlistPanel: React.FC = () => {
         >
           {isPersonal ? '★ Saved' : '☆ Save Roll'}
         </button>
-      </div>
+      }
+    >
 
       {/* Community wishlist section */}
       <div className="space-y-3">
@@ -301,6 +304,6 @@ export const WishlistPanel: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </CollapsiblePanel>
   );
 };

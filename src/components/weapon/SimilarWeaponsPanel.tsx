@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
 import { Weapon, WeaponGroup } from '../../types/weapon';
@@ -179,16 +180,18 @@ export const SimilarWeaponsPanel: React.FC = () => {
   const visible = showAll ? recommendations : recommendations.slice(0, 5);
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-      <div className="flex items-center justify-between mb-1">
-        <h2 className="text-xl font-bold text-white">Similar Weapons</h2>
-        <span className="text-[10px] text-slate-500">
-          {recommendations.length} found
-        </span>
-      </div>
-      <p className="text-[11px] text-slate-500 mb-4">
-        Same archetype · ranked by stat similarity
-      </p>
+    <CollapsiblePanel
+      defaultOpen={false}
+      title={
+        <div>
+          <div>Similar Weapons</div>
+          <p className="text-[11px] text-slate-500 mt-0.5 font-normal">Same archetype · ranked by stat similarity</p>
+        </div>
+      }
+      headerRight={
+        <span className="text-[10px] text-slate-500">{recommendations.length} found</span>
+      }
+    >
 
       {/* Header row */}
       <div className="flex items-center gap-3 pb-1.5 mb-1 border-b border-white/10">
@@ -219,6 +222,6 @@ export const SimilarWeaponsPanel: React.FC = () => {
           {showAll ? 'Show fewer' : `Show all ${recommendations.length} →`}
         </button>
       )}
-    </div>
+    </CollapsiblePanel>
   );
 };
