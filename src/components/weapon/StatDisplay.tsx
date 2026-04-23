@@ -6,11 +6,11 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { interpolateStat } from '../../lib/math';
 import { getStatsForWeapon } from '../../lib/weaponStatMappings';
+import { calcHandlingTimes, HandlingTimes } from '../../lib/handlingTimes';
 
 const STAT_TRANSLATIONS: Record<string, { label: string; unit: string }> = {
-  Range:    { label: 'Falloff', unit: 'm' },
-  Handling: { label: 'Ready',   unit: 's' },
-  Reload:   { label: 'Time',    unit: 's' },
+  Range:  { label: 'Falloff', unit: 'm' },
+  Reload: { label: 'Time',    unit: 's' },
 };
 
 const STAT_LABEL_MAP: Record<string, string> = {
@@ -187,6 +187,26 @@ function CompactStatCard({ statName, base, current, label }: {
   );
 }
 
+// ── Handling time breakdown ───────────────────────────────────────────────────
+
+function HandlingBreakdown({ times }: { times: HandlingTimes }) {
+  const items = [
+    { label: 'Ready', value: times.readyMs },
+    { label: 'ADS',   value: times.adsMs   },
+    { label: 'Stow',  value: times.stowMs  },
+  ];
+  return (
+    <div className="flex gap-3 mt-1 ml-[7.5rem] md:ml-[8.5rem]">
+      {items.map(({ label, value }) => (
+        <div key={label} className="flex items-baseline gap-1">
+          <span className="text-[10px] text-slate-500">{label}</span>
+          <span className="text-[10px] font-mono text-amber-400">{value}ms</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export const StatDisplay: React.FC = () => {
@@ -232,6 +252,13 @@ export const StatDisplay: React.FC = () => {
   const barStats     = displayStats.filter((s) => ALL_BAR_STAT_KEYS.includes(s));
   const compactStats = displayStats.filter((s) => COMPACT_STAT_KEYS.includes(s));
 
+  const handlingTimes = useMemo(() => {
+    const stat = calcStats['Handling'] ?? activeWeapon.baseStats['Handling'] ?? null;
+    if (stat === null) return null;
+    return calcHandlingTimes(activeWeapon.itemTypeDisplayName, stat);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calcStats, activeWeapon]);
+
   return (
     <CollapsiblePanel title="Weapon Stats">
 
@@ -248,14 +275,18 @@ export const StatDisplay: React.FC = () => {
           const label      = STAT_LABEL_MAP[statName] ?? statName;
 
           return (
-            <StatBarRow
-              key={statName}
-              label={label}
-              base={base}
-              current={current}
-              translatedValue={translated}
-              translatedUnit={info?.unit}
-            />
+            <div key={statName}>
+              <StatBarRow
+                label={label}
+                base={base}
+                current={current}
+                translatedValue={translated}
+                translatedUnit={info?.unit}
+              />
+              {statName === 'Handling' && handlingTimes && (
+                <HandlingBreakdown times={handlingTimes} />
+              )}
+            </div>
           );
         })}
       </div>
