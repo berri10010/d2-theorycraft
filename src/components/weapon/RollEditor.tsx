@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
@@ -41,6 +41,7 @@ export const RollEditor: React.FC = () => {
   );
 
   const { data: clarityData } = useClarityPerks();
+  const [flashHash, setFlashHash] = useState<string | null>(null);
 
   const isLegacy = useMemo(() => {
     if (!activeWeapon) return false;
@@ -118,11 +119,19 @@ export const RollEditor: React.FC = () => {
 
                     const tierCfg = perk.tier ? TIER_CONFIG[perk.tier as PerkTier] : null;
 
+                    const flash = (hash: string) => {
+                      setFlashHash(hash);
+                      setTimeout(() => setFlashHash((h) => (h === hash ? null : h)), 400);
+                    };
+
                     const handleClick = () => {
                       if (!isActive) {
                         selectPerk(column.name, perk.hash);
+                        flash(perk.hash);
                       } else if (isBaseActive && perk.enhancedVersion) {
-                        selectPerk(column.name, perk.enhancedVersion.hash);
+                        const enhHash = perk.enhancedVersion.hash;
+                        selectPerk(column.name, enhHash);
+                        flash(enhHash);
                       } else {
                         clearPerk(column.name);
                       }
@@ -154,9 +163,14 @@ export const RollEditor: React.FC = () => {
                       </div>
                     );
 
+                    const isFlashing = flashHash === perk.hash || flashHash === perk.enhancedVersion?.hash;
+
                     return (
                       <Tooltip key={perk.hash} content={tooltipContent}>
                       <div className="relative shrink-0">
+                        {isFlashing && (
+                          <span className="absolute inset-0 rounded-full pointer-events-none z-10 animate-perk-ring" />
+                        )}
                         <button
                           onClick={handleClick}
                           aria-pressed={isActive}

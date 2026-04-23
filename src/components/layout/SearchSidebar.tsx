@@ -783,11 +783,16 @@ export const SearchSidebar: React.FC = () => {
           return (
             <div
               key={group.baseName}
-              className={['rounded-lg overflow-hidden transition-colors', isActive ? 'bg-amber-500/10' : ''].join(' ')}
+              className={[
+                'rounded-lg overflow-hidden transition-all duration-150 border-l-2',
+                isActive
+                  ? 'bg-amber-500/10 border-amber-500/50'
+                  : 'border-transparent hover:border-white/15 hover:bg-white/[0.04]',
+              ].join(' ')}
             >
               <button
                 onClick={() => loadWeapon(group.default, group.variants)}
-                className="w-full text-left p-2 flex items-center gap-2.5 hover:bg-white/4 transition-colors"
+                className="w-full text-left p-2 flex items-center gap-2.5 transition-all duration-150"
               >
                 <div className="relative w-14 h-14 shrink-0">
                   <div className="w-14 h-14 rounded overflow-hidden">

@@ -341,7 +341,7 @@ function Dashboard() {
 
           {/* ── Editor tab ──────────────────────────────── */}
           <div role="tabpanel" aria-label="Roll editor" hidden={activeTab !== 'editor'}>
-            <div className="space-y-6">
+            <div key={activeWeapon.hash} className="space-y-6 animate-weapon-in">
               <WeaponHeader />
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

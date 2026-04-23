@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { interpolateStat } from '../../lib/math';
@@ -19,12 +19,8 @@ const STAT_LABEL_MAP: Record<string, string> = {
   'Recoil Direction':        'Recoil',
 };
 
-// Stats that always render even when both base and current are 0.
-// Sword guard stats are legitimately 0 on frames with no guard (Legacy, Vortex, etc.)
-// but should still be visible so players know those frames have no guard.
 const ALWAYS_SHOW_STATS = new Set(['Guard Resistance', 'Guard Endurance']);
 
-// Stats shown as full-width bar charts
 const ALL_BAR_STAT_KEYS = [
   'Impact', 'Range', 'Stability', 'Handling', 'Reload', 'Aim Assistance',
   'Velocity', 'Blast Radius', 'Accuracy',
@@ -33,23 +29,46 @@ const ALL_BAR_STAT_KEYS = [
   'Cooling Efficiency', 'Heat Generated', 'Vent Speed', 'Persistence',
 ];
 
-// Stats shown compactly in a grid (no meaningful 0-100 bar)
 const COMPACT_STAT_KEYS = [
   'Zoom', 'Airborne Effectiveness', 'Ammo Generation', 'Recoil Direction', 'Magazine', 'Inventory Size',
 ];
 
+// ── Smooth number animation hook ─────────────────────────────────────────────
+
+function useAnimatedValue(target: number): number {
+  const [val, setVal] = useState(target);
+  const rafRef  = useRef<number | null>(null);
+  const prevRef = useRef(target);
+
+  useEffect(() => {
+    const from = prevRef.current;
+    prevRef.current = target;
+    if (from === target) return;
+
+    const startTime = performance.now();
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+
+    const tick = (now: number) => {
+      const t    = Math.min((now - startTime) / 250, 1);
+      const ease = 1 - (1 - t) ** 3; // cubic ease-out
+      setVal(Math.round(from + (target - from) * ease));
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
+  }, [target]);
+
+  return val;
+}
+
+// ── Recoil chart ──────────────────────────────────────────────────────────────
+
 function RecoilChart({ value }: { value: number }) {
   const W = 56, H = 28;
   const cx = W / 2;
-  // cy = H puts the pivot exactly on the SVG bottom edge.
-  // overflow="hidden" on the <svg> clips anything below, giving a perfect semi-circle mask.
   const cy = H;
   const R = 26;
 
-  // Visual coordinate system: 0°=right, 90°=up, 180°=left.
-  // To draw in SVG (y-axis down): x = cx + R·cos θ,  y = cy − R·sin θ
-  // Formula: sin((x+5)·2π/20)·(100-x). Negated because increasing angle is leftward,
-  // but positive formula output means rightward (60→right, 50→left, 55→center).
   const centerAngle = 90 - Math.sin((value + 5) * 2 * Math.PI / 20) * (100 - value);
   const arcWidth    = ((100 - value) / 100) * 180;
 
@@ -65,7 +84,6 @@ function RecoilChart({ value }: { value: number }) {
   const p2 = toPoint(endAngle);
   const f  = (n: number) => n.toFixed(2);
 
-  // sweep=0 (screen CCW) draws the arc from p1 to p2 going upward through the top — correct.
   const largeArc   = arcWidth > 180 ? 1 : 0;
   const bgPath     = `M ${cx} ${cy} L ${cx + R} ${cy} A ${R} ${R} 0 0 0 ${cx - R} ${cy} Z`;
   const sectorPath = `M ${cx} ${cy} L ${f(p1.x)} ${f(p1.y)} A ${R} ${R} 0 ${largeArc} 0 ${f(p2.x)} ${f(p2.y)} Z`;
@@ -74,10 +92,97 @@ function RecoilChart({ value }: { value: number }) {
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} overflow="hidden" className="shrink-0">
       <path d={bgPath}     fill="#323232" />
       <path d={sectorPath} fill="#FFFFFF" />
-      {/* Stroke only the two straight radial edges — no arc outline, no center dot */}
       <line x1={cx} y1={cy} x2={f(p1.x)} y2={f(p1.y)} stroke="#FFFFFF" strokeWidth={1} />
       <line x1={cx} y1={cy} x2={f(p2.x)} y2={f(p2.y)} stroke="#FFFFFF" strokeWidth={1} />
     </svg>
+  );
+}
+
+// ── Animated stat bar row ─────────────────────────────────────────────────────
+
+function StatBarRow({ label, base, current, translatedValue, translatedUnit }: {
+  label: string;
+  base: number;
+  current: number;
+  translatedValue: number | null;
+  translatedUnit: string | undefined;
+}) {
+  const animVal = useAnimatedValue(current);
+  const diff    = current - base;
+
+  return (
+    <div className="flex items-center text-sm">
+      <div className="w-24 md:w-28 font-medium text-slate-300 shrink-0">{label}</div>
+
+      <div className="flex-1 h-2.5 bg-black rounded-full overflow-hidden relative mx-3">
+        <div
+          className="absolute top-0 left-0 h-full bg-slate-300 transition-all duration-300"
+          style={{ width: `${Math.min(base, 100)}%` }}
+        />
+        {diff > 0 && (
+          <div
+            className="absolute top-0 h-full bg-green-500 transition-all duration-300 opacity-90"
+            style={{ left: `${Math.min(base, 100)}%`, width: `${Math.min(diff, 100 - base)}%` }}
+          />
+        )}
+        {diff < 0 && (
+          <div
+            className="absolute top-0 h-full bg-red-500 transition-all duration-300 opacity-90"
+            style={{ left: `${Math.max(current, 0)}%`, width: `${Math.abs(diff)}%` }}
+          />
+        )}
+      </div>
+
+      <div className="w-16 text-right font-mono flex flex-col justify-center items-end">
+        <span className={
+          'font-bold text-sm ' +
+          (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-white')
+        }>
+          {animVal}
+          {diff !== 0 && (
+            <span className="text-[10px] ml-0.5">({diff > 0 ? '+' : ''}{diff})</span>
+          )}
+        </span>
+        {translatedValue !== null && translatedUnit && (
+          <span className="text-[10px] text-amber-500">
+            {translatedValue.toFixed(2)}{translatedUnit}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Animated compact stat card ────────────────────────────────────────────────
+
+function CompactStatCard({ statName, base, current, label }: {
+  statName: string;
+  base: number;
+  current: number;
+  label: string;
+}) {
+  const animVal  = useAnimatedValue(current);
+  const diff     = current - base;
+  const isRecoil = statName === 'Recoil Direction';
+
+  return (
+    <div className="bg-black/30 rounded-lg px-2.5 py-2 border border-white/5 flex items-center gap-2">
+      {isRecoil && <RecoilChart value={current} />}
+      <div className="min-w-0">
+        <div className="text-[10px] text-slate-500 leading-none mb-0.5">{label}</div>
+        <div className={[
+          'text-sm font-mono font-bold leading-none',
+          diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-slate-200',
+        ].join(' ')}>
+          {animVal}
+          {diff !== 0 && (
+            <span className="text-[9px] ml-0.5 font-normal">
+              ({diff > 0 ? '+' : ''}{diff})
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -135,7 +240,6 @@ export const StatDisplay: React.FC = () => {
         {barStats.map((statName) => {
           const base    = baseStats[statName] ?? 0;
           const current = calcStats[statName] ?? base;
-          const diff    = current - base;
           if (base === 0 && current === 0 && !ALWAYS_SHOW_STATS.has(statName)) return null;
 
           const curve      = activeWeapon.statCurves[statName];
@@ -144,89 +248,40 @@ export const StatDisplay: React.FC = () => {
           const label      = STAT_LABEL_MAP[statName] ?? statName;
 
           return (
-            <div key={statName} className="flex items-center text-sm">
-              <div className="w-24 md:w-28 font-medium text-slate-300 shrink-0">{label}</div>
-
-              <div className="flex-1 h-2.5 bg-black rounded-full overflow-hidden relative mx-3">
-                <div
-                  className="absolute top-0 left-0 h-full bg-slate-300 transition-all duration-300"
-                  style={{ width: `${Math.min(base, 100)}%` }}
-                />
-                {diff > 0 && (
-                  <div
-                    className="absolute top-0 h-full bg-green-500 transition-all duration-300 opacity-90"
-                    style={{ left: `${Math.min(base, 100)}%`, width: `${Math.min(diff, 100 - base)}%` }}
-                  />
-                )}
-                {diff < 0 && (
-                  <div
-                    className="absolute top-0 h-full bg-red-500 transition-all duration-300 opacity-90"
-                    style={{ left: `${Math.max(current, 0)}%`, width: `${Math.abs(diff)}%` }}
-                  />
-                )}
-              </div>
-
-              <div className="w-16 text-right font-mono flex flex-col justify-center items-end">
-                <span className={
-                  'font-bold text-sm ' +
-                  (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-white')
-                }>
-                  {current}
-                  {diff !== 0 && (
-                    <span className="text-[10px] ml-0.5">({diff > 0 ? '+' : ''}{diff})</span>
-                  )}
-                </span>
-                {translated !== null && info && (
-                  <span className="text-[10px] text-amber-500">
-                    {translated.toFixed(2)}{info.unit}
-                  </span>
-                )}
-              </div>
-            </div>
+            <StatBarRow
+              key={statName}
+              label={label}
+              base={base}
+              current={current}
+              translatedValue={translated}
+              translatedUnit={info?.unit}
+            />
           );
         })}
       </div>
 
       {/* ── Compact numeric stats grid ───────────────────────────── */}
       {compactStats.length > 0 && (
-        <>
-          <div className="border-t border-white/5 pt-3 mt-1">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {compactStats.map((statName) => {
-                const base    = baseStats[statName] ?? 0;
-                const current = calcStats[statName] ?? base;
-                const diff    = current - base;
-                if (base === 0 && current === 0 && !ALWAYS_SHOW_STATS.has(statName)) return null;
+        <div className="border-t border-white/5 pt-3 mt-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {compactStats.map((statName) => {
+              const base    = baseStats[statName] ?? 0;
+              const current = calcStats[statName] ?? base;
+              if (base === 0 && current === 0 && !ALWAYS_SHOW_STATS.has(statName)) return null;
 
-                const label = STAT_LABEL_MAP[statName] ?? statName;
-                const isRecoil = statName === 'Recoil Direction';
-
-                return (
-                  <div
-                    key={statName}
-                    className="bg-black/30 rounded-lg px-2.5 py-2 border border-white/5 flex items-center gap-2"
-                  >
-                    {isRecoil && <RecoilChart value={current} />}
-                    <div className="min-w-0">
-                      <div className="text-[10px] text-slate-500 leading-none mb-0.5">{label}</div>
-                      <div className={[
-                        'text-sm font-mono font-bold leading-none',
-                        diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-slate-200',
-                      ].join(' ')}>
-                        {current}
-                        {diff !== 0 && (
-                          <span className="text-[9px] ml-0.5 font-normal">
-                            ({diff > 0 ? '+' : ''}{diff})
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+              const label = STAT_LABEL_MAP[statName] ?? statName;
+              return (
+                <CompactStatCard
+                  key={statName}
+                  statName={statName}
+                  base={base}
+                  current={current}
+                  label={label}
+                />
+              );
+            })}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
