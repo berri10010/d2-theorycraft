@@ -252,7 +252,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Task | Status |
 |------|--------|
-| Community research annotations: show empirically verified perk values on hover | ⬜ Pending |
+| Community research annotations: show empirically verified perk values on hover | ✅ Done |
 | Clarity description shown inline for single-option perk/origin columns in Weapon Perks grid | ✅ Done |
 
 #### 12D — External Buffs Panel
