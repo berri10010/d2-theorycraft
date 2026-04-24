@@ -2,17 +2,14 @@
 
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
+import { Tooltip } from '../ui/Tooltip';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
-import { interpolateStat } from '../../lib/math';
+import { interpolateStat, adsMultiplier } from '../../lib/math';
 import { getStatsForWeapon } from '../../lib/weaponStatMappings';
-import { calcHandlingTimes, HandlingTimes } from '../../lib/handlingTimes';
+import { calcHandlingTimes } from '../../lib/handlingTimes';
 import { calcReloadTime } from '../../lib/reloadTimes';
 import { calcBowPerfectDraw } from '../../lib/bowDrawWindow';
-
-const STAT_TRANSLATIONS: Record<string, { label: string; unit: string }> = {
-  Range: { label: 'Falloff', unit: 'm' },
-};
 
 const STAT_LABEL_MAP: Record<string, string> = {
   'Aim Assistance':          'Aim Assist',
@@ -102,12 +99,12 @@ function RecoilChart({ value }: { value: number }) {
 
 // ── Animated stat bar row ─────────────────────────────────────────────────────
 
-function StatBarRow({ label, base, current, translatedValue, translatedUnit }: {
+function StatBarRow({ label, base, current, details }: {
   label: string;
   base: number;
   current: number;
-  translatedValue: number | null;
-  translatedUnit: string | undefined;
+  /** Optional derived value annotations shown below the stat number. */
+  details?: Array<{ label: string; value: string }>;
 }) {
   const animVal = useAnimatedValue(current);
   const diff    = current - base;
@@ -145,11 +142,11 @@ function StatBarRow({ label, base, current, translatedValue, translatedUnit }: {
             <span className="text-[10px] ml-0.5">({diff > 0 ? '+' : ''}{diff})</span>
           )}
         </span>
-        {translatedValue !== null && translatedUnit && (
-          <span className="text-[10px] text-amber-500">
-            {translatedValue.toFixed(2)}{translatedUnit}
+        {details?.map((d) => (
+          <span key={d.label} className="text-[10px] text-amber-500 leading-none">
+            {d.label} {d.value}
           </span>
-        )}
+        ))}
       </div>
     </div>
   );
@@ -187,65 +184,6 @@ function CompactStatCard({ statName, base, current, label, annotation }: {
         {annotation && (
           <div className="text-[10px] font-mono text-amber-400 leading-none mt-0.5">{annotation}</div>
         )}
-      </div>
-    </div>
-  );
-}
-
-// ── Handling time breakdown ───────────────────────────────────────────────────
-
-function HandlingBreakdown({ times }: { times: HandlingTimes }) {
-  const items = [
-    { label: 'Ready', value: times.readyMs },
-    { label: 'ADS',   value: times.adsMs   },
-    { label: 'Stow',  value: times.stowMs  },
-  ];
-  return (
-    <div className="flex gap-3 mt-1 ml-[7.5rem] md:ml-[8.5rem]">
-      {items.map(({ label, value }) => (
-        <div key={label} className="flex items-baseline gap-1">
-          <span className="text-[10px] text-slate-500">{label}</span>
-          <span className="text-[10px] font-mono text-amber-400">{value}ms</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ── Reload time breakdown ─────────────────────────────────────────────────────
-
-function ReloadBreakdown({ reloadMs }: { reloadMs: number }) {
-  return (
-    <div className="flex gap-3 mt-1 ml-[7.5rem] md:ml-[8.5rem]">
-      <div className="flex items-baseline gap-1">
-        <span className="text-[10px] text-slate-500">Time</span>
-        <span className="text-[10px] font-mono text-amber-400">{(reloadMs / 1000).toFixed(2)}s</span>
-      </div>
-    </div>
-  );
-}
-
-// ── Charge / draw time breakdown ─────────────────────────────────────────────
-
-function ChargeTimeBreakdown({ ms }: { ms: number }) {
-  return (
-    <div className="flex gap-3 mt-1 ml-[7.5rem] md:ml-[8.5rem]">
-      <div className="flex items-baseline gap-1">
-        <span className="text-[10px] text-slate-500">Time</span>
-        <span className="text-[10px] font-mono text-amber-400">{(ms / 1000).toFixed(2)}s</span>
-      </div>
-    </div>
-  );
-}
-
-// ── Bow draw window breakdown ─────────────────────────────────────────────────
-
-function DrawWindowBreakdown({ perfectMs }: { perfectMs: number }) {
-  return (
-    <div className="flex gap-3 mt-1 ml-[7.5rem] md:ml-[8.5rem]">
-      <div className="flex items-baseline gap-1">
-        <span className="text-[10px] text-slate-500">Perfect</span>
-        <span className="text-[10px] font-mono text-amber-400">{(perfectMs / 1000).toFixed(2)}s</span>
       </div>
     </div>
   );
@@ -311,12 +249,15 @@ export const StatDisplay: React.FC = () => {
   }, [calcStats, activeWeapon]);
 
   const bowPerfectDrawMs = useMemo(() => {
-    if (activeWeapon.itemSubType !== 31) return null; // 31 = Bow
+    if (activeWeapon.itemSubType !== 31) return null;
     const stat = calcStats['Stability'] ?? activeWeapon.baseStats['Stability'] ?? null;
     if (stat === null) return null;
     return calcBowPerfectDraw(activeWeapon.intrinsicTrait?.name ?? null, stat);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calcStats, activeWeapon]);
+
+  // Zoom stat for ADS falloff multiplier
+  const zoomStat = calcStats['Zoom'] ?? activeWeapon.baseStats['Zoom'] ?? 14;
 
   return (
     <CollapsiblePanel title="Weapon Stats">
@@ -328,32 +269,72 @@ export const StatDisplay: React.FC = () => {
           const current = calcStats[statName] ?? base;
           if (base === 0 && current === 0 && !ALWAYS_SHOW_STATS.has(statName)) return null;
 
-          const curve      = activeWeapon.statCurves[statName];
-          const translated = interpolateStat(current, curve);
-          const info       = STAT_TRANSLATIONS[statName];
-          const label      = STAT_LABEL_MAP[statName] ?? statName;
+          const curve = activeWeapon.statCurves[statName];
+          const label = STAT_LABEL_MAP[statName] ?? statName;
+
+          // ── Range: show Hip and ADS falloff distances inline ────────────
+          let details: Array<{ label: string; value: string }> | undefined;
+          if (statName === 'Range') {
+            const hip = interpolateStat(current, curve);
+            if (hip != null) {
+              const ads = hip * adsMultiplier(zoomStat);
+              details = [
+                { label: 'Hip', value: `${hip.toFixed(1)}m`  },
+                { label: 'ADS', value: `${ads.toFixed(1)}m`  },
+              ];
+            }
+          }
+
+          // ── Hover tooltip content for time-based stats ───────────────────
+          let tooltipContent: React.ReactNode = null;
+
+          if (statName === 'Handling' && handlingTimes) {
+            tooltipContent = (
+              <div>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Handling Times</p>
+                <div className="flex gap-4">
+                  {([['Ready', handlingTimes.readyMs], ['ADS', handlingTimes.adsMs], ['Stow', handlingTimes.stowMs]] as [string, number][]).map(([lbl, ms]) => (
+                    <div key={lbl} className="flex flex-col items-center">
+                      <span className="text-[10px] text-slate-500">{lbl}</span>
+                      <span className="text-sm font-mono font-bold text-amber-400">{ms}ms</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          } else if (statName === 'Reload' && reloadMs != null) {
+            tooltipContent = (
+              <div className="flex items-baseline gap-2">
+                <span className="text-xs text-slate-400">Reload time</span>
+                <span className="text-sm font-mono font-bold text-amber-400">{(reloadMs / 1000).toFixed(2)}s</span>
+              </div>
+            );
+          } else if (statName === 'Charge Time' && current > 0) {
+            tooltipContent = (
+              <div className="flex items-baseline gap-2">
+                <span className="text-xs text-slate-400">Charge time</span>
+                <span className="text-sm font-mono font-bold text-amber-400">{(current / 1000).toFixed(2)}s</span>
+              </div>
+            );
+          } else if (statName === 'Draw Time' && bowPerfectDrawMs != null) {
+            tooltipContent = (
+              <div className="flex items-baseline gap-2">
+                <span className="text-xs text-slate-400">Perfect draw</span>
+                <span className="text-sm font-mono font-bold text-amber-400">{(bowPerfectDrawMs / 1000).toFixed(2)}s</span>
+              </div>
+            );
+          }
 
           return (
             <div key={statName}>
-              <StatBarRow
-                label={label}
-                base={base}
-                current={current}
-                translatedValue={translated}
-                translatedUnit={info?.unit}
-              />
-              {statName === 'Handling' && handlingTimes && (
-                <HandlingBreakdown times={handlingTimes} />
-              )}
-              {statName === 'Reload' && reloadMs != null && (
-                <ReloadBreakdown reloadMs={reloadMs} />
-              )}
-              {statName === 'Charge Time' && current > 0 && (
-                <ChargeTimeBreakdown ms={current} />
-              )}
-              {statName === 'Draw Time' && bowPerfectDrawMs != null && (
-                <DrawWindowBreakdown perfectMs={bowPerfectDrawMs} />
-              )}
+              <Tooltip content={tooltipContent} delay={80}>
+                <StatBarRow
+                  label={label}
+                  base={base}
+                  current={current}
+                  details={details}
+                />
+              </Tooltip>
             </div>
           );
         })}
@@ -369,13 +350,9 @@ export const StatDisplay: React.FC = () => {
               if (base === 0 && current === 0 && !ALWAYS_SHOW_STATS.has(statName)) return null;
 
               const label = STAT_LABEL_MAP[statName] ?? statName;
-
-              let annotation: string | undefined;
-              if (statName === 'Zoom' && current > 0) {
-                annotation = `${(current / 10).toFixed(1)}×`;
-              } else if (statName === 'Airborne Effectiveness' && current > 0) {
-                annotation = `${current}% flinch`;
-              }
+              const annotation = (statName === 'Zoom' && current > 0)
+                ? `${(current / 10).toFixed(1)}×`
+                : undefined;
 
               return (
                 <CompactStatCard

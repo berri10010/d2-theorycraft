@@ -7,6 +7,9 @@ import { CompareSnapshot, StatCurveNode } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
 import { interpolateStat, adsMultiplier } from '../../lib/math';
+import { calcHandlingTimes } from '../../lib/handlingTimes';
+import { calcReloadTime } from '../../lib/reloadTimes';
+import { calcBowPerfectDraw } from '../../lib/bowDrawWindow';
 
 // ─── Stat keys shown in the comparison card ────────────────────────────────────
 // Mirrors the keys in StatDisplay so the Compare view has full parity.
@@ -72,6 +75,25 @@ function SnapshotCard({
    const adsFalloff = hipFalloff !== null
      ? hipFalloff * adsMultiplier(zoomStat)
      : null;
+
+  // ── Handling / reload / charge / bow timing ───────────────────────────────
+  const handlingStat = snapshot.calculatedStats['Handling'] ?? snapshot.weapon.baseStats?.['Handling'];
+  const handlingTimes = handlingStat != null
+    ? calcHandlingTimes(snapshot.weapon.itemTypeDisplayName, handlingStat)
+    : null;
+
+  const reloadStat = snapshot.calculatedStats['Reload'] ?? snapshot.weapon.baseStats?.['Reload'];
+  const reloadMs = reloadStat != null
+    ? calcReloadTime(snapshot.weapon.itemTypeDisplayName, snapshot.weapon.ammoType, reloadStat)
+    : null;
+
+  const chargeTimeMs = snapshot.calculatedStats['Charge Time'] ?? 0;
+
+  const isBow = snapshot.weapon.itemSubType === 31;
+  const stabilityStat = snapshot.calculatedStats['Stability'] ?? snapshot.weapon.baseStats?.['Stability'] ?? 50;
+  const bowPerfectMs  = isBow
+    ? calcBowPerfectDraw(snapshot.weapon.intrinsicTrait?.name ?? null, stabilityStat)
+    : null;
 
 
   // ── Build selected perk list from weapon socket data ─────────────────────
@@ -191,6 +213,37 @@ function SnapshotCard({
           </span>
         </div>
       </div>
+
+      {/* ── Handling times row ──────────────────────────────────────────── */}
+      {handlingTimes && (
+        <div className="grid grid-cols-3 gap-2">
+          {([['Ready', handlingTimes.readyMs], ['ADS', handlingTimes.adsMs], ['Stow', handlingTimes.stowMs]] as [string, number][]).map(([label, ms]) => (
+            <div key={label} className="px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
+              <span className="text-[10px] text-slate-500">{label}</span>
+              <span className="font-mono text-sm font-bold text-slate-200">{ms}ms</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Timing row (reload + weapon-type specific) ───────────────────── */}
+      {(() => {
+        const chips: { label: string; value: string }[] = [];
+        if (reloadMs != null)    chips.push({ label: 'Reload',  value: `${(reloadMs / 1000).toFixed(2)}s` });
+        if (chargeTimeMs > 0)    chips.push({ label: 'Charge',  value: `${(chargeTimeMs / 1000).toFixed(2)}s` });
+        if (bowPerfectMs != null) chips.push({ label: 'Perfect', value: `${(bowPerfectMs / 1000).toFixed(2)}s` });
+        if (chips.length === 0) return null;
+        return (
+          <div className="flex gap-2">
+            {chips.map(({ label, value }) => (
+              <div key={label} className="flex-1 px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
+                <span className="text-[10px] text-slate-500">{label}</span>
+                <span className="font-mono text-sm font-bold text-amber-400">{value}</span>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* ── Bar stats (weapon-specific: only stats present in baseStats) ─── */}
       {sharedBarStatKeys.length > 0 && (
