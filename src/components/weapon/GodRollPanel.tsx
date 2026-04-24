@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useGodRolls } from '../../lib/useGodRolls';
@@ -43,9 +44,79 @@ function RollRow({ label, options }: { label: string; options: string[] }) {
   );
 }
 
+// ── Apply God Roll button ─────────────────────────
+
+function useApplyGodRoll() {
+  const { activeWeapon, selectPerk } = useWeaponStore(
+    useShallow((s) => ({ activeWeapon: s.activeWeapon, selectPerk: s.selectPerk }))
+  );
+  const [applied, setApplied] = useState(false);
+
+  const applyEntry = (entry: ReturnType<typeof useGodRolls>['data'] extends Record<string, infer E> | null ? E : never) => {
+    if (!activeWeapon || !entry) return;
+
+    // Build name → { columnName, perkHash } from all perk sockets
+    const nameToColumn = new Map<string, { columnName: string; perkHash: string }>();
+    for (const col of activeWeapon.perkSockets) {
+      for (const perk of col.perks) {
+        nameToColumn.set(perk.name.toLowerCase(), { columnName: col.name, perkHash: perk.hash });
+      }
+    }
+
+    // Determine which perk names to apply per slot
+    const perkCols = activeWeapon.perkSockets.filter((c) => c.columnType === 'perk');
+    const originCols = activeWeapon.perkSockets.filter((c) => c.columnType === 'origin');
+
+    // Build slot → recommended names mapping
+    const slots: Array<{ names: string[]; colType: string }> = [];
+
+    // Barrel (first col with columnType 'barrel')
+    const barrelCol = activeWeapon.perkSockets.find((c) => c.columnType === 'barrel');
+    if (barrelCol && entry.barrel.length > 0) slots.push({ names: entry.barrel, colType: 'barrel' });
+
+    // Mag (first col with columnType 'mag')
+    const magCol = activeWeapon.perkSockets.find((c) => c.columnType === 'mag');
+    if (magCol && entry.mag.length > 0) slots.push({ names: entry.mag, colType: 'mag' });
+
+    // Perk 1 & 2
+    if (perkCols[0] && entry.perk1.length > 0) slots.push({ names: entry.perk1, colType: 'perk1' });
+    if (perkCols[1] && entry.perk2.length > 0) slots.push({ names: entry.perk2, colType: 'perk2' });
+
+    // Origin
+    if (originCols[0] && entry.originTrait && entry.originTrait !== 'None') {
+      const originNames = entry.originTrait.includes('\n')
+        ? entry.originTrait.split('\n').map((s) => s.trim()).filter(Boolean)
+        : entry.originTrait.length <= 40 ? [entry.originTrait] : [];
+      if (originNames.length > 0) slots.push({ names: originNames, colType: 'origin' });
+    }
+
+    let applied = false;
+
+    for (const slot of slots) {
+      // Try to find the first recommended perk that actually exists on the weapon
+      for (const name of slot.names) {
+        const match = nameToColumn.get(name.toLowerCase());
+        if (match) {
+          selectPerk(match.columnName, match.perkHash);
+          applied = true;
+          break;
+        }
+      }
+    }
+
+    if (applied) {
+      setApplied(true);
+      setTimeout(() => setApplied(false), 2000);
+    }
+  };
+
+  return { applyEntry, applied };
+}
+
 export const GodRollPanel: React.FC = () => {
   const { activeWeapon } = useWeaponStore();
   const { data: godRollDb, loading } = useGodRolls();
+  const { applyEntry, applied } = useApplyGodRoll();
 
   if (!activeWeapon) return null;
 
@@ -63,7 +134,6 @@ export const GodRollPanel: React.FC = () => {
 
   const tierCfg = entry.tier ? WEAPON_TIER_CONFIG[entry.tier] : null;
 
-  // Build a clean subtitle: only include season/rank when present, handle "Other" type
   const weaponTypeLabel = entry.weaponType === 'Other' ? 'other weapons' : `${entry.weaponType}s`;
   const subtitleParts = [
     'Community analysis',
@@ -97,10 +167,6 @@ export const GodRollPanel: React.FC = () => {
       {(() => {
         const ot = entry.originTrait;
 
-        // Three cases for originTrait:
-        // 1. Contains \n → multiple perk options (split into pills)
-        // 2. Long sentence with no \n → analyst note about the origin slot
-        // 3. Short single name (or "None") → single perk pill as normal
         let originPills: string[] = [];
         let originNote: string | null = null;
         if (ot && ot !== 'None') {
@@ -113,10 +179,7 @@ export const GodRollPanel: React.FC = () => {
           }
         }
 
-        // notes field is sometimes a bare number (spreadsheet artefact) — skip those.
         const validNotes = entry.notes && !/^\d+$/.test(entry.notes.trim()) ? entry.notes : null;
-
-        // Combine origin-as-note and analyst notes into one block
         const noteLines = [originNote, validNotes].filter(Boolean) as string[];
 
         return (
@@ -128,6 +191,19 @@ export const GodRollPanel: React.FC = () => {
               <RollRow label="Perk 2" options={entry.perk2} />
               {originPills.length > 0 && <RollRow label="Origin" options={originPills} />}
             </div>
+
+            {/* Apply God Roll button */}
+            <button
+              onClick={() => applyEntry(entry)}
+              className={[
+                'w-full py-2 text-xs font-semibold rounded-lg border transition-all',
+                applied
+                  ? 'bg-green-500/20 border-green-500/40 text-green-400'
+                  : 'bg-white/5 border-white/10 text-slate-400 hover:bg-amber-500/10 hover:border-amber-500/30 hover:text-amber-400',
+              ].join(' ')}
+            >
+              {applied ? '✓ Applied' : 'Apply God Roll'}
+            </button>
 
             {noteLines.length > 0 && (
               <div className="mt-4 pt-4 border-t border-white/10">

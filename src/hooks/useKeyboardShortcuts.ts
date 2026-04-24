@@ -11,6 +11,8 @@ interface UseKeyboardShortcutsOptions {
   onPvp?: () => void;
   /** Callback when "c" is pressed — typically open comparison view */
   onCompare?: () => void;
+  /** Callback when "?" is pressed — show keyboard shortcut legend */
+  onShortcutLegend?: () => void;
 }
 
 /**
@@ -25,12 +27,13 @@ export function useKeyboardShortcuts({
   onPve,
   onPvp,
   onCompare,
+  onShortcutLegend,
 }: UseKeyboardShortcutsOptions) {
-  const handlersRef = useRef({ onSearch, onEscape, onPve, onPvp, onCompare });
+  const handlersRef = useRef({ onSearch, onEscape, onPve, onPvp, onCompare, onShortcutLegend });
 
   useEffect(() => {
-    handlersRef.current = { onSearch, onEscape, onPve, onPvp, onCompare };
-  }, [onSearch, onEscape, onPve, onPvp, onCompare]);
+    handlersRef.current = { onSearch, onEscape, onPve, onPvp, onCompare, onShortcutLegend };
+  }, [onSearch, onEscape, onPve, onPvp, onCompare, onShortcutLegend]);
 
   useEffect(() => {
     function isTyping(e: KeyboardEvent): boolean {
@@ -73,6 +76,10 @@ export function useKeyboardShortcuts({
         case 'C':
           e.preventDefault();
           h.onCompare?.();
+          break;
+        case '?':
+          e.preventDefault();
+          h.onShortcutLegend?.();
           break;
       }
     }

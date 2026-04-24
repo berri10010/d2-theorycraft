@@ -2,3 +2,6 @@
 node_modules
 .env.local
 .next
+items.json
+plugsets.json
+weapon_formulas.json

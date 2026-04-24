@@ -10,6 +10,7 @@ import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { ClarityEntry } from '../../lib/clarity';
+import { DamageIcon } from '../ui/DamageIcon';
 
 // Compendium placeholder strings that should not be shown to users
 const BAD_COMPENDIUM_DESCRIPTIONS = new Set([
@@ -146,9 +147,10 @@ export const WeaponHeader: React.FC = () => {
   );
   const { data: compendiumPerks } = useCompendiumPerks();
   const { data: clarityPerks }   = useClarityPerks();
-  const [imgError, setImgError] = useState(false);
+  const [imgError,  setImgError]  = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
-  useEffect(() => { setImgError(false); }, [activeWeapon?.hash]);
+  useEffect(() => { setImgError(false); setImgLoaded(false); }, [activeWeapon?.hash]);
 
   const isLegacy = useMemo(() => {
     if (!activeWeapon) return false;
@@ -183,7 +185,8 @@ export const WeaponHeader: React.FC = () => {
           <img
             src={activeWeapon.screenshot!}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-[center_30%]"
+            className={`absolute inset-0 w-full h-full object-cover object-[center_30%] transition-opacity duration-700 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={() => setImgLoaded(true)}
             onError={() => setImgError(true)}
           />
           {/* 1. Base scrim */}
@@ -230,9 +233,9 @@ export const WeaponHeader: React.FC = () => {
 
           {/* Metadata row: ● Element · Ammo · RPM · Variant · Legacy */}
           <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-slate-400">
-            {/* Element with coloured dot */}
+            {/* Element with damage icon */}
             <span className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full shrink-0 ${dmg.dot}`} />
+              <DamageIcon type={activeWeapon.damageType} className={`w-3 h-3 shrink-0 ${dmg.text}`} />
               <span className={dmg.text}>
                 {activeWeapon.damageType.charAt(0).toUpperCase() + activeWeapon.damageType.slice(1)}
               </span>

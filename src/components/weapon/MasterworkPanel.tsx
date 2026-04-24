@@ -51,6 +51,7 @@ export const MasterworkPanel: React.FC = () => {
   const {
     activeWeapon,
     masterworkStat, setMasterworkStat,
+    hoveredMasterworkStat, setHoveredMasterworkStat,
     isCrafted,
     isEnhanced,
     activeMod, setActiveMod,
@@ -126,11 +127,15 @@ export const MasterworkPanel: React.FC = () => {
                 <button
                   key={stat}
                   onClick={() => setMasterworkStat(isActive ? null : stat)}
+                  onMouseEnter={() => setHoveredMasterworkStat(stat)}
+                  onMouseLeave={() => setHoveredMasterworkStat(null)}
                   className={[
                     'text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
                     isActive
                       ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
-                      : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
+                      : hoveredMasterworkStat === stat
+                        ? 'bg-amber-500/10 text-amber-300/70 border-amber-500/25'
+                        : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
                   ].join(' ')}
                 >
                   {stat}

@@ -208,14 +208,15 @@ interface WeaponState {
   activeEffects:     Record<string, number>;
   mode:              GameMode;
 
-  masterworkStat:    MasterworkStat | null;
-  isCrafted:         boolean;
+  masterworkStat:        MasterworkStat | null;
+  hoveredMasterworkStat: string | null;
+  isCrafted:             boolean;
   /** Enhanced Legendary state — enhanced perks active without crafted pattern. +2 secondary MW bonus. */
-  isEnhanced:        boolean;
-  activeMod:         WeaponMod;
-  surgeStacks:       0 | 1 | 2 | 3 | 4;
-  weaponsStat:       number;
-  armorMods:         ArmorModState;
+  isEnhanced:            boolean;
+  activeMod:             WeaponMod;
+  surgeStacks:           0 | 1 | 2 | 3 | 4;
+  weaponsStat:           number;
+  armorMods:             ArmorModState;
 
   /** Per-weapon roll cache, keyed by weapon hash. Persisted to localStorage. */
   weaponRolls:       Record<string, WeaponRoll>;
@@ -233,7 +234,8 @@ interface WeaponState {
   setEffectState:    (perkHash: string, state: number) => void;
   setBuffStack:      (buffHash: string, stackIndex: number) => void;
   setMode:           (mode: GameMode) => void;
-  setMasterworkStat: (stat: MasterworkStat | null) => void;
+  setMasterworkStat:        (stat: MasterworkStat | null) => void;
+  setHoveredMasterworkStat: (stat: string | null) => void;
   toggleCrafted:     () => void;
   setCrafted:        (val: boolean) => void;
   toggleEnhanced:    () => void;
@@ -312,16 +314,17 @@ function isDefaultRoll(roll: WeaponRoll, weapon: Weapon): boolean {
 export const useWeaponStore = create<WeaponState>()(
   persist(
     (set, get) => ({
-      activeWeapon:      null,
-      activeWeaponHash:  null,
-      variantGroup:      [],
-      selectedPerks:     {},
-      activeBuffs:       [],
-      buffStacks:        {},
-      activeEffects:     {},
-      mode:              'pve',
-      masterworkStat:    null,
-      isCrafted:         false,
+      activeWeapon:          null,
+      activeWeaponHash:      null,
+      variantGroup:          [],
+      selectedPerks:         {},
+      activeBuffs:           [],
+      buffStacks:            {},
+      activeEffects:         {},
+      mode:                  'pve',
+      masterworkStat:        null,
+      hoveredMasterworkStat: null,
+      isCrafted:             false,
       isEnhanced:        false,
       activeMod:         NONE_MOD,
       surgeStacks:       0,
@@ -467,8 +470,9 @@ export const useWeaponStore = create<WeaponState>()(
           return { activeEffects: { ...s.activeEffects, [perkHash]: state } };
         }),
 
-      setMode:           (mode)   => set({ mode }),
-      setMasterworkStat: (stat)   => set({ masterworkStat: stat }),
+      setMode:                  (mode)   => set({ mode }),
+      setMasterworkStat:        (stat)   => set({ masterworkStat: stat }),
+      setHoveredMasterworkStat: (stat)   => set({ hoveredMasterworkStat: stat }),
       // Crafted and Enhanced are mutually exclusive — activating one clears the other.
       toggleCrafted:     ()       => set((s) => s.isCrafted
         ? { isCrafted: false }

@@ -100,21 +100,24 @@ function RecoilChart({ value }: { value: number }) {
 
 // ── Animated stat bar row ─────────────────────────────────────────────────────
 
-function StatBarRow({ label, base, current }: {
+function StatBarRow({ label, base, current, highlighted }: {
   label: string;
   base: number;
   current: number;
+  highlighted?: boolean;
 }) {
   const animVal = useAnimatedValue(current);
   const diff    = current - base;
 
   return (
-    <div className="flex items-center text-sm">
-      <div className="w-24 md:w-28 font-medium text-slate-300 shrink-0">{label}</div>
+    <div className={`flex items-center text-sm rounded-md transition-colors duration-150 ${highlighted ? 'bg-amber-500/8' : ''}`}>
+      <div className={`w-24 md:w-28 font-medium shrink-0 transition-colors duration-150 ${highlighted ? 'text-amber-300' : 'text-slate-300'}`}>
+        {label}
+      </div>
 
       <div className="flex-1 h-2.5 bg-black rounded-full overflow-hidden relative mx-3">
         <motion.div
-          className="absolute top-0 left-0 h-full bg-slate-300"
+          className={`absolute top-0 left-0 h-full transition-colors duration-150 ${highlighted ? 'bg-amber-400' : 'bg-slate-300'}`}
           animate={{ width: `${Math.min(base, 100)}%` }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         />
@@ -137,7 +140,7 @@ function StatBarRow({ label, base, current }: {
       <div className="w-16 text-right font-mono flex flex-col justify-center items-end">
         <span className={
           'font-bold text-sm ' +
-          (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-white')
+          (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : highlighted ? 'text-amber-300' : 'text-white')
         }>
           {animVal}
           {diff !== 0 && (
@@ -190,6 +193,7 @@ export const StatDisplay: React.FC = () => {
     getCalculatedStats,
     selectedPerks,
     masterworkStat,
+    hoveredMasterworkStat,
     isCrafted,
     isEnhanced,
     activeMod,
@@ -198,16 +202,17 @@ export const StatDisplay: React.FC = () => {
     activeBuffs,
   } = useWeaponStore(
     useShallow((s) => ({
-      activeWeapon:       s.activeWeapon,
-      getCalculatedStats: s.getCalculatedStats,
-      selectedPerks:      s.selectedPerks,
-      masterworkStat:     s.masterworkStat,
-      isCrafted:          s.isCrafted,
-      isEnhanced:         s.isEnhanced,
-      activeMod:          s.activeMod,
-      armorMods:          s.armorMods,
-      activeEffects:      s.activeEffects,
-      activeBuffs:        s.activeBuffs,
+      activeWeapon:          s.activeWeapon,
+      getCalculatedStats:    s.getCalculatedStats,
+      selectedPerks:         s.selectedPerks,
+      masterworkStat:        s.masterworkStat,
+      hoveredMasterworkStat: s.hoveredMasterworkStat,
+      isCrafted:             s.isCrafted,
+      isEnhanced:            s.isEnhanced,
+      activeMod:             s.activeMod,
+      armorMods:             s.armorMods,
+      activeEffects:         s.activeEffects,
+      activeBuffs:           s.activeBuffs,
     }))
   );
 
@@ -323,6 +328,8 @@ export const StatDisplay: React.FC = () => {
             );
           }
 
+          const isHighlighted = statName === hoveredMasterworkStat;
+
           return (
             <div key={statName}>
               <Tooltip content={tooltipContent} delay={80}>
@@ -330,6 +337,7 @@ export const StatDisplay: React.FC = () => {
                   label={label}
                   base={base}
                   current={current}
+                  highlighted={isHighlighted}
                 />
               </Tooltip>
             </div>

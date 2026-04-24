@@ -86,23 +86,25 @@ function Dashboard() {
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
   const searchParams = useSearchParams();
 
-  const [activeTab,       setActiveTab]       = useState<'editor' | 'compare'>('editor');
-  const [shareOpen,       setShareOpen]       = useState(false);
-  const [copiedType,      setCopiedType]      = useState<'permalink' | 'dim' | null>(null);
-  const [sidebarOpen,     setSidebarOpen]     = useState(false);
+  const [activeTab,        setActiveTab]        = useState<'editor' | 'compare'>('editor');
+  const [shareOpen,        setShareOpen]        = useState(false);
+  const [copiedType,       setCopiedType]       = useState<'permalink' | 'dim' | null>(null);
+  const [sidebarOpen,      setSidebarOpen]      = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [clearPending,    setClearPending]    = useState(false);
+  const [clearPending,     setClearPending]     = useState(false);
+  const [showShortcuts,    setShowShortcuts]    = useState(false);
 
   const shareRef    = useRef<HTMLDivElement>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Keyboard shortcuts ───────────────────────────────────────────────────────
   useKeyboardShortcuts({
-    onSearch:  () => setSidebarOpen(true),
-    onEscape:  () => { if (sidebarOpen) setSidebarOpen(false); },
-    onPve:     () => setMode('pve'),
-    onPvp:     () => setMode('pvp'),
-    onCompare: () => setActiveTab((t) => (t === 'editor' ? 'compare' : 'editor')),
+    onSearch:         () => setSidebarOpen(true),
+    onEscape:         () => { if (showShortcuts) { setShowShortcuts(false); return; } if (sidebarOpen) setSidebarOpen(false); },
+    onPve:            () => setMode('pve'),
+    onPvp:            () => setMode('pvp'),
+    onCompare:        () => setActiveTab((t) => (t === 'editor' ? 'compare' : 'editor')),
+    onShortcutLegend: () => setShowShortcuts((v) => !v),
   });
 
   const weaponGroups = useMemo(() => groupWeapons(weapons), [weapons]);
@@ -339,6 +341,62 @@ function Dashboard() {
         <SearchSidebar />
       </div>
 
+      {/* Keyboard shortcut legend modal */}
+      <AnimatePresence>
+        {showShortcuts && (
+          <motion.div
+            key="shortcut-modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4"
+            onClick={() => setShowShortcuts(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.94, y: 12 }}
+              animate={{ scale: 1,    y: 0  }}
+              exit={{ scale: 0.94,    y: 12 }}
+              transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#111] border border-white/15 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-base font-bold text-white">Keyboard Shortcuts</h3>
+                <button
+                  onClick={() => setShowShortcuts(false)}
+                  className="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:text-slate-200 transition-colors"
+                >
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+              <div className="space-y-2.5">
+                {[
+                  { key: '/',   label: 'Open weapon search' },
+                  { key: '1',   label: 'Switch to PvE mode' },
+                  { key: '2',   label: 'Switch to PvP mode' },
+                  { key: 'C',   label: 'Toggle comparison view' },
+                  { key: 'Esc', label: 'Close sidebar / clear search' },
+                  { key: '?',   label: 'Show this shortcut legend' },
+                ].map(({ key, label }) => (
+                  <div key={key} className="flex items-center justify-between gap-4">
+                    <span className="text-sm text-slate-300">{label}</span>
+                    <kbd className="shrink-0 text-xs font-mono font-bold bg-white/8 border border-white/15 px-2.5 py-1 rounded-lg text-slate-200 min-w-[2rem] text-center leading-none">
+                      {key}
+                    </kbd>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-slate-600 mt-5 text-center">
+                Shortcuts are disabled when typing in text fields.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Desktop sidebar collapse toggle */}
       <button
         onClick={() => setSidebarCollapsed((v) => !v)}
@@ -421,6 +479,15 @@ function Dashboard() {
             {/* Right group — action buttons */}
             {activeTab === 'editor' && (
               <div className="flex items-center gap-2">
+                {/* Keyboard shortcut legend */}
+                <button
+                  onClick={() => setShowShortcuts(true)}
+                  aria-label="Keyboard shortcuts"
+                  title="Keyboard shortcuts (?)"
+                  className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20 transition-colors text-xs font-bold"
+                >
+                  ?
+                </button>
 
                 {/* Share dropdown */}
                 <div className="relative" ref={shareRef}>
@@ -535,21 +602,33 @@ function Dashboard() {
                   {/* Left column */}
                   <div className="lg:col-span-6 space-y-6">
                     <RollEditor />
-                    {mode === 'pve' && (
-                      <>
-                        <GodRollPanel />
-                        <WishlistPanel />
-                        <EffectsPanel />
-                        <BuffToggle />
-                      </>
-                    )}
-                    {mode === 'pvp' && (
-                      <>
-                        <WishlistPanel />
-                        <EffectsPanel />
-                        <BuffToggle />
-                      </>
-                    )}
+                    {/* Mode-dependent panels — animate on PvE ↔ PvP switch */}
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.div
+                        key={mode}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                        className="space-y-6"
+                      >
+                        {mode === 'pve' && (
+                          <>
+                            <GodRollPanel />
+                            <WishlistPanel />
+                            <EffectsPanel />
+                            <BuffToggle />
+                          </>
+                        )}
+                        {mode === 'pvp' && (
+                          <>
+                            <WishlistPanel />
+                            <EffectsPanel />
+                            <BuffToggle />
+                          </>
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
                   </div>
 
                   {/* Right column */}

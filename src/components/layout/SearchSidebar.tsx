@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
@@ -8,6 +9,7 @@ import { Weapon, WeaponGroup } from '../../types/weapon';
 import { groupWeapons } from '../../lib/weaponGroups';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { DamageIcon } from '../ui/DamageIcon';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -453,6 +455,24 @@ function FilterPanel({
   );
 }
 
+// ─── Recently viewed weapons ──────────────────────────────────────────────────
+
+const LS_RECENT_WEAPONS_KEY = 'd2tc_recent_weapons';
+const MAX_RECENT_WEAPONS    = 5;
+
+function loadRecentWeaponHashes(): string[] {
+  try {
+    const raw = localStorage.getItem(LS_RECENT_WEAPONS_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch { return []; }
+}
+
+function pushRecentWeaponHash(hash: string, existing: string[]): string[] {
+  const next = [hash, ...existing.filter((h) => h !== hash)].slice(0, MAX_RECENT_WEAPONS);
+  try { localStorage.setItem(LS_RECENT_WEAPONS_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+  return next;
+}
+
 // ─── Recent searches ──────────────────────────────────────────────────────────
 
 const LS_RECENT_KEY = 'd2tc_recent_searches';
@@ -469,6 +489,73 @@ function saveRecentSearches(searches: string[]) {
   try { localStorage.setItem(LS_RECENT_KEY, JSON.stringify(searches)); } catch { /* ignore */ }
 }
 
+// ─── Weapon list item ─────────────────────────────────────────────────────────
+
+function WeaponListItem({
+  group, activeWeapon, onLoad,
+}: {
+  group: WeaponGroup;
+  activeWeapon: Weapon | null;
+  onLoad: (weapon: Weapon, variants?: Weapon[]) => void;
+}) {
+  const d          = group.default;
+  const isActive   = group.variants.some((v) => v.hash === activeWeapon?.hash);
+  const seasonName = bestSeasonName(group);
+
+  return (
+    <div
+      className={[
+        'rounded-lg overflow-hidden transition-all duration-150 border-l-2',
+        isActive
+          ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/15'
+          : 'border-transparent hover:border-white/15 hover:bg-white/[0.04] hover:scale-[1.005]',
+      ].join(' ')}
+    >
+      <button
+        onClick={() => onLoad(group.default, group.variants)}
+        className="w-full text-left p-2 flex items-center gap-2.5 transition-all duration-150"
+      >
+        <div className="relative w-14 h-14 shrink-0">
+          <div className="w-14 h-14 rounded overflow-hidden bg-white/5">
+            {d.icon && <img src={BUNGIE_ROOT + d.icon} alt="" className="w-full h-full object-cover" />}
+          </div>
+          {d.iconWatermark && (
+            <img src={d.iconWatermark} alt="" className="absolute top-0 left-0 w-5 h-5 object-contain" />
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <p className={[
+            'text-sm font-bold truncate leading-tight',
+            isActive ? 'text-amber-400' : d.rarity === 'Exotic' ? 'text-yellow-400' : 'text-slate-200',
+          ].join(' ')}>
+            {group.baseName}
+          </p>
+          <p className="text-[10px] uppercase tracking-wider mt-0.5 flex items-center gap-1">
+            <DamageIcon
+              type={d.damageType}
+              className={`w-2.5 h-2.5 shrink-0 ${DAMAGE_COLORS[d.damageType] ?? 'text-slate-500'} opacity-80`}
+            />
+            <span className={[DAMAGE_COLORS[d.damageType] ?? 'text-slate-500', 'opacity-70'].join(' ')}>
+              {d.damageType}
+            </span>
+            {AMMO_LABELS[d.ammoType] && (
+              <>
+                <span className="text-slate-700">|</span>
+                <span className={AMMO_COLORS[d.ammoType] ?? 'text-slate-500'}>{AMMO_LABELS[d.ammoType]}</span>
+              </>
+            )}
+          </p>
+          <p className="text-[10px] text-slate-500 mt-0.5 truncate">
+            {d.itemTypeDisplayName}
+            {seasonName && <span className="text-slate-500"> · {seasonName}</span>}
+          </p>
+        </div>
+      </button>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export const SearchSidebar: React.FC = () => {
@@ -482,11 +569,15 @@ export const SearchSidebar: React.FC = () => {
   const [filters,       setFilters]       = useState<FilterState>(DEFAULT_FILTERS);
   const [activeCat,     setActiveCat]     = useState<CategoryId | null>(null);
   const [colSubcat,     setColSubcat]     = useState<MultiKey | null>(null);
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [searchFocused,       setSearchFocused]       = useState(false);
+  const [recentSearches,      setRecentSearches]      = useState<string[]>([]);
+  const [recentWeaponHashes,  setRecentWeaponHashes]  = useState<string[]>([]);
 
-  // Load recent searches from localStorage on mount
-  useEffect(() => { setRecentSearches(loadRecentSearches()); }, []);
+  // Load persisted state from localStorage on mount
+  useEffect(() => {
+    setRecentSearches(loadRecentSearches());
+    setRecentWeaponHashes(loadRecentWeaponHashes());
+  }, []);
 
   const pushRecentSearch = useCallback((term: string) => {
     const trimmed = term.trim();
@@ -508,6 +599,7 @@ export const SearchSidebar: React.FC = () => {
 
   const headerRef      = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const weaponListRef  = useRef<HTMLDivElement>(null);
 
   useKeyboardShortcuts({
     onSearch: () => searchInputRef.current?.focus(),
@@ -516,6 +608,7 @@ export const SearchSidebar: React.FC = () => {
 
   const handleLoadWeapon = useCallback((weapon: Parameters<typeof loadWeapon>[0], variants?: Parameters<typeof loadWeapon>[1]) => {
     if (query.trim()) pushRecentSearch(query);
+    setRecentWeaponHashes((prev) => pushRecentWeaponHash(weapon.hash, prev));
     loadWeapon(weapon, variants);
   }, [loadWeapon, query, pushRecentSearch]);
 
@@ -705,6 +798,22 @@ export const SearchSidebar: React.FC = () => {
   const anyFilter = !!(query || activeFilterCount);
   const dirArrow = (m: SortMode) => sortMode === m ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
 
+  // Recently viewed — only when no search/filters active, resolved from groups
+  const recentGroups = useMemo(() => {
+    if (anyFilter) return [];
+    return recentWeaponHashes
+      .map((hash) => groups.find((g) => g.variants.some((v) => v.hash === hash)))
+      .filter((g): g is WeaponGroup => !!g);
+  }, [anyFilter, recentWeaponHashes, groups]);
+
+  // Virtualizer for the main filtered list (skips recently-viewed which is always short)
+  const virtualizer = useVirtualizer({
+    count:           filteredGroups.length,
+    getScrollElement: () => weaponListRef.current,
+    estimateSize:    () => 72, // ~p2 + 56px icon + padding
+    overscan:        8,
+  });
+
   return (
     <nav aria-label="Weapon database" className="bg-black h-full flex flex-col">
 
@@ -850,7 +959,7 @@ export const SearchSidebar: React.FC = () => {
       </div>
 
       {/* ── Weapon list ─────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+      <div ref={weaponListRef} className="flex-1 overflow-y-auto p-2">
         {isLoading && (
           <div className="space-y-2 mt-4 px-1">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -872,61 +981,50 @@ export const SearchSidebar: React.FC = () => {
           </p>
         )}
 
-        {filteredGroups.map((group) => {
-          const d          = group.default;
-          const isActive   = group.variants.some(v => v.hash === activeWeapon?.hash);
-          const seasonName = bestSeasonName(group);
+        {/* Recently viewed section — rendered outside virtualizer (always short) */}
+        {!isLoading && !error && recentGroups.length > 0 && (
+          <div className="mb-2 space-y-1">
+            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest px-2 py-1.5">Recently Viewed</p>
+            {recentGroups.map((group) => (
+              <WeaponListItem
+                key={`recent-${group.baseName}`}
+                group={group}
+                activeWeapon={activeWeapon}
+                onLoad={handleLoadWeapon}
+              />
+            ))}
+            <div className="border-t border-white/8 mx-2 mt-2 mb-1" />
+          </div>
+        )}
 
-          return (
-            <div
-              key={group.baseName}
-              className={[
-                'rounded-lg overflow-hidden transition-all duration-150 border-l-2',
-                isActive
-                  ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/15'
-                  : 'border-transparent hover:border-white/15 hover:bg-white/[0.04] hover:scale-[1.005]',
-              ].join(' ')}
-            >
-              <button
-                onClick={() => handleLoadWeapon(group.default, group.variants)}
-                className="w-full text-left p-2 flex items-center gap-2.5 transition-all duration-150"
+        {/* Virtualized main list */}
+        {!isLoading && !error && filteredGroups.length > 0 && (
+          <div
+            style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}
+          >
+            {virtualizer.getVirtualItems().map((vItem) => (
+              <div
+                key={vItem.key}
+                data-index={vItem.index}
+                ref={virtualizer.measureElement}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${vItem.start}px)`,
+                  paddingBottom: '4px',
+                }}
               >
-                <div className="relative w-14 h-14 shrink-0">
-                  <div className="w-14 h-14 rounded overflow-hidden">
-                    {d.icon && <img src={BUNGIE_ROOT + d.icon} alt="" className="w-full h-full object-cover" />}
-                  </div>
-                  {d.iconWatermark && (
-                    <img src={d.iconWatermark} alt="" className="absolute top-0 left-0 w-5 h-5 object-contain" />
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className={[
-                    'text-sm font-bold truncate leading-tight',
-                    isActive ? 'text-amber-400' : d.rarity === 'Exotic' ? 'text-yellow-400' : 'text-slate-200',
-                  ].join(' ')}>
-                    {group.baseName}
-                  </p>
-                  <p className="text-[10px] uppercase tracking-wider mt-0.5 flex items-center gap-1">
-                    <span className={[DAMAGE_COLORS[d.damageType] ?? 'text-slate-500', 'opacity-70'].join(' ')}>
-                      {d.damageType}
-                    </span>
-                    {AMMO_LABELS[d.ammoType] && (
-                      <>
-                        <span className="text-slate-700">|</span>
-                        <span className={AMMO_COLORS[d.ammoType] ?? 'text-slate-500'}>{AMMO_LABELS[d.ammoType]}</span>
-                      </>
-                    )}
-                  </p>
-                  <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-                    {d.itemTypeDisplayName}
-                    {seasonName && <span className="text-slate-500"> · {seasonName}</span>}
-                  </p>
-                </div>
-              </button>
-            </div>
-          );
-        })}
+                <WeaponListItem
+                  group={filteredGroups[vItem.index]}
+                  activeWeapon={activeWeapon}
+                  onLoad={handleLoadWeapon}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Footer ──────────────────────────────────────────────────── */}

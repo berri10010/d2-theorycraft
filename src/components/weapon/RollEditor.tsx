@@ -13,6 +13,7 @@ import { Tooltip } from '../ui/Tooltip';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
+import { useGodRolls } from '../../lib/useGodRolls';
 
 // ── Column accent styles ──────────────────────────────────────────────────────
 
@@ -44,7 +45,37 @@ export const RollEditor: React.FC = () => {
   );
 
   const { data: clarityData } = useClarityPerks();
+  const { data: godRollDb }   = useGodRolls();
   const [flashHash, setFlashHash] = useState<string | null>(null);
+
+  // Build a map of column-type → Set<lowercase perk name> for god roll highlights
+  const godRollNames = useMemo(() => {
+    if (!activeWeapon || !godRollDb) return null;
+    const entry = godRollDb[activeWeapon.name];
+    if (!entry) return null;
+
+    const toSet = (arr: string[]) => new Set(arr.map((n) => n.toLowerCase()));
+    const perkCols = activeWeapon.perkSockets.filter((c) => c.columnType === 'perk');
+
+    let originSet = new Set<string>();
+    if (entry.originTrait && entry.originTrait !== 'None') {
+      const parts = entry.originTrait.includes('\n')
+        ? entry.originTrait.split('\n').map((s) => s.trim()).filter(Boolean)
+        : entry.originTrait.length <= 40 ? [entry.originTrait] : [];
+      originSet = toSet(parts);
+    }
+
+    return {
+      barrel:     toSet(entry.barrel ?? []),
+      mag:        toSet(entry.mag ?? []),
+      perk1:      toSet(entry.perk1 ?? []),
+      perk2:      toSet(entry.perk2 ?? []),
+      origin:     originSet,
+      perk1ColName: perkCols[0]?.name ?? null,
+      perk2ColName: perkCols[1]?.name ?? null,
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeWeapon, godRollDb]);
 
   const isLegacy = useMemo(() => {
     if (!activeWeapon) return false;
@@ -154,6 +185,22 @@ export const RollEditor: React.FC = () => {
 
                     const tierCfg = perk.tier ? TIER_CONFIG[perk.tier as PerkTier] : null;
 
+                    // God roll indicator — amber star on matching perks (PvE only)
+                    let isGodRoll = false;
+                    if (mode === 'pve' && godRollNames) {
+                      const n = perk.name.toLowerCase();
+                      switch (column.columnType) {
+                        case 'barrel': isGodRoll = godRollNames.barrel.has(n); break;
+                        case 'mag':    isGodRoll = godRollNames.mag.has(n);    break;
+                        case 'origin': isGodRoll = godRollNames.origin.has(n); break;
+                        case 'perk':
+                          isGodRoll = column.name === godRollNames.perk1ColName
+                            ? godRollNames.perk1.has(n)
+                            : godRollNames.perk2.has(n);
+                          break;
+                      }
+                    }
+
                     const flash = (hash: string) => {
                       setFlashHash(hash);
                       // Cleared by motion's onAnimationComplete — no setTimeout needed
@@ -252,6 +299,15 @@ export const RollEditor: React.FC = () => {
                         {isUpgraded && (
                           <span className="absolute -bottom-1 -right-1 text-[7px] font-black leading-none px-1 py-px rounded-full z-10 bg-amber-400 text-black">
                             ENH
+                          </span>
+                        )}
+
+                        {/* God roll star — top-left; only when not selected */}
+                        {isGodRoll && !isActive && !isUpgraded && (
+                          <span className="absolute -top-1 -left-1 w-3.5 h-3.5 rounded-full z-10 bg-amber-500 flex items-center justify-center">
+                            <svg viewBox="0 0 12 12" fill="currentColor" className="w-2 h-2 text-black">
+                              <path d="M6 1l1.2 3.7H11L8.1 6.6l1.1 3.4L6 8.1 2.8 10l1.1-3.4L1 4.7h3.8z" />
+                            </svg>
                           </span>
                         )}
                       </div>
