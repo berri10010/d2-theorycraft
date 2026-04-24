@@ -284,7 +284,6 @@ export const StatDisplay: React.FC = () => {
           } else if (statName === 'Handling' && handlingTimes) {
             tooltipContent = (
               <div>
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Handling Times</p>
                 <div className="flex gap-4">
                   {([['Ready', handlingTimes.readyMs], ['ADS', handlingTimes.adsMs], ['Stow', handlingTimes.stowMs]] as [string, number][]).map(([lbl, ms]) => (
                     <div key={lbl} className="flex flex-col items-center">
