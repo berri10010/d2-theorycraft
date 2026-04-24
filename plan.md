@@ -315,6 +315,14 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Charge Time MW for Fusion Rifles / LFRs: positive bonus also negated | ✅ Done |
 | Season 27+ tiered weapon secondary MW bonus: flat +5 to all other applicable stats (replaces old +2/+3/+4 adept/crafted/enhanced ladder for s27+) | ✅ Done |
 | MasterworkPanel labels updated to show correct season-aware secondary bonus count | ✅ Done |
+| Draw Time MW hardcoded to −34ms; Charge Time MW −33ms (LFR + FR Rapid-Fire/Precision) or −34ms (other FR frames) | ✅ Done |
+| Ammo Generation excluded from masterworkSecondaryStats (never a secondary MW bonus stat) | ✅ Done |
+| Sunset filter excludes Exotic weapons (exotics cannot be sunset in D2) | ✅ Done |
+| Enhanced state auto-derived from perk selection — no longer a manual toggle; "Enhanceable" badge (non-interactive) shows when off, "Enhanced" (violet) when both Perk 1 & 2 are enhanced | ✅ Done |
+| Barrel/mag columns skip enhanced state for non-featured (pre-s27, non-Exotic) weapons unless craftable is active | ✅ Done |
+| Adept toggle circle vertically centered (`top-1/2 -translate-y-1/2`) | ✅ Done |
+| Craftable (inactive) and Enhanceable badge border updated to `border-white/10` matching Adept grey style | ✅ Done |
+| StatDisplay subscribes to `isEnhanced` so stat bars and masterwork label update when enhanced state auto-triggers | ✅ Done |
 | Ammo panel: uses Bungie manifest first (ammoType, Magazine stat, Ammo Capacity reserves); MossyMax only for mag round count and reserve mod tiers | ✅ Done |
 | Adept/Craftable mutual exclusion: clicking Adept disables Craftable and vice versa (no double-disable bug) | ✅ Done |
 | Move Weapon Stat row in PvE Masterwork & Mods panel into TTK & Falloff panel (mirrors PvP layout) | ✅ Done |
@@ -555,6 +563,20 @@ npm run build
 *6. `src/components/weapon/StatDisplay.tsx` updated: `ReloadBreakdown` component shows reload time in seconds below Reload bar. `DrawWindowBreakdown` component shows perfect draw start time below Draw Time bar (bows only, gated on `itemSubType === 31`).*
 
 *7. Share button (from previous session, commits da71feb + b5c5903): replaced single Share button with dropdown offering "Roll Permalink" and "DIM Wishlist Item". DIM format uses `&perks=` separator. Perk sort order matches DIM: non-origin perks descending by socket index, origin trait last.*
+
+---
+
+*Last updated: 2026-04-24 — Session summary (MW fixes, enhanced state rework, sunset filter):*
+
+*1. MW bonus corrections (parser.ts, DATA_FORMAT_VERSION → 14): Draw Time MW hardcoded to −34ms for all bows (was −10 from naive negation). Charge Time MW: −33ms for LFR and FR Rapid-Fire/Precision frames, −34ms for all other FR frames. Ammo Generation excluded from masterworkSecondaryStats. Sunset filter excludes Exotic weapons.*
+
+*2. Enhanced state auto-derive (RollEditor.tsx + WeaponHeader.tsx): removed manual Enhanced toggle. `isEnhanced` is now computed in a `useMemo` + `useEffect` in RollEditor — activates only when both Perk 1 AND Perk 2 have their enhanced version explicitly selected (and craftable is off). Guard added for the `undefined === undefined` false-positive that caused single-perk enhancement to trigger the state. WeaponHeader shows a non-interactive "Enhanceable" badge (grey) when available, "Enhanced" badge (violet) when active.*
+
+*3. Barrel/mag enhancement restriction: for non-featured weapons (pre-s27, non-Exotic), double-clicking a barrel or mag perk skips the enhanced step and goes straight to deselect, unless craftable mode is active. Featured weapons (Exotic or s27+) are exempt.*
+
+*4. StatDisplay fix: added `isEnhanced` to the `useShallow` subscription and `useMemo` dependency array so stat bars and masterwork label recompute when the auto-enhanced state changes.*
+
+*5. UI polish: Adept toggle circle now uses `top-1/2 -translate-y-1/2` for correct vertical centering. Craftable (inactive) and Enhanceable badge borders updated to `border-white/10`.*
 
 ---
 
