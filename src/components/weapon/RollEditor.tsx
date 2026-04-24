@@ -61,24 +61,20 @@ export const RollEditor: React.FC = () => {
     return activeWeapon.rarity === 'Exotic' || (activeWeapon.seasonNumber ?? 0) >= 27;
   }, [activeWeapon]);
 
-  // Auto-derive enhanced state: when both perk 1 and perk 2 have enhanced versions
-  // selected (and craftable is off), isEnhanced is automatically activated.
-  // Perk columns that have no enhanced versions at all are treated as trivially satisfied.
+  // Auto-derive enhanced state: isEnhanced is true ONLY when both Perk 1 and Perk 2
+  // have their enhanced version explicitly selected. Any other state disables it.
   const shouldBeEnhanced = useMemo(() => {
     if (isCrafted || !activeWeapon) return false;
     const perkCols = activeWeapon.perkSockets.filter((col) => col.columnType === 'perk');
-
-    const check = (col: typeof perkCols[0] | undefined): boolean => {
-      if (!col) return true;
-      const hasEnh = col.perks.some((p) => !!p.enhancedVersion);
-      if (!hasEnh) return true; // no enhanced perks in this column — trivially satisfied
+    const perk1 = perkCols[0];
+    const perk2 = perkCols[1];
+    // Both columns must exist
+    if (!perk1 || !perk2) return false;
+    const isEnhancedSelected = (col: typeof perk1): boolean => {
       const selected = selectedPerks[col.name];
       return col.perks.some((p) => p.enhancedVersion?.hash === selected);
     };
-
-    // At least one perk column must have enhanceable perks for the condition to fire
-    const anyEnhanceable = perkCols.slice(0, 2).some((col) => col.perks.some((p) => !!p.enhancedVersion));
-    return anyEnhanceable && check(perkCols[0]) && check(perkCols[1]);
+    return isEnhancedSelected(perk1) && isEnhancedSelected(perk2);
   }, [isCrafted, activeWeapon, selectedPerks]);
 
   // Auto-sync isEnhanced to the derived condition
