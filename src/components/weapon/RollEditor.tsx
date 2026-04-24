@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
@@ -27,7 +27,7 @@ const COL_ACCENT_BAR: Record<string, string> = {
 export const RollEditor: React.FC = () => {
   const {
     activeWeapon, selectedPerks, selectPerk, clearPerk,
-    isCrafted, isEnhanced, variantGroup, mode,
+    isCrafted, isEnhanced, setEnhanced, variantGroup, mode,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:  s.activeWeapon,
@@ -36,6 +36,7 @@ export const RollEditor: React.FC = () => {
       clearPerk:     s.clearPerk,
       isCrafted:     s.isCrafted,
       isEnhanced:    s.isEnhanced,
+      setEnhanced:   s.setEnhanced,
       variantGroup:  s.variantGroup,
       mode:          s.mode,
     }))
@@ -53,21 +54,53 @@ export const RollEditor: React.FC = () => {
     });
   }, [activeWeapon, variantGroup]);
 
-  const hasEnhanceable = useMemo(
-    () => !!activeWeapon?.perkSockets.some((col) => col.perks.some((p) => !!p.enhancedVersion)),
+  // "Featured" weapons (Exotic or s27+) allow barrel/mag enhancement freely.
+  // Non-featured weapons require isCrafted to be true before barrel/mag can be enhanced.
+  const isFeatured = useMemo(() => {
+    if (!activeWeapon) return false;
+    return activeWeapon.rarity === 'Exotic' || (activeWeapon.seasonNumber ?? 0) >= 27;
+  }, [activeWeapon]);
+
+  // Auto-derive enhanced state: when both perk 1 and perk 2 have enhanced versions
+  // selected (and craftable is off), isEnhanced is automatically activated.
+  // Perk columns that have no enhanced versions at all are treated as trivially satisfied.
+  const shouldBeEnhanced = useMemo(() => {
+    if (isCrafted || !activeWeapon) return false;
+    const perkCols = activeWeapon.perkSockets.filter((col) => col.columnType === 'perk');
+
+    const check = (col: typeof perkCols[0] | undefined): boolean => {
+      if (!col) return true;
+      const hasEnh = col.perks.some((p) => !!p.enhancedVersion);
+      if (!hasEnh) return true; // no enhanced perks in this column — trivially satisfied
+      const selected = selectedPerks[col.name];
+      return col.perks.some((p) => p.enhancedVersion?.hash === selected);
+    };
+
+    // At least one perk column must have enhanceable perks for the condition to fire
+    const anyEnhanceable = perkCols.slice(0, 2).some((col) => col.perks.some((p) => !!p.enhancedVersion));
+    return anyEnhanceable && check(perkCols[0]) && check(perkCols[1]);
+  }, [isCrafted, activeWeapon, selectedPerks]);
+
+  // Auto-sync isEnhanced to the derived condition
+  useEffect(() => {
+    if (shouldBeEnhanced !== isEnhanced) {
+      setEnhanced(shouldBeEnhanced);
+    }
+  }, [shouldBeEnhanced, isEnhanced, setEnhanced]);
+
+  const hasPerkEnhanceable = useMemo(
+    () => !!activeWeapon?.perkSockets
+      .filter((col) => col.columnType === 'perk')
+      .some((col) => col.perks.some((p) => !!p.enhancedVersion)),
     [activeWeapon]
   );
 
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
-  // Suppress unused-variable warnings — subscribed to trigger re-renders
-  void isCrafted;
-  void isEnhanced;
-
   return (
     <CollapsiblePanel
       title="Weapon Perks"
-      headerRight={hasEnhanceable && (activeWeapon.hasCraftedPattern || isEnhanced) && (
+      headerRight={hasPerkEnhanceable && !isCrafted && (
         <span className="text-xs text-slate-500 font-normal tracking-wide">
           Click twice to enhance
         </span>
@@ -82,6 +115,12 @@ export const RollEditor: React.FC = () => {
             const columnDisabled   = isOriginTraitCol && isLegacy;
             const accentBar        = COL_ACCENT_BAR[column.columnType] ?? 'bg-slate-500/40';
             const isLast           = colIdx === activeWeapon.perkSockets.length - 1;
+
+            // Barrel and mag can only be enhanced on featured weapons (Exotic / s27+)
+            // or when craftable mode is active. For all other weapons, the second click
+            // skips enhanced and goes straight to deselect.
+            const isBarrelOrMag = column.columnType === 'barrel' || column.columnType === 'mag';
+            const canEnhanceCol = !isBarrelOrMag || isFeatured || isCrafted;
 
             return (
               <div
@@ -126,7 +165,8 @@ export const RollEditor: React.FC = () => {
                       if (!isActive) {
                         selectPerk(column.name, perk.hash);
                         flash(perk.hash);
-                      } else if (isBaseActive && perk.enhancedVersion) {
+                      } else if (isBaseActive && perk.enhancedVersion && canEnhanceCol) {
+                        // Progress to enhanced state only when allowed for this column
                         const enhHash = perk.enhancedVersion.hash;
                         selectPerk(column.name, enhHash);
                         flash(enhHash);
@@ -137,7 +177,7 @@ export const RollEditor: React.FC = () => {
 
                     const nextAction = !isActive
                       ? displayPerk.name
-                      : isBaseActive && perk.enhancedVersion
+                      : isBaseActive && perk.enhancedVersion && canEnhanceCol
                         ? `Enhance → ${perk.enhancedVersion.name}`
                         : `Deselect ${displayPerk.name}`;
 
@@ -158,6 +198,7 @@ export const RollEditor: React.FC = () => {
                         <div className="text-[10px] text-slate-400 leading-relaxed">
                           {clarityEntry ? renderClarityDesc(clarityEntry) : displayPerk.description}
                         </div>
+                        <div className="text-[9px] text-slate-600 mt-1">{nextAction}</div>
                       </div>
                     );
 
