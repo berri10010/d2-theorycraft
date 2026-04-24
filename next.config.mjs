@@ -6,6 +6,9 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Allow Next.js/webpack to resolve motion's ESM subpath exports (e.g. motion/react)
+  transpilePackages: ['motion'],
+
   // Fully static export — no Next.js server, no API routes, no SSR.
   // All pages are pre-rendered to HTML + JS at build time and served via CDN.
   output: 'export',
