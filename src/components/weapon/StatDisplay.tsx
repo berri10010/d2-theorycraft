@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useEffect, useRef, useState } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { Tooltip } from '../ui/Tooltip';
 import { useShallow } from 'zustand/react/shallow';
