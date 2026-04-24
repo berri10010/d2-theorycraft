@@ -961,20 +961,31 @@ export function parseWeapons(
       }
     }
 
-    // Step 2: Draw Time and Charge Time are "lower is better" stats.  The Bungie
-    // manifest stores their MW investment as a positive integer but the actual
-    // game effect is a reduction in milliseconds.  Negate so getCalculatedStats
-    // subtracts from the raw value and the stat display shows a correct negative delta.
-    for (const negStat of ['Draw Time', 'Charge Time'] as const) {
-      if ((masterworkBonuses[negStat] ?? 0) > 0) {
-        masterworkBonuses[negStat] = -masterworkBonuses[negStat];
-      }
+    // Step 2: Draw Time and Charge Time are "lower is better" stats stored as
+    // positive integers in the Bungie manifest.  Replace the raw bonus with the
+    // correct in-game value so getCalculatedStats shows the right signed delta.
+    //   Draw Time (Combat Bow):      always −34 ms
+    //   Charge Time (LFR):           always −33 ms
+    //   Charge Time (FR Rapid-Fire or Precision frame): −33 ms
+    //   Charge Time (all other FR frames):              −34 ms
+    const mwFrameName = intrinsicTrait !== null ? (intrinsicTrait as { name: string }).name : '';
+    if ('Draw Time' in masterworkBonuses) {
+      masterworkBonuses['Draw Time'] = -34;
+    }
+    if ('Charge Time' in masterworkBonuses) {
+      const weaponType = item.itemTypeDisplayName ?? '';
+      const isLFR = weaponType === 'Linear Fusion Rifle';
+      const isFR  = weaponType === 'Fusion Rifle';
+      const isRapidFireOrPrecision =
+        mwFrameName.includes('Rapid') || mwFrameName === 'Precision Frame';
+      masterworkBonuses['Charge Time'] =
+        isLFR || (isFR && isRapidFireOrPrecision) ? -33 : -34;
     }
 
     // Step 3: Apply per-type / per-frame whitelist to block cross-plug-set bleed
     // (e.g. Impact appearing on bows, Charge Time on swords).
     // Returns null for unknown weapon types → no whitelist applied (safe fallback).
-    const mwFrameName = intrinsicTrait !== null ? (intrinsicTrait as { name: string }).name : '';
+    // mwFrameName is computed above (Step 2).
     const mwWhitelist = getMwWhitelist(
       item.itemTypeDisplayName ?? '',
       mwFrameName,
@@ -1019,8 +1030,9 @@ export function parseWeapons(
       ),
       // Secondary bonus stats that are not MW options but still receive adept bonuses.
       // Must exist on this weapon's baseStats (same guard as masterworkOptions).
+      // Ammo Generation is never a secondary MW bonus stat — exclude it explicitly.
       masterworkSecondaryStats: [...secondaryMwStats].filter(
-        (s) => !finalMwOptions.includes(s) && baseStats[s] !== undefined
+        (s) => !finalMwOptions.includes(s) && baseStats[s] !== undefined && s !== 'Ammo Generation'
       ),
       weaponMods,
       foundry: extractFoundry(item.traitIds),

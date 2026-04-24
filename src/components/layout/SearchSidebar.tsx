@@ -646,7 +646,7 @@ export const SearchSidebar: React.FC = () => {
       if (filters.adeptOnly     && !g.variants.some(v => v.isAdept))           return false;
       if (filters.craftableOnly && !g.variants.some(v => v.hasCraftedPattern))  return false;
       if (filters.featured      && !(d.rarity === 'Exotic' || (d.seasonNumber !== null && d.seasonNumber >= 27))) return false;
-      if (filters.sunsetOnly    && !(d.seasonNumber !== null && d.seasonNumber <= 12))                             return false;
+      if (filters.sunsetOnly    && (d.rarity === 'Exotic' || !(d.seasonNumber !== null && d.seasonNumber <= 12))) return false;
 
       return true;
     });
