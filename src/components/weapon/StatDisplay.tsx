@@ -187,6 +187,7 @@ export const StatDisplay: React.FC = () => {
     selectedPerks,
     masterworkStat,
     isCrafted,
+    isEnhanced,
     activeMod,
     armorMods,
     activeEffects,
@@ -198,6 +199,7 @@ export const StatDisplay: React.FC = () => {
       selectedPerks:      s.selectedPerks,
       masterworkStat:     s.masterworkStat,
       isCrafted:          s.isCrafted,
+      isEnhanced:         s.isEnhanced,
       activeMod:          s.activeMod,
       armorMods:          s.armorMods,
       activeEffects:      s.activeEffects,
@@ -207,7 +209,7 @@ export const StatDisplay: React.FC = () => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const calcStats = useMemo(() => getCalculatedStats(), [
-    activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods, activeEffects, activeBuffs,
+    activeWeapon, selectedPerks, masterworkStat, isCrafted, isEnhanced, activeMod, armorMods, activeEffects, activeBuffs,
   ]);
 
   if (!activeWeapon) return null;
