@@ -11,8 +11,7 @@ import { calcReloadTime } from '../../lib/reloadTimes';
 import { calcBowPerfectDraw } from '../../lib/bowDrawWindow';
 
 const STAT_TRANSLATIONS: Record<string, { label: string; unit: string }> = {
-  Range:  { label: 'Falloff', unit: 'm' },
-  Reload: { label: 'Time',    unit: 's' },
+  Range: { label: 'Falloff', unit: 'm' },
 };
 
 const STAT_LABEL_MAP: Record<string, string> = {
@@ -158,11 +157,12 @@ function StatBarRow({ label, base, current, translatedValue, translatedUnit }: {
 
 // ── Animated compact stat card ────────────────────────────────────────────────
 
-function CompactStatCard({ statName, base, current, label }: {
+function CompactStatCard({ statName, base, current, label, annotation }: {
   statName: string;
   base: number;
   current: number;
   label: string;
+  annotation?: string;
 }) {
   const animVal  = useAnimatedValue(current);
   const diff     = current - base;
@@ -184,6 +184,9 @@ function CompactStatCard({ statName, base, current, label }: {
             </span>
           )}
         </div>
+        {annotation && (
+          <div className="text-[10px] font-mono text-amber-400 leading-none mt-0.5">{annotation}</div>
+        )}
       </div>
     </div>
   );
@@ -366,6 +369,14 @@ export const StatDisplay: React.FC = () => {
               if (base === 0 && current === 0 && !ALWAYS_SHOW_STATS.has(statName)) return null;
 
               const label = STAT_LABEL_MAP[statName] ?? statName;
+
+              let annotation: string | undefined;
+              if (statName === 'Zoom' && current > 0) {
+                annotation = `${(current / 10).toFixed(1)}×`;
+              } else if (statName === 'Airborne Effectiveness' && current > 0) {
+                annotation = `${current}% flinch`;
+              }
+
               return (
                 <CompactStatCard
                   key={statName}
@@ -373,6 +384,7 @@ export const StatDisplay: React.FC = () => {
                   base={base}
                   current={current}
                   label={label}
+                  annotation={annotation}
                 />
               );
             })}
