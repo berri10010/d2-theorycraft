@@ -222,6 +222,19 @@ function ReloadBreakdown({ reloadMs }: { reloadMs: number }) {
   );
 }
 
+// ── Charge / draw time breakdown ─────────────────────────────────────────────
+
+function ChargeTimeBreakdown({ ms }: { ms: number }) {
+  return (
+    <div className="flex gap-3 mt-1 ml-[7.5rem] md:ml-[8.5rem]">
+      <div className="flex items-baseline gap-1">
+        <span className="text-[10px] text-slate-500">Time</span>
+        <span className="text-[10px] font-mono text-amber-400">{(ms / 1000).toFixed(2)}s</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Bow draw window breakdown ─────────────────────────────────────────────────
 
 function DrawWindowBreakdown({ perfectMs }: { perfectMs: number }) {
@@ -331,6 +344,9 @@ export const StatDisplay: React.FC = () => {
               )}
               {statName === 'Reload' && reloadMs != null && (
                 <ReloadBreakdown reloadMs={reloadMs} />
+              )}
+              {statName === 'Charge Time' && current > 0 && (
+                <ChargeTimeBreakdown ms={current} />
               )}
               {statName === 'Draw Time' && bowPerfectDrawMs != null && (
                 <DrawWindowBreakdown perfectMs={bowPerfectDrawMs} />
