@@ -343,6 +343,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | `CollapsiblePanel` shared component: card background + toggle header with `stopPropagation` on `headerRight` slot | ✅ Done |
 | All panels collapsible via `CollapsiblePanel`; External Buffs, Similar Weapons, Wishlists collapsed by default | ✅ Done |
 | Service worker cache strategy: never pre-cache HTML (prevents stale CSS hash mismatches after deploys); cache-first only for `/_next/static/` immutable hashed assets | ✅ Done |
+| Weapon Surge dmg label floating-point fix: `(multiplier - 1) * 100` → `.toFixed(2)` + unary `+` to strip trailing zeros | ✅ Done |
 
 **Stage 12 progress: ~95%**
 
@@ -568,3 +569,9 @@ npm run build
 *4. Charge Time tooltip added (X.XXs on hover over Charge Time bar) — Charge Time stat is stored as raw ms in Bungie manifest, so no formula needed, just divide by 1000.*
 
 *5. oracle_engine research: investigated Magazine, Draw Time, and Charge Time stat math (see Known Issues and Reference sections below). Key findings: (a) `baseStats['Magazine']` is a 0–100 investmentStat, not round count — oracle_engine applies a per-archetype quadratic formula to convert it to actual rounds; our DPS panel currently uses the raw stat value which is incorrect. (b) Draw Time and Charge Time are also 0–100 investmentStats in oracle_engine's model; archetype-specific linear formulas convert stat deltas to seconds. Our display of the raw ms Bungie manifest value is correct for the stat bar but perk effects on these stats interact with the formula, not directly with ms. (c) One special case: Sniper Rifles with mag_stat > 90 receive +1 bonus round after the quadratic formula. (d) LFRs: perks that reduce charge time below base also apply a proportional damage penalty (`dmg *= 1.0 - 0.6 * delta / base_damage`), which we do not model.*
+
+---
+
+*Last updated: 2026-04-24 — Session summary (bug fix):*
+
+*1. Weapon Surge dmg label floating-point fix (commit eb1c920, ArmorModPanel.tsx line 175): `(multiplier - 1) * 100` with no rounding produced `5.499999999999994%` due to IEEE 754 representation of `1.055`. Fixed with `.toFixed(2)` + unary `+` to strip trailing zeros → displays `+5.5% dmg`.*
