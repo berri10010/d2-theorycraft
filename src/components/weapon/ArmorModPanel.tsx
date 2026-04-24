@@ -172,7 +172,7 @@ export const ArmorModPanel: React.FC = () => {
           </h3>
           {surgeStacks > 0 && (
             <span className="text-[10px] font-semibold text-amber-400">
-              +{(((mode === 'pve' ? SURGE_PVE : SURGE_PVP)[surgeStacks] ?? 1) - 1) * 100}% dmg
+              +{+((((mode === 'pve' ? SURGE_PVE : SURGE_PVP)[surgeStacks] ?? 1) - 1) * 100).toFixed(2)}% dmg
             </span>
           )}
         </div>
