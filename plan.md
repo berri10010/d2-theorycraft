@@ -236,8 +236,13 @@ A broad set of UI, data, and UX improvements requested for the next development 
 |------|--------|
 | Handling breakdown: surface Ready / ADS / Stow times as separate stats | ✅ Done |
 | Reload time in seconds: show below Reload stat bar (oracle_engine quadratic formula) | ✅ Done |
+| Charge Time: show actual charge duration on hover over Charge Time bar | ✅ Done |
 | Perfect Draw Window: show exact start time in seconds below Draw Time bar (Bows) | ✅ Done |
 | DPS panel: Optimal DPS + Sustained DPS (PvP/PvE), per-shot damage, burst size, RPM, mag, reload | ✅ Done |
+| All stat breakdowns (Handling/Reload/ChargeTime/DrawTime/Range/Zoom) moved to hover tooltips | ✅ Done |
+| Range stat: hover shows Hip Xm (cyan) + ADS Xm (amber) using adsMultiplier(zoom) | ✅ Done |
+| Zoom stat: hover shows magnification multiplier (zoom/10, e.g. 1.4×) | ✅ Done |
+| Compare tab: Ready/ADS/Stow handling chips + Reload/Charge/Perfect timing row (per-weapon-type) | ✅ Done |
 | Damage vs Distance chart: interactive line chart showing actual damage values per meter (hip-fire vs ADS) | ⬜ Pending |
 | Flinch resistance: show flinch resist derived from Stability + Health (0–100 → 0–10%) | ⬜ Pending |
 | Per-activity PvE scaling: Activity + Difficulty + Enemy Type dropdown scales all damage numbers; include custom option | ⬜ Pending |
@@ -375,7 +380,8 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Issue | Notes |
 |-------|-------|
-| (none) | |
+| DPS panel magazine size is wrong | `calcStats['Magazine']` is a 0–100 investmentStat, not round count. oracle_engine uses a per-archetype quadratic formula (same evpp/vpp/offset pattern as reload) to convert it to actual rounds. DPS panel currently uses raw stat value. |
+| LFR charge-time damage penalty not modelled | oracle_engine applies a proportional damage penalty when perks reduce charge time below base on LFRs: `dmg *= 1.0 - (0.6 * delta) / base_damage`. We don't apply this. |
 
 ---
 
@@ -548,3 +554,17 @@ npm run build
 *6. `src/components/weapon/StatDisplay.tsx` updated: `ReloadBreakdown` component shows reload time in seconds below Reload bar. `DrawWindowBreakdown` component shows perfect draw start time below Draw Time bar (bows only, gated on `itemSubType === 31`).*
 
 *7. Share button (from previous session, commits da71feb + b5c5903): replaced single Share button with dropdown offering "Roll Permalink" and "DIM Wishlist Item". DIM format uses `&perks=` separator. Perk sort order matches DIM: non-origin perks descending by socket index, origin trait last.*
+
+---
+
+*Last updated: 2026-04-24 — Session summary (stat hover tooltips + compare tab timing chips):*
+
+*1. Removed AE "flinch" annotation — Airborne Effectiveness does not measure flinch resistance.*
+
+*2. All derived stat values moved to hover tooltips (80ms delay, via existing portal Tooltip component): Handling (Ready/ADS/Stow ms), Reload (X.XXs), Charge Time (X.XXs), Draw Time (Perfect X.XXs for bows), Range (Hip Xm in cyan + ADS Xm in amber-300), Zoom (magnification X.X×). StatBarRow `details` prop and CompactStatCard `annotation` prop removed. Stat bars and compact cards are now clean by default.*
+
+*3. ComparisonGrid new chip rows (commits d69b437, 1cb0999, 7833f63): after TTK/Hip/ADS row, added Ready/ADS/Stow handling chips (slate-200, only shown when formula data exists for weapon type) and a dynamic Reload/Charge/Perfect timing row (amber, 1–2 chips depending on weapon type). Zoom magnification not added to compare tab per user request.*
+
+*4. Charge Time tooltip added (X.XXs on hover over Charge Time bar) — Charge Time stat is stored as raw ms in Bungie manifest, so no formula needed, just divide by 1000.*
+
+*5. oracle_engine research: investigated Magazine, Draw Time, and Charge Time stat math (see Known Issues and Reference sections below). Key findings: (a) `baseStats['Magazine']` is a 0–100 investmentStat, not round count — oracle_engine applies a per-archetype quadratic formula to convert it to actual rounds; our DPS panel currently uses the raw stat value which is incorrect. (b) Draw Time and Charge Time are also 0–100 investmentStats in oracle_engine's model; archetype-specific linear formulas convert stat deltas to seconds. Our display of the raw ms Bungie manifest value is correct for the stat bar but perk effects on these stats interact with the formula, not directly with ms. (c) One special case: Sniper Rifles with mag_stat > 90 receive +1 bonus round after the quadratic formula. (d) LFRs: perks that reduce charge time below base also apply a proportional damage penalty (`dmg *= 1.0 - 0.6 * delta / base_damage`), which we do not model.*
