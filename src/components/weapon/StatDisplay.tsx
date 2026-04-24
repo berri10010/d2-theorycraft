@@ -7,6 +7,8 @@ import { useWeaponStore } from '../../store/useWeaponStore';
 import { interpolateStat } from '../../lib/math';
 import { getStatsForWeapon } from '../../lib/weaponStatMappings';
 import { calcHandlingTimes, HandlingTimes } from '../../lib/handlingTimes';
+import { calcReloadTime } from '../../lib/reloadTimes';
+import { calcBowPerfectDraw } from '../../lib/bowDrawWindow';
 
 const STAT_TRANSLATIONS: Record<string, { label: string; unit: string }> = {
   Range:  { label: 'Falloff', unit: 'm' },
@@ -207,6 +209,32 @@ function HandlingBreakdown({ times }: { times: HandlingTimes }) {
   );
 }
 
+// ── Reload time breakdown ─────────────────────────────────────────────────────
+
+function ReloadBreakdown({ reloadMs }: { reloadMs: number }) {
+  return (
+    <div className="flex gap-3 mt-1 ml-[7.5rem] md:ml-[8.5rem]">
+      <div className="flex items-baseline gap-1">
+        <span className="text-[10px] text-slate-500">Time</span>
+        <span className="text-[10px] font-mono text-amber-400">{(reloadMs / 1000).toFixed(2)}s</span>
+      </div>
+    </div>
+  );
+}
+
+// ── Bow draw window breakdown ─────────────────────────────────────────────────
+
+function DrawWindowBreakdown({ perfectMs }: { perfectMs: number }) {
+  return (
+    <div className="flex gap-3 mt-1 ml-[7.5rem] md:ml-[8.5rem]">
+      <div className="flex items-baseline gap-1">
+        <span className="text-[10px] text-slate-500">Perfect</span>
+        <span className="text-[10px] font-mono text-amber-400">{(perfectMs / 1000).toFixed(2)}s</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export const StatDisplay: React.FC = () => {
@@ -259,6 +287,21 @@ export const StatDisplay: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calcStats, activeWeapon]);
 
+  const reloadMs = useMemo(() => {
+    const stat = calcStats['Reload'] ?? activeWeapon.baseStats['Reload'] ?? null;
+    if (stat === null) return null;
+    return calcReloadTime(activeWeapon.itemTypeDisplayName, activeWeapon.ammoType, stat);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calcStats, activeWeapon]);
+
+  const bowPerfectDrawMs = useMemo(() => {
+    if (activeWeapon.itemSubType !== 31) return null; // 31 = Bow
+    const stat = calcStats['Stability'] ?? activeWeapon.baseStats['Stability'] ?? null;
+    if (stat === null) return null;
+    return calcBowPerfectDraw(activeWeapon.intrinsicTrait?.name ?? null, stat);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calcStats, activeWeapon]);
+
   return (
     <CollapsiblePanel title="Weapon Stats">
 
@@ -285,6 +328,12 @@ export const StatDisplay: React.FC = () => {
               />
               {statName === 'Handling' && handlingTimes && (
                 <HandlingBreakdown times={handlingTimes} />
+              )}
+              {statName === 'Reload' && reloadMs != null && (
+                <ReloadBreakdown reloadMs={reloadMs} />
+              )}
+              {statName === 'Draw Time' && bowPerfectDrawMs != null && (
+                <DrawWindowBreakdown perfectMs={bowPerfectDrawMs} />
               )}
             </div>
           );

@@ -7,6 +7,7 @@ import { ArmorModPanel } from './ArmorModPanel';
 import { TTKAndFalloffPanel } from '../ui/TTKAndFalloffPanel';
 import { SubclassVerbPanel } from './SubclassVerbPanel';
 import { DamageProfilePanel } from './DamageProfilePanel';
+import { DpsPanel } from './DpsPanel';
 
 // ── Panel options ─────────────────────────────────────────────────────────────
 
@@ -15,6 +16,7 @@ type PanelKey =
   | 'ammo'
   | 'ttk-falloff'
   | 'damage-profile'
+  | 'dps'
   | 'subclass';
 
 interface PanelOption {
@@ -27,6 +29,7 @@ const OPTIONS: PanelOption[] = [
   { key: 'ammo',           label: 'Ammo'                 },
   { key: 'ttk-falloff',    label: 'TTK & Falloff'        },
   { key: 'damage-profile', label: 'Damage Profile'       },
+  { key: 'dps',            label: 'DPS'                  },
   { key: 'subclass',       label: 'Subclass Verb Math'   },
 ];
 
@@ -108,6 +111,7 @@ export function WeaponDataPanel() {
             {active === 'ammo'           && <AmmoPanel />}
             {active === 'ttk-falloff'    && <TTKAndFalloffPanel />}
             {active === 'damage-profile' && <DamageProfilePanel />}
+            {active === 'dps'           && <DpsPanel />}
             {active === 'subclass'       && <SubclassVerbPanel />}
           </div>
         </div>
