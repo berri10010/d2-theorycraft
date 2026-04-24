@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { motion } from 'motion/react';
 import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
@@ -155,7 +156,7 @@ export const RollEditor: React.FC = () => {
 
                     const flash = (hash: string) => {
                       setFlashHash(hash);
-                      setTimeout(() => setFlashHash((h) => (h === hash ? null : h)), 400);
+                      // Cleared by motion's onAnimationComplete — no setTimeout needed
                     };
 
                     const handleClick = () => {
@@ -205,7 +206,17 @@ export const RollEditor: React.FC = () => {
                       <Tooltip key={perk.hash} content={tooltipContent}>
                       <div className="relative shrink-0">
                         {isFlashing && (
-                          <span className="absolute inset-0 rounded-full pointer-events-none z-10 animate-perk-ring" />
+                          <motion.span
+                            className="absolute inset-0 rounded-full pointer-events-none z-10"
+                            initial={{ boxShadow: '0 0 0 0px rgba(255,255,255,0.55)', opacity: 1 }}
+                            animate={{ boxShadow: '0 0 0 10px rgba(255,255,255,0)', opacity: 0 }}
+                            transition={{ duration: 0.38, ease: 'easeOut' }}
+                            onAnimationComplete={() =>
+                              setFlashHash((h) =>
+                                h === perk.hash || h === perk.enhancedVersion?.hash ? null : h
+                              )
+                            }
+                          />
                         )}
                         <button
                           onClick={handleClick}

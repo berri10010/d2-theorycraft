@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
+import { motion } from 'motion/react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { isLegacyVariant } from '../../lib/weaponGroups';
@@ -300,7 +301,11 @@ export const WeaponHeader: React.FC = () => {
                     ].join(' ')}
                   >
                     <span className={['relative inline-flex w-7 h-4 rounded-full transition-colors border', isAdeptSelected ? 'bg-amber-500/40 border-amber-500/60' : 'bg-white/5 border-white/15'].join(' ')}>
-                      <span className={['absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full transition-all', isAdeptSelected ? 'translate-x-3.5 bg-amber-400' : 'translate-x-0.5 bg-slate-500'].join(' ')} />
+                      <motion.span
+                        className={['absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full', isAdeptSelected ? 'bg-amber-400' : 'bg-slate-500'].join(' ')}
+                        animate={{ x: isAdeptSelected ? 14 : 2 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      />
                     </span>
                     {adeptVariant.variantLabel}
                   </button>

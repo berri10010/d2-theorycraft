@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useEffect, useRef, useState } from 'react';
+import { motion } from 'motion/react';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { Tooltip } from '../ui/Tooltip';
 import { useShallow } from 'zustand/react/shallow';
@@ -112,20 +113,23 @@ function StatBarRow({ label, base, current }: {
       <div className="w-24 md:w-28 font-medium text-slate-300 shrink-0">{label}</div>
 
       <div className="flex-1 h-2.5 bg-black rounded-full overflow-hidden relative mx-3">
-        <div
-          className="absolute top-0 left-0 h-full bg-slate-300 transition-all duration-300"
-          style={{ width: `${Math.min(base, 100)}%` }}
+        <motion.div
+          className="absolute top-0 left-0 h-full bg-slate-300"
+          animate={{ width: `${Math.min(base, 100)}%` }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
         />
         {diff > 0 && (
-          <div
-            className="absolute top-0 h-full bg-green-500 transition-all duration-300 opacity-90"
-            style={{ left: `${Math.min(base, 100)}%`, width: `${Math.min(diff, 100 - base)}%` }}
+          <motion.div
+            className="absolute top-0 h-full bg-green-500 opacity-90"
+            animate={{ left: `${Math.min(base, 100)}%`, width: `${Math.min(diff, 100 - base)}%` }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
           />
         )}
         {diff < 0 && (
-          <div
-            className="absolute top-0 h-full bg-red-500 transition-all duration-300 opacity-90"
-            style={{ left: `${Math.max(current, 0)}%`, width: `${Math.abs(diff)}%` }}
+          <motion.div
+            className="absolute top-0 h-full bg-red-500 opacity-90"
+            animate={{ left: `${Math.max(current, 0)}%`, width: `${Math.abs(diff)}%` }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
           />
         )}
       </div>
