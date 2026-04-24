@@ -60,8 +60,27 @@ export const MasterworkPanel: React.FC = () => {
 
   if (!activeWeapon) return null;
 
-  // Exotic weapons use catalysts — no masterwork socket or mod socket.
-  if (activeWeapon.rarity === 'Exotic') return null;
+  // Exotic weapons use Catalysts instead of masterworks.
+  // Show an informational card so the user knows why no masterwork options appear.
+  if (activeWeapon.rarity === 'Exotic') {
+    return (
+      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-amber-500/20">
+        <div className="flex items-start gap-3">
+          <span className="text-amber-400 text-xl leading-none mt-0.5">⬡</span>
+          <div>
+            <h2 className="text-xl font-bold text-white mb-1">Catalyst</h2>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Exotic weapons upgrade via a <span className="text-amber-400 font-semibold">Catalyst</span> instead of a masterwork.
+              Equip and complete the catalyst objective in-game to unlock bonus stats and an intrinsic perk upgrade.
+            </p>
+            <p className="text-[10px] text-slate-600 mt-2">
+              Catalyst bonuses are not reflected in this builder.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const isAdept = activeWeapon.isAdept;
 

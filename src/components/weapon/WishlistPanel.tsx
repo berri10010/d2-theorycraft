@@ -136,6 +136,7 @@ export const WishlistPanel: React.FC = () => {
   const { activeWeapon, selectedPerks } = useWeaponStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showAllRolls, setShowAllRolls] = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   const { wishlistDb, wishlistName, entryCount, isLoading, loadFile, clear } = useWishlist();
   const { rolls, save: saveRoll, remove: removeRoll, exportFile } = usePersonalRolls();
@@ -175,6 +176,7 @@ export const WishlistPanel: React.FC = () => {
   return (
     <CollapsiblePanel
       defaultOpen={false}
+      storageKey="wishlist"
       className={
         isMatch    ? 'border-yellow-500/60 shadow-[0_0_24px_rgba(234,179,8,0.2)]' :
         isPersonal ? 'border-cyan-500/50 shadow-[0_0_24px_rgba(6,182,212,0.15)]' :
@@ -235,9 +237,23 @@ export const WishlistPanel: React.FC = () => {
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className="w-full border border-dashed border-white/15 rounded-lg py-3 text-center text-xs text-slate-500 hover:text-slate-300 hover:border-white/30 transition-all disabled:opacity-50 disabled:cursor-wait"
+              onDragEnter={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragging(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file) loadFile(file);
+              }}
+              className={[
+                'w-full border border-dashed rounded-lg py-3 text-center text-xs transition-all disabled:opacity-50 disabled:cursor-wait',
+                dragging
+                  ? 'border-amber-500/60 bg-amber-500/10 text-amber-400 shadow-[0_0_18px_rgba(245,158,11,0.15)]'
+                  : 'border-white/15 text-slate-500 hover:text-slate-300 hover:border-white/30',
+              ].join(' ')}
             >
-              {isLoading ? 'Parsing…' : 'Drop a DIM wishlist (.txt) here, or click to browse'}
+              {isLoading ? 'Parsing…' : dragging ? 'Drop to import…' : 'Drop a DIM wishlist (.txt) here, or click to browse'}
             </button>
           )}
 

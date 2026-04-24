@@ -798,6 +798,11 @@ export const TTKAndFalloffPanel: React.FC = () => {
         </div>
       )}
 
+      {/* ── Data vintage note ─────────────────────────────────── */}
+      <p className="text-[9px] text-slate-700 text-right">
+        TTK &amp; falloff data: Season 26
+      </p>
+
       {/* ── Fullscreen overlay — rendered via portal so no ancestor stacking context can clip it */}
       {expanded !== null && createPortal(
         <div

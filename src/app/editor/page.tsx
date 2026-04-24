@@ -21,6 +21,7 @@ import { WeaponDataPanel } from '../../components/weapon/WeaponDataPanel';
 import { calculateTTK } from '../../lib/damageMath';
 import { MasterworkStat } from '../../store/useWeaponStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -86,13 +87,14 @@ function Dashboard() {
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
   const searchParams = useSearchParams();
 
-  const [activeTab,        setActiveTab]        = useState<'editor' | 'compare'>('editor');
-  const [shareOpen,        setShareOpen]        = useState(false);
-  const [copiedType,       setCopiedType]       = useState<'permalink' | 'dim' | null>(null);
-  const [sidebarOpen,      setSidebarOpen]      = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [clearPending,     setClearPending]     = useState(false);
-  const [showShortcuts,    setShowShortcuts]    = useState(false);
+  const [activeTab,          setActiveTab]          = useState<'editor' | 'compare'>('editor');
+  const [shareOpen,          setShareOpen]          = useState(false);
+  const [copiedType,         setCopiedType]         = useState<'permalink' | 'dim' | null>(null);
+  const [sidebarOpen,        setSidebarOpen]        = useState(false);
+  const [sidebarCollapsed,   setSidebarCollapsed]   = useState(false);
+  const [clearPending,       setClearPending]       = useState(false);
+  const [showShortcuts,      setShowShortcuts]      = useState(false);
+  const [importedWeaponName, setImportedWeaponName] = useState<string | null>(null);
 
   const shareRef    = useRef<HTMLDivElement>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -154,6 +156,7 @@ function Dashboard() {
 
     const group = weaponGroups.find((g) => g.variants.some((v) => v.hash === weaponHash));
     loadWeapon(found, group?.variants);
+    setImportedWeaponName(found.name);
 
     if (perkParam) {
       const hashes = perkParam.split(',');
@@ -585,6 +588,34 @@ function Dashboard() {
             )}
           </header>
 
+          {/* ── URL import banner ───────────────────────────────────────── */}
+          <AnimatePresence>
+            {importedWeaponName && (
+              <motion.div
+                key="import-banner"
+                initial={{ opacity: 0, y: -10, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="overflow-hidden"
+              >
+                <div className="flex items-center justify-between gap-3 bg-sky-500/10 border border-sky-500/25 rounded-xl px-4 py-2.5">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-sky-400">🔗</span>
+                    <span className="text-slate-300">
+                      Imported: <span className="font-semibold text-sky-400">{importedWeaponName}</span>
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setImportedWeaponName(null)}
+                    className="text-slate-500 hover:text-slate-200 transition-colors text-lg leading-none px-1"
+                    aria-label="Dismiss"
+                  >×</button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* ── Editor tab ──────────────────────────────────────────────── */}
           <div role="tabpanel" aria-label="Roll editor" hidden={activeTab !== 'editor'}>
             <AnimatePresence mode="popLayout" initial={false}>
@@ -596,12 +627,12 @@ function Dashboard() {
                 transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
                 className="space-y-6"
               >
-                <WeaponHeader />
+                <ErrorBoundary label="Weapon Header"><WeaponHeader /></ErrorBoundary>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                   {/* Left column */}
                   <div className="lg:col-span-6 space-y-6">
-                    <RollEditor />
+                    <ErrorBoundary label="Weapon Perks"><RollEditor /></ErrorBoundary>
                     {/* Mode-dependent panels — animate on PvE ↔ PvP switch */}
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.div
@@ -614,16 +645,16 @@ function Dashboard() {
                       >
                         {mode === 'pve' && (
                           <>
-                            <GodRollPanel />
-                            <WishlistPanel />
-                            <EffectsPanel />
+                            <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>
+                            <ErrorBoundary label="Wishlists"><WishlistPanel /></ErrorBoundary>
+                            <ErrorBoundary label="Effects"><EffectsPanel /></ErrorBoundary>
                             <BuffToggle />
                           </>
                         )}
                         {mode === 'pvp' && (
                           <>
-                            <WishlistPanel />
-                            <EffectsPanel />
+                            <ErrorBoundary label="Wishlists"><WishlistPanel /></ErrorBoundary>
+                            <ErrorBoundary label="Effects"><EffectsPanel /></ErrorBoundary>
                             <BuffToggle />
                           </>
                         )}
@@ -633,9 +664,9 @@ function Dashboard() {
 
                   {/* Right column */}
                   <div className="lg:col-span-6 space-y-6">
-                    <StatDisplay />
-                    <WeaponDataPanel />
-                    <SimilarWeaponsPanel />
+                    <ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary>
+                    <ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary>
+                    <ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary>
                   </div>
                 </div>
               </motion.div>
@@ -644,7 +675,7 @@ function Dashboard() {
 
           {/* ── Compare tab ─────────────────────────────────────────────── */}
           <div role="tabpanel" aria-label="Comparison grid" hidden={activeTab !== 'compare'}>
-            <ComparisonGrid />
+            <ErrorBoundary label="Comparison"><ComparisonGrid /></ErrorBoundary>
           </div>
 
         </div>

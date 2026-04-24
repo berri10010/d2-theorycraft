@@ -7,6 +7,7 @@ interface CompareState {
   addSnapshot: (snapshot: Omit<CompareSnapshot, 'id'>) => void;
   removeSnapshot: (id: string) => void;
   renameSnapshot: (id: string, label: string) => void;
+  reorderSnapshot: (id: string, direction: 'left' | 'right') => void;
   clearSnapshots: () => void;
 }
 
@@ -35,6 +36,17 @@ export const useCompareStore = create<CompareState>()(
         set((state) => ({
           snapshots: state.snapshots.map((s) => (s.id === id ? { ...s, label } : s)),
         })),
+
+      reorderSnapshot: (id, direction) =>
+        set((state) => {
+          const idx = state.snapshots.findIndex((s) => s.id === id);
+          if (idx === -1) return state;
+          const next = [...state.snapshots];
+          const target = direction === 'left' ? idx - 1 : idx + 1;
+          if (target < 0 || target >= next.length) return state;
+          [next[idx], next[target]] = [next[target], next[idx]];
+          return { snapshots: next };
+        }),
 
       clearSnapshots: () => set({ snapshots: [] }),
     }),

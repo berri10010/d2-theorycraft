@@ -129,6 +129,7 @@ export const RollEditor: React.FC = () => {
   return (
     <CollapsiblePanel
       title="Weapon Perks"
+      storageKey="weapon-perks"
       headerRight={hasPerkEnhanceable && !isCrafted && (
         <span className="text-xs text-slate-500 font-normal tracking-wide">
           Click twice to enhance
@@ -138,6 +139,9 @@ export const RollEditor: React.FC = () => {
 
       {/* ── Perk columns — identical layout regardless of single vs. multiple options ── */}
       {activeWeapon.perkSockets.length > 0 && (
+        <div className="relative">
+        {/* Right-fade scroll hint — visible on mobile only */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0d0d0f] to-transparent md:hidden z-10" />
         <div className="flex overflow-x-auto pb-4 md:grid md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 md:pb-0">
           {activeWeapon.perkSockets.map((column, colIdx) => {
             const isOriginTraitCol = column.columnType === 'origin';
@@ -227,6 +231,12 @@ export const RollEditor: React.FC = () => {
                         : `Deselect ${displayPerk.name}`;
 
                     const clarityEntry = clarityData?.[String(displayPerk.hash)] ?? clarityData?.[String(perk.hash)];
+
+                    // Stat modifier badges (e.g. +10 Range, -5 Handling) — unconditional mods only
+                    const statMods = (displayPerk.statModifiers ?? []).filter(
+                      (m) => m.value !== 0 && !m.isConditional
+                    );
+
                     const tooltipContent = (
                       <div>
                         <div className="flex items-center gap-1.5 mb-1">
@@ -243,6 +253,20 @@ export const RollEditor: React.FC = () => {
                         <div className="text-[10px] text-slate-400 leading-relaxed">
                           {clarityEntry ? renderClarityDesc(clarityEntry) : displayPerk.description}
                         </div>
+                        {statMods.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {statMods.map((mod) => (
+                              <span
+                                key={mod.statName}
+                                className={`text-[9px] font-bold px-1 py-px rounded leading-none ${
+                                  mod.value > 0 ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'
+                                }`}
+                              >
+                                {mod.value > 0 ? '+' : ''}{mod.value} {mod.statName}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         <div className="text-[9px] text-slate-600 mt-1">{nextAction}</div>
                       </div>
                     );
@@ -318,6 +342,7 @@ export const RollEditor: React.FC = () => {
               </div>
             );
           })}
+        </div>
         </div>
       )}
 

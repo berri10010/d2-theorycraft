@@ -122,7 +122,7 @@ export const GodRollPanel: React.FC = () => {
 
   if (loading) {
     return (
-      <CollapsiblePanel title="God Roll">
+      <CollapsiblePanel title="God Roll" storageKey="god-roll">
         <p className="text-slate-600 text-sm text-center py-6 animate-pulse">Loading community analysis…</p>
       </CollapsiblePanel>
     );
@@ -143,6 +143,7 @@ export const GodRollPanel: React.FC = () => {
 
   return (
     <CollapsiblePanel
+      storageKey="god-roll"
       title={
         <div>
           <div>God Roll</div>

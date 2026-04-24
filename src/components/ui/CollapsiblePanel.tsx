@@ -9,6 +9,11 @@ interface CollapsiblePanelProps {
   headerRight?: React.ReactNode;
   /** Override border/shadow — defaults to 'border-white/10' */
   className?: string;
+  /**
+   * When set, the open/closed state is persisted to localStorage under the key
+   * `panel-<storageKey>`. Omit for panels that should not persist state.
+   */
+  storageKey?: string;
   children: React.ReactNode;
 }
 
@@ -17,14 +22,29 @@ export function CollapsiblePanel({
   defaultOpen = true,
   headerRight,
   className = 'border-white/10',
+  storageKey,
   children,
 }: CollapsiblePanelProps) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(() => {
+    if (storageKey && typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(`panel-${storageKey}`);
+        if (saved !== null) return saved === 'open';
+      } catch { /* ignore */ }
+    }
+    return defaultOpen;
+  });
 
   return (
     <div className={`bg-white/5 backdrop-blur-sm rounded-xl border ${className}`}>
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen((o) => {
+          const next = !o;
+          if (storageKey) {
+            try { localStorage.setItem(`panel-${storageKey}`, next ? 'open' : 'closed'); } catch { /* ignore */ }
+          }
+          return next;
+        })}
         className="w-full flex items-center gap-3 p-4 md:p-6 text-left"
         aria-expanded={open}
       >

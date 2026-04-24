@@ -130,6 +130,8 @@ export function DpsPanel() {
 
       <p className="text-[9px] text-slate-600 text-center">
         PvE assumes Major/Elite combatant scalar (3×). Optimal = continuous fire, no reloads.
+        <br />
+        <span className="text-slate-700">Timing data: Season 26</span>
       </p>
     </div>
   );

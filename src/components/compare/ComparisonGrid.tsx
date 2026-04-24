@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useCompareStore } from '../../store/useCompareStore';
+import { useWeaponStore } from '../../store/useWeaponStore';
 import { CompareSnapshot, StatCurveNode } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
@@ -36,18 +37,23 @@ function deltaColorClass(delta: number): string {
 // ─── Snapshot card ─────────────────────────────────────────────────────────────
 function SnapshotCard({
   snapshot,
+  index,
+  total,
   statMins,
   statMaxes,
   sharedBarStatKeys,
   enemyTier,
 }: {
   snapshot: CompareSnapshot;
+  index: number;
+  total: number;
   statMins: Record<string, number>;
   statMaxes: Record<string, number>;
   sharedBarStatKeys: string[];
   enemyTier: string;
 }) {
-  const { removeSnapshot, renameSnapshot } = useCompareStore();
+  const { removeSnapshot, renameSnapshot, reorderSnapshot } = useCompareStore();
+  const { loadWeapon } = useWeaponStore();
   const [editing, setEditing] = useState(false);
   const [labelValue, setLabel] = useState(snapshot.label);
 
@@ -122,15 +128,37 @@ function SnapshotCard({
 
   return (
     <div className="min-w-[260px] bg-black/40 p-4 rounded-lg border border-white/10 relative flex flex-col gap-4">
-      {/* Remove */}
+      {/* Top-right controls: reorder left/right + remove */}
+      <div className="absolute top-2 right-2 flex items-center gap-1">
+        <button
+          onClick={() => reorderSnapshot(snapshot.id, 'left')}
+          disabled={index === 0}
+          className="w-5 h-5 bg-white/5 text-slate-500 rounded hover:bg-white/10 hover:text-slate-200 transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
+          aria-label="Move left"
+        >‹</button>
+        <button
+          onClick={() => reorderSnapshot(snapshot.id, 'right')}
+          disabled={index === total - 1}
+          className="w-5 h-5 bg-white/5 text-slate-500 rounded hover:bg-white/10 hover:text-slate-200 transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
+          aria-label="Move right"
+        >›</button>
+        <button
+          onClick={() => removeSnapshot(snapshot.id)}
+          className="w-5 h-5 bg-white/5 text-slate-400 rounded hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center text-[10px] font-bold"
+          aria-label="Remove"
+        >×</button>
+      </div>
+
+      {/* Load in editor */}
       <button
-        onClick={() => removeSnapshot(snapshot.id)}
-        className="absolute top-2 right-2 w-6 h-6 bg-white/5 text-slate-400 rounded hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center text-xs font-bold"
-        aria-label="Remove"
-      >×</button>
+        onClick={() => loadWeapon(snapshot.weapon)}
+        className="absolute top-2 left-2 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500 hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 transition-all"
+        aria-label="Load in editor"
+        title="Load in editor"
+      >Load ↗</button>
 
       {/* ── Weapon identity ──────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 pr-6">
+      <div className="flex items-center gap-3 pr-6 pt-5">
         <div className="w-12 h-12 bg-white/5 rounded overflow-hidden flex-shrink-0 border border-white/10">
           {snapshot.weapon.icon && (
             <Image
@@ -415,10 +443,12 @@ export const ComparisonGrid: React.FC = () => {
       </div>
 
       <div className="flex overflow-x-auto gap-4 pb-4 md:grid md:grid-cols-2 xl:grid-cols-3">
-        {snapshots.map((snapshot) => (
+        {snapshots.map((snapshot, idx) => (
           <SnapshotCard
             key={snapshot.id}
             snapshot={snapshot}
+            index={idx}
+            total={snapshots.length}
             statMins={statMins}
             statMaxes={statMaxes}
             sharedBarStatKeys={sharedBarStatKeys}

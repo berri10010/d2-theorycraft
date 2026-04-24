@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import Image from 'next/image';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
 import { Weapon, WeaponGroup } from '../../types/weapon';
 import { groupWeapons } from '../../lib/weaponGroups';
+import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 
 // ─── Scoring ──────────────────────────────────────────────────────────────────
 
@@ -97,18 +99,32 @@ function SimilarRow({
     : 'text-slate-500';
 
   const ELEMENT_DOT: Record<string, string> = {
-    arc:     'bg-sky-400',
-    solar:   'bg-orange-400',
-    void:    'bg-violet-500',
-    strand:  'bg-emerald-400',
-    stasis:  'bg-cyan-400',
-    kinetic: 'bg-slate-400',
+    arc:     'border-sky-500/60',
+    solar:   'border-orange-500/60',
+    void:    'border-violet-500/60',
+    strand:  'border-emerald-500/60',
+    stasis:  'border-cyan-500/60',
+    kinetic: 'border-slate-600/60',
   };
-  const dot = ELEMENT_DOT[weapon.damageType ?? 'kinetic'] ?? 'bg-slate-400';
+  const iconBorder = ELEMENT_DOT[weapon.damageType ?? 'kinetic'] ?? 'border-slate-600/60';
 
   return (
     <div className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
-      <span className={`w-2 h-2 rounded-full shrink-0 ${dot}`} />
+      {/* Weapon icon */}
+      <div className={`w-9 h-9 rounded-md overflow-hidden flex-shrink-0 bg-white/5 border ${iconBorder}`}>
+        {weapon.icon ? (
+          <Image
+            src={BUNGIE_ROOT + weapon.icon}
+            alt=""
+            width={36}
+            height={36}
+            className="w-full h-full object-cover"
+            unoptimized
+          />
+        ) : (
+          <div className="w-full h-full bg-white/5" />
+        )}
+      </div>
 
       <div className="flex-1 min-w-0">
         <p className="text-xs font-semibold text-slate-200 truncate leading-tight">
@@ -182,6 +198,7 @@ export const SimilarWeaponsPanel: React.FC = () => {
   return (
     <CollapsiblePanel
       defaultOpen={false}
+      storageKey="similar-weapons"
       title={
         <div>
           <div>Similar Weapons</div>
@@ -195,7 +212,7 @@ export const SimilarWeaponsPanel: React.FC = () => {
 
       {/* Header row */}
       <div className="flex items-center gap-3 pb-1.5 mb-1 border-b border-white/10">
-        <span className="w-2 shrink-0" />
+        <span className="w-9 shrink-0" />
         <span className="flex-1 text-[9px] text-slate-600 uppercase tracking-wider">Weapon</span>
         <span className="text-[9px] text-slate-600 uppercase tracking-wider shrink-0">Match</span>
         <span className="w-8 shrink-0" />

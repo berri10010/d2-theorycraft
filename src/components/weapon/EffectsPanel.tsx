@@ -253,7 +253,7 @@ export const EffectsPanel: React.FC = () => {
   const passiveEntries     = activePerkEntries.filter((e) => !e.isConditional);
 
   return (
-    <CollapsiblePanel title="Effects">
+    <CollapsiblePanel title="Effects" storageKey="effects">
 
       {isEmpty ? (
         <p className="text-slate-600 text-sm text-center py-6">

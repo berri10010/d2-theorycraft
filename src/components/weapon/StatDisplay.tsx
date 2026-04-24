@@ -260,7 +260,7 @@ export const StatDisplay: React.FC = () => {
   const zoomStat = calcStats['Zoom'] ?? activeWeapon.baseStats['Zoom'] ?? 14;
 
   return (
-    <CollapsiblePanel title="Weapon Stats">
+    <CollapsiblePanel title="Weapon Stats" storageKey="weapon-stats">
 
       {/* ── Bar stats ────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 mb-4">
