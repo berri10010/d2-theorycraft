@@ -99,12 +99,10 @@ function RecoilChart({ value }: { value: number }) {
 
 // ── Animated stat bar row ─────────────────────────────────────────────────────
 
-function StatBarRow({ label, base, current, details }: {
+function StatBarRow({ label, base, current }: {
   label: string;
   base: number;
   current: number;
-  /** Optional derived value annotations shown below the stat number. */
-  details?: Array<{ label: string; value: string }>;
 }) {
   const animVal = useAnimatedValue(current);
   const diff    = current - base;
@@ -142,11 +140,6 @@ function StatBarRow({ label, base, current, details }: {
             <span className="text-[10px] ml-0.5">({diff > 0 ? '+' : ''}{diff})</span>
           )}
         </span>
-        {details?.map((d) => (
-          <span key={d.label} className="text-[10px] text-amber-500 leading-none">
-            {d.label} {d.value}
-          </span>
-        ))}
       </div>
     </div>
   );
@@ -154,12 +147,11 @@ function StatBarRow({ label, base, current, details }: {
 
 // ── Animated compact stat card ────────────────────────────────────────────────
 
-function CompactStatCard({ statName, base, current, label, annotation }: {
+function CompactStatCard({ statName, base, current, label }: {
   statName: string;
   base: number;
   current: number;
   label: string;
-  annotation?: string;
 }) {
   const animVal  = useAnimatedValue(current);
   const diff     = current - base;
@@ -181,9 +173,6 @@ function CompactStatCard({ statName, base, current, label, annotation }: {
             </span>
           )}
         </div>
-        {annotation && (
-          <div className="text-[10px] font-mono text-amber-400 leading-none mt-0.5">{annotation}</div>
-        )}
       </div>
     </div>
   );
@@ -272,23 +261,27 @@ export const StatDisplay: React.FC = () => {
           const curve = activeWeapon.statCurves[statName];
           const label = STAT_LABEL_MAP[statName] ?? statName;
 
-          // ── Range: show Hip and ADS falloff distances inline ────────────
-          let details: Array<{ label: string; value: string }> | undefined;
+          // ── Hover tooltip content ────────────────────────────────────────
+          let tooltipContent: React.ReactNode = null;
+
           if (statName === 'Range') {
             const hip = interpolateStat(current, curve);
             if (hip != null) {
               const ads = hip * adsMultiplier(zoomStat);
-              details = [
-                { label: 'Hip', value: `${hip.toFixed(1)}m`  },
-                { label: 'ADS', value: `${ads.toFixed(1)}m`  },
-              ];
+              tooltipContent = (
+                <div className="flex gap-5">
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] text-slate-500">Hip</span>
+                    <span className="text-sm font-mono font-bold text-cyan-400">{hip.toFixed(1)}m</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] text-slate-500">ADS</span>
+                    <span className="text-sm font-mono font-bold text-amber-300">{ads.toFixed(1)}m</span>
+                  </div>
+                </div>
+              );
             }
-          }
-
-          // ── Hover tooltip content for time-based stats ───────────────────
-          let tooltipContent: React.ReactNode = null;
-
-          if (statName === 'Handling' && handlingTimes) {
+          } else if (statName === 'Handling' && handlingTimes) {
             tooltipContent = (
               <div>
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Handling Times</p>
@@ -332,7 +325,6 @@ export const StatDisplay: React.FC = () => {
                   label={label}
                   base={base}
                   current={current}
-                  details={details}
                 />
               </Tooltip>
             </div>
@@ -350,19 +342,24 @@ export const StatDisplay: React.FC = () => {
               if (base === 0 && current === 0 && !ALWAYS_SHOW_STATS.has(statName)) return null;
 
               const label = STAT_LABEL_MAP[statName] ?? statName;
-              const annotation = (statName === 'Zoom' && current > 0)
-                ? `${(current / 10).toFixed(1)}×`
+              const zoomTooltip = (statName === 'Zoom' && current > 0)
+                ? (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xs text-slate-400">Magnification</span>
+                    <span className="text-sm font-mono font-bold text-amber-400">{(current / 10).toFixed(1)}×</span>
+                  </div>
+                )
                 : undefined;
 
               return (
-                <CompactStatCard
-                  key={statName}
-                  statName={statName}
-                  base={base}
-                  current={current}
-                  label={label}
-                  annotation={annotation}
-                />
+                <Tooltip key={statName} content={zoomTooltip} delay={80}>
+                  <CompactStatCard
+                    statName={statName}
+                    base={base}
+                    current={current}
+                    label={label}
+                  />
+                </Tooltip>
               );
             })}
           </div>
