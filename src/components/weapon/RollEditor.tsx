@@ -72,6 +72,7 @@ export const RollEditor: React.FC = () => {
     if (!perk1 || !perk2) return false;
     const isEnhancedSelected = (col: typeof perk1): boolean => {
       const selected = selectedPerks[col.name];
+      if (!selected) return false; // nothing selected — can't be enhanced
       return col.perks.some((p) => p.enhancedVersion?.hash === selected);
     };
     return isEnhancedSelected(perk1) && isEnhancedSelected(perk2);
