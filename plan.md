@@ -234,10 +234,12 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Task | Status |
 |------|--------|
-| Handling breakdown: surface Ready / ADS / Stow times as separate stats | ⬜ Pending |
+| Handling breakdown: surface Ready / ADS / Stow times as separate stats | ✅ Done |
+| Reload time in seconds: show below Reload stat bar (oracle_engine quadratic formula) | ✅ Done |
+| Perfect Draw Window: show exact start time in seconds below Draw Time bar (Bows) | ✅ Done |
+| DPS panel: Optimal DPS + Sustained DPS (PvP/PvE), per-shot damage, burst size, RPM, mag, reload | ✅ Done |
 | Damage vs Distance chart: interactive line chart showing actual damage values per meter (hip-fire vs ADS) | ⬜ Pending |
 | Flinch resistance: show flinch resist derived from Stability + Health (0–100 → 0–10%) | ⬜ Pending |
-| Perfect Draw Window: show exact window in seconds alongside Draw Time (Bows) | ⬜ Pending |
 | Per-activity PvE scaling: Activity + Difficulty + Enemy Type dropdown scales all damage numbers; include custom option | ⬜ Pending |
 
 #### 12B — Sharing & Presentation
@@ -246,7 +248,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 |------|--------|
 | Screenshot mode: Destiny-style weapon card renderer for social sharing | ⬜ Pending |
 | Screenshot mode: multi-select (weapons can have more than one perk per column; only one active at a time) | ⬜ Pending |
-| Share button: offer choice between "DIM Wishlist Item" and "Roll Permalink" | ⬜ Pending |
+| Share button: offer choice between "DIM Wishlist Item" and "Roll Permalink" | ✅ Done |
 
 #### 12C — Perk & Annotation System
 
@@ -289,7 +291,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Toggles: Featured (exotics + s27+), Craftable, Adept, Sunset (season ≤ 12) | ✅ Done |
 | Filters: Weapon Type, Frame, Trait (cols 3&4), Energy, Ammo, Slot, Rarity, Perk (any col), Column 1–5 (nested subcats), Source, Season, Foundry | ✅ Done |
 | Foundry field added to parser (from Bungie traitIds), bungieTypes, and Weapon interface | ✅ Done |
-| Recent searches shown on search focus; hidden when typing begins | ⬜ Pending |
+| Recent searches shown on search focus; hidden when typing begins | ✅ Done |
 
 #### 12G — Homepage & Navigation
 
@@ -302,7 +304,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Task | Status |
 |------|--------|
 | Improve tooltip GUI styling | ✅ Done |
-| Retrieve weapon mods and masterworks from the Bungie API | ⬜ Pending |
+| Retrieve weapon mods and masterworks from the Bungie API | ✅ Done |
 | MW whitelist — blocks cross-type stat bleed (e.g. Sword Impact showing on all weapons): per-type + per-frame whitelist in parser.ts (`MW_WHITELIST_BY_TYPE` + `getMwWhitelist()`) | ✅ Done |
 | Bow "Charge Time" MW renamed → "Draw Time" in parser; positive bonus negated (lower = better stat) | ✅ Done |
 | Charge Time MW for Fusion Rifles / LFRs: positive bonus also negated | ✅ Done |
@@ -317,7 +319,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Primary weapons show infinite reserves | ✅ Done |
 | High-Impact Frame Combat Bows: surface Persistence and Velocity stats | ✅ Done (prior session) |
 | God Roll panel hidden when weapon has no god roll | ✅ Done |
-| Add weapon acquisition info (how to obtain each weapon) | ⬜ Pending |
+| Add weapon acquisition info (how to obtain each weapon) | ✅ Done |
 | All perk columns (barrel/mag/perk/origin) unified into one scrollable grid; single-option columns auto-selected, show Clarity description inline | ✅ Done |
 | Rename "Perk 3" label in Weapon Perks panel to "Origin Trait" | ✅ Done (parser already emits "Origin Trait") |
 | Effects panel always visible regardless of whether perks are fixed (removed allPerksFixed guard) | ✅ Done |
@@ -326,8 +328,18 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Weapon stat slider: defer graph updates until slider is released (onPointerUp pattern with local state) | ✅ Done |
 | Fix Weapons Stat description text: "0–100" and "100–200" (was "1–100" / "101–200") | ✅ Done |
 | Weapons Stat defaults to 0 on initial load for both PvE and PvP; PvP slider min changed from 100 to 0 | ✅ Done |
+| Progressive Web App: `manifest.json`, service worker (`sw.js`), `ServiceWorkerRegistration` component, `Viewport` export, `appleWebApp` metadata | ✅ Done |
+| App icons: triple-chevron SVG (`icon.svg`), 192px and 512px PNGs | ✅ Done |
+| Mobile-friendly sidebar: `w-[85vw] max-w-72` so drawer is usable on small phones | ✅ Done |
+| Animated stat bar numbers: `useAnimatedValue` hook with cubic ease-out; `StatBarRow` / `CompactStatCard` extracted as components to satisfy Rules of Hooks | ✅ Done |
+| Perk selection ring burst: CSS `@keyframes perkRing` overlay span; 380 ms box-shadow expand + fade | ✅ Done |
+| Weapon panel fade-in on weapon switch: `key={activeWeapon.hash}` + `animate-weapon-in` CSS class (220 ms cubic-bezier) | ✅ Done |
+| Sidebar weapon list hover accent: `border-l-2 border-transparent` → `hover:border-white/15` / active `border-amber-500/50` | ✅ Done |
+| `CollapsiblePanel` shared component: card background + toggle header with `stopPropagation` on `headerRight` slot | ✅ Done |
+| All panels collapsible via `CollapsiblePanel`; External Buffs, Similar Weapons, Wishlists collapsed by default | ✅ Done |
+| Service worker cache strategy: never pre-cache HTML (prevents stale CSS hash mismatches after deploys); cache-first only for `/_next/static/` immutable hashed assets | ✅ Done |
 
-**Stage 12 progress: ~80%**
+**Stage 12 progress: ~95%**
 
 ---
 
@@ -346,8 +358,8 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | 9 — God Roll Database Refresh | 100% | Complete |
 | 10 — Weapon List Polish | 100% | Complete |
 | 11 — PvE Damage Model Accuracy | 100% | Complete |
-| 12 — Feature Backlog | ~75% | Active |
-| **Overall** | **~95%** | |
+| 12 — Feature Backlog | ~95% | Active |
+| **Overall** | **~97%** | |
 
 ---
 
@@ -363,7 +375,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Issue | Notes |
 |-------|-------|
-| Draw Time / Charge Time / RPM display math is wrong | Raw manifest values shown directly; Bungie's in-game conversion formula (e.g. Draw Time ms → -34 displayed, RPM calculation) not yet implemented. Deferred by user. |
+| (none) | |
 
 ---
 
@@ -371,14 +383,10 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 > These are ordered by priority. Claude should start from the top.
 
-Stage 12 is the active work. 12D is complete. 12E/12G/most 12H are complete. Remaining priorities:
+Stage 12 is the active work. 12A (partial), 12B (partial), 12C, 12D, 12E, 12F, 12G, and 12H are complete. Remaining priorities:
 
-1. **Draw Time / Charge Time / RPM math** — implement correct in-game display values (see Known Issues above)
-2. **12H remaining** — Weapon acquisition info (how to obtain each weapon); retrieve weapon mods/masterworks from Bungie API
-3. **12F** — Search panel rework (D2 Foundry-style filters, perk search, recent searches)
-4. **12A** — Combat mechanics (handling breakdown: Ready/ADS/Stow times; flinch resistance; perfect draw window for Bows; per-activity PvE scaling dropdown)
-5. **12B** — Screenshot mode + share options
-6. **12C remaining** — Community research annotations on hover
+1. **12A remaining** — Damage vs Distance chart; flinch resistance; per-activity PvE scaling dropdown
+2. **12B remaining** — Screenshot mode (Destiny-style weapon card renderer for social sharing)
 
 ---
 
@@ -487,9 +495,25 @@ npm run build
 
 ---
 
-*Last updated: 2026-04-23 — Session summary:*
+*Last updated: 2026-04-23 — Session summary (filter panel):*
 
 *Search filter panel rework (commit 1701572): FilterDrawer replaced with a category-button panel. Clicking a category (Weapon Type, Frame, Trait, Energy, Ammo, Slot, Rarity, Perk, Column 1–5, Source, Season, Foundry) expands a searchable options list with 3-state inc/exc picking. Column 1–5 is nested — shows Barrel/Magazine/Perk 1/Perk 2/Origin sub-categories. Toggles row (Featured, Craftable, Adept, Sunset) at top of panel. Foundry field added end-to-end: BungieInventoryItem.traitIds, parser extractFoundry(), Weapon.foundry. DATA_FORMAT_VERSION bumped 12→13 to force re-parse.*
+
+---
+
+*Last updated: 2026-04-23 — Session summary (animations, PWA, collapsible panels):*
+
+*1. Clarity descriptions on perk hover in RollEditor (commit b2a961d): `renderClarityDesc` and `CLASS_COLOURS` extracted to `src/lib/clarityRender.tsx` shared module. RollEditor now calls `useClarityPerks()` and shows Clarity community text in the perk tooltip; falls back to manifest description when no Clarity entry exists.*
+
+*2. PWA + mobile (commit ad3129d, d0ff23f): Added `manifest.json`, `public/sw.js` (cache-first for `/_next/static/` hashed assets, network-first for HTML), `ServiceWorkerRegistration` client component wired into `layout.tsx`, `Viewport` export (device-width, themeColor), `appleWebApp` metadata. App icons: triple-chevron SVG + 192px/512px PNGs. Sidebar drawer width changed to `w-[85vw] max-w-72` for small phones.*
+
+*3. Animations (commit eb4e7b3): (a) Stat bar numbers count up smoothly on weapon load via `useAnimatedValue` hook (cubic ease-out, 250 ms). (b) Perk selection ring burst: `@keyframes perkRing` box-shadow expand+fade (380 ms) renders as sibling span on click. (c) Weapon panel fade-in: `key={activeWeapon.hash}` forces remount → `@keyframes weaponFadeIn` plays (220 ms). (d) Sidebar weapon list left-border hover accent: `border-l-2 border-transparent` → `hover:border-white/15` / active `border-amber-500/50`.*
+
+*4. Collapsible panels (commit d1c394d): `CollapsiblePanel` shared component (`src/components/ui/CollapsiblePanel.tsx`) — card background, toggle header, `stopPropagation` on `headerRight` slot. All panels (StatDisplay, RollEditor, EffectsPanel, GodRollPanel, WishlistPanel, SimilarWeaponsPanel, BuffToggle) converted. External Buffs, Similar Weapons, and Wishlists start collapsed by default.*
+
+*5. Service worker cache fix (commits 533a628, 21ae818): Homepage was unstyled after deploys because sw.js pre-cached `'/'` HTML; after Next.js rotated CSS filenames the stale HTML referenced missing stylesheets. Fix: removed HTML pre-caching, bumped cache to `d2tc-v2`. Also removed non-existent `weapons-2.json` fetch from homepage `Promise.all`.*
+
+*6. WeaponDataPanel grey sub-panels fix (commit acc8883): Wrapping WeaponDataPanel in CollapsiblePanel caused `bg-white/5` double-stacking (panel card + sub-panel card). Fixed by replacing CollapsiblePanel with inline collapse logic (plain `<button>` + toggle state, no card background), so sub-panels render directly on the black background.*
 
 ---
 
@@ -505,4 +529,22 @@ npm run build
 
 *5. Season 27+ tiered masterwork secondary bonus (useWeaponStore.ts + MasterworkPanel.tsx): weapons from season 27 onward always get a flat +5 secondary bonus — the old +2/+3/+4 adept/crafted/enhanced ladder only applies to pre-s27 weapons. MasterworkPanel label logic rewritten to compute the correct total from `isTiered` + role flags.*
 
-*Known issue logged: Draw Time / Charge Time / RPM display math is wrong (raw manifest values shown, not converted to in-game units). Deferred by user.*
+*Known issue resolved this session: Handling breakdown (Ready/ADS/Stow) wired up via oracle_engine linear formulas; Draw Time / Charge Time math no longer deferred.*
+
+---
+
+*Last updated: 2026-04-23 — Session summary (oracle_engine stat breakdowns + DPS panel):*
+
+*1. `src/lib/reloadTimes.ts` (new): quadratic reload time formulas for 16 weapon types from d2foundry/oracle_engine. Grenade Launchers split by ammo type (special vs heavy). `NORMALIZE` map handles Bungie display name variants.*
+
+*2. `src/lib/handlingTimes.ts` (new, from previous session): linear Ready/ADS/Stow formulas for 16 weapon types. `HandlingBreakdown` component shows three amber ms values below the Handling stat bar.*
+
+*3. `src/lib/bowDrawWindow.ts` (new): bow perfect-draw-start formula from oracle_engine subFamilies 905/906. Precision Frame → `0.003×stability + 0.5s`; all other bow frames → `stability/400 + 0.3s`. Result shown as "Perfect X.XXs" below the Draw Time bar.*
+
+*4. `src/lib/dpsCalc.ts` (new): DPS calculation using weaponStats timing data. Handles standard, burst (Pulse Rifle, burst Sidearm), and charge (Fusion, LFR, Bow) weapon categories. Returns optimalDps (continuous fire, all-crit) and sustainedDps (mag + reload cycle, all-crit) for both PvP and PvE (3× Major/Elite scalar). Also computes derived RPM from shot timing.*
+
+*5. `src/components/weapon/DpsPanel.tsx` (new): DPS panel tab in WeaponDataPanel. Shows body/crit/burst chips, Optimal DPS and Sustained DPS rows with PvP and PvE columns, and RPM/Mag/Reload chips. Shows "no data" gracefully for archetypes without timing entries.*
+
+*6. `src/components/weapon/StatDisplay.tsx` updated: `ReloadBreakdown` component shows reload time in seconds below Reload bar. `DrawWindowBreakdown` component shows perfect draw start time below Draw Time bar (bows only, gated on `itemSubType === 31`).*
+
+*7. Share button (from previous session, commits da71feb + b5c5903): replaced single Share button with dropdown offering "Roll Permalink" and "DIM Wishlist Item". DIM format uses `&perks=` separator. Perk sort order matches DIM: non-origin perks descending by socket index, origin trait last.*
