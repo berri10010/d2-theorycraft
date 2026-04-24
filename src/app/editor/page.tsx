@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWeaponStore, MASTERWORK_STATS } from '../../store/useWeaponStore';
 import { useCompareStore } from '../../store/useCompareStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
@@ -21,6 +22,8 @@ import { calculateTTK } from '../../lib/damageMath';
 import { MasterworkStat } from '../../store/useWeaponStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
+// ── Icons ─────────────────────────────────────────────────────────────────────
+
 function MenuIcon({ open }: { open: boolean }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -33,6 +36,45 @@ function MenuIcon({ open }: { open: boolean }) {
   );
 }
 
+function ShareIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className={className}>
+      <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+    </svg>
+  );
+}
+
+function TrashIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className={className}>
+      <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+function AppSkeleton() {
+  return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="flex flex-col items-center gap-6">
+        {/* Spinner */}
+        <div className="relative w-10 h-10">
+          <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+          <div className="absolute inset-0 rounded-full border-2 border-t-amber-500/70 animate-spin" />
+        </div>
+        {/* Content skeleton */}
+        <div className="w-64 space-y-2 animate-pulse">
+          <div className="h-3 bg-white/5 rounded w-3/4" />
+          <div className="h-3 bg-white/5 rounded w-1/2" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+
 function Dashboard() {
   const {
     loadWeapon, activeWeapon, activeWeaponHash, selectedPerks, selectPerk,
@@ -44,54 +86,65 @@ function Dashboard() {
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
   const searchParams = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState<'editor' | 'compare'>('editor');
-  const [shareOpen, setShareOpen] = useState(false);
-  const [copiedType, setCopiedType] = useState<'permalink' | 'dim' | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab,       setActiveTab]       = useState<'editor' | 'compare'>('editor');
+  const [shareOpen,       setShareOpen]       = useState(false);
+  const [copiedType,      setCopiedType]      = useState<'permalink' | 'dim' | null>(null);
+  const [sidebarOpen,     setSidebarOpen]     = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const shareRef = useRef<HTMLDivElement>(null);
+  const [clearPending,    setClearPending]    = useState(false);
 
-  // Keyboard shortcuts
+  const shareRef    = useRef<HTMLDivElement>(null);
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Keyboard shortcuts ───────────────────────────────────────────────────────
   useKeyboardShortcuts({
-    onSearch: () => setSidebarOpen(true),
-    onEscape: () => { if (sidebarOpen) setSidebarOpen(false); },
-    onPve: () => setMode('pve'),
-    onPvp: () => setMode('pvp'),
+    onSearch:  () => setSidebarOpen(true),
+    onEscape:  () => { if (sidebarOpen) setSidebarOpen(false); },
+    onPve:     () => setMode('pve'),
+    onPvp:     () => setMode('pvp'),
     onCompare: () => setActiveTab((t) => (t === 'editor' ? 'compare' : 'editor')),
   });
 
-  // Memoize grouped weapons — only recompute when the weapons array changes.
   const weaponGroups = useMemo(() => groupWeapons(weapons), [weapons]);
 
   useEffect(() => { fetchWeapons(); }, [fetchWeapons]);
+
+  // Close sidebar when weapon changes
   useEffect(() => { setSidebarOpen(false); }, [activeWeapon?.hash]);
 
+  // Reset clear-pending when weapon changes
+  useEffect(() => {
+    setClearPending(false);
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+  }, [activeWeapon?.hash]);
+
+  // Cleanup clear timer on unmount
+  useEffect(() => () => {
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+  }, []);
+
+  // Auto-load default weapon
   useEffect(() => {
     if (weapons.length === 0 || activeWeapon || searchParams.get('w')) return;
-    // Try to restore the last active weapon from the persisted hash.
     if (activeWeaponHash) {
       const group = weaponGroups.find((g) =>
         g.default.hash === activeWeaponHash ||
         g.variants.some((v) => v.hash === activeWeaponHash)
       );
-      if (group) {
-        // loadWeapon will restore the saved roll from weaponRolls automatically.
-        loadWeapon(group.default, group.variants);
-        return;
-      }
+      if (group) { loadWeapon(group.default, group.variants); return; }
     }
-    // Fallback: first weapon in the list.
     const firstGroup = weaponGroups[0];
     if (firstGroup) loadWeapon(firstGroup.default, firstGroup.variants);
   }, [weapons, activeWeapon, loadWeapon, searchParams, weaponGroups, activeWeaponHash]);
 
+  // Restore state from URL params
   useEffect(() => {
-    const weaponHash  = searchParams.get('w');
-    const perkParam   = searchParams.get('p');
-    const modeParam   = searchParams.get('m');
-    const mwParam     = searchParams.get('mw');
-    const wsParam     = searchParams.get('ws');
-    const buffsParam  = searchParams.get('b');
+    const weaponHash = searchParams.get('w');
+    const perkParam  = searchParams.get('p');
+    const modeParam  = searchParams.get('m');
+    const mwParam    = searchParams.get('mw');
+    const wsParam    = searchParams.get('ws');
+    const buffsParam = searchParams.get('b');
 
     if (!weaponHash || weapons.length === 0) return;
     const found = weapons.find((w) => w.hash === weaponHash);
@@ -100,41 +153,29 @@ function Dashboard() {
     const group = weaponGroups.find((g) => g.variants.some((v) => v.hash === weaponHash));
     loadWeapon(found, group?.variants);
 
-    // Restore selected perks
     if (perkParam) {
       const hashes = perkParam.split(',');
       found.perkSockets.forEach((col) =>
         col.perks.forEach((p) => {
           if (hashes.includes(p.hash)) selectPerk(col.name, p.hash);
-          // Also check enhanced versions
-          if (p.enhancedVersion && hashes.includes(p.enhancedVersion.hash)) {
+          if (p.enhancedVersion && hashes.includes(p.enhancedVersion.hash))
             selectPerk(col.name, p.enhancedVersion.hash);
-          }
         })
       );
     }
-
-    // Restore mode
     if (modeParam === 'pvp' || modeParam === 'pve') setMode(modeParam);
-
-    // Restore masterwork stat — validate against known stat list before casting
-    if (mwParam && (MASTERWORK_STATS as readonly string[]).includes(mwParam)) {
+    if (mwParam && (MASTERWORK_STATS as readonly string[]).includes(mwParam))
       setMasterworkStat(mwParam as MasterworkStat);
-    }
-
-    // Restore weapons stat
     if (wsParam) setWeaponsStat(Number(wsParam));
-
-    // Restore active buffs
     if (buffsParam) {
       const toActivate = buffsParam.split(',').filter(Boolean);
       const currentBuffs = useWeaponStore.getState().activeBuffs;
-      toActivate.forEach((hash) => {
-        if (!currentBuffs.includes(hash)) toggleBuff(hash);
-      });
+      toActivate.forEach((hash) => { if (!currentBuffs.includes(hash)) toggleBuff(hash); });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, weapons.length]);
+
+  // ── Share helpers ────────────────────────────────────────────────────────────
 
   const buildPermalink = () => {
     if (!activeWeapon) return '';
@@ -160,8 +201,6 @@ function Dashboard() {
 
   const handleShareDim = () => {
     if (!activeWeapon) return;
-
-    // Build hash → {socketIndex, isOrigin} lookup
     const hashMeta = new Map<string, { idx: number; isOrigin: boolean }>();
     activeWeapon.perkSockets.forEach((col, i) => {
       const isOrigin = col.columnType === 'origin';
@@ -170,18 +209,13 @@ function Dashboard() {
         if (p.enhancedVersion) hashMeta.set(p.enhancedVersion.hash, { idx: i, isOrigin });
       });
     });
-
-    // Sort: non-origin perks descending by socket index, then origin perks
     const perkHashes = Object.values(selectedPerks);
     const sorted = [...perkHashes].sort((a, b) => {
-      const ma = hashMeta.get(a);
-      const mb = hashMeta.get(b);
-      const aOrigin = ma?.isOrigin ?? false;
-      const bOrigin = mb?.isOrigin ?? false;
+      const ma = hashMeta.get(a), mb = hashMeta.get(b);
+      const aOrigin = ma?.isOrigin ?? false, bOrigin = mb?.isOrigin ?? false;
       if (aOrigin !== bOrigin) return aOrigin ? 1 : -1;
       return (mb?.idx ?? 0) - (ma?.idx ?? 0);
     });
-
     let entry = `dimwishlist:item=${activeWeapon.hash}`;
     if (sorted.length) entry += `&perks=${sorted.join(',')}`;
     entry += `\n//notes:${activeWeapon.name} — via D2 Theorycraft`;
@@ -202,10 +236,25 @@ function Dashboard() {
     return () => document.removeEventListener('mousedown', handler);
   }, [shareOpen]);
 
+  // ── Clear Roll handler (2-step, no window.confirm) ───────────────────────────
+
+  const handleClearClick = () => {
+    if (!clearPending) {
+      setClearPending(true);
+      clearTimerRef.current = setTimeout(() => setClearPending(false), 2500);
+    } else {
+      if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+      setClearPending(false);
+      clearRoll();
+    }
+  };
+
+  // ── Compare ──────────────────────────────────────────────────────────────────
+
   const handleAddToCompare = () => {
     if (!activeWeapon) return;
     const multiplier = getDamageMultiplier();
-    const ttkResult = calculateTTK(mode, activeWeapon, multiplier, 230, 'Minor');
+    const ttkResult  = calculateTTK(mode, activeWeapon, multiplier, 230, 'Minor');
     addSnapshot({
       label: activeWeapon.name,
       weapon: activeWeapon,
@@ -217,10 +266,20 @@ function Dashboard() {
     });
   };
 
+  // ── No weapon yet ────────────────────────────────────────────────────────────
+
   if (!activeWeapon) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-slate-500 p-8">
-        {isLoading && <p role="status" className="text-lg">Loading weapon database...</p>}
+        {isLoading && (
+          <div className="flex flex-col items-center gap-5">
+            <div className="relative w-10 h-10">
+              <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+              <div className="absolute inset-0 rounded-full border-2 border-t-amber-500/60 animate-spin" />
+            </div>
+            <p className="text-slate-600 text-sm tracking-wide">Loading weapon database…</p>
+          </div>
+        )}
         {error && (
           <div className="text-center space-y-3 max-w-md">
             <p className="text-red-400 font-bold text-lg">Failed to load weapons</p>
@@ -242,6 +301,8 @@ function Dashboard() {
     );
   }
 
+  // ── Main layout ──────────────────────────────────────────────────────────────
+
   return (
     <div className="h-screen bg-black text-slate-200 font-sans flex overflow-hidden">
       <a
@@ -251,10 +312,23 @@ function Dashboard() {
         Skip to main content
       </a>
 
-      {sidebarOpen && (
-        <div aria-hidden="true" className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
+      {/* Mobile overlay — fades in/out */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            key="sidebar-overlay"
+            aria-hidden="true"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/60 z-40 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
+      {/* Sidebar */}
       <div className={[
         'fixed inset-y-0 left-0 z-50 w-[85vw] max-w-72 transform transition-transform duration-300 ease-in-out',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
@@ -265,7 +339,7 @@ function Dashboard() {
         <SearchSidebar />
       </div>
 
-      {/* Desktop sidebar collapse toggle — lives outside the sidebar so it's always reachable */}
+      {/* Desktop sidebar collapse toggle */}
       <button
         onClick={() => setSidebarCollapsed((v) => !v)}
         aria-label={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
@@ -277,6 +351,7 @@ function Dashboard() {
         </svg>
       </button>
 
+      {/* Main content */}
       <main
         id="main-content"
         tabIndex={-1}
@@ -285,9 +360,11 @@ function Dashboard() {
       >
         <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
-          {/* ── Top action bar ──────────────────────────── */}
+          {/* ── Top action bar ─────────────────────────────────────────── */}
           <header className="flex items-center gap-3 flex-wrap justify-between">
-            <div className="flex items-center gap-3">
+
+            {/* Left group */}
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* Mobile sidebar toggle */}
               <button
                 aria-label={sidebarOpen ? 'Close weapon database' : 'Open weapon database'}
@@ -321,159 +398,172 @@ function Dashboard() {
                 ))}
               </div>
 
-              {/* ── PvE / PvP mode toggle ─────────────────── */}
+              {/* PvE / PvP mode toggle */}
               {activeTab === 'editor' && (
-                <div
-                  role="group"
-                  aria-label="Game mode"
-                  className="flex bg-white/5 rounded-lg p-1 border border-white/10"
-                >
-                  <button
-                    onClick={() => setMode('pve')}
-                    aria-pressed={mode === 'pve'}
-                    className={[
-                      'px-4 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px]',
-                      mode === 'pve'
-                        ? 'bg-white/10 text-amber-400'
-                        : 'text-slate-400 hover:text-slate-200',
-                    ].join(' ')}
-                  >
-                    PvE
-                  </button>
-                  <button
-                    onClick={() => setMode('pvp')}
-                    aria-pressed={mode === 'pvp'}
-                    className={[
-                      'px-4 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px]',
-                      mode === 'pvp'
-                        ? 'bg-white/10 text-amber-400'
-                        : 'text-slate-400 hover:text-slate-200',
-                    ].join(' ')}
-                  >
-                    PvP
-                  </button>
+                <div role="group" aria-label="Game mode" className="flex bg-white/5 rounded-lg p-1 border border-white/10">
+                  {(['pve', 'pvp'] as const).map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => setMode(m)}
+                      aria-pressed={mode === m}
+                      className={[
+                        'px-3 sm:px-4 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] uppercase',
+                        mode === m ? 'bg-white/10 text-amber-400' : 'text-slate-400 hover:text-slate-200',
+                      ].join(' ')}
+                    >
+                      {m}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
 
+            {/* Right group — action buttons */}
             {activeTab === 'editor' && (
               <div className="flex items-center gap-2">
+
                 {/* Share dropdown */}
                 <div className="relative" ref={shareRef}>
                   <button
-                    onClick={() => setShareOpen(v => !v)}
+                    onClick={() => setShareOpen((v) => !v)}
                     aria-label="Share options"
                     aria-expanded={shareOpen}
                     className={[
-                      'flex items-center gap-1.5 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border min-h-[44px]',
+                      'flex items-center gap-1.5 font-medium px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-colors border min-h-[44px] min-w-[44px]',
                       copiedType
                         ? 'bg-green-500/20 border-green-500/40 text-green-400'
                         : 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10',
                     ].join(' ')}
                   >
-                    {copiedType === 'permalink' ? 'Link copied!' : copiedType === 'dim' ? 'DIM copied!' : 'Share'}
+                    <ShareIcon className="w-3.5 h-3.5 shrink-0" />
+                    <span className="hidden sm:inline">
+                      {copiedType === 'permalink' ? 'Copied!' : copiedType === 'dim' ? 'DIM copied!' : 'Share'}
+                    </span>
                     {!copiedType && (
-                      <svg viewBox="0 0 20 20" fill="currentColor" className={`w-3 h-3 text-slate-500 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
+                      <svg viewBox="0 0 20 20" fill="currentColor" className={`hidden sm:block w-3 h-3 text-slate-500 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
                         <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.937a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                       </svg>
                     )}
                   </button>
 
-                  {shareOpen && (
-                    <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#111] border border-white/15 rounded-xl shadow-2xl z-50 overflow-hidden">
-                      <button
-                        onClick={handleSharePermalink}
-                        className="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/6 transition-colors text-left"
+                  <AnimatePresence>
+                    {shareOpen && (
+                      <motion.div
+                        key="share-dropdown"
+                        initial={{ opacity: 0, scale: 0.95, y: -6 }}
+                        animate={{ opacity: 1, scale: 1,    y: 0  }}
+                        exit={{ opacity: 0, scale: 0.95,    y: -6 }}
+                        transition={{ duration: 0.12, ease: 'easeOut' }}
+                        style={{ transformOrigin: 'top right' }}
+                        className="absolute right-0 top-full mt-1.5 w-52 bg-[#111] border border-white/15 rounded-xl shadow-2xl z-50 overflow-hidden"
                       >
-                        <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-sky-400 shrink-0 mt-0.5">
-                          <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
-                        </svg>
-                        <div>
-                          <p className="text-xs font-semibold text-slate-200">Roll Permalink</p>
-                          <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Copies a URL with your full roll state</p>
-                        </div>
-                      </button>
-                      <div className="border-t border-white/8" />
-                      <button
-                        onClick={handleShareDim}
-                        className="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/6 transition-colors text-left"
-                      >
-                        <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-amber-400 shrink-0 mt-0.5">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <div>
-                          <p className="text-xs font-semibold text-slate-200">DIM Wishlist Item</p>
-                          <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Copies a wishlist entry to paste into DIM</p>
-                        </div>
-                      </button>
-                    </div>
-                  )}
+                        <button
+                          onClick={handleSharePermalink}
+                          className="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/6 transition-colors text-left"
+                        >
+                          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-sky-400 shrink-0 mt-0.5">
+                            <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+                          </svg>
+                          <div>
+                            <p className="text-xs font-semibold text-slate-200">Roll Permalink</p>
+                            <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Copies a URL with your full roll state</p>
+                          </div>
+                        </button>
+                        <div className="border-t border-white/8" />
+                        <button
+                          onClick={handleShareDim}
+                          className="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/6 transition-colors text-left"
+                        >
+                          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-amber-400 shrink-0 mt-0.5">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          <div>
+                            <p className="text-xs font-semibold text-slate-200">DIM Wishlist Item</p>
+                            <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Copies a wishlist entry to paste into DIM</p>
+                          </div>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
+
+                {/* Clear Roll — 2-step inline confirm */}
                 <button
-                  onClick={() => {
-                    if (window.confirm(`Clear all perks, mods, and masterwork for ${activeWeapon.name}?`)) {
-                      clearRoll();
-                    }
-                  }}
-                  aria-label="Clear all perks and mods for this weapon"
-                  title="Reset perks, mods, and masterwork for this weapon"
-                  className="bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-400 font-medium px-3 py-1.5 rounded-lg text-sm transition-colors border border-white/10 hover:border-red-500/30 min-h-[44px]"
+                  onClick={handleClearClick}
+                  aria-label={clearPending ? 'Confirm clear roll' : 'Clear all perks and mods for this weapon'}
+                  title={clearPending ? 'Click again to confirm' : 'Reset perks, mods, and masterwork for this weapon'}
+                  className={[
+                    'flex items-center gap-1.5 font-medium px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-all border min-h-[44px] min-w-[44px]',
+                    clearPending
+                      ? 'bg-red-500/20 border-red-500/40 text-red-400 scale-[1.02]'
+                      : 'bg-white/5 hover:bg-red-500/10 text-slate-400 hover:text-red-400 border-white/10 hover:border-red-500/30',
+                  ].join(' ')}
                 >
-                  Clear Roll
+                  <TrashIcon className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden sm:inline">
+                    {clearPending ? 'Confirm?' : 'Clear Roll'}
+                  </span>
                 </button>
+
+                {/* Add to Compare */}
                 <button
                   onClick={handleAddToCompare}
                   aria-label={`Save current ${activeWeapon.name} roll to comparison`}
-                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-sm transition-colors min-h-[44px]"
+                  className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-colors min-h-[44px] min-w-[44px] flex items-center gap-1"
                 >
-                  + Compare
+                  <span>+</span>
+                  <span className="hidden sm:inline">Compare</span>
                 </button>
               </div>
             )}
           </header>
 
-          {/* ── Editor tab ──────────────────────────────── */}
+          {/* ── Editor tab ──────────────────────────────────────────────── */}
           <div role="tabpanel" aria-label="Roll editor" hidden={activeTab !== 'editor'}>
-            <div key={activeWeapon.hash} className="space-y-6 animate-weapon-in">
-              <WeaponHeader />
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.div
+                key={activeWeapon.hash}
+                initial={{ opacity: 0, y: 12, scale: 0.995 }}
+                animate={{ opacity: 1, y: 0,  scale: 1     }}
+                exit={{ opacity: 0,    y: -6,  scale: 1.005 }}
+                transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                className="space-y-6"
+              >
+                <WeaponHeader />
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Left column */}
+                  <div className="lg:col-span-6 space-y-6">
+                    <RollEditor />
+                    {mode === 'pve' && (
+                      <>
+                        <GodRollPanel />
+                        <WishlistPanel />
+                        <EffectsPanel />
+                        <BuffToggle />
+                      </>
+                    )}
+                    {mode === 'pvp' && (
+                      <>
+                        <WishlistPanel />
+                        <EffectsPanel />
+                        <BuffToggle />
+                      </>
+                    )}
+                  </div>
 
-                {/* ── Left column (always visible) ───────── */}
-                <div className="lg:col-span-6 space-y-6">
-                  <RollEditor />
-
-                  {/* PvE — god roll guide, wishlists, effects, buffs */}
-                  {mode === 'pve' && (
-                    <>
-                      <GodRollPanel />
-                      <WishlistPanel />
-                      <EffectsPanel />
-                      <BuffToggle />
-                    </>
-                  )}
-
-                  {/* PvP — wishlists, effects, buffs */}
-                  {mode === 'pvp' && (
-                    <>
-                      <WishlistPanel />
-                      <EffectsPanel />
-                      <BuffToggle />
-                    </>
-                  )}
+                  {/* Right column */}
+                  <div className="lg:col-span-6 space-y-6">
+                    <StatDisplay />
+                    <WeaponDataPanel />
+                    <SimilarWeaponsPanel />
+                  </div>
                 </div>
-
-                {/* ── Right column ───────────────────────── */}
-                <div className="lg:col-span-6 space-y-6">
-                  <StatDisplay />
-                  <WeaponDataPanel />
-                  <SimilarWeaponsPanel />
-                </div>
-              </div>
-            </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* ── Compare tab ─────────────────────────────── */}
+          {/* ── Compare tab ─────────────────────────────────────────────── */}
           <div role="tabpanel" aria-label="Comparison grid" hidden={activeTab !== 'compare'}>
             <ComparisonGrid />
           </div>
@@ -484,13 +574,11 @@ function Dashboard() {
   );
 }
 
+// ── Root export with Suspense ─────────────────────────────────────────────────
+
 export default function TheorycraftDashboard() {
   return (
-    <Suspense fallback={
-      <div role="status" aria-label="Loading" className="min-h-screen bg-slate-950 text-slate-500 flex items-center justify-center">
-        Loading...
-      </div>
-    }>
+    <Suspense fallback={<AppSkeleton />}>
       <Dashboard />
     </Suspense>
   );

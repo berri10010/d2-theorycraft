@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
 import { Weapon, WeaponGroup } from '../../types/weapon';
@@ -311,7 +312,7 @@ function FilterPanel({
   const activeCatDef = CATEGORIES.find(c => c.id === activeCat);
 
   return (
-    <div className="bg-[#0c0c0c] border-b border-white/10 overflow-hidden">
+    <div className="bg-[#0c0c0c] border-b border-white/10">
 
       {/* ── Toggles ── */}
       <div className="px-3 pt-3 pb-2.5">
@@ -728,8 +729,15 @@ export const SearchSidebar: React.FC = () => {
               />
 
               {/* Recent searches dropdown */}
+              <AnimatePresence>
               {searchFocused && !query && recentSearches.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-[#111] border border-white/15 rounded-lg shadow-xl z-50 overflow-hidden">
+                <motion.div
+                  key="recent-searches"
+                  initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0,  scale: 1    }}
+                  exit={{ opacity: 0,    y: -4, scale: 0.98 }}
+                  transition={{ duration: 0.12, ease: 'easeOut' }}
+                  className="absolute top-full left-0 right-0 mt-1 bg-[#111] border border-white/15 rounded-lg shadow-xl z-50 overflow-hidden">
                   <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest px-3 pt-2.5 pb-1">Recent</p>
                   {recentSearches.map(term => (
                     <div
@@ -753,8 +761,9 @@ export const SearchSidebar: React.FC = () => {
                       </button>
                     </div>
                   ))}
-                </div>
+                </motion.div>
               )}
+              </AnimatePresence>
             </div>
             <button
               onClick={() => setFilterOpen(v => !v)} title="Filters" aria-expanded={filterOpen}
@@ -813,20 +822,31 @@ export const SearchSidebar: React.FC = () => {
           )}
         </div>
 
-        {/* Filter panel — in normal flow, directly below header, no gap */}
-        {filterOpen && (
-          <FilterPanel
-            filters={filters}
-            allOptions={allOptions}
-            activeCat={activeCat}
-            activeColSubcat={colSubcat}
-            onSetActiveCat={id => { setActiveCat(id); if (id !== 'column') setColSubcat(null); }}
-            onSetColSubcat={setColSubcat}
-            onToggle={handleToggleFilter}
-            onToggleFilter={handleToggleBool}
-            onClearKey={key => setFilters(f => ({ ...f, [key]: emptyMF() }))}
-          />
-        )}
+        {/* Filter panel — animated height slide */}
+        <AnimatePresence initial={false}>
+          {filterOpen && (
+            <motion.div
+              key="filter-panel"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              <FilterPanel
+                filters={filters}
+                allOptions={allOptions}
+                activeCat={activeCat}
+                activeColSubcat={colSubcat}
+                onSetActiveCat={id => { setActiveCat(id); if (id !== 'column') setColSubcat(null); }}
+                onSetColSubcat={setColSubcat}
+                onToggle={handleToggleFilter}
+                onToggleFilter={handleToggleBool}
+                onClearKey={key => setFilters(f => ({ ...f, [key]: emptyMF() }))}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* ── Weapon list ─────────────────────────────────────────────── */}
@@ -863,8 +883,8 @@ export const SearchSidebar: React.FC = () => {
               className={[
                 'rounded-lg overflow-hidden transition-all duration-150 border-l-2',
                 isActive
-                  ? 'bg-amber-500/10 border-amber-500/50'
-                  : 'border-transparent hover:border-white/15 hover:bg-white/[0.04]',
+                  ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/15'
+                  : 'border-transparent hover:border-white/15 hover:bg-white/[0.04] hover:scale-[1.005]',
               ].join(' ')}
             >
               <button
