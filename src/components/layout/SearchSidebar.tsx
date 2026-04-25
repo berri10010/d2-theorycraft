@@ -33,6 +33,7 @@ interface FilterState {
   weaponType: MultiFilter;
   frame:      MultiFilter;
   trait:      MultiFilter;   // perks in 'perk' columnType columns (3 & 4)
+  perkTier:   MultiFilter;   // S/A/B/C tier rating on perk-column perks
   energy:     MultiFilter;
   ammo:       MultiFilter;
   slot:       MultiFilter;   // Kinetic / Energy / Power (derived from ammoType)
@@ -58,7 +59,7 @@ type ToggleKey = 'featured' | 'craftableOnly' | 'adeptOnly' | 'sunsetOnly';
 const emptyMF = (): MultiFilter => ({ inc: [], exc: [] });
 
 const DEFAULT_FILTERS: FilterState = {
-  weaponType: emptyMF(), frame: emptyMF(), trait: emptyMF(),
+  weaponType: emptyMF(), frame: emptyMF(), trait: emptyMF(), perkTier: emptyMF(),
   energy: emptyMF(), ammo: emptyMF(), slot: emptyMF(), rarity: emptyMF(),
   perk: emptyMF(), col1: emptyMF(), col2: emptyMF(), col3: emptyMF(),
   col4: emptyMF(), col5: emptyMF(), source: emptyMF(), season: emptyMF(),
@@ -80,6 +81,7 @@ const CATEGORIES: CategoryDef[] = [
   { id: 'weaponType', label: 'Weapon Type', filterKey: 'weaponType' },
   { id: 'frame',      label: 'Frame',       filterKey: 'frame' },
   { id: 'trait',      label: 'Trait',       filterKey: 'trait' },
+  { id: 'perkTier',   label: 'Perk Tier',   filterKey: 'perkTier' },
   { id: 'energy',     label: 'Energy',      filterKey: 'energy' },
   { id: 'ammo',       label: 'Ammo',        filterKey: 'ammo' },
   { id: 'slot',       label: 'Slot',        filterKey: 'slot' },
@@ -147,7 +149,7 @@ function categoryCount(f: FilterState, cat: CategoryDef): number {
 
 function totalFilterCount(f: FilterState): number {
   return (
-    countMF(f.weaponType) + countMF(f.frame) + countMF(f.trait) +
+    countMF(f.weaponType) + countMF(f.frame) + countMF(f.trait) + countMF(f.perkTier) +
     countMF(f.energy) + countMF(f.ammo) + countMF(f.slot) + countMF(f.rarity) +
     countMF(f.perk) + colCount(f) + countMF(f.source) + countMF(f.season) + countMF(f.foundry) +
     (f.featured ? 1 : 0) + (f.craftableOnly ? 1 : 0) + (f.adeptOnly ? 1 : 0) + (f.sunsetOnly ? 1 : 0)
@@ -442,8 +444,9 @@ function FilterPanel({
                 onToggle={onToggle}
                 onClear={() => onClearKey(activeCatDef.filterKey!)}
                 optLabel={
-                  activeCatDef.filterKey === 'energy' ? v => v.charAt(0).toUpperCase() + v.slice(1) :
-                  activeCatDef.filterKey === 'frame'  ? v => v.replace(/ Frame$/, '') :
+                  activeCatDef.filterKey === 'energy'   ? v => v.charAt(0).toUpperCase() + v.slice(1) :
+                  activeCatDef.filterKey === 'frame'    ? v => v.replace(/ Frame$/, '') :
+                  activeCatDef.filterKey === 'perkTier' ? v => `${v}-Tier` :
                   undefined
                 }
               />
@@ -663,12 +666,13 @@ export const SearchSidebar: React.FC = () => {
     const sorted = (s: Set<string>) => Array.from(s).sort();
     return {
       weaponType: sorted(weaponTypeSet),
-      frame:  sorted(frameSet),
-      trait:  sorted(traitSet),
-      energy: ['kinetic', 'solar', 'arc', 'void', 'stasis', 'strand'],
-      ammo:   ['Primary', 'Special', 'Heavy'],
-      slot:   ['Kinetic', 'Energy', 'Power'],
-      rarity: ['Exotic', 'Legendary', 'Rare', 'Uncommon', 'Common'],
+      frame:    sorted(frameSet),
+      trait:    sorted(traitSet),
+      perkTier: ['S', 'A', 'B', 'C'],
+      energy:   ['kinetic', 'solar', 'arc', 'void', 'stasis', 'strand'],
+      ammo:     ['Primary', 'Special', 'Heavy'],
+      slot:     ['Kinetic', 'Energy', 'Power'],
+      rarity:   ['Exotic', 'Legendary', 'Rare', 'Uncommon', 'Common'],
       perk:   sorted(perkSet),
       col1:   sorted(col1Set),
       col2:   sorted(col2Set),
@@ -731,6 +735,13 @@ export const SearchSidebar: React.FC = () => {
       const perks = getPerkValues(d);
       if (!matchesMFAny(filters.perk,  perks.all))          return false;
       if (!matchesMFAny(filters.trait, perks.traits))        return false;
+      // Perk tier filter — match weapons that have at least one rated perk in a perk column
+      if (filters.perkTier.inc.length > 0 || filters.perkTier.exc.length > 0) {
+        const perkTiers = d.perkSockets
+          .filter(col => col.columnType === 'perk')
+          .flatMap(col => col.perks.map(p => p.tier).filter((t): t is string => !!t));
+        if (!matchesMFAny(filters.perkTier, perkTiers)) return false;
+      }
       if (!matchesMFAny(filters.col1,  perks.cols[0] ?? [])) return false;
       if (!matchesMFAny(filters.col2,  perks.cols[1] ?? [])) return false;
       if (!matchesMFAny(filters.col3,  perks.cols[2] ?? [])) return false;
@@ -780,6 +791,7 @@ export const SearchSidebar: React.FC = () => {
     ...mkChips('weaponType', v => v),
     ...mkChips('frame',      v => v.replace(/ Frame$/, '')),
     ...mkChips('trait',      v => v),
+    ...mkChips('perkTier',   v => `${v}-Tier Perk`),
     ...mkChips('perk',       v => v),
     ...mkChips('col1',       v => `Barrel: ${v}`),
     ...mkChips('col2',       v => `Mag: ${v}`),

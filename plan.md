@@ -352,8 +352,18 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | All panels collapsible via `CollapsiblePanel`; External Buffs, Similar Weapons, Wishlists collapsed by default | ✅ Done |
 | Service worker cache strategy: never pre-cache HTML (prevents stale CSS hash mismatches after deploys); cache-first only for `/_next/static/` immutable hashed assets | ✅ Done |
 | Weapon Surge dmg label floating-point fix: `(multiplier - 1) * 100` → `.toFixed(2)` + unary `+` to strip trailing zeros | ✅ Done |
+| `ErrorBoundary` React class component (`src/components/ui/ErrorBoundary.tsx`): per-panel crash isolation with "Try again" reset; wraps all major panels in `page.tsx` | ✅ Done |
+| `CollapsiblePanel` `storageKey` prop: persists open/closed state in `localStorage` under `panel-<key>`; added to Weapon Perks, Stats, Effects, God Roll, Wishlists, Similar Weapons | ✅ Done |
+| CompareStore: `reorderSnapshot(id, 'left'|'right')` action; ComparisonGrid: ‹ › arrows + "Load ↗" button per snapshot card | ✅ Done |
+| WishlistPanel drag-and-drop: `dragging` state + amber glow + "Drop to import…" label on drag-over | ✅ Done |
+| Perk tooltip stat modifier badges: unconditional `PerkMod[]` entries shown as green/red pills below description | ✅ Done |
+| Mobile perk grid scroll hint: right-fade gradient overlay on `md:hidden` so horizontal scroll is discoverable | ✅ Done |
+| MasterworkPanel: Exotic weapons now show a Catalyst info card instead of rendering nothing | ✅ Done |
+| Data vintage notes: "TTK & falloff data: Season 26" on `TTKAndFalloffPanel`; "Timing data: Season 26" on `DpsPanel` | ✅ Done |
+| SimilarWeaponsPanel: weapon icon card (36×36, element-tinted border) replaces element-colour dot | ✅ Done |
+| URL import banner: dismissible sky banner "Imported: [Weapon Name]" when roll loaded from `?w=` permalink | ✅ Done |
 
-**Stage 12 progress: ~95%**
+**Stage 12 progress: ~97%**
 
 ---
 
@@ -372,8 +382,8 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | 9 — God Roll Database Refresh | 100% | Complete |
 | 10 — Weapon List Polish | 100% | Complete |
 | 11 — PvE Damage Model Accuracy | 100% | Complete |
-| 12 — Feature Backlog | ~95% | Active |
-| **Overall** | **~97%** | |
+| 12 — Feature Backlog | ~97% | Active |
+| **Overall** | **~98%** | |
 
 ---
 
@@ -402,6 +412,30 @@ Stage 12 is the active work. 12A (partial), 12B (partial), 12C, 12D, 12E, 12F, 1
 
 1. **12A remaining** — Damage vs Distance chart; flinch resistance; per-activity PvE scaling dropdown
 2. **12B remaining** — Screenshot mode (Destiny-style weapon card renderer for social sharing)
+
+---
+
+*Last updated: 2026-04-25 — Session summary (11 UI/UX polish improvements, commit fc6d447):*
+
+*1. `src/components/ui/ErrorBoundary.tsx` (new): React class component with `getDerivedStateFromError` + `componentDidCatch`. Default fallback shows a red error card with the panel label and a "Try again" reset button. All major panels in `page.tsx` wrapped (`<ErrorBoundary label="…">`).*
+
+*2. `CollapsiblePanel` persistence: added `storageKey?: string` prop. Initial state reads `localStorage.getItem('panel-<key>')` (lazy initializer to avoid SSR mismatch). Toggle writes `'open'`/`'closed'` back. `storageKey` added to: Weapon Perks, Weapon Stats, Effects, God Roll (both loading + main branch), Wishlists, Similar Weapons.*
+
+*3. CompareStore + ComparisonGrid: added `reorderSnapshot(id, 'left'|'right')` to `useCompareStore` (swaps adjacent items in the array). Each snapshot card gains ‹ › move arrows (disabled at boundaries) and a "Load ↗" button in the top-left that calls `loadWeapon(snapshot.weapon)` to open the snapshot in the editor.*
+
+*4. WishlistPanel drag-and-drop: `dragging` boolean state tracks hover; `onDragEnter/Over/Leave/Drop` handlers on the drop-zone button. On drag-over: amber glow border + `bg-amber-500/10` background + "Drop to import…" label. `onDrop` reads `e.dataTransfer.files[0]` and calls `loadFile()`.*
+
+*5. Perk tooltip stat modifier badges (RollEditor): `displayPerk.statModifiers` (a `PerkMod[]`) filtered to `value !== 0 && !isConditional` then rendered as green/red pills (`+X StatName`) below the perk description in the tooltip.*
+
+*6. Mobile perk grid scroll hint (RollEditor): wrapped the `flex overflow-x-auto` grid in a `relative` div; a `pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0d0d0f]` overlay fades the right edge on `md:hidden`.*
+
+*7. MasterworkPanel — Exotic Catalyst card: replaced `return null` for Exotic rarity with an amber-bordered info card (`⬡ Catalyst`) explaining that Exotic weapons upgrade via a Catalyst, not a masterwork.*
+
+*8. Data vintage notes: added `"TTK & falloff data: Season 26"` footnote to `TTKAndFalloffPanel` (inserted before the fullscreen portal block); added `"Timing data: Season 26"` `<br>` line to `DpsPanel` footer.*
+
+*9. SimilarWeaponsPanel weapon icons: imported `Image` from `next/image` and `BUNGIE_URL`. `SimilarRow` now shows a 36×36 rounded weapon icon with element-tinted border (`border-sky-500/60` for arc, `border-orange-500/60` for solar, etc.) in place of the old 8px element dot. Header row `w-2` spacer widened to `w-9` to align.*
+
+*10. URL import banner: `importedWeaponName` state (`useState<string | null>(null)`) added to `Dashboard`. Set inside the URL-restore `useEffect` after a successful `loadWeapon`. Banner renders as an `AnimatePresence`-animated sky-tinted div above the editor tab with a × dismiss button.*
 
 ---
 

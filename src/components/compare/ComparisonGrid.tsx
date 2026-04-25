@@ -43,6 +43,7 @@ function SnapshotCard({
   statMaxes,
   sharedBarStatKeys,
   enemyTier,
+  canReorder,
 }: {
   snapshot: CompareSnapshot;
   index: number;
@@ -51,6 +52,7 @@ function SnapshotCard({
   statMaxes: Record<string, number>;
   sharedBarStatKeys: string[];
   enemyTier: string;
+  canReorder: boolean;
 }) {
   const { removeSnapshot, renameSnapshot, reorderSnapshot } = useCompareStore();
   const { loadWeapon } = useWeaponStore();
@@ -128,20 +130,24 @@ function SnapshotCard({
 
   return (
     <div className="min-w-[260px] bg-black/40 p-4 rounded-lg border border-white/10 relative flex flex-col gap-4">
-      {/* Top-right controls: reorder left/right + remove */}
+      {/* Top-right controls: reorder left/right (when not sorted) + remove */}
       <div className="absolute top-2 right-2 flex items-center gap-1">
-        <button
-          onClick={() => reorderSnapshot(snapshot.id, 'left')}
-          disabled={index === 0}
-          className="w-5 h-5 bg-white/5 text-slate-500 rounded hover:bg-white/10 hover:text-slate-200 transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
-          aria-label="Move left"
-        >‹</button>
-        <button
-          onClick={() => reorderSnapshot(snapshot.id, 'right')}
-          disabled={index === total - 1}
-          className="w-5 h-5 bg-white/5 text-slate-500 rounded hover:bg-white/10 hover:text-slate-200 transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
-          aria-label="Move right"
-        >›</button>
+        {canReorder && (
+          <>
+            <button
+              onClick={() => reorderSnapshot(snapshot.id, 'left')}
+              disabled={index === 0}
+              className="w-5 h-5 bg-white/5 text-slate-500 rounded hover:bg-white/10 hover:text-slate-200 transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
+              aria-label="Move left"
+            >‹</button>
+            <button
+              onClick={() => reorderSnapshot(snapshot.id, 'right')}
+              disabled={index === total - 1}
+              className="w-5 h-5 bg-white/5 text-slate-500 rounded hover:bg-white/10 hover:text-slate-200 transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
+              aria-label="Move right"
+            >›</button>
+          </>
+        )}
         <button
           onClick={() => removeSnapshot(snapshot.id)}
           className="w-5 h-5 bg-white/5 text-slate-400 rounded hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center text-[10px] font-bold"
@@ -372,6 +378,8 @@ export const ComparisonGrid: React.FC = () => {
 
   const pveTierKeys = Object.keys(PVE_HEALTH_TIERS);
   const [enemyTier, setEnemyTier] = useState(pveTierKeys[0]);
+  const [sortStat,  setSortStat]  = useState<string | null>(null);
+  const [sortDir,   setSortDir]   = useState<'asc' | 'desc'>('asc');
 
   // Whether any snapshot uses PvE mode (shows the enemy tier selector).
   const hasPveSnapshot = snapshots.some((s) => s.mode === 'pve');
@@ -392,6 +400,38 @@ export const ComparisonGrid: React.FC = () => {
     });
     return { statMins: mins, statMaxes: maxes, sharedBarStatKeys: shared };
   }, [snapshots]);
+
+  // Sort options: TTK first, then shared bar stat keys
+  const sortOptions = useMemo(() => ['TTK', ...sharedBarStatKeys], [sharedBarStatKeys]);
+
+  // Sorted snapshot order (leaves original store order untouched)
+  const sortedSnapshots = useMemo(() => {
+    if (!sortStat) return snapshots;
+    return [...snapshots].sort((a, b) => {
+      let valA: number;
+      let valB: number;
+      if (sortStat === 'TTK') {
+        const tierA = a.mode === 'pve' ? enemyTier : 'Minor';
+        const tierB = b.mode === 'pve' ? enemyTier : 'Minor';
+        valA = calculateTTK(a.mode, a.weapon, a.multiplier ?? 1.0, PVP_GUARDIAN_HP, tierA)?.ttk ?? Infinity;
+        valB = calculateTTK(b.mode, b.weapon, b.multiplier ?? 1.0, PVP_GUARDIAN_HP, tierB)?.ttk ?? Infinity;
+      } else {
+        valA = a.calculatedStats[sortStat] ?? 0;
+        valB = b.calculatedStats[sortStat] ?? 0;
+      }
+      return sortDir === 'asc' ? valA - valB : valB - valA;
+    });
+  }, [snapshots, sortStat, sortDir, enemyTier]);
+
+  const handleSortClick = (stat: string) => {
+    if (sortStat === stat) {
+      if (sortDir === 'asc') { setSortDir('desc'); }
+      else { setSortStat(null); setSortDir('asc'); }
+    } else {
+      setSortStat(stat);
+      setSortDir('asc');
+    }
+  };
 
   if (snapshots.length === 0) {
     return (
@@ -431,7 +471,7 @@ export const ComparisonGrid: React.FC = () => {
             </div>
           )}
 
-          <div className="flex items-center gap-3 text-[10px] text-slate-600">
+          <div className="flex flex-wrap items-center gap-3 text-[10px] text-slate-600">
             <span title="Colors show each stat's delta above the lowest value across all snapshots">
               Δ from min: <span className="text-green-300">■</span> +1–5 <span className="text-green-400">■</span> +6–15 <span className="text-green-400 font-bold">■</span> +16+ <span className="text-red-400">■</span> lower
             </span>
@@ -439,11 +479,35 @@ export const ComparisonGrid: React.FC = () => {
               Clear all
             </button>
           </div>
+
+          {/* Sort by stat — compact chip row */}
+          {sortOptions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 w-full">
+              <span className="text-[10px] text-slate-600 shrink-0">Sort:</span>
+              {sortOptions.map((stat) => {
+                const isActive = sortStat === stat;
+                return (
+                  <button
+                    key={stat}
+                    onClick={() => handleSortClick(stat)}
+                    className={[
+                      'text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-all leading-none',
+                      isActive
+                        ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                        : 'bg-white/5 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300',
+                    ].join(' ')}
+                  >
+                    {stat}{isActive ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="flex overflow-x-auto gap-4 pb-4 md:grid md:grid-cols-2 xl:grid-cols-3">
-        {snapshots.map((snapshot, idx) => (
+        {sortedSnapshots.map((snapshot, idx) => (
           <SnapshotCard
             key={snapshot.id}
             snapshot={snapshot}
@@ -453,6 +517,7 @@ export const ComparisonGrid: React.FC = () => {
             statMaxes={statMaxes}
             sharedBarStatKeys={sharedBarStatKeys}
             enemyTier={enemyTier}
+            canReorder={!sortStat}
           />
         ))}
       </div>

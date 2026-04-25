@@ -438,7 +438,7 @@ function FeaturedGodRolls({
             return (
               <button
                 key={name}
-                onClick={() => router.push(`/editor?w=${w.hash}`)}
+                onClick={() => router.push(`/editor?w=${w.hash}&godroll=1`)}
                 className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 hover:border-white/15 transition-colors text-left flex flex-col gap-3 group"
               >
                 {/* Header: icon + name + tier */}

@@ -22,6 +22,7 @@ import { calculateTTK } from '../../lib/damageMath';
 import { MasterworkStat } from '../../store/useWeaponStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
+import { useGodRolls } from '../../lib/useGodRolls';
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -85,6 +86,7 @@ function Dashboard() {
   } = useWeaponStore();
   const { addSnapshot, snapshots } = useCompareStore();
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
+  const { data: godRollDb } = useGodRolls();
   const searchParams = useSearchParams();
 
   const [activeTab,          setActiveTab]          = useState<'editor' | 'compare'>('editor');
@@ -95,6 +97,7 @@ function Dashboard() {
   const [clearPending,       setClearPending]       = useState(false);
   const [showShortcuts,      setShowShortcuts]      = useState(false);
   const [importedWeaponName, setImportedWeaponName] = useState<string | null>(null);
+  const [pendingGodRoll,     setPendingGodRoll]     = useState(false);
 
   const shareRef    = useRef<HTMLDivElement>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -157,6 +160,7 @@ function Dashboard() {
     const group = weaponGroups.find((g) => g.variants.some((v) => v.hash === weaponHash));
     loadWeapon(found, group?.variants);
     setImportedWeaponName(found.name);
+    if (searchParams.get('godroll') === '1') setPendingGodRoll(true);
 
     if (perkParam) {
       const hashes = perkParam.split(',');
@@ -180,11 +184,53 @@ function Dashboard() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, weapons.length]);
 
+  // Auto-apply god roll when navigated from homepage card (?godroll=1)
+  useEffect(() => {
+    if (!pendingGodRoll || !activeWeapon || !godRollDb) return;
+    const entry = godRollDb[activeWeapon.name];
+    if (!entry) { setPendingGodRoll(false); return; }
+
+    const nameToColumn = new Map<string, { columnName: string; perkHash: string }>();
+    for (const col of activeWeapon.perkSockets) {
+      for (const perk of col.perks) {
+        nameToColumn.set(perk.name.toLowerCase(), { columnName: col.name, perkHash: perk.hash });
+      }
+    }
+
+    const perkCols   = activeWeapon.perkSockets.filter((c) => c.columnType === 'perk');
+    const originCols = activeWeapon.perkSockets.filter((c) => c.columnType === 'origin');
+
+    const slots: Array<{ names: string[] }> = [];
+    if (entry.barrel?.length)  slots.push({ names: entry.barrel });
+    if (entry.mag?.length)     slots.push({ names: entry.mag });
+    if (perkCols[0] && entry.perk1?.length) slots.push({ names: entry.perk1 });
+    if (perkCols[1] && entry.perk2?.length) slots.push({ names: entry.perk2 });
+    if (originCols[0] && entry.originTrait && entry.originTrait !== 'None') {
+      const names = entry.originTrait.includes('\n')
+        ? entry.originTrait.split('\n').map((s) => s.trim()).filter(Boolean)
+        : entry.originTrait.length <= 40 ? [entry.originTrait] : [];
+      if (names.length) slots.push({ names });
+    }
+
+    for (const slot of slots) {
+      for (const name of slot.names) {
+        const match = nameToColumn.get(name.toLowerCase());
+        if (match) { selectPerk(match.columnName, match.perkHash); break; }
+      }
+    }
+
+    setPendingGodRoll(false);
+  }, [pendingGodRoll, activeWeapon, godRollDb, selectPerk]);
+
   // ── Share helpers ────────────────────────────────────────────────────────────
 
   const buildPermalink = () => {
     if (!activeWeapon) return '';
     const params = new URLSearchParams({ w: activeWeapon.hash });
+    // Human-readable slug makes shared URLs legible (e.g. ?w=123&name=the-messenger).
+    // The slug is decorative — the editor always resolves via the hash.
+    const slug = activeWeapon.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    params.set('name', slug);
     const perkHashes = Object.values(selectedPerks);
     if (perkHashes.length) params.set('p', perkHashes.join(','));
     params.set('m', mode);
