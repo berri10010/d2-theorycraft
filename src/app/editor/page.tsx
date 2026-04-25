@@ -96,7 +96,6 @@ function Dashboard() {
   const [sidebarCollapsed,   setSidebarCollapsed]   = useState(false);
   const [clearPending,       setClearPending]       = useState(false);
   const [showShortcuts,      setShowShortcuts]      = useState(false);
-  const [importedWeaponName, setImportedWeaponName] = useState<string | null>(null);
   const [pendingGodRoll,     setPendingGodRoll]     = useState(false);
 
   const shareRef    = useRef<HTMLDivElement>(null);
@@ -159,7 +158,6 @@ function Dashboard() {
 
     const group = weaponGroups.find((g) => g.variants.some((v) => v.hash === weaponHash));
     loadWeapon(found, group?.variants);
-    setImportedWeaponName(found.name);
     if (searchParams.get('godroll') === '1') setPendingGodRoll(true);
 
     if (perkParam) {
@@ -639,34 +637,6 @@ function Dashboard() {
               </div>
             )}
           </header>
-
-          {/* ── URL import banner ───────────────────────────────────────── */}
-          <AnimatePresence>
-            {importedWeaponName && (
-              <motion.div
-                key="import-banner"
-                initial={{ opacity: 0, y: -10, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: 'auto' }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="overflow-hidden"
-              >
-                <div className="flex items-center justify-between gap-3 bg-sky-500/10 border border-sky-500/25 rounded-xl px-4 py-2.5">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-sky-400">🔗</span>
-                    <span className="text-slate-300">
-                      Imported: <span className="font-semibold text-sky-400">{importedWeaponName}</span>
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setImportedWeaponName(null)}
-                    className="text-slate-500 hover:text-slate-200 transition-colors text-lg leading-none px-1"
-                    aria-label="Dismiss"
-                  >×</button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* ── Editor tab ──────────────────────────────────────────────── */}
           <div role="tabpanel" aria-label="Roll editor" hidden={activeTab !== 'editor'}>
