@@ -468,9 +468,15 @@ function Dashboard() {
         <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
 
           {/* ── Top action bar ─────────────────────────────────────────── */}
-          <header className="flex items-center gap-3 flex-wrap justify-between">
+          {/*
+            Mobile layout: two deliberate rows
+              Row 1: [☰ | Editor Compare] ··· [PVE PVP]
+              Row 2: [Share] [Clear] [+Compare]  (right-aligned)
+            Desktop (md+): single flex row, action buttons pushed right via ml-auto
+          */}
+          <header className="flex flex-wrap items-center gap-2 sm:gap-3">
 
-            {/* Left group */}
+            {/* Nav group: hamburger + tabs */}
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Mobile sidebar toggle */}
               <button
@@ -504,30 +510,30 @@ function Dashboard() {
                   </button>
                 ))}
               </div>
-
-              {/* PvE / PvP mode toggle */}
-              {activeTab === 'editor' && (
-                <div role="group" aria-label="Game mode" className="flex bg-white/5 rounded-lg p-1 border border-white/10">
-                  {(['pve', 'pvp'] as const).map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => setMode(m)}
-                      aria-pressed={mode === m}
-                      className={[
-                        'px-3 sm:px-4 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] uppercase',
-                        mode === m ? 'bg-white/10 text-amber-400' : 'text-slate-400 hover:text-slate-200',
-                      ].join(' ')}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Right group — action buttons */}
+            {/* PvE / PvP mode toggle — shares row 1 with nav on both mobile and desktop */}
             {activeTab === 'editor' && (
-              <div className="flex items-center gap-2">
+              <div role="group" aria-label="Game mode" className="flex bg-white/5 rounded-lg p-1 border border-white/10">
+                {(['pve', 'pvp'] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    aria-pressed={mode === m}
+                    className={[
+                      'px-3 sm:px-4 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] uppercase',
+                      mode === m ? 'bg-white/10 text-amber-400' : 'text-slate-400 hover:text-slate-200',
+                    ].join(' ')}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Action buttons — full-width on mobile (forces new row, right-aligned); auto on desktop */}
+            {activeTab === 'editor' && (
+              <div className="flex items-center gap-2 w-full md:w-auto justify-end md:ml-auto">
                 {/* Keyboard shortcut legend */}
                 <button
                   onClick={() => setShowShortcuts(true)}

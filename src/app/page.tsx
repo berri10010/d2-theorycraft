@@ -137,6 +137,7 @@ const TIER_COLORS: Record<string, string> = {
   D: 'bg-slate-600 text-slate-300',
   E: 'bg-slate-700 text-slate-400',
   F: 'bg-slate-800 text-slate-500',
+  G: 'bg-red-900 text-red-400',
 };
 
 // ── Feature cards ─────────────────────────────────────────────────────────────
@@ -236,9 +237,10 @@ function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps)
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setFocused(f => Math.max(f - 1, 0));
-    } else if (e.key === 'Enter' && focused >= 0) {
+    } else if (e.key === 'Enter') {
       e.preventDefault();
-      go(results[focused].default.hash);
+      if (focused >= 0) go(results[focused].default.hash);
+      else if (results.length > 0) go(results[0].default.hash);
     } else if (e.key === 'Escape') {
       setOpen(false);
     }
@@ -552,7 +554,7 @@ export default function HomePage() {
       </nav>
 
       {/* Hero + search */}
-      <section className="relative z-20 flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 flex-1">
+      <section className="relative z-20 flex flex-col items-center justify-center text-center px-6 pt-12 pb-10">
 
         <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-none mb-4">
           Build the <span className="text-amber-400">perfect</span><br />weapon roll.
@@ -581,7 +583,7 @@ export default function HomePage() {
       <FeaturedGodRolls groups={weaponGroups} godRolls={godRolls} />
 
       {/* Tools & Features (collapsible) */}
-      <section className="relative z-10 px-6 pb-20">
+      <section className="relative z-10 px-6 pb-6">
         <div className="max-w-4xl mx-auto">
           <button
             onClick={() => setFeaturesOpen(o => !o)}

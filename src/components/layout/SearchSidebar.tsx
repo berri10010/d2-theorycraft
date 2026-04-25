@@ -75,13 +75,14 @@ interface CategoryDef {
   id: CategoryId;
   label: string;
   filterKey?: MultiKey;
+  noSearch?: boolean;
 }
 
 const CATEGORIES: CategoryDef[] = [
   { id: 'weaponType', label: 'Weapon Type', filterKey: 'weaponType' },
   { id: 'frame',      label: 'Frame',       filterKey: 'frame' },
   { id: 'trait',      label: 'Trait',       filterKey: 'trait' },
-  { id: 'perkTier',   label: 'Perk Tier',   filterKey: 'perkTier' },
+  { id: 'perkTier',   label: 'Perk Tier',   filterKey: 'perkTier', noSearch: true },
   { id: 'energy',     label: 'Energy',      filterKey: 'energy' },
   { id: 'ammo',       label: 'Ammo',        filterKey: 'ammo' },
   { id: 'slot',       label: 'Slot',        filterKey: 'slot' },
@@ -225,7 +226,7 @@ function ActiveChip({ label, isExclude, onRemove }: { label: string; isExclude: 
 }
 
 function OptionsPanel({
-  filterKey, options, mf, onToggle, onClear, optLabel,
+  filterKey, options, mf, onToggle, onClear, optLabel, showSearch = true,
 }: {
   filterKey: MultiKey;
   options: string[];
@@ -233,10 +234,11 @@ function OptionsPanel({
   onToggle: (key: MultiKey, val: string) => void;
   onClear: () => void;
   optLabel?: (v: string) => string;
+  showSearch?: boolean;
 }) {
   const [search, setSearch] = useState('');
   const label = (v: string) => optLabel?.(v) ?? v;
-  const visible = search
+  const visible = showSearch && search
     ? options.filter(o => label(o).toLowerCase().includes(search.toLowerCase()))
     : options;
   const activeCount = mf.inc.length + mf.exc.length;
@@ -244,23 +246,31 @@ function OptionsPanel({
   return (
     <div className="flex flex-col gap-2">
       {/* Search + active count */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-600 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-          </svg>
-          <input
-            value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search options…"
-            className="w-full bg-white/[0.04] border border-white/10 rounded-md pl-7 pr-2.5 py-1.5 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-amber-500/40 transition-colors"
-          />
+      {showSearch ? (
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-600 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            </svg>
+            <input
+              value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search options…"
+              className="w-full bg-white/[0.04] border border-white/10 rounded-md pl-7 pr-2.5 py-1.5 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-amber-500/40 transition-colors"
+            />
+          </div>
+          {activeCount > 0 && (
+            <button onClick={onClear} className="shrink-0 text-[10px] text-slate-500 hover:text-amber-400 transition-colors whitespace-nowrap">
+              Clear {activeCount}
+            </button>
+          )}
         </div>
-        {activeCount > 0 && (
-          <button onClick={onClear} className="shrink-0 text-[10px] text-slate-500 hover:text-amber-400 transition-colors whitespace-nowrap">
+      ) : activeCount > 0 ? (
+        <div className="flex justify-end">
+          <button onClick={onClear} className="text-[10px] text-slate-500 hover:text-amber-400 transition-colors whitespace-nowrap">
             Clear {activeCount}
           </button>
-        )}
-      </div>
+        </div>
+      ) : null}
 
       {/* Option list */}
       <div className="max-h-48 overflow-y-auto -mx-1">
@@ -443,6 +453,7 @@ function FilterPanel({
                 mf={filters[activeCatDef.filterKey]}
                 onToggle={onToggle}
                 onClear={() => onClearKey(activeCatDef.filterKey!)}
+                showSearch={!activeCatDef.noSearch}
                 optLabel={
                   activeCatDef.filterKey === 'energy'   ? v => v.charAt(0).toUpperCase() + v.slice(1) :
                   activeCatDef.filterKey === 'frame'    ? v => v.replace(/ Frame$/, '') :
@@ -668,7 +679,7 @@ export const SearchSidebar: React.FC = () => {
       weaponType: sorted(weaponTypeSet),
       frame:    sorted(frameSet),
       trait:    sorted(traitSet),
-      perkTier: ['S', 'A', 'B', 'C'],
+      perkTier: ['S', 'A', 'B', 'C', 'D', 'E', 'F', 'G'],
       energy:   ['kinetic', 'solar', 'arc', 'void', 'stasis', 'strand'],
       ammo:     ['Primary', 'Special', 'Heavy'],
       slot:     ['Kinetic', 'Energy', 'Power'],

@@ -246,6 +246,11 @@ export const RollEditor: React.FC = () => {
                               perk.tier === 'S' ? 'bg-amber-500/30 text-amber-300' :
                               perk.tier === 'A' ? 'bg-emerald-500/25 text-emerald-300' :
                               perk.tier === 'B' ? 'bg-blue-500/25 text-blue-300' :
+                              perk.tier === 'C' ? 'bg-slate-500/30 text-slate-300' :
+                              perk.tier === 'D' ? 'bg-slate-600/30 text-slate-400' :
+                              perk.tier === 'E' ? 'bg-slate-700/30 text-slate-500' :
+                              perk.tier === 'F' ? 'bg-slate-800/30 text-slate-600' :
+                              perk.tier === 'G' ? 'bg-red-900/30 text-red-400' :
                               'bg-white/10 text-slate-400'
                             }`}>{perk.tier}</span>
                           )}
