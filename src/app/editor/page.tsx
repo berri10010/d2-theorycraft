@@ -469,7 +469,7 @@ function Dashboard() {
           {/*
             Mobile layout: two deliberate rows
               Row 1: [☰ | Editor Compare] ··· [PVE PVP]
-              Row 2: [Share] [Clear] [+Compare]  (right-aligned)
+              Row 2: [Share] [Clear] [+Compare]  (centered)
             Desktop (md+): single flex row, action buttons pushed right via ml-auto
           */}
           <header className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -529,9 +529,9 @@ function Dashboard() {
               </div>
             )}
 
-            {/* Action buttons — full-width on mobile (forces new row, right-aligned); auto on desktop */}
+            {/* Action buttons — full-width on mobile (forces new row, centered); auto+right on desktop */}
             {activeTab === 'editor' && (
-              <div className="flex items-center gap-2 w-full md:w-auto justify-end md:ml-auto">
+              <div className="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end md:ml-auto">
                 {/* Keyboard shortcut legend */}
                 <button
                   onClick={() => setShowShortcuts(true)}
