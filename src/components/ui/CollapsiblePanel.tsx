@@ -14,6 +14,7 @@ interface CollapsiblePanelProps {
    * `panel-<storageKey>`. Omit for panels that should not persist state.
    */
   storageKey?: string;
+  fullWidth?: boolean;
   children: React.ReactNode;
 }
 
@@ -23,6 +24,7 @@ export function CollapsiblePanel({
   headerRight,
   className = 'border-white/10',
   storageKey,
+  fullWidth = false,
   children,
 }: CollapsiblePanelProps) {
   const [open, setOpen] = useState(() => {
@@ -78,7 +80,10 @@ export function CollapsiblePanel({
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden"
           >
-            <div className="px-4 md:px-6 pb-4 md:pb-6">
+            <div className={[
+              'pb-4 md:pb-6',
+              !fullWidth ? 'px-4 md:px-6' : '',
+            ].join(' ')}>
               {children}
             </div>
           </motion.div>
