@@ -8,11 +8,10 @@ import { ArmorModPanel } from './ArmorModPanel';
 import { TTKAndFalloffPanel } from '../ui/TTKAndFalloffPanel';
 import { SubclassVerbPanel } from './SubclassVerbPanel';
 import { DpsPanel } from './DpsPanel';
-import { DamageProfilePanel } from './DamageProfilePanel';
 
 // ── Panel options ─────────────────────────────────────────────────────────────
 
-type PanelKey = 'masterwork' | 'ammo' | 'ttk-falloff' | 'dps' | 'subclass' | 'physics';
+type PanelKey = 'masterwork' | 'ammo' | 'ttk-falloff' | 'dps' | 'subclass';
 
 interface TabDef {
   key: PanelKey;
@@ -25,7 +24,6 @@ const TABS: TabDef[] = [
   { key: 'ttk-falloff', label: 'TTK'       },
   { key: 'dps',        label: 'DPS'        },
   { key: 'subclass',   label: 'Subclass'   },
-  { key: 'physics',    label: 'Physics'    },
 ];
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -97,7 +95,6 @@ export function WeaponDataPanel() {
               {active === 'ttk-falloff' && <TTKAndFalloffPanel />}
               {active === 'dps'         && <DpsPanel />}
               {active === 'subclass'    && <SubclassVerbPanel />}
-              {active === 'physics'     && <DamageProfilePanel />}
             </motion.div>
           </AnimatePresence>
         </div>
