@@ -297,20 +297,13 @@ export const WeaponHeader: React.FC = () => {
                     onClick={() => loadWeapon(isAdeptSelected ? baseVariant : adeptVariant, variantGroup)}
                     title={isAdeptSelected ? 'Switch to base version' : `Switch to ${adeptVariant.variantLabel} version`}
                     className={[
-                      'flex items-center gap-2 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-all',
+                      'text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-all',
                       isAdeptSelected
                         ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
                         : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
                     ].join(' ')}
                   >
-                    <span className={['relative inline-flex w-7 h-4 rounded-full transition-colors border', isAdeptSelected ? 'bg-amber-500/40 border-amber-500/60' : 'bg-white/5 border-white/15'].join(' ')}>
-                      <motion.span
-                        className={['absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full', isAdeptSelected ? 'bg-amber-400' : 'bg-slate-500'].join(' ')}
-                        animate={{ x: isAdeptSelected ? 14 : 2 }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                      />
-                    </span>
-                    {adeptVariant.variantLabel}
+                    {isAdeptSelected ? adeptVariant.variantLabel : 'Non-Adept'}
                   </button>
                 );
               }
@@ -343,11 +336,8 @@ export const WeaponHeader: React.FC = () => {
                 <button
                   onClick={toggleCrafted}
                   title="Crafted mode active — click to disable"
-                  className="text-xs font-semibold px-2 py-1 rounded-md border transition-all flex items-center gap-1.5 bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30"
+                  className="text-xs font-semibold px-2 py-1 rounded-md border transition-all bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30"
                 >
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 shrink-0">
-                    <path fillRule="evenodd" d="M8.34 1.804A1 1 0 019.32 1h1.36a1 1 0 01.98.804l.295 1.473c.497.144.971.342 1.416.587l1.25-.834a1 1 0 011.262.125l.962.962a1 1 0 01.125 1.262l-.834 1.25c.245.445.443.919.587 1.416l1.473.294a1 1 0 01.804.98v1.361a1 1 0 01-.804.98l-1.473.295a6.95 6.95 0 01-.587 1.416l.834 1.25a1 1 0 01-.125 1.262l-.962.962a1 1 0 01-1.262.125l-1.25-.834a6.953 6.953 0 01-1.416.587l-.294 1.473a1 1 0 01-.98.804H9.32a1 1 0 01-.98-.804l-.295-1.473a6.957 6.957 0 01-1.416-.587l-1.25.834a1 1 0 01-1.262-.125l-.962-.962a1 1 0 01-.125-1.262l.834-1.25a6.957 6.957 0 01-.587-1.416l-1.473-.294A1 1 0 011 10.68V9.32a1 1 0 01.804-.98l1.473-.295c.144-.497.342-.971.587-1.416l-.834-1.25a1 1 0 01.125-1.262l.962-.962A1 1 0 015.38 2.03l1.25.834a6.957 6.957 0 011.416-.587l.294-1.473zM13 10a3 3 0 11-6 0 3 3 0 016 0z" clipRule="evenodd" />
-                  </svg>
                   Crafted
                 </button>
               ) : (
@@ -362,11 +352,8 @@ export const WeaponHeader: React.FC = () => {
                     }
                   }}
                   title="This weapon has a craftable pattern — click to enable crafted mode (+2 stats, enhanced perks)"
-                  className="text-xs font-medium px-2 py-1 rounded-md border transition-all flex items-center gap-1.5 bg-white/3 text-slate-500 border-white/10 hover:border-red-500/30 hover:text-red-400 hover:bg-red-500/8"
+                  className="text-xs font-medium px-2 py-1 rounded-md border transition-all bg-white/3 text-slate-500 border-white/10 hover:border-red-500/30 hover:text-red-400 hover:bg-red-500/8"
                 >
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 shrink-0">
-                    <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
-                  </svg>
                   Craftable
                 </button>
               )
@@ -380,21 +367,15 @@ export const WeaponHeader: React.FC = () => {
               isEnhanced ? (
                 <div
                   title="Enhanced — both perk slots are enhanced"
-                  className="text-xs font-semibold px-2 py-1 rounded-md border flex items-center gap-1.5 bg-violet-500/20 text-violet-400 border-violet-500/50 select-none"
+                  className="text-xs font-semibold px-2 py-1 rounded-md border bg-violet-500/20 text-violet-400 border-violet-500/50 select-none"
                 >
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 shrink-0">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
                   Enhanced
                 </div>
               ) : (
                 <div
                   title="Enhance both Perk 1 and Perk 2 (click twice on each) to activate enhanced mode"
-                  className="text-xs font-medium px-2 py-1 rounded-md border flex items-center gap-1.5 bg-white/3 text-slate-500 border-white/10 select-none"
+                  className="text-xs font-medium px-2 py-1 rounded-md border bg-white/3 text-slate-500 border-white/10 select-none"
                 >
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 shrink-0">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
                   Enhanceable
                 </div>
               )
