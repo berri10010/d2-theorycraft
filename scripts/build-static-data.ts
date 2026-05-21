@@ -39,6 +39,33 @@ import type { BungieSeasonDefinition } from '../src/lib/bungie/bungieTypes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 const ROOT       = path.resolve(__dirname, '..');
+
+// Load .env.local if present and BUNGIE_API_KEY is not set
+if (!process.env.BUNGIE_API_KEY) {
+  try {
+    const envPath = path.join(ROOT, '.env.local');
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf-8');
+      for (const line of envContent.split(/\r?\n/)) {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+          const idx = trimmed.indexOf('=');
+          if (idx !== -1) {
+            const key = trimmed.substring(0, idx).trim();
+            let val = trimmed.substring(idx + 1).trim();
+            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+              val = val.substring(1, val.length - 1);
+            }
+            process.env[key] = val;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // Ignore env loading errors
+  }
+}
+
 const OUT_DIR    = path.join(ROOT, 'public', 'data');
 
 function outPath(name: string) { return path.join(OUT_DIR, name); }

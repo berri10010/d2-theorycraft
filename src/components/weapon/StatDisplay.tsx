@@ -292,6 +292,14 @@ export const StatDisplay: React.FC = () => {
                 </div>
               );
             }
+          } else if (statName === 'Stability') {
+            const flinchResist = current * 0.1;
+            tooltipContent = (
+              <div className="flex items-baseline gap-2">
+                <span className="text-xs text-slate-400">Flinch resistance</span>
+                <span className="text-sm font-mono font-bold text-amber-400">-{flinchResist.toFixed(1)}%</span>
+              </div>
+            );
           } else if (statName === 'Handling' && handlingTimes) {
             tooltipContent = (
               <div>

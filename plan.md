@@ -243,8 +243,8 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Range stat: hover shows Hip Xm (cyan) + ADS Xm (amber) using adsMultiplier(zoom) | ✅ Done |
 | Zoom stat: hover shows magnification multiplier (zoom/10, e.g. 1.4×) | ✅ Done |
 | Compare tab: Ready/ADS/Stow handling chips + Reload/Charge/Perfect timing row (per-weapon-type) | ✅ Done |
-| Damage vs Distance chart: interactive line chart showing actual damage values per meter (hip-fire vs ADS) | ⬜ Pending |
-| Flinch resistance: show flinch resist derived from Stability + Health (0–100 → 0–10%) | ⬜ Pending |
+| Damage vs Distance chart: interactive line chart showing actual damage values per meter (hip-fire vs ADS) | ✅ Done |
+| Flinch resistance: show flinch resist derived from Stability + Health (0–100 → 0–10%) | ✅ Done |
 | Per-activity PvE scaling: Activity + Difficulty + Enemy Type dropdown scales all damage numbers; include custom option | ⬜ Pending |
 
 #### 12B — Sharing & Presentation

@@ -90,11 +90,11 @@ export function DamageProfilePanel() {
 
   if (!detectArchetype(activeWeapon.itemSubType)) {
     return (
-      <div className="bg-white/5 backdrop-blur-sm p-5 rounded-xl border border-white/10 text-center">
-        <p className="text-slate-500 text-sm">
+      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 text-center">
+        <p className="text-slate-400 text-sm">
           Damage profile not available for {activeWeapon.itemTypeDisplayName}.
         </p>
-        <p className="text-slate-600 text-xs mt-1">
+        <p className="text-slate-600 text-xs mt-1.5">
           Supported: Rocket Launcher · Shotgun · Sniper Rifle · Sword · Trace Rifle
         </p>
       </div>
@@ -105,8 +105,8 @@ export function DamageProfilePanel() {
 
   if (!profile) {
     return (
-      <div className="bg-white/5 backdrop-blur-sm p-5 rounded-xl border border-white/10 text-center">
-        <p className="text-slate-500 text-sm">Could not build damage profile for this weapon.</p>
+      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 text-center">
+        <p className="text-slate-400 text-sm">Could not build damage profile for this weapon.</p>
       </div>
     );
   }
@@ -124,7 +124,7 @@ export function DamageProfilePanel() {
   const hasSplash   = result.splash > 0;
 
   return (
-    <div className="space-y-4">
+    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 space-y-4">
 
       {/* Header */}
       <div className="flex items-center justify-between">

@@ -516,9 +516,19 @@ export default function HomePage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.json() as Promise<WeaponResult[]>;
     };
-    Promise.all([fetchChunk('/data/weapons-0.json'), fetchChunk('/data/weapons-1.json')])
-      .then(([c0, c1]) => { setWeaponGroups(groupWeapons([...c0, ...c1])); setWeaponLoaded(true); })
-      .catch(() => { setWeaponLoaded(true); setWeaponError(true); });
+    Promise.all([
+      fetchChunk('/data/weapons-0.json'),
+      fetchChunk('/data/weapons-1.json'),
+      fetchChunk('/data/weapons-2.json'),
+    ])
+      .then(([c0, c1, c2]) => {
+        setWeaponGroups(groupWeapons([...c0, ...c1, ...c2]));
+        setWeaponLoaded(true);
+      })
+      .catch(() => {
+        setWeaponLoaded(true);
+        setWeaponError(true);
+      });
   }, []);
 
   useEffect(() => { loadWeapons(); }, [loadWeapons]);
