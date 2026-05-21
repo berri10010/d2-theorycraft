@@ -472,7 +472,7 @@ function Dashboard() {
               Row 2: [Share] [Clear] [+Compare]  (centered)
             Desktop (md+): single flex row, action buttons pushed right via ml-auto
           */}
-          <header className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <header className="flex flex-nowrap items-center gap-2 sm:gap-3 min-w-0">
 
             {/* Nav group: hamburger + tabs */}
             <div className="flex items-center gap-2 sm:gap-3">
@@ -531,7 +531,7 @@ function Dashboard() {
 
             {/* Action buttons — full-width on mobile (forces new row, centered); auto+right on desktop */}
             {activeTab === 'editor' && (
-              <div className="flex items-center gap-2 w-full md:w-auto justify-center md:justify-end md:ml-auto">
+              <div className="flex items-center gap-2 ml-auto">
                 {/* Keyboard shortcut legend */}
                 <button
                   onClick={() => setShowShortcuts(true)}
