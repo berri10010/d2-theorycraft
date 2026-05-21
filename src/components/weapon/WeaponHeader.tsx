@@ -381,9 +381,7 @@ export const WeaponHeader: React.FC = () => {
               )
             )}
 
-            {isLegacy && (
-              <span className="text-xs text-slate-500 italic">No Origin Trait on legacy frames.</span>
-            )}
+
           </div>
         </div>
 
