@@ -303,7 +303,7 @@ export const WeaponHeader: React.FC = () => {
                         : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
                     ].join(' ')}
                   >
-                    {isAdeptSelected ? adeptVariant.variantLabel : 'Non-Adept'}
+                    {isAdeptSelected ? adeptVariant.variantLabel : 'Base'}
                   </button>
                 );
               }
