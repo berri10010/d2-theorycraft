@@ -140,10 +140,7 @@ export const RollEditor: React.FC = () => {
 
       {/* ── Perk columns — identical layout regardless of single vs. multiple options ── */}
       {activeWeapon.perkSockets.length > 0 && (
-        <div className="relative">
-        {/* Right-fade scroll hint — visible on mobile only */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0d0d0f] to-transparent md:hidden z-10" />
-         <div className="flex overflow-x-auto px-4 pb-4 md:px-0 md:grid md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 md:pb-0">
+        <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${activeWeapon.perkSockets.length}, minmax(0, 1fr))` }}>
           {activeWeapon.perkSockets.map((column, colIdx) => {
             const isOriginTraitCol = column.columnType === 'origin';
             const columnDisabled   = isOriginTraitCol && isLegacy;
@@ -349,8 +346,8 @@ export const RollEditor: React.FC = () => {
             );
           })}
         </div>
-        </div>
       )}
+
 
     </CollapsiblePanel>
   );
