@@ -87,13 +87,6 @@ export const RollEditor: React.FC = () => {
     });
   }, [activeWeapon, variantGroup]);
 
-  // "Featured" weapons (Exotic or s27+) allow barrel/mag enhancement freely.
-  // Non-featured weapons require isCrafted to be true before barrel/mag can be enhanced.
-  const isFeatured = useMemo(() => {
-    if (!activeWeapon) return false;
-    return activeWeapon.rarity === 'Exotic' || (activeWeapon.seasonNumber ?? 0) >= 27;
-  }, [activeWeapon]);
-
   // Auto-derive enhanced state: isEnhanced is true ONLY when both Perk 1 and Perk 2
   // have their enhanced version explicitly selected. Any other state disables it.
   const shouldBeEnhanced = useMemo(() => {
@@ -120,8 +113,7 @@ export const RollEditor: React.FC = () => {
 
   const hasPerkEnhanceable = useMemo(
     () => !!activeWeapon?.perkSockets
-      .filter((col) => col.columnType === 'perk')
-      .some((col) => col.perks.some((p) => !!p.enhancedVersion)),
+      .some((col) => col.perks.some((p) => !!p.enhancedVersion || p.isEnhanced)),
     [activeWeapon]
   );
 
@@ -147,12 +139,6 @@ export const RollEditor: React.FC = () => {
             const columnDisabled   = isOriginTraitCol && isLegacy;
             const accentBar        = COL_ACCENT_BAR[column.columnType] ?? 'bg-slate-500/40';
             const isLast           = colIdx === activeWeapon.perkSockets.length - 1;
-
-            // Barrel and mag can only be enhanced on featured weapons (Exotic / s27+)
-            // or when craftable mode is active. For all other weapons, the second click
-            // skips enhanced and goes straight to deselect.
-            const isBarrelOrMag = column.columnType === 'barrel' || column.columnType === 'mag';
-            const canEnhanceCol = !isBarrelOrMag || isFeatured || isCrafted;
 
             return (
               <div
@@ -180,7 +166,10 @@ export const RollEditor: React.FC = () => {
                       ? selectedHash === perk.enhancedVersion.hash
                       : false;
                     const isActive   = isBaseActive || isEnhancedActive;
-                    const isUpgraded = isEnhancedActive;
+                    // isUpgraded covers two cases:
+                    //   1. Normal: enhanced version of a base perk is selected
+                    //   2. Orphaned: perk itself is isEnhanced (no base in this socket)
+                    const isUpgraded = isEnhancedActive || (perk.isEnhanced && isBaseActive);
 
                     const displayPerk: Perk = (isEnhancedActive && perk.enhancedVersion)
                       ? perk.enhancedVersion
@@ -213,8 +202,7 @@ export const RollEditor: React.FC = () => {
                       if (!isActive) {
                         selectPerk(column.name, perk.hash);
                         flash(perk.hash);
-                      } else if (isBaseActive && perk.enhancedVersion && canEnhanceCol) {
-                        // Progress to enhanced state only when allowed for this column
+                      } else if (isBaseActive && perk.enhancedVersion) {
                         const enhHash = perk.enhancedVersion.hash;
                         selectPerk(column.name, enhHash);
                         flash(enhHash);
@@ -225,7 +213,7 @@ export const RollEditor: React.FC = () => {
 
                     const nextAction = !isActive
                       ? displayPerk.name
-                      : isBaseActive && perk.enhancedVersion && canEnhanceCol
+                      : isBaseActive && perk.enhancedVersion
                         ? `Enhance → ${perk.enhancedVersion.name}`
                         : `Deselect ${displayPerk.name}`;
 
