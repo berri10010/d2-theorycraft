@@ -32,6 +32,20 @@ import { roundTo3 } from './math';
  */
 const PVE_DAMAGE_SCALAR = 3.0;
 
+/**
+ * Per-archetype falloff floor — minimum damage fraction at maximum falloff
+ * distance.  Defaults to 0.5 (50%).  Overrides are community-sourced.
+ * itemSubType values match Bungie's DestinyItemSubType enum.
+ */
+export const FALLOFF_FLOORS: Partial<Record<number, number>> = {
+  22: 0.85, // Linear Fusion Rifle — long-range precision frame, high damage floor
+};
+
+/** Returns the damage floor fraction for the given weapon subtype. */
+export function getFalloffFloor(itemSubType: number): number {
+  return FALLOFF_FLOORS[itemSubType] ?? 0.5;
+}
+
 /** PvE enemy health tiers used in the TTK panel selector. */
 export const PVE_HEALTH_TIERS: Record<string, number> = {
   'Minor':         336,

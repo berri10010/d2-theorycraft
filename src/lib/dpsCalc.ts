@@ -2,6 +2,7 @@
 
 import { lookupWeaponStat, isChargeWeapon, isBurstWeapon } from './weaponStats';
 import { calcReloadTime } from './reloadTimes';
+import rawCombatantScalars from '../data/combatantScalars.json';
 
 export interface DpsResult {
   /** Continuous fire, all-crit (PvP damage). */
@@ -20,8 +21,12 @@ export interface DpsResult {
   rpm: number;
 }
 
-// PvE combatant scalar normalised to Major/Elite = 3.0 (matches damageMath.ts).
-const PVE_SCALAR = 3.0;
+const COMBATANT_SCALARS = rawCombatantScalars as Record<string, Record<string, number>>;
+const FALLBACK_PVE_SCALAR = 3.0;
+
+function getPveScalar(itemSubType: number, enemyTier: string): number {
+  return COMBATANT_SCALARS[String(itemSubType)]?.[enemyTier] ?? FALLBACK_PVE_SCALAR;
+}
 
 export function calcDps(
   itemSubType: number,
@@ -30,6 +35,7 @@ export function calcDps(
   itemTypeDisplayName: string,
   reloadStat: number,
   magStat: number,
+  enemyTier = 'Major / Elite',
 ): DpsResult | null {
   const entry = lookupWeaponStat(itemSubType, ammoType, intrinsicName);
   if (!entry) return null;
@@ -57,9 +63,10 @@ export function calcDps(
   const rpm = Math.round(60 / timePerShot_s);
 
   // ── Optimal DPS (continuous fire, all crits) ───────────────────────────────
+  const pveScalar      = getPveScalar(itemSubType, enemyTier);
   const critPerTrigger = entry.critDamage * burstSize;
   const optimalDpsPvp  = critPerTrigger / timePerShot_s;
-  const optimalDpsPve  = optimalDpsPvp * PVE_SCALAR;
+  const optimalDpsPve  = optimalDpsPvp * pveScalar;
 
   // ── Sustained DPS (mag + reload) ───────────────────────────────────────────
   let magDuration_s: number;
@@ -77,7 +84,7 @@ export function calcDps(
   const reloadS        = reloadMs != null ? reloadMs / 1000 : 2.0;
   const cycleTime_s    = magDuration_s + reloadS;
   const sustainedDpsPvp = totalDmg / cycleTime_s;
-  const sustainedDpsPve = sustainedDpsPvp * PVE_SCALAR;
+  const sustainedDpsPve = sustainedDpsPvp * pveScalar;
 
   return {
     optimalDpsPvp:  Math.round(optimalDpsPvp),

@@ -30,6 +30,7 @@ const RELOAD_FORMULAS: Record<string, QuadCoeff | GLCoeff> = {
 
 const NORMALIZE: Record<string, string> = {
   'Breech Grenade Launcher':      'Grenade Launcher',
+  'Heavy Grenade Launcher':       'Grenade Launcher',
   'Wave Frame Grenade Launcher':  'Grenade Launcher',
   'Drum Grenade Launcher':        'Grenade Launcher',
   'Lightweight Grenade Launcher': 'Grenade Launcher',

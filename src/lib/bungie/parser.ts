@@ -47,6 +47,17 @@ type AuditEntry = {
 };
 const AUDIT = PERK_AUDIT as Record<string, AuditEntry>;
 
+// perkAudit.json was generated from multiple sources and uses non-canonical stat
+// names in some entries.  This map normalises them to the names used in STAT_HASH_MAP
+// so that stat modifier math in the store works correctly.
+const STAT_NAME_ALIASES: Record<string, string> = {
+  'Reload Speed':  'Reload',
+  'Airborne Eff.': 'Airborne Effectiveness',
+  'Aim Assist':    'Aim Assistance',
+  'Recoil':        'Recoil Direction',
+  'Fire Rate':     'RPM',
+};
+
 /**
  * Returns audit stat modifiers for a perk, or null if the audit has none.
  * Audit data is preferred over the Bungie manifest when present — it uses
@@ -55,7 +66,10 @@ const AUDIT = PERK_AUDIT as Record<string, AuditEntry>;
 function auditStatsFor(perkName: string): AuditEntry['statModifiers'] | null {
   const entry = AUDIT[perkName];
   if (!entry || entry.statModifiers.length === 0) return null;
-  return entry.statModifiers;
+  return entry.statModifiers.map((m) => ({
+    ...m,
+    statName: STAT_NAME_ALIASES[m.statName] ?? m.statName,
+  }));
 }
 
 function auditActivationFor(perkName: string): { act: PerkActivation | null; act2: PerkActivation | null } {

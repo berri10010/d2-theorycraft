@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { getArchetype } from '../../lib/archetypes';
-import { calculateTTK, calculateTTKCurve, PVE_HEALTH_TIERS, TTKBreakpoint } from '../../lib/damageMath';
+import { calculateTTK, calculateTTKCurve, getFalloffFloor, PVE_HEALTH_TIERS, TTKBreakpoint } from '../../lib/damageMath';
 import { getPlDeltaMultiplier, fmtPlDelta } from '../../lib/plDelta';
 import { useAnimatedPath } from '../../hooks/useAnimatedPath';
 import { useAnimatedValue } from '../../hooks/useAnimatedValue';
@@ -14,7 +14,6 @@ import { useAnimatedValue } from '../../hooks/useAnimatedValue';
 
 const PVP_GUARDIAN_HP = 230;
 const PVE_TIERS_KEYS = Object.keys(PVE_HEALTH_TIERS);
-const FALLOFF_FLOOR = 0.5;
 
 // SVG dimensions
 const W = 500, H = 200, PL = 46, PB = 28, PR = 14, PT = 14;
@@ -131,8 +130,9 @@ export const TTKAndFalloffPanel: React.FC = () => {
     : calculateTTK(mode, activeWeapon, effectiveMultiplier, PVP_GUARDIAN_HP, enemyTier);
 
   // ── Falloff curve data ────────────────────────────────────────────────
-  const rangeCurve = activeWeapon.statCurves?.['Range'];
-  const archetype  = getArchetype(activeWeapon.itemSubType, activeWeapon.rpm);
+  const rangeCurve   = activeWeapon.statCurves?.['Range'];
+  const falloffFloor = getFalloffFloor(activeWeapon.itemSubType);
+  const archetype    = getArchetype(activeWeapon.itemSubType, activeWeapon.rpm);
   const dmg = archetype ? (mode === 'pvp' ? archetype.pvp : archetype.pve) : null;
   const critDmg = dmg?.crit ?? 0;
   const bodyDmg = dmg?.body ?? 0;
@@ -157,7 +157,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
     if (!hasFalloffData || championModMissing) return [];
     return calculateTTKCurve(
       mode, activeWeapon, effectiveMultiplier, PVP_GUARDIAN_HP, enemyTier,
-      hipFalloffStart!, maxDist, FALLOFF_FLOOR,
+      hipFalloffStart!, maxDist, falloffFloor,
     );
   }, [mode, activeWeapon, effectiveMultiplier, hipFalloffStart, maxDist, enemyTier, hasFalloffData, championModMissing]);
 
@@ -171,7 +171,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
       if (dist <= falloffStart) frac = 1.0;
       else {
         const t = Math.min(1, (dist - falloffStart) / (maxD - falloffStart));
-        frac = 1.0 - (1.0 - FALLOFF_FLOOR) * t;
+        frac = 1.0 - (1.0 - falloffFloor) * t;
       }
       pts.push({ dist, crit: critVal * frac, body: bodyVal * frac });
     }
@@ -242,8 +242,8 @@ export const TTKAndFalloffPanel: React.FC = () => {
   let hoverTtkBp: TTKBreakpoint | null = null;
   if (hoverX !== null && hasFalloffData) {
     hoverDist = (hoverX / IW) * maxDist;
-    const hipFrac = hoverDist <= hipFalloffStart! ? 1 : Math.max(FALLOFF_FLOOR, 1 - (1 - FALLOFF_FLOOR) * Math.min(1, (hoverDist - hipFalloffStart!) / (maxDist - hipFalloffStart!)));
-    const adsFrac = hoverDist <= adsFalloffStart ? 1 : Math.max(FALLOFF_FLOOR, 1 - (1 - FALLOFF_FLOOR) * Math.min(1, (hoverDist - adsFalloffStart) / (maxDist - adsFalloffStart)));
+    const hipFrac = hoverDist <= hipFalloffStart! ? 1 : Math.max(falloffFloor, 1 - (1 - falloffFloor) * Math.min(1, (hoverDist - hipFalloffStart!) / (maxDist - hipFalloffStart!)));
+    const adsFrac = hoverDist <= adsFalloffStart ? 1 : Math.max(falloffFloor, 1 - (1 - falloffFloor) * Math.min(1, (hoverDist - adsFalloffStart) / (maxDist - adsFalloffStart)));
     // Use effectiveCrit so tooltip reflects active perk/buff bonuses
     hoverHipCrit = effectiveCrit * hipFrac;
     hoverAdsCrit = effectiveCrit * adsFrac;

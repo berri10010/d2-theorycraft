@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { getArchetype } from '../../lib/archetypes';
+import { getFalloffFloor } from '../../lib/damageMath';
 import { StatCurveNode } from '../../types/weapon';
 import { useAnimatedPath } from '../../hooks/useAnimatedPath';
 import { useAnimatedValue } from '../../hooks/useAnimatedValue';
@@ -37,16 +38,13 @@ function pathStr(pts: [number, number][]): string {
 }
 
 // ─── ADS range multiplier from zoom stat ─────────
-// In D2, ADS extends falloff by approximately 1 + (zoom - 10) * 0.033
+// Community approximation: range_ads = range_hip × (1 + (zoom - 10) × 0.033)
+// Source: d2foundry community research; not published by Bungie.
+// Accuracy varies slightly by archetype — treat as ±5% estimate.
 function adsMultiplier(zoom: number): number {
   return 1 + Math.max(0, zoom - 10) * 0.033;
 }
 
-// Floor damage fraction at max falloff distance.
-// Simplified constant — most archetypes floor around 50%, but some (e.g.
-// linear fusion rifles, certain exotic frames) differ.  A future improvement
-// would read the archetype-specific floor from the manifest if available.
-const FALLOFF_FLOOR = 0.5;
 
 export const DamageFalloffGraph: React.FC = () => {
   const { activeWeapon, getCalculatedStats, mode } = useWeaponStore();
@@ -58,10 +56,11 @@ export const DamageFalloffGraph: React.FC = () => {
   const rangeStat = calcStats['Range'] ?? 0;
   const zoomStat  = calcStats['Zoom']  ?? 14;
 
-  const rangeCurve = activeWeapon?.statCurves?.['Range'];
-  const archetype  = activeWeapon
+  const rangeCurve    = activeWeapon?.statCurves?.['Range'];
+  const archetype     = activeWeapon
     ? getArchetype(activeWeapon.itemSubType, activeWeapon.rpm)
     : null;
+  const falloffFloor  = activeWeapon ? getFalloffFloor(activeWeapon.itemSubType) : 0.5;
 
   // Pick damage values based on current mode
   const dmg = archetype ? (mode === 'pvp' ? archetype.pvp : archetype.pve) : null;
@@ -101,7 +100,7 @@ export const DamageFalloffGraph: React.FC = () => {
         frac = 1.0;
       } else {
         const t = Math.min(1, (dist - falloffStart) / (maxD - falloffStart));
-        frac = 1.0 - (1.0 - FALLOFF_FLOOR) * t;
+        frac = 1.0 - (1.0 - falloffFloor) * t;
       }
       pts.push({ dist, crit: critVal * frac, body: bodyVal * frac });
     }
@@ -143,8 +142,8 @@ export const DamageFalloffGraph: React.FC = () => {
   let hoverAdsCrit: number | null = null;
   if (hoverX !== null) {
     hoverDist = (hoverX / IW) * maxDist;
-    const hipFrac = hoverDist <= hipFalloffStart ? 1 : Math.max(FALLOFF_FLOOR, 1 - (1 - FALLOFF_FLOOR) * Math.min(1, (hoverDist - hipFalloffStart) / (maxDist - hipFalloffStart)));
-    const adsFrac = hoverDist <= adsFalloffStart ? 1 : Math.max(FALLOFF_FLOOR, 1 - (1 - FALLOFF_FLOOR) * Math.min(1, (hoverDist - adsFalloffStart) / (maxDist - adsFalloffStart)));
+    const hipFrac = hoverDist <= hipFalloffStart ? 1 : Math.max(falloffFloor, 1 - (1 - falloffFloor) * Math.min(1, (hoverDist - hipFalloffStart) / (maxDist - hipFalloffStart)));
+    const adsFrac = hoverDist <= adsFalloffStart ? 1 : Math.max(falloffFloor, 1 - (1 - falloffFloor) * Math.min(1, (hoverDist - adsFalloffStart) / (maxDist - adsFalloffStart)));
     hoverHipCrit = critDmg * hipFrac;
     hoverAdsCrit = critDmg * adsFrac;
   }

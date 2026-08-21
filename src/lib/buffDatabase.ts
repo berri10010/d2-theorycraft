@@ -57,6 +57,12 @@ export interface DamageBuff {
    * base + perk modifiers, clamped to [0, 100].
    */
   statBonuses?: Record<string, number>;
+  /**
+   * Per-ammo-type damage multipliers — overrides `multiplier` when present.
+   * Keys: "primary" | "special" | "power".
+   * Used by Vorpal Weapon (+20% primary, +15% special, +10% power).
+   */
+  ammoTypeMultipliers?: Record<string, number>;
 }
 
 export const BUFF_DATABASE = buffData as Record<string, DamageBuff>;

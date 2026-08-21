@@ -37,8 +37,9 @@ export interface VerbDef {
    * @param baseImpact  weapon's effective impact (0–100)
    * @param rps         rounds per second from weapon RPM
    * @param tier        enemy tier selection
+   * @param magSize     weapon's actual magazine size (used where mag matters, e.g. Unravel)
    */
-  calcBonus: (baseImpact: number, rps: number, tier: EnemyTier) => VerbCalcResult;
+  calcBonus: (baseImpact: number, rps: number, tier: EnemyTier, magSize: number) => VerbCalcResult;
 }
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
@@ -82,7 +83,7 @@ export const SUBCLASS_VERBS: VerbDef[] = [
     perkName: 'Voltshot',
     element: 'arc',
     tagline: 'On reload after kill: Jolt the target. Jolt chains lightning to nearby enemies.',
-    calcBonus(baseImpact, rps, tier) {
+    calcBonus(baseImpact, rps, tier, _magSize) {
       const bulletDmg = impactToDamage(baseImpact);
       // Jolt: 6 procs over 5s, each ~15% of bullet damage
       const joltProcs = 6;
@@ -123,7 +124,7 @@ export const SUBCLASS_VERBS: VerbDef[] = [
     perkName: 'Incandescent',
     element: 'solar',
     tagline: 'On kill: spreads 30 Scorch to nearby enemies. At 100 Scorch → Ignition.',
-    calcBonus(baseImpact, rps, tier) {
+    calcBonus(baseImpact, rps, tier, _magSize) {
       const ignDmg = Math.round(IGNITION_BASE * IGNITION_TIER_MULT[tier]);
       // Incandescent spreads 30 stacks → 4 kills of anything with 25 stacks already to chain
       // Scorch DoT: each tick = (stacks / 100) * ~40 dmg
@@ -155,7 +156,7 @@ export const SUBCLASS_VERBS: VerbDef[] = [
     perkName: 'Destabilizing Rounds',
     element: 'void',
     tagline: 'On hit: applies Volatile. Volatile explodes for area damage around the target.',
-    calcBonus(baseImpact, rps, tier) {
+    calcBonus(baseImpact, rps, tier, _magSize) {
       const bulletDmg = impactToDamage(baseImpact);
       const volatileDmg = Math.round(bulletDmg * VOLATILE_MULT);
       // Suppression / Volatile triggers on next hit after debuff applies
@@ -185,10 +186,10 @@ export const SUBCLASS_VERBS: VerbDef[] = [
     perkName: 'Hatchling / Weaver\'s Call',
     element: 'strand',
     tagline: 'Spread Unravel on hits. Threadlings detonate on targets for additional damage.',
-    calcBonus(baseImpact, rps, tier) {
+    calcBonus(_baseImpact, _rps, tier, magSize) {
       // Threadlings spawn ~every 5 bullets in Unravel state
       const bulletsPerThreadling = 5;
-      const threadlingsPerMag = Math.floor(30 / bulletsPerThreadling); // assume 30-round mag
+      const threadlingsPerMag = Math.floor(magSize / bulletsPerThreadling);
       const totalThreadlingDmg = threadlingsPerMag * THREADLING_DAMAGE;
       const tierHp = ENEMY_TIERS.find((t) => t.key === tier)!.hp;
       const pct = ((totalThreadlingDmg / tierHp) * 100).toFixed(1);
@@ -214,7 +215,7 @@ export const SUBCLASS_VERBS: VerbDef[] = [
     perkName: 'Cold Steel / Headstone',
     element: 'stasis',
     tagline: 'Freeze targets. Shattering a frozen enemy multiplies all incoming damage.',
-    calcBonus(baseImpact, rps, tier) {
+    calcBonus(baseImpact, rps, tier, _magSize) {
       const bulletDmg = impactToDamage(baseImpact);
       const shatterDmg = Math.round(bulletDmg * SHATTER_MULT);
       const bonusDmg = shatterDmg - bulletDmg;

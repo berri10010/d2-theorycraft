@@ -77,13 +77,14 @@ function TierPicker({ value, onChange }: {
 
 // ─── Calculation result card ───────────────────────────────────────────────────
 
-function ResultCard({ verb, baseImpact, rps, tier }: {
+function ResultCard({ verb, baseImpact, rps, tier, magSize }: {
   verb: VerbDef;
   baseImpact: number;
   rps: number;
   tier: EnemyTier;
+  magSize: number;
 }) {
-  const result = verb.calcBonus(baseImpact, rps, tier);
+  const result = verb.calcBonus(baseImpact, rps, tier, magSize);
   const c = ELEMENT_COLORS[result.element];
 
   return (
@@ -103,7 +104,7 @@ function ResultCard({ verb, baseImpact, rps, tier }: {
         {verb.tagline}
       </p>
       <p className="mt-1 text-[9px] text-slate-700 italic">
-        Estimates based on community testing. Actual values vary with buffs, mods & patch notes.
+        Estimates based on community testing (Season 23 baseline). Actual values vary with buffs, mods & patch notes.
       </p>
     </div>
   );
@@ -119,7 +120,8 @@ export const SubclassVerbPanel: React.FC = () => {
   if (!activeWeapon) return null;
 
   const stats = getCalculatedStats();
-  const impact = stats['Impact'] ?? activeWeapon.baseStats['Impact'] ?? 50;
+  const impact  = stats['Impact']   ?? activeWeapon.baseStats['Impact']   ?? 50;
+  const magSize = Math.max(1, Math.round(stats['Magazine'] ?? activeWeapon.baseStats['Magazine'] ?? 30));
   // baseStats stores this under 'RPM' (from STAT_HASH_MAP in parser.ts)
   const rpm = activeWeapon.baseStats['RPM'] ?? activeWeapon.rpm ?? 90;
   const rps = rpm / 60;
@@ -168,6 +170,7 @@ export const SubclassVerbPanel: React.FC = () => {
             baseImpact={impact}
             rps={rps}
             tier={enemyTier}
+            magSize={magSize}
           />
         </>
       )}

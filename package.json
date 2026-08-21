@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "npx tsx scripts/build-static-data.ts",
     "build": "next build",
+    "validate": "npx tsx scripts/validate-data.ts",
     "start": "next start",
     "lint": "next lint"
   },

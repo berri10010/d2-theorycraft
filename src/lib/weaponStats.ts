@@ -72,17 +72,6 @@ const SUBTYPE_TO_TYPE: Record<number, string> = {
    35: 'Heavy Grenade Launcher',
    36: 'Breech Grenade Launcher',
    37: 'Rocket Sidearm',
-   38: 'Machinegun',
-   39: 'Submachinegun',
-   40: 'Auto Rifle',
-   41: 'Handcannon',
-   42: 'Pulserifle',
-   43: 'Scoutrifle',
-   44: 'Sniperrifle',
-   45: 'Shotgun',
-   46: 'Fusionrifle',
-   47: 'Linearfusionrifle',
-   48: 'Sword',
 };
 
 /** ammoType (1/2/3) → spreadsheet ammo slot (p/s/h) */
@@ -121,7 +110,12 @@ export function lookupWeaponStat(
 
   const typeStr  = SUBTYPE_TO_TYPE[itemSubType];
   const ammoSlot = AMMO_TO_SLOT[ammoType];
-  if (!typeStr || !ammoSlot) return null;
+  if (!typeStr || !ammoSlot) {
+    if (process.env.NODE_ENV === 'development' && typeStr === undefined) {
+      console.warn(`lookupWeaponStat: unknown itemSubType ${itemSubType} — no timing data`);
+    }
+    return null;
+  }
 
   const frame = normalizeFrameName(intrinsicName);
   const key   = `${typeStr}_${ammoSlot}_${frame}`;

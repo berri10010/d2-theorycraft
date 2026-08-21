@@ -686,11 +686,17 @@ export const useWeaponStore = create<WeaponState>()(
         let maxEmpowering  = 1;
         let maxDebuff      = 1;
 
+        const ammoSlot = activeWeapon?.ammoType === 1 ? 'primary'
+          : activeWeapon?.ammoType === 2 ? 'special'
+          : 'power';
+
         for (const hash of allActiveBuffs) {
           const buff = BUFF_DATABASE[hash];
           if (!buff) continue;
           const stackIdx = hash in effectStackByKey ? effectStackByKey[hash] : buffStacks[hash];
-          const mult = getBuffMultiplier(buff, stackIdx);
+          const mult = buff.ammoTypeMultipliers
+            ? (buff.ammoTypeMultipliers[ammoSlot] ?? buff.multiplier)
+            : getBuffMultiplier(buff, stackIdx);
           if (buff.stackType === 'multiplicative') {
             multiplicative *= mult;
           } else if (buff.stackType === 'empowering') {
@@ -710,6 +716,9 @@ export const useWeaponStore = create<WeaponState>()(
           multiplier *= (1 + tier1 * 0.15 + tier2 * 0.15);
         } else if (mode === 'pvp') {
           multiplier *= SURGE_PVP[surgeStacks] ?? 1;
+          // PvP: only Tier 2 (101–200) gives a bonus (+5% per 100 pts above 100).
+          // Tier 1 (0–100) is intentionally 0 in PvP — Bungie does not apply the
+          // base Weapons stat bonus in Crucible to avoid undue stat advantage.
           const pvpTier = Math.max(0, weaponsStat - 100) / 100;
           multiplier *= (1 + pvpTier * 0.05);
         }
