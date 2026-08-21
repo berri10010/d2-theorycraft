@@ -278,7 +278,7 @@ export const StatDisplay: React.FC = () => {
           if (statName === 'Range') {
             const hip = interpolateStat(current, curve);
             if (hip != null) {
-              const ads = hip * adsMultiplier(zoomStat);
+              const ads = hip * adsMultiplier(zoomStat, activeWeapon.itemSubType);
               tooltipContent = (
                 <div className="flex gap-5">
                   <div className="flex flex-col items-center">

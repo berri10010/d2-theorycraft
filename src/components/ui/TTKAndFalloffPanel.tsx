@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { getArchetype } from '../../lib/archetypes';
 import { calculateTTK, calculateTTKCurve, getFalloffFloor, PVE_HEALTH_TIERS, TTKBreakpoint } from '../../lib/damageMath';
+import { adsMultiplier } from '../../lib/math';
 import { getPlDeltaMultiplier, fmtPlDelta } from '../../lib/plDelta';
 import { useAnimatedPath } from '../../hooks/useAnimatedPath';
 import { useAnimatedValue } from '../../hooks/useAnimatedValue';
@@ -24,9 +25,6 @@ function toSvg(x: number, y: number, yMin: number, yMax: number): [number, numbe
   return [x * IW, IH - ((y - yMin) / (yMax - yMin)) * IH];
 }
 
-function adsMultiplier(zoom: number): number {
-  return 1 + Math.max(0, zoom - 10) * 0.033;
-}
 
 function interpolate(curve: Array<{ stat: number; value: number }>, statVal: number): number {
   if (!curve || curve.length === 0) return 0;
@@ -149,7 +147,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
 
   const hasFalloffData = hipFalloffStart !== null && critDmg > 0;
 
-  const adsFalloffStart = hasFalloffData ? hipFalloffStart! * adsMultiplier(zoomStat) : 0;
+  const adsFalloffStart = hasFalloffData ? hipFalloffStart! * adsMultiplier(zoomStat, activeWeapon.itemSubType) : 0;
   const maxDist = hasFalloffData ? adsFalloffStart * 2.0 : 100;
 
   // ── TTK breakpoint curve ──────────────────────────────────────────────

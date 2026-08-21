@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { getArchetype } from '../../lib/archetypes';
 import { getFalloffFloor } from '../../lib/damageMath';
+import { adsMultiplier } from '../../lib/math';
 import { StatCurveNode } from '../../types/weapon';
 import { useAnimatedPath } from '../../hooks/useAnimatedPath';
 import { useAnimatedValue } from '../../hooks/useAnimatedValue';
@@ -37,13 +38,6 @@ function pathStr(pts: [number, number][]): string {
   return pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
 }
 
-// ─── ADS range multiplier from zoom stat ─────────
-// Community approximation: range_ads = range_hip × (1 + (zoom - 10) × 0.033)
-// Source: d2foundry community research; not published by Bungie.
-// Accuracy varies slightly by archetype — treat as ±5% estimate.
-function adsMultiplier(zoom: number): number {
-  return 1 + Math.max(0, zoom - 10) * 0.033;
-}
 
 
 export const DamageFalloffGraph: React.FC = () => {
@@ -86,7 +80,7 @@ export const DamageFalloffGraph: React.FC = () => {
     );
   }
 
-  const adsFalloffStart = hipFalloffStart * adsMultiplier(zoomStat);
+  const adsFalloffStart = hipFalloffStart * adsMultiplier(zoomStat, activeWeapon.itemSubType);
   const maxDist = adsFalloffStart * 2.0;
 
   // Build a damage-over-distance curve

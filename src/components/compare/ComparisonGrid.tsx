@@ -81,7 +81,7 @@ function SnapshotCard({
    }, [rangeCurve, rangeStat]);
 
    const adsFalloff = hipFalloff !== null
-     ? hipFalloff * adsMultiplier(zoomStat)
+     ? hipFalloff * adsMultiplier(zoomStat, snapshot.weapon.itemSubType)
      : null;
 
   // ── Handling / reload / charge / bow timing ───────────────────────────────

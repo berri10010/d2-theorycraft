@@ -86,32 +86,32 @@
   },
   "curves": {
     "9":  {
-      "Range":    [{ "stat": 0, "value": 9.0  }, { "stat": 50, "value": 16.5 }, { "stat": 100, "value": 24.5 }],
+      "Range":    [{ "stat": 0, "value": 13.9 }, { "stat": 50, "value": 21.7 }, { "stat": 100, "value": 29.5 }],
       "Handling": [{ "stat": 0, "value": 0.96 }, { "stat": 100, "value": 0.52 }],
       "Reload":   [{ "stat": 0, "value": 4.1  }, { "stat": 100, "value": 2.1  }]
     },
     "6":  {
-      "Range":    [{ "stat": 0, "value": 12.0 }, { "stat": 50, "value": 19.0 }, { "stat": 100, "value": 29.0 }],
+      "Range":    [{ "stat": 0, "value": 13.0 }, { "stat": 50, "value": 18.0 }, { "stat": 100, "value": 23.0 }],
       "Handling": [{ "stat": 0, "value": 0.84 }, { "stat": 100, "value": 0.46 }],
       "Reload":   [{ "stat": 0, "value": 3.8  }, { "stat": 100, "value": 1.9  }]
     },
     "13": {
-      "Range":    [{ "stat": 0, "value": 14.0 }, { "stat": 50, "value": 21.0 }, { "stat": 100, "value": 32.0 }],
+      "Range":    [{ "stat": 0, "value": 13.5 }, { "stat": 50, "value": 19.6 }, { "stat": 100, "value": 25.7 }],
       "Handling": [{ "stat": 0, "value": 0.88 }, { "stat": 100, "value": 0.48 }],
       "Reload":   [{ "stat": 0, "value": 3.6  }, { "stat": 100, "value": 1.8  }]
     },
     "14": {
-      "Range":    [{ "stat": 0, "value": 35.0 }, { "stat": 50, "value": 52.0 }, { "stat": 100, "value": 75.0 }],
+      "Range":    [{ "stat": 0, "value": 20.0 }, { "stat": 50, "value": 35.2 }, { "stat": 100, "value": 50.4 }],
       "Handling": [{ "stat": 0, "value": 0.88 }, { "stat": 100, "value": 0.48 }],
       "Reload":   [{ "stat": 0, "value": 3.7  }, { "stat": 100, "value": 1.85 }]
     },
     "24": {
-      "Range":    [{ "stat": 0, "value": 8.0  }, { "stat": 50, "value": 13.0 }, { "stat": 100, "value": 20.0 }],
+      "Range":    [{ "stat": 0, "value": 9.5  }, { "stat": 50, "value": 13.5 }, { "stat": 100, "value": 17.5 }],
       "Handling": [{ "stat": 0, "value": 0.72 }, { "stat": 100, "value": 0.38 }],
       "Reload":   [{ "stat": 0, "value": 3.2  }, { "stat": 100, "value": 1.6  }]
     },
     "17": {
-      "Range":    [{ "stat": 0, "value": 7.0  }, { "stat": 50, "value": 11.5 }, { "stat": 100, "value": 18.0 }],
+      "Range":    [{ "stat": 0, "value": 9.0  }, { "stat": 50, "value": 13.6 }, { "stat": 100, "value": 18.3 }],
       "Handling": [{ "stat": 0, "value": 0.68 }, { "stat": 100, "value": 0.36 }],
       "Reload":   [{ "stat": 0, "value": 2.8  }, { "stat": 100, "value": 1.4  }]
     },
@@ -136,7 +136,7 @@
       "Reload":   [{ "stat": 0, "value": 4.5  }, { "stat": 100, "value": 2.2  }]
     },
     "11": {
-      "Range":    [{ "stat": 0, "value": 6.0  }, { "stat": 50, "value": 10.0 }, { "stat": 100, "value": 16.0 }],
+      "Range":    [{ "stat": 0, "value": 8.0  }, { "stat": 50, "value": 12.5 }, { "stat": 100, "value": 17.0 }],
       "Handling": [{ "stat": 0, "value": 0.84 }, { "stat": 100, "value": 0.46 }],
       "Reload":   [{ "stat": 0, "value": 3.8  }, { "stat": 100, "value": 1.9  }]
     },
