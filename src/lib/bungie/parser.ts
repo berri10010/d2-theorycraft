@@ -743,17 +743,11 @@ export function parseWeapons(
           //     items are in the current pool; false = deprecated / removed from rotation.
           const plugHashSet = new Set<number>();
           const plugHashes: number[] = [];
-          const hasRandomized = !!socket.randomizedPlugSetHash;
 
-          // reusablePlugSetHash: filter by currentlyCanRoll only when this is
-          // the sole plug source (barrel/mag sockets on non-crafted weapons).
-          // When paired with randomizedPlugSetHash, include all so enhanced perks
-          // land in the same rawPerks array for within-socket dedup.
           if (socket.reusablePlugSetHash) {
             const ps = plugSetDefs[socket.reusablePlugSetHash.toString()];
             if (ps) {
               for (const p of ps.reusablePlugItems) {
-                if (!hasRandomized && !p.currentlyCanRoll) continue;
                 if (!plugHashSet.has(p.plugItemHash)) {
                   plugHashSet.add(p.plugItemHash);
                   plugHashes.push(p.plugItemHash);
@@ -777,8 +771,16 @@ export function parseWeapons(
               }
             }
           }
-          if (plugHashes.length === 0 && socket.reusablePlugItems?.length) {
-            plugHashes.push(...socket.reusablePlugItems.map((p) => p.plugItemHash));
+          // Always merge direct reusablePlugItems — some origin sockets store the
+          // actual trait hashes here while the reusablePlugSetHash points to a
+          // generic "Empty Origins Socket" placeholder (e.g. Hezen Vengeance).
+          if (socket.reusablePlugItems?.length) {
+            for (const p of socket.reusablePlugItems) {
+              if (!plugHashSet.has(p.plugItemHash)) {
+                plugHashSet.add(p.plugItemHash);
+                plugHashes.push(p.plugItemHash);
+              }
+            }
           }
           if (plugHashes.length === 0 && socket.singleInitialItemHash) {
             plugHashes.push(socket.singleInitialItemHash);

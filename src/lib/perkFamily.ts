@@ -61,6 +61,7 @@ const ORIGIN_TRAIT_NAMES = new Set([
   'roar of battle',
   // Dungeon / Raid
   'nadir focus',
+  'timelost magazine',
   'souldrinker',
   'collective action',
   'bait and switch',

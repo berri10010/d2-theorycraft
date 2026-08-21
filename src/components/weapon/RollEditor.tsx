@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
-import { isLegacyVariant } from '../../lib/weaponGroups';
 import { Perk, PerkColumn } from '../../types/weapon';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { Tooltip } from '../ui/Tooltip';
@@ -21,7 +20,7 @@ import { getPerkFamily } from '../../lib/perkFamily';
 export const RollEditor: React.FC = () => {
   const {
     activeWeapon, selectedPerks, selectPerk, clearPerk,
-    isCrafted, isEnhanced, setEnhanced, variantGroup, mode,
+    isCrafted, isEnhanced, setEnhanced, mode,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:  s.activeWeapon,
@@ -31,7 +30,6 @@ export const RollEditor: React.FC = () => {
       isCrafted:     s.isCrafted,
       isEnhanced:    s.isEnhanced,
       setEnhanced:   s.setEnhanced,
-      variantGroup:  s.variantGroup,
       mode:          s.mode,
     }))
   );
@@ -69,15 +67,6 @@ export const RollEditor: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWeapon, godRollDb]);
 
-  const isLegacy = useMemo(() => {
-    if (!activeWeapon) return false;
-    return isLegacyVariant(activeWeapon, {
-      baseName: activeWeapon.baseName,
-      variants: variantGroup,
-      default:  variantGroup[0] ?? activeWeapon,
-    });
-  }, [activeWeapon, variantGroup]);
-
   // Auto-derive enhanced state: isEnhanced is true ONLY when both Perk 1 and Perk 2
   // have their enhanced version explicitly selected. Any other state disables it.
   const shouldBeEnhanced = useMemo(() => {
@@ -110,14 +99,19 @@ export const RollEditor: React.FC = () => {
 
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
-  // Derive the display label for a column. Perk columns named "Perk N" by the parser
-  // get a semantic label based on what their perks actually are.
+  // Derive the display label for a column.
+  // For perk columns, if every perk shares the same non-Trait family (e.g. all
+  // are Origin Trait, or all are Grip), use that family name. Otherwise fall back
+  // to the parser's numbered name ("Perk 1", "Perk 2", etc.).
   function colDisplayName(col: PerkColumn): string {
     if (col.columnType !== 'perk') return col.name;
-    const allOrigin = col.perks.length > 0 && col.perks.every(
-      (p: Perk) => getPerkFamily(p, col) === 'Origin Trait'
-    );
-    return allOrigin ? 'Origin Trait' : 'Trait';
+    if (col.perks.length === 0) return col.name;
+    const families = new Set(col.perks.map((p: Perk) => getPerkFamily(p, col)));
+    if (families.size === 1) {
+      const fam = [...families][0];
+      if (fam !== 'Trait') return fam === 'Origin Trait' ? 'Origin Trait' : fam;
+    }
+    return col.name;
   }
 
   const COL_ACCENT_DERIVED: Record<string, string> = {
@@ -145,7 +139,6 @@ export const RollEditor: React.FC = () => {
           {activeWeapon.perkSockets.map((column, colIdx) => {
             const displayLabel     = colDisplayName(column);
             const isOriginTraitCol = column.columnType === 'origin' || displayLabel === 'Origin Trait';
-            const columnDisabled   = isOriginTraitCol && isLegacy;
             const accentBarKey     = isOriginTraitCol ? 'origin' : column.columnType;
             const accentBar        = COL_ACCENT_DERIVED[accentBarKey] ?? 'bg-slate-500/40';
             const isLast           = colIdx === activeWeapon.perkSockets.length - 1;
@@ -155,14 +148,13 @@ export const RollEditor: React.FC = () => {
                 key={column.name}
                 className={[
                   'flex flex-col items-center min-w-[60px]',
-                  columnDisabled ? 'opacity-30 pointer-events-none' : '',
                   !isLast ? 'border-r border-white/5 pr-3 md:pr-4' : '',
                 ].join(' ')}
               >
                 {/* Column header */}
                 <div className="w-full flex flex-col items-center gap-1 mb-3">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                    {columnDisabled ? `${displayLabel} ·` : displayLabel}
+                    {displayLabel}
                   </span>
                   <div className={`h-0.5 w-8 rounded-full ${accentBar}`} />
                 </div>
@@ -228,6 +220,12 @@ export const RollEditor: React.FC = () => {
                         : `Deselect ${displayPerk.name}`;
 
                     const clarityEntry = clarityData?.[String(displayPerk.hash)] ?? clarityData?.[String(perk.hash)];
+
+                    // Origin trait perk inside a mixed perk column (e.g. Hezen Vengeance Perk 2).
+                    // The column header can't reflect this, so give the icon an emerald ring instead.
+                    const isOriginInMixed = !isOriginTraitCol
+                      && column.columnType === 'perk'
+                      && getPerkFamily(perk, column) === 'Origin Trait';
 
                     // Stat modifier badges (e.g. +10 Range, -5 Handling) — unconditional mods only
                     const statMods = (displayPerk.statModifiers ?? []).filter(
@@ -299,8 +297,12 @@ export const RollEditor: React.FC = () => {
                             isActive
                               ? isUpgraded
                                 ? 'border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.45)] scale-110 opacity-100'
-                                : 'border-white/80 shadow-[0_0_10px_rgba(255,255,255,0.15)] scale-105 opacity-100'
-                              : 'border-white/15 opacity-50 hover:opacity-85 hover:scale-105 hover:border-white/35',
+                                : isOriginInMixed
+                                  ? 'border-emerald-400/80 shadow-[0_0_10px_rgba(52,211,153,0.2)] scale-105 opacity-100'
+                                  : 'border-white/80 shadow-[0_0_10px_rgba(255,255,255,0.15)] scale-105 opacity-100'
+                              : isOriginInMixed
+                                ? 'border-emerald-500/35 opacity-50 hover:opacity-85 hover:scale-105 hover:border-emerald-400/55'
+                                : 'border-white/15 opacity-50 hover:opacity-85 hover:scale-105 hover:border-white/35',
                           ].join(' ')}
                         >
                           <Image

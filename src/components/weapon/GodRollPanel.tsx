@@ -133,12 +133,14 @@ export const GodRollPanel: React.FC = () => {
   if (!entry) return null;
 
   const tierCfg = entry.tier ? WEAPON_TIER_CONFIG[entry.tier] : null;
+  // Some weapon types (swords) use numeric tier strings ('1','2','3') as rank positions
+  const numericRank = entry.rank ?? (/^\d+$/.test(entry.tier ?? '') ? Number(entry.tier) : null);
 
   const weaponTypeLabel = entry.weaponType === 'Other' ? 'other weapons' : `${entry.weaponType}s`;
   const subtitleParts = [
     'Community analysis',
     entry.season ? `Season ${entry.season}` : null,
-    entry.rank != null ? `Rank #${entry.rank} in ${weaponTypeLabel}` : null,
+    numericRank != null ? `Rank #${numericRank} in ${weaponTypeLabel}` : null,
   ].filter(Boolean).join(' · ');
 
   const cleanMw = entry.mw && !entry.mw.includes('\n') ? entry.mw : null;
