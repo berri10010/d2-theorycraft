@@ -1,5 +1,5 @@
 {
-  "_source": "huwugo_ D2 WeaponStat Chart v2.0 + rockstarmatt TTK Breakpoints v1.2 (patch 9.5.0.5)",
+  "_source": "huwugo_ D2 WeaponStat Chart v2.0 + rockstarmatt TTK Breakpoints v1.2 (patch 9.7.0.3)",
   "resilienceHp": {
     "0": 192, "1": 193, "2": 194, "3": 196, "4": 198,
     "5": 200, "6": 202, "7": 204, "8": 206, "9": 208, "10": 230
@@ -9,16 +9,16 @@
     "7":  { "name": "Shotgun",                 "rpmBuckets": [55, 65, 72, 86, 140] },
     "8":  { "name": "Machine Gun",             "rpmBuckets": [360, 450, 600, 900] },
     "9":  { "name": "Hand Cannon",             "rpmBuckets": [120, 140, 150, 180, 257] },
-    "11": { "name": "Fusion Rifle",            "rpmBuckets": [660, 740, 860, 960] },
+    "11": { "name": "Fusion Rifle",            "rpmBuckets": [533, 667, 800, 967] },
     "12": { "name": "Sniper Rifle",            "rpmBuckets": [72, 90, 140] },
     "13": { "name": "Pulse Rifle",             "rpmBuckets": [327, 340, 390, 450, 540] },
     "14": { "name": "Scout Rifle",             "rpmBuckets": [120, 150, 180, 200, 260] },
     "17": { "name": "Sidearm",                 "rpmBuckets": [260, 300, 327, 360, 450, 491] },
     "22": { "name": "Linear Fusion Rifle",     "rpmBuckets": [533] },
+    "23": { "name": "Grenade Launcher",        "rpmBuckets": [72, 90, 100, 120, 150] },
     "24": { "name": "SMG",                     "rpmBuckets": [600, 720, 900] },
-    "25": { "name": "Grenade Launcher",        "rpmBuckets": [90, 120] },
-    "29": { "name": "Trace Rifle",             "rpmBuckets": [900] },
-    "31": { "name": "Bow",                     "rpmBuckets": [50, 60, 70, 80] }
+    "25": { "name": "Trace Rifle",             "rpmBuckets": [1000] },
+    "31": { "name": "Combat Bow",              "rpmBuckets": [80, 567, 667, 800] }
   },
   "archetypes": {
     "9_120":  { "label": "Aggressive Frame",    "pvp": { "crit": 90.83, "body": 49.02, "burstSize": 1 }, "pve": { "crit": 272, "body": 147, "burstSize": 1 } },
@@ -68,7 +68,21 @@
     "7_65":   { "label": "Precision Frame",     "pvp": { "crit": 25.49, "body": 23.01, "burstSize": 1 }, "pve": { "crit":  76, "body":  69, "burstSize": 1 } },
     "7_72":   { "label": "Heavy Burst",         "pvp": { "crit": 187.87, "body": 107.06, "burstSize": 1 }, "pve": { "crit": 563, "body": 321, "burstSize": 1 } },
     "7_86":   { "label": "Rapid-Fire Frame",    "pvp": { "crit": 22.15, "body": 20.00, "burstSize": 1 }, "pve": { "crit":  66, "body":  60, "burstSize": 1 } },
-    "7_140":  { "label": "Rapid-Fire Slug",     "pvp": { "crit": 280.97, "body": 160.11, "burstSize": 1 }, "pve": { "crit": 843, "body": 480, "burstSize": 1 } }
+    "7_140":  { "label": "Rapid-Fire Slug",     "pvp": { "crit": 280.97, "body": 160.11, "burstSize": 1 }, "pve": { "crit": 843, "body": 480, "burstSize": 1 } },
+
+    "11_533": { "label": "Rapid-Fire Frame",    "pvp": { "crit": 33.97, "body": 33.97, "burstSize": 1 }, "pve": { "crit": 102, "body": 102, "burstSize": 1 } },
+    "11_667": { "label": "Adaptive Frame",      "pvp": { "crit": 46.30, "body": 46.30, "burstSize": 1 }, "pve": { "crit": 139, "body": 139, "burstSize": 1 } },
+    "11_800": { "label": "Precision Frame",     "pvp": { "crit": 48.00, "body": 48.00, "burstSize": 1 }, "pve": { "crit": 144, "body": 144, "burstSize": 1 } },
+    "11_967": { "label": "High-Impact Frame",   "pvp": { "crit": 79.22, "body": 79.22, "burstSize": 1 }, "pve": { "crit": 238, "body": 238, "burstSize": 1 } },
+
+    "22_533": { "label": "Precision Frame",     "pvp": { "crit": 568.09, "body": 165.09, "burstSize": 1 }, "pve": { "crit": 1704, "body": 495, "burstSize": 1 } },
+
+    "25_1000": { "label": "Adaptive Frame",     "pvp": { "crit": 20.16, "body": 15.01, "burstSize": 1 }, "pve": { "crit":  60, "body":  45, "burstSize": 1 } },
+
+    "31_80":   { "label": "High-Impact Frame",  "pvp": { "crit": 263.95, "body": 196.52, "burstSize": 1 }, "pve": { "crit": 792, "body": 590, "burstSize": 1 } },
+    "31_567":  { "label": "Lightweight Frame",  "pvp": { "crit": 124.01, "body":  77.60, "burstSize": 1 }, "pve": { "crit": 372, "body": 233, "burstSize": 1 } },
+    "31_667":  { "label": "Precision Frame",    "pvp": { "crit": 131.43, "body": 100.79, "burstSize": 1 }, "pve": { "crit": 394, "body": 302, "burstSize": 1 } },
+    "31_800":  { "label": "High-Impact Longbow","pvp": { "crit": 157.70, "body": 120.94, "burstSize": 1 }, "pve": { "crit": 473, "body": 363, "burstSize": 1 } }
   },
   "curves": {
     "9":  {
@@ -115,6 +129,30 @@
       "Range":    [{ "stat": 0, "value": 4.5  }, { "stat": 50, "value": 7.5  }, { "stat": 100, "value": 12.0 }],
       "Handling": [{ "stat": 0, "value": 0.90 }, { "stat": 100, "value": 0.50 }],
       "Reload":   [{ "stat": 0, "value": 4.0  }, { "stat": 100, "value": 2.0  }]
+    },
+    "22": {
+      "Range":    [{ "stat": 0, "value": 38.0 }, { "stat": 50, "value": 62.0 }, { "stat": 100, "value": 95.0 }],
+      "Handling": [{ "stat": 0, "value": 1.20 }, { "stat": 100, "value": 0.65 }],
+      "Reload":   [{ "stat": 0, "value": 4.5  }, { "stat": 100, "value": 2.2  }]
+    },
+    "11": {
+      "Range":    [{ "stat": 0, "value": 6.0  }, { "stat": 50, "value": 10.0 }, { "stat": 100, "value": 16.0 }],
+      "Handling": [{ "stat": 0, "value": 0.84 }, { "stat": 100, "value": 0.46 }],
+      "Reload":   [{ "stat": 0, "value": 3.8  }, { "stat": 100, "value": 1.9  }]
+    },
+    "25": {
+      "Range":    [{ "stat": 0, "value": 11.0 }, { "stat": 50, "value": 19.0 }, { "stat": 100, "value": 30.0 }],
+      "Handling": [{ "stat": 0, "value": 0.84 }, { "stat": 100, "value": 0.46 }],
+      "Reload":   [{ "stat": 0, "value": 3.6  }, { "stat": 100, "value": 1.8  }]
+    },
+    "31": {
+      "Range":    [{ "stat": 0, "value": 20.0 }, { "stat": 50, "value": 40.0 }, { "stat": 100, "value": 65.0 }],
+      "Handling": [{ "stat": 0, "value": 1.00 }, { "stat": 100, "value": 0.55 }],
+      "Reload":   [{ "stat": 0, "value": 4.0  }, { "stat": 100, "value": 2.0  }]
+    },
+    "23": {
+      "Handling": [{ "stat": 0, "value": 0.90 }, { "stat": 100, "value": 0.48 }],
+      "Reload":   [{ "stat": 0, "value": 3.8  }, { "stat": 100, "value": 1.9  }]
     }
   },
   "defaultCurves": {

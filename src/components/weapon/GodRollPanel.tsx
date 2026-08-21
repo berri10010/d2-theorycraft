@@ -141,6 +141,8 @@ export const GodRollPanel: React.FC = () => {
     entry.rank != null ? `Rank #${entry.rank} in ${weaponTypeLabel}` : null,
   ].filter(Boolean).join(' · ');
 
+  const cleanMw = entry.mw && !entry.mw.includes('\n') ? entry.mw : null;
+
   return (
     <CollapsiblePanel
       storageKey="god-roll"
@@ -148,6 +150,11 @@ export const GodRollPanel: React.FC = () => {
         <div>
           <div>God Roll</div>
           <p className="text-xs text-slate-500 mt-0.5 font-normal">{subtitleParts}</p>
+          {entry.source && (
+            <p className="text-xs text-slate-500 mt-0.5 font-normal">
+              <span className="text-slate-600">Drop: </span>{entry.source}
+            </p>
+          )}
         </div>
       }
       headerRight={
@@ -191,6 +198,7 @@ export const GodRollPanel: React.FC = () => {
               <RollRow label="Perk 1" options={entry.perk1} />
               <RollRow label="Perk 2" options={entry.perk2} />
               {originPills.length > 0 && <RollRow label="Origin" options={originPills} />}
+              {cleanMw && <RollRow label="MW" options={[cleanMw]} />}
             </div>
 
             {/* Apply God Roll button */}

@@ -58,7 +58,7 @@ const ROCKET_SUBTYPES  = new Set([10]);
 const SHOTGUN_SUBTYPES = new Set([7, 45]);
 const SNIPER_SUBTYPES  = new Set([12, 44]);
 const SWORD_SUBTYPES   = new Set([34, 48]);
-const TRACE_SUBTYPES   = new Set([29]);
+const TRACE_SUBTYPES   = new Set([25]);
 
 export function detectArchetype(itemSubType: number): SupportedArchetype | null {
   if (ROCKET_SUBTYPES.has(itemSubType))  return 'rocket_launcher';
@@ -101,7 +101,7 @@ function resolveBaseDamage(
   mode: GameMode,
   multiplier: number,
 ): number {
-  // 1. Archetype table (subtypes 7, 12, 29 are covered here)
+  // 1. Archetype table (subtypes 7, 11, 12, 22, 25, 31 are covered here)
   const archData = getArchetype(weapon.itemSubType, weapon.rpm);
   if (archData) {
     const crit = mode === 'pve' ? archData.pve.crit : archData.pvp.crit;

@@ -10,6 +10,7 @@ import { groupWeapons } from '../../lib/weaponGroups';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { DamageIcon } from '../ui/DamageIcon';
+import { useGodRolls } from '../../lib/useGodRolls';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -21,9 +22,18 @@ const AMMO_LABELS: Record<number, string> = { 1: 'Primary', 2: 'Special', 3: 'He
 const AMMO_COLORS: Record<number, string> = { 1: 'text-slate-400', 2: 'text-green-400', 3: 'text-purple-400' };
 const SLOT_LABELS: Record<number, string> = { 1: 'Kinetic', 2: 'Energy', 3: 'Power' };
 
-type SortMode = 'alpha' | 'season';
+type SortMode = 'alpha' | 'season' | 'tier';
 type SortDir  = 'asc'   | 'desc';
-const DEFAULT_DIR: Record<SortMode, SortDir> = { alpha: 'asc', season: 'asc' };
+const DEFAULT_DIR: Record<SortMode, SortDir> = { alpha: 'asc', season: 'asc', tier: 'asc' };
+
+const TIER_ORDER: Record<string, number> = { S: 0, A: 1, B: 2, C: 3, D: 4 };
+const TIER_STYLE: Record<string, { bg: string; text: string }> = {
+  S: { bg: 'bg-amber-400', text: 'text-slate-950' },
+  A: { bg: 'bg-green-400', text: 'text-slate-950' },
+  B: { bg: 'bg-blue-400',  text: 'text-slate-950' },
+  C: { bg: 'bg-slate-500', text: 'text-white' },
+  D: { bg: 'bg-slate-700', text: 'text-slate-300' },
+};
 
 // ─── Filter types ─────────────────────────────────────────────────────────────
 
@@ -47,6 +57,7 @@ interface FilterState {
   source:     MultiFilter;
   season:     MultiFilter;
   foundry:    MultiFilter;
+  weaponTier: MultiFilter;
   featured:      boolean;
   craftableOnly: boolean;
   adeptOnly:     boolean;
@@ -63,7 +74,7 @@ const DEFAULT_FILTERS: FilterState = {
   energy: emptyMF(), ammo: emptyMF(), slot: emptyMF(), rarity: emptyMF(),
   perk: emptyMF(), col1: emptyMF(), col2: emptyMF(), col3: emptyMF(),
   col4: emptyMF(), col5: emptyMF(), source: emptyMF(), season: emptyMF(),
-  foundry: emptyMF(),
+  foundry: emptyMF(), weaponTier: emptyMF(),
   featured: false, craftableOnly: false, adeptOnly: false, sunsetOnly: false,
 };
 
@@ -92,6 +103,7 @@ const CATEGORIES: CategoryDef[] = [
   { id: 'source',     label: 'Source',      filterKey: 'source' },
   { id: 'season',     label: 'Season',      filterKey: 'season' },
   { id: 'foundry',    label: 'Foundry',     filterKey: 'foundry' },
+  { id: 'weaponTier', label: 'Aegis Tier',  filterKey: 'weaponTier', noSearch: true },
 ];
 
 const COL_SUBCATS: { id: MultiKey; label: string }[] = [
@@ -152,7 +164,7 @@ function totalFilterCount(f: FilterState): number {
   return (
     countMF(f.weaponType) + countMF(f.frame) + countMF(f.trait) + countMF(f.perkTier) +
     countMF(f.energy) + countMF(f.ammo) + countMF(f.slot) + countMF(f.rarity) +
-    countMF(f.perk) + colCount(f) + countMF(f.source) + countMF(f.season) + countMF(f.foundry) +
+    countMF(f.perk) + colCount(f) + countMF(f.source) + countMF(f.season) + countMF(f.foundry) + countMF(f.weaponTier) +
     (f.featured ? 1 : 0) + (f.craftableOnly ? 1 : 0) + (f.adeptOnly ? 1 : 0) + (f.sunsetOnly ? 1 : 0)
   );
 }
@@ -455,9 +467,10 @@ function FilterPanel({
                 onClear={() => onClearKey(activeCatDef.filterKey!)}
                 showSearch={!activeCatDef.noSearch}
                 optLabel={
-                  activeCatDef.filterKey === 'energy'   ? v => v.charAt(0).toUpperCase() + v.slice(1) :
-                  activeCatDef.filterKey === 'frame'    ? v => v.replace(/ Frame$/, '') :
-                  activeCatDef.filterKey === 'perkTier' ? v => `${v}-Tier` :
+                  activeCatDef.filterKey === 'energy'     ? v => v.charAt(0).toUpperCase() + v.slice(1) :
+                  activeCatDef.filterKey === 'frame'      ? v => v.replace(/ Frame$/, '') :
+                  activeCatDef.filterKey === 'perkTier'   ? v => `${v}-Tier` :
+                  activeCatDef.filterKey === 'weaponTier' ? v => `${v}-Tier` :
                   undefined
                 }
               />
@@ -506,11 +519,12 @@ function saveRecentSearches(searches: string[]) {
 // ─── Weapon list item ─────────────────────────────────────────────────────────
 
 function WeaponListItem({
-  group, activeWeapon, onLoad,
+  group, activeWeapon, onLoad, tier,
 }: {
   group: WeaponGroup;
   activeWeapon: Weapon | null;
   onLoad: (weapon: Weapon, variants?: Weapon[]) => void;
+  tier?: string;
 }) {
   const d          = group.default;
   const isActive   = group.variants.some((v) => v.hash === activeWeapon?.hash);
@@ -539,12 +553,19 @@ function WeaponListItem({
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className={[
-            'text-sm font-bold truncate leading-tight',
-            isActive ? 'text-amber-400' : d.rarity === 'Exotic' ? 'text-yellow-400' : 'text-slate-200',
-          ].join(' ')}>
-            {group.baseName}
-          </p>
+          <div className="flex items-start justify-between gap-1">
+            <p className={[
+              'text-sm font-bold truncate leading-tight',
+              isActive ? 'text-amber-400' : d.rarity === 'Exotic' ? 'text-yellow-400' : 'text-slate-200',
+            ].join(' ')}>
+              {group.baseName}
+            </p>
+            {tier && TIER_STYLE[tier] && (
+              <span className={`shrink-0 text-[9px] font-black px-1.5 py-0.5 rounded leading-none ${TIER_STYLE[tier].bg} ${TIER_STYLE[tier].text}`}>
+                {tier}
+              </span>
+            )}
+          </div>
           <p className="text-[10px] uppercase tracking-wider mt-0.5 flex items-center gap-1">
             <DamageIcon
               type={d.damageType}
@@ -575,6 +596,7 @@ function WeaponListItem({
 export const SearchSidebar: React.FC = () => {
   const { loadWeapon, activeWeapon } = useWeaponStore();
   const { weapons, isLoading, error } = useWeaponDb();
+  const { data: godRollDb } = useGodRolls();
 
   const [query,         setQuery]         = useState('');
   const [sortMode,      setSortMode]      = useState<SortMode>('alpha');
@@ -690,9 +712,10 @@ export const SearchSidebar: React.FC = () => {
       col3:   sorted(col3Set),
       col4:   sorted(col4Set),
       col5:   sorted(col5Set),
-      source:  sorted(sourceSet),
-      season:  sorted(seasonSet),
-      foundry: sorted(foundrySet),
+      source:     sorted(sourceSet),
+      season:     sorted(seasonSet),
+      foundry:    sorted(foundrySet),
+      weaponTier: ['S', 'A', 'B', 'C', 'D'],
     };
   }, [weapons]);
 
@@ -710,6 +733,17 @@ export const SearchSidebar: React.FC = () => {
   const activeFilterCount = useMemo(() => totalFilterCount(filters), [filters]);
 
   const groups = useMemo(() => groupWeapons(weapons), [weapons]);
+
+  // Map baseName → tier string from god-rolls DB
+  const tierMap = useMemo(() => {
+    const m = new Map<string, string>();
+    if (godRollDb) {
+      for (const [name, e] of Object.entries(godRollDb)) {
+        if (e.tier) m.set(name, e.tier);
+      }
+    }
+    return m;
+  }, [godRollDb]);
 
   const makeRankFn = useCallback((q: string) => (name: string): number => {
     if (!q) return 0;
@@ -764,13 +798,28 @@ export const SearchSidebar: React.FC = () => {
       if (filters.featured      && !(d.rarity === 'Exotic' || (d.seasonNumber !== null && d.seasonNumber >= 27))) return false;
       if (filters.sunsetOnly    && (d.rarity === 'Exotic' || !(d.seasonNumber !== null && d.seasonNumber <= 12))) return false;
 
+      if (filters.weaponTier.inc.length > 0 || filters.weaponTier.exc.length > 0) {
+        const wt = tierMap.get(g.baseName) ?? '';
+        if (!matchesMF(filters.weaponTier, wt)) return false;
+      }
+
       return true;
     });
 
     ranked.sort((a, b) => {
       if (q && a.rank !== b.rank) return a.rank - b.rank;
       let diff: number;
-      if (sortMode === 'season') {
+      if (sortMode === 'tier') {
+        const ta = TIER_ORDER[tierMap.get(a.g.baseName) ?? ''] ?? 99;
+        const tb = TIER_ORDER[tierMap.get(b.g.baseName) ?? ''] ?? 99;
+        if (ta !== tb) {
+          diff = ta - tb;
+        } else {
+          const ra = godRollDb?.[a.g.baseName]?.rank ?? 9999;
+          const rb = godRollDb?.[b.g.baseName]?.rank ?? 9999;
+          diff = ra - rb;
+        }
+      } else if (sortMode === 'season') {
         const sa = bestSeasonNumber(a.g), sb = bestSeasonNumber(b.g);
         diff = sa !== sb ? sa - sb : a.g.baseName.localeCompare(b.g.baseName);
       } else {
@@ -780,7 +829,7 @@ export const SearchSidebar: React.FC = () => {
     });
 
     return ranked.map(({ g }) => g);
-  }, [groups, query, filters, sortMode, sortDir, makeRankFn]);
+  }, [groups, query, filters, sortMode, sortDir, makeRankFn, tierMap, godRollDb]);
 
   // Active dismissible chips
   const mkChips = (key: MultiKey, labelFn: (v: string) => string) => [
@@ -812,6 +861,7 @@ export const SearchSidebar: React.FC = () => {
     ...mkChips('source',     v => v.length > 30 ? v.slice(0, 28) + '…' : v),
     ...mkChips('season',     v => v),
     ...mkChips('foundry',    v => v),
+    ...mkChips('weaponTier', v => `${v}-Tier`),
     ...(filters.featured      ? [{ label: 'Featured',  isExclude: false, clear: () => handleToggleBool('featured') }]      : []),
     ...(filters.craftableOnly ? [{ label: 'Craftable', isExclude: false, clear: () => handleToggleBool('craftableOnly') }] : []),
     ...(filters.adeptOnly     ? [{ label: 'Adept',     isExclude: false, clear: () => handleToggleBool('adeptOnly') }]     : []),
@@ -920,7 +970,7 @@ export const SearchSidebar: React.FC = () => {
           {/* Sort + clear row */}
           <div className="flex items-center gap-2">
             <div className="flex rounded-lg border border-white/10 overflow-hidden">
-              {(['alpha', 'season'] as SortMode[]).map((m, i) => (
+              {(['alpha', 'season', 'tier'] as SortMode[]).map((m, i) => (
                 <button
                   key={m}
                   onClick={() => handleSortClick(m)}
@@ -930,7 +980,7 @@ export const SearchSidebar: React.FC = () => {
                     sortMode === m ? 'bg-white/10 text-slate-200' : 'text-slate-500 hover:text-slate-300',
                   ].join(' ')}
                 >
-                  {m === 'alpha' ? `A–Z${dirArrow('alpha')}` : `Season${dirArrow('season')}`}
+                  {m === 'alpha' ? `A–Z${dirArrow('alpha')}` : m === 'season' ? `Season${dirArrow('season')}` : `Tier${dirArrow('tier')}`}
                 </button>
               ))}
             </div>
@@ -1014,6 +1064,7 @@ export const SearchSidebar: React.FC = () => {
                 group={group}
                 activeWeapon={activeWeapon}
                 onLoad={handleLoadWeapon}
+                tier={tierMap.get(group.baseName)}
               />
             ))}
             <div className="border-t border-white/8 mx-2 mt-2 mb-1" />
@@ -1043,6 +1094,7 @@ export const SearchSidebar: React.FC = () => {
                   group={filteredGroups[vItem.index]}
                   activeWeapon={activeWeapon}
                   onLoad={handleLoadWeapon}
+                  tier={tierMap.get(filteredGroups[vItem.index].baseName)}
                 />
               </div>
             ))}

@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { Weapon, StatMap, GameMode, WeaponGroup, Perk, PerkColumn } from '../types/weapon';
 import { BUFF_DATABASE, getBuffMultiplier } from '../lib/buffDatabase';
 import { EXOTIC_ARMOR, ExoticClassType } from '../data/exoticArmor';
+import { getCurves } from '../lib/archetypes';
 
 // ─── Weapon Mods ────────────────────────────────────────────────────────────
 
@@ -360,8 +361,20 @@ export const useWeaponStore = create<WeaponState>()(
           ? (availableMods.find((m) => m.id === saved.activeModId) ?? NONE_MOD)
           : NONE_MOD;
 
+        // Override baked-in statCurves with the current archetypes.json values
+        // so updates to curve data don't require a full weapon data rebuild.
+        const liveCurves = getCurves(weapon.itemSubType);
+        const activeWeapon: Weapon = {
+          ...weapon,
+          statCurves: {
+            ...(liveCurves.Range    ? { Range:    liveCurves.Range    } : {}),
+            ...(liveCurves.Handling ? { Handling: liveCurves.Handling } : {}),
+            ...(liveCurves.Reload   ? { Reload:   liveCurves.Reload   } : {}),
+          },
+        };
+
         set({
-          activeWeapon:     weapon,
+          activeWeapon,
           activeWeaponHash: weapon.hash,
           variantGroup:     group ?? [weapon],
           weaponRolls,
