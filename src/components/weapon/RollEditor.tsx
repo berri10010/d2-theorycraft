@@ -7,23 +7,14 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { isLegacyVariant } from '../../lib/weaponGroups';
-import { Perk } from '../../types/weapon';
+import { Perk, PerkColumn } from '../../types/weapon';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { Tooltip } from '../ui/Tooltip';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
 import { useGodRolls } from '../../lib/useGodRolls';
-import { getPerkFamily, getPerkFamilyBadge } from '../../lib/perkFamily';
-
-// ── Column accent styles ──────────────────────────────────────────────────────
-
-const COL_ACCENT_BAR: Record<string, string> = {
-  barrel: 'bg-orange-500/40',
-  mag:    'bg-blue-500/40',
-  perk:   'bg-slate-500/40',
-  origin: 'bg-emerald-500/40',
-};
+import { getPerkFamily } from '../../lib/perkFamily';
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -119,6 +110,23 @@ export const RollEditor: React.FC = () => {
 
   if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
 
+  // Derive the display label for a column. Perk columns named "Perk N" by the parser
+  // get a semantic label based on what their perks actually are.
+  function colDisplayName(col: PerkColumn): string {
+    if (col.columnType !== 'perk') return col.name;
+    const allOrigin = col.perks.length > 0 && col.perks.every(
+      (p: Perk) => getPerkFamily(p, col) === 'Origin Trait'
+    );
+    return allOrigin ? 'Origin Trait' : 'Trait';
+  }
+
+  const COL_ACCENT_DERIVED: Record<string, string> = {
+    barrel: 'bg-orange-500/40',
+    mag:    'bg-blue-500/40',
+    perk:   'bg-slate-500/40',
+    origin: 'bg-emerald-500/40',
+  };
+
   return (
     <CollapsiblePanel
       title="Weapon Perks"
@@ -135,9 +143,11 @@ export const RollEditor: React.FC = () => {
       {activeWeapon.perkSockets.length > 0 && (
         <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${activeWeapon.perkSockets.length}, minmax(0, 1fr))` }}>
           {activeWeapon.perkSockets.map((column, colIdx) => {
-            const isOriginTraitCol = column.columnType === 'origin';
+            const displayLabel     = colDisplayName(column);
+            const isOriginTraitCol = column.columnType === 'origin' || displayLabel === 'Origin Trait';
             const columnDisabled   = isOriginTraitCol && isLegacy;
-            const accentBar        = COL_ACCENT_BAR[column.columnType] ?? 'bg-slate-500/40';
+            const accentBarKey     = isOriginTraitCol ? 'origin' : column.columnType;
+            const accentBar        = COL_ACCENT_DERIVED[accentBarKey] ?? 'bg-slate-500/40';
             const isLast           = colIdx === activeWeapon.perkSockets.length - 1;
 
             return (
@@ -152,7 +162,7 @@ export const RollEditor: React.FC = () => {
                 {/* Column header */}
                 <div className="w-full flex flex-col items-center gap-1 mb-3">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                    {columnDisabled ? `${column.name} ·` : column.name}
+                    {columnDisabled ? `${displayLabel} ·` : displayLabel}
                   </span>
                   <div className={`h-0.5 w-8 rounded-full ${accentBar}`} />
                 </div>
@@ -219,10 +229,6 @@ export const RollEditor: React.FC = () => {
 
                     const clarityEntry = clarityData?.[String(displayPerk.hash)] ?? clarityData?.[String(perk.hash)];
 
-                    const perkFamily     = getPerkFamily(perk, column);
-                    const perkFamilyBadge = getPerkFamilyBadge(perk, column);
-                    const isOriginInPerkCol = perkFamily === 'Origin Trait' && column.columnType === 'perk';
-
                     // Stat modifier badges (e.g. +10 Range, -5 Handling) — unconditional mods only
                     const statMods = (displayPerk.statModifiers ?? []).filter(
                       (m) => m.value !== 0 && !m.isConditional
@@ -232,9 +238,6 @@ export const RollEditor: React.FC = () => {
                       <div>
                         <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                           <span className="text-[11px] font-bold text-white leading-tight">{displayPerk.name}</span>
-                          <span className={`text-[9px] font-bold px-1 py-px rounded leading-none ${
-                            perkFamily === 'Origin Trait' ? 'bg-emerald-500/25 text-emerald-300' : 'bg-white/10 text-slate-400'
-                          }`}>{perkFamilyBadge}</span>
                           {perk.tier && (
                             <span className={`text-[9px] font-black px-1 py-px rounded leading-none ${
                               perk.tier === 'S' ? 'bg-amber-500/30 text-amber-300' :
@@ -322,13 +325,6 @@ export const RollEditor: React.FC = () => {
                         {isUpgraded && (
                           <span className="absolute -bottom-1 -right-1 text-[7px] font-black leading-none px-1 py-px rounded-full z-10 bg-amber-400 text-black">
                             ENH
-                          </span>
-                        )}
-
-                        {/* Origin trait marker — top-right corner; only for origin-classified perks in perk columns */}
-                        {isOriginInPerkCol && (
-                          <span className="absolute -top-1 -right-1 text-[7px] font-black leading-none px-1 py-px rounded-full z-10 bg-emerald-500/80 text-white pointer-events-none">
-                            OT
                           </span>
                         )}
 
