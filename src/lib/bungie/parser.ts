@@ -732,20 +732,28 @@ export function parseWeapons(
           // the within-socket dedup can pair them — preventing duplicate icon rows.
           //
           // Key distinction:
-          //   reusablePlugSetHash  — fixed / choosable options (e.g. barrel mods, exotic
-          //     Tang/Grip choices).  ALL items are valid choices regardless of
-          //     currentlyCanRoll, which Bungie sometimes sets false on non-default
-          //     alternatives (see e.g. Praxic Blade Tang/Grip sockets).
+          //   reusablePlugSetHash  — barrel/mag/fixed options for this weapon.
+          //     When also paired with a randomizedPlugSetHash on the same socket
+          //     (crafted / adept enhanced perks), include ALL items so the
+          //     base+enhanced pairing works regardless of currentlyCanRoll.
+          //     When this is the ONLY source (regular barrel/mag sockets),
+          //     filter by currentlyCanRoll — Bungie sets it false for mods that
+          //     cannot roll on this specific weapon (e.g. Drop Mag on Rose).
           //   randomizedPlugSetHash — random-roll perk pool.  Only currentlyCanRoll:true
           //     items are in the current pool; false = deprecated / removed from rotation.
           const plugHashSet = new Set<number>();
           const plugHashes: number[] = [];
+          const hasRandomized = !!socket.randomizedPlugSetHash;
 
-          // reusablePlugSetHash: include ALL items (choosable, not random-rolled)
+          // reusablePlugSetHash: filter by currentlyCanRoll only when this is
+          // the sole plug source (barrel/mag sockets on non-crafted weapons).
+          // When paired with randomizedPlugSetHash, include all so enhanced perks
+          // land in the same rawPerks array for within-socket dedup.
           if (socket.reusablePlugSetHash) {
             const ps = plugSetDefs[socket.reusablePlugSetHash.toString()];
             if (ps) {
               for (const p of ps.reusablePlugItems) {
+                if (!hasRandomized && !p.currentlyCanRoll) continue;
                 if (!plugHashSet.has(p.plugItemHash)) {
                   plugHashSet.add(p.plugItemHash);
                   plugHashes.push(p.plugItemHash);
@@ -778,6 +786,10 @@ export function parseWeapons(
 
           const rawPerks: Perk[] = [];
           const seenPlugs = new Set<string>();
+          // Deduplicate by (name, isEnhanced) — Bungie sometimes ships two hashes
+          // for the exact same mod (e.g. two "Drop Mag" entries with identical stats).
+          // Keep the first one seen; the second would show as a confusing duplicate.
+          const seenPerkNames = new Set<string>();
 
           for (const plugHash of plugHashes) {
             const hashStr = plugHash.toString();
@@ -817,6 +829,10 @@ export function parseWeapons(
             const statModifiers = auditStats ?? manifestStats;
 
             const enhanced = isEnhancedPerkItem(plugItem);
+            const nameKey = `${perkName.toLowerCase()}:${enhanced}`;
+            if (seenPerkNames.has(nameKey)) continue;
+            seenPerkNames.add(nameKey);
+
             const derivedBuffKey = enhanced ? null : getBuffKeyForPerk(perkName);
             const tierEntry = getPerkTier(perkName);
             const { act, act2 } = auditActivationFor(perkName);
