@@ -317,31 +317,16 @@ async function buildClarity() {
 }
 
 // ── Step 3: God rolls (Google Sheets) ────────────────────────────────────────
-
-function parseCSVSimple(text: string): string[][] {
-  const rows: string[][] = [];
-  const lines = text.split('\n');
-  for (const line of lines) {
-    if (!line.trim()) continue;
-    const row: string[] = [];
-    let inQuote = false;
-    let cell = '';
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        if (inQuote && line[i + 1] === '"') { cell += '"'; i++; }
-        else inQuote = !inQuote;
-      } else if (ch === ',' && !inQuote) {
-        row.push(cell); cell = '';
-      } else {
-        cell += ch;
-      }
-    }
-    row.push(cell);
-    rows.push(row);
-  }
-  return rows;
-}
+//
+// Column layout (Season 29 sheet revision — 18 columns):
+//   [0]  WEAPON image  [1]  Name        [2]  Season     [3]  Energy
+//   [4]  Frame         [5]  Source       [6]  Stun       [7]  Ammo
+//   [8]  ⬆️            [9]  Barrel       [10] Mag        [11] MW
+//   [12] Perk 1        [13] Perk 2       [14] Origin     [15] Notes
+//   [16] Rank #        [17] Tier
+//
+// Uses the gviz JSON endpoint (not CSV) so multi-line quoted cells — perk
+// options are newline-delimited in the sheet — parse correctly.
 
 const SHEET_ID = '1JM-0SlxVDAi-C6rGVlLxa-J1WGewEeL8Qvq4htWZHhY';
 const WEAPON_TABS = [
@@ -359,46 +344,68 @@ const TAB_TO_TYPE: Record<string, string> = {
   Other:'Other', 'Exotic Weapons':'Exotic',
 };
 
+type GvizCell = { v: string | number | null; f?: string } | null;
+
+function gvizCellStr(cell: GvizCell): string {
+  if (!cell || cell.v == null) return '';
+  return String(cell.v).trim();
+}
+
+function gvizSplitOptions(cell: GvizCell): string[] {
+  const s = gvizCellStr(cell);
+  if (!s) return [];
+  const parts = s.includes('\n') ? s.split('\n') : s.split(',');
+  return parts.map(p => p.trim()).filter(Boolean);
+}
+
+async function fetchGvizTab(tab: string): Promise<GvizCell[][] | null> {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const raw = await res.text();
+  // Strip JSONP wrapper: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+  const jsonStr = raw.replace(/^[^{]+/, '').replace(/\);?\s*$/, '');
+  const data = JSON.parse(jsonStr) as { table?: { rows?: Array<{ c: GvizCell[] }> } };
+  return data.table?.rows?.map(r => r.c) ?? null;
+}
+
 async function buildGodRolls() {
-  // If god-rolls.json was committed to the repo (e.g. exported from the local
-  // Excel workbook), use it as-is and skip the Google Sheets fetch entirely.
+  // If god-rolls.json was committed to the repo (e.g. refreshed via
+  // `npm run refresh-god-rolls`), use it as-is and skip the fetch.
   if (fs.existsSync(outPath('god-rolls.json'))) {
     const existing = JSON.parse(fs.readFileSync(outPath('god-rolls.json'), 'utf8'));
     console.log(`\n[god-rolls] Using committed file (${Object.keys(existing).length} entries) — skipping Google Sheets fetch.`);
+    console.log(`    (run \`npm run refresh-god-rolls\` to pull fresh data from TheAegisRelic's sheet)`);
     return;
   }
 
-  console.log('\n[god-rolls] Fetching Google Sheets tabs...');
-  const base = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
+  console.log('\n[god-rolls] Fetching Google Sheets tabs (gviz JSON)...');
   const db: Record<string, unknown> = {};
   let tabCount = 0;
 
   await Promise.all(
     WEAPON_TABS.map(async (tab) => {
       try {
-        const res = await fetch(base + encodeURIComponent(tab));
-        if (!res.ok) return;
-        const text = await res.text();
-        const rows = parseCSVSimple(text);
-        const split = (s?: string) => s ? s.split('\n').map(p => p.trim()).filter(Boolean) : [];
-
-        for (let i = 1; i < rows.length; i++) {
-          const r = rows[i];
-          const name = r[1]?.trim();
-          if (!name || name === 'Name' || r.length < 12) continue;
+        const rows = await fetchGvizTab(tab);
+        if (!rows) return;
+        for (const c of rows) {
+          const name = gvizCellStr(c[1]);
+          if (!name || name === 'Name') continue;
           db[name] = {
-            weaponType: TAB_TO_TYPE[tab] ?? tab,
-            season: r[2]?.trim() || null,
-            energy: r[3]?.trim() || null,
-            frame: r[4]?.trim() || null,
-            barrel: split(r[7]),
-            mag: split(r[8]),
-            perk1: split(r[9]),
-            perk2: split(r[10]),
-            originTrait: r[11]?.trim() || null,
-            notes: r[12]?.trim() || null,
-            rank: r[13] ? parseInt(r[13], 10) || null : null,
-            tier: r[14]?.trim() || null,
+            weaponType:  TAB_TO_TYPE[tab] ?? tab,
+            season:      gvizCellStr(c[2]) || null,
+            energy:      gvizCellStr(c[3]) || null,
+            frame:       gvizCellStr(c[4]) || null,
+            source:      gvizCellStr(c[5]) || null,
+            barrel:      gvizSplitOptions(c[9]),
+            mag:         gvizSplitOptions(c[10]),
+            mw:          gvizCellStr(c[11]) || null,
+            perk1:       gvizSplitOptions(c[12]),
+            perk2:       gvizSplitOptions(c[13]),
+            originTrait: gvizCellStr(c[14]) || null,
+            notes:       gvizCellStr(c[15]) || null,
+            rank:        c[16]?.v != null ? Number(c[16].v) || null : null,
+            tier:        gvizCellStr(c[17]) || null,
           };
         }
         tabCount++;
@@ -459,6 +466,31 @@ async function patchEventWeaponSeasons() {
 }
 
 // ── Step 5: Perk descriptions (Destiny Data Compendium) ──────────────────────
+
+function parseCSVSimple(text: string): string[][] {
+  const rows: string[][] = [];
+  const lines = text.split('\n');
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const row: string[] = [];
+    let inQuote = false;
+    let cell = '';
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQuote && line[i + 1] === '"') { cell += '"'; i++; }
+        else inQuote = !inQuote;
+      } else if (ch === ',' && !inQuote) {
+        row.push(cell); cell = '';
+      } else {
+        cell += ch;
+      }
+    }
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows;
+}
 
 async function buildPerkDescriptions() {
   console.log('\n[perk-descriptions] Fetching Destiny Data Compendium...');

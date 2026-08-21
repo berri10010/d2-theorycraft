@@ -7,6 +7,7 @@
     "prebuild": "npx tsx scripts/build-static-data.ts",
     "build": "next build",
     "validate": "npx tsx scripts/validate-data.ts",
+    "refresh-god-rolls": "npx tsx scripts/refresh-god-rolls.ts",
     "start": "next start",
     "lint": "next lint"
   },

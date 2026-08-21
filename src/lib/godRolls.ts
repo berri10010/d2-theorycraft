@@ -3,10 +3,14 @@ export interface GodRollEntry {
   season: string | null;
   energy: string | null;
   frame: string | null;
+  /** Activity or source where the weapon drops */
+  source: string | null;
   /** Recommended barrel / bowstring / blade perks */
   barrel: string[];
   /** Recommended magazine / battery / arrow perks */
   mag: string[];
+  /** Recommended masterwork stat */
+  mw: string | null;
   /** Recommended options for Trait 1 (first trait column) */
   perk1: string[];
   /** Recommended options for Trait 2 (second trait column) */
@@ -21,91 +25,6 @@ export interface GodRollEntry {
 }
 
 export type GodRollDatabase = Record<string, GodRollEntry>;
-
-import { parseCSV } from './parseCSV';
-
-const SHEET_ID = '1JM-0SlxVDAi-C6rGVlLxa-J1WGewEeL8Qvq4htWZHhY';
-
-const WEAPON_TABS = [
-  'Autos', 'Bows', 'HCs', 'Pulses', 'Scouts', 'Sidearms', 'SMGs', 'BGLs',
-  'Fusions', 'Glaives', 'Shotguns', 'Snipers', 'Rocket Sidearms', 'Traces',
-  'HGLs', 'LFRs', 'LMGs', 'Rockets', 'Swords', 'Other', 'Exotic Weapons',
-];
-
-const TAB_TO_TYPE: Record<string, string> = {
-  Autos: 'Auto Rifle',
-  Bows: 'Bow',
-  HCs: 'Hand Cannon',
-  Pulses: 'Pulse Rifle',
-  Scouts: 'Scout Rifle',
-  Sidearms: 'Sidearm',
-  SMGs: 'Submachine Gun',
-  BGLs: 'Breech Grenade Launcher',
-  Fusions: 'Fusion Rifle',
-  Glaives: 'Glaive',
-  Shotguns: 'Shotgun',
-  Snipers: 'Sniper Rifle',
-  'Rocket Sidearms': 'Rocket Sidearm',
-  Traces: 'Trace Rifle',
-  HGLs: 'Heavy Grenade Launcher',
-  LFRs: 'Linear Fusion Rifle',
-  LMGs: 'Machine Gun',
-  Rockets: 'Rocket Launcher',
-  Swords: 'Sword',
-  Other: 'Other',
-  'Exotic Weapons': 'Exotic',
-};
-
-/**
- * Fetches PvE god roll data from the community Google Sheets spreadsheet.
- * Designed to run server-side (Next.js Route Handler / Server Component).
- * Fetches are de-duped and cached for 1 hour by Next.js fetch cache.
- */
-export async function fetchGodRolls(): Promise<GodRollDatabase> {
-  const base = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
-  const db: GodRollDatabase = {};
-
-  await Promise.all(
-    WEAPON_TABS.map(async (tab) => {
-      try {
-        const res = await fetch(base + encodeURIComponent(tab), {
-          next: { revalidate: 3600 },
-        });
-        if (!res.ok) return;
-        const text = await res.text();
-        const rows = parseCSV(text);
-
-        for (let i = 1; i < rows.length; i++) {
-          const r = rows[i];
-          const name = r[1]?.trim();
-          if (!name || name === 'Name' || r.length < 12) continue;
-
-          const split = (s?: string): string[] =>
-            s ? s.split('\n').map((p) => p.trim()).filter(Boolean) : [];
-
-          db[name] = {
-            weaponType: TAB_TO_TYPE[tab] ?? tab,
-            season: r[2]?.trim() || null,
-            energy: r[3]?.trim() || null,
-            frame: r[4]?.trim() || null,
-            barrel: split(r[7]),
-            mag: split(r[8]),
-            perk1: split(r[9]),
-            perk2: split(r[10]),
-            originTrait: r[11]?.trim() || null,
-            notes: r[12]?.trim() || null,
-            rank: r[13] ? parseInt(r[13], 10) || null : null,
-            tier: r[14]?.trim() || null,
-          };
-        }
-      } catch (err) {
-        console.warn(`[godRolls] Failed to load tab "${tab}":`, err instanceof Error ? err.message : err);
-      }
-    }),
-  );
-
-  return db;
-}
 
 // ──────────────────────────────────────────────────
 // Column-name → god-roll field mapping
