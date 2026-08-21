@@ -14,6 +14,7 @@ import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
 import { useGodRolls } from '../../lib/useGodRolls';
+import { getPerkFamily, getPerkFamilyBadge } from '../../lib/perkFamily';
 
 // ── Column accent styles ──────────────────────────────────────────────────────
 
@@ -230,6 +231,10 @@ export const RollEditor: React.FC = () => {
 
                     const clarityEntry = clarityData?.[String(displayPerk.hash)] ?? clarityData?.[String(perk.hash)];
 
+                    const perkFamily     = getPerkFamily(perk, column);
+                    const perkFamilyBadge = getPerkFamilyBadge(perk, column);
+                    const isOriginInPerkCol = perkFamily === 'Origin Trait' && column.columnType === 'perk';
+
                     // Stat modifier badges (e.g. +10 Range, -5 Handling) — unconditional mods only
                     const statMods = (displayPerk.statModifiers ?? []).filter(
                       (m) => m.value !== 0 && !m.isConditional
@@ -237,8 +242,11 @@ export const RollEditor: React.FC = () => {
 
                     const tooltipContent = (
                       <div>
-                        <div className="flex items-center gap-1.5 mb-1">
+                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                           <span className="text-[11px] font-bold text-white leading-tight">{displayPerk.name}</span>
+                          <span className={`text-[9px] font-bold px-1 py-px rounded leading-none ${
+                            perkFamily === 'Origin Trait' ? 'bg-emerald-500/25 text-emerald-300' : 'bg-white/10 text-slate-400'
+                          }`}>{perkFamilyBadge}</span>
                           {perk.tier && (
                             <span className={`text-[9px] font-black px-1 py-px rounded leading-none ${
                               perk.tier === 'S' ? 'bg-amber-500/30 text-amber-300' :
@@ -326,6 +334,13 @@ export const RollEditor: React.FC = () => {
                         {isUpgraded && (
                           <span className="absolute -bottom-1 -right-1 text-[7px] font-black leading-none px-1 py-px rounded-full z-10 bg-amber-400 text-black">
                             ENH
+                          </span>
+                        )}
+
+                        {/* Origin trait marker — top-right corner; only for origin-classified perks in perk columns */}
+                        {isOriginInPerkCol && (
+                          <span className="absolute -top-1 -right-1 text-[7px] font-black leading-none px-1 py-px rounded-full z-10 bg-emerald-500/80 text-white pointer-events-none">
+                            OT
                           </span>
                         )}
 
