@@ -520,6 +520,18 @@ export const useWeaponStore = create<WeaponState>()(
 
         const finalStats: StatMap = { ...activeWeapon.baseStats };
 
+        // Some stats (e.g. Guard Resistance / Guard Endurance on swords) aren't
+        // stored in baseStats because the manifest only includes them via socket
+        // plugs, not the base item definition. Pre-seed any such stat to 0 so
+        // perk modifier deltas can be applied correctly.
+        for (const col of activeWeapon.perkSockets) {
+          for (const perk of col.perks) {
+            for (const mod of perk.statModifiers) {
+              if (!(mod.statName in finalStats)) finalStats[mod.statName] = 0;
+            }
+          }
+        }
+
         // Perk stat modifiers.
          for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
            const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
