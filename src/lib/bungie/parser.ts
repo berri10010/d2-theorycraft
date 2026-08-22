@@ -1,4 +1,4 @@
-import { Weapon, Perk, PerkColumn, ColumnType, StatMap, PerkActivation } from '../../types/weapon';
+import { Weapon, Perk, PerkColumn, ColumnType, StatMap, PerkActivation, WeaponModOption } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../bungieUrl';
 import {
   BungieInventoryItem,
@@ -492,6 +492,7 @@ export function parseWeapons(
     const masterworkBonuses: Record<string, number> = {};
     /** Non-primary stats that still receive secondary adept bonuses (e.g. sword Charge Rate). */
     const secondaryMwStats = new Set<string>();
+    const rawWeaponMods: (WeaponModOption & { isEnhanced: boolean })[] = [];
     const weaponMods: Weapon['weaponMods'] = [];
 
     let intrinsicTrait: Perk | null = null;
@@ -688,8 +689,10 @@ export function parseWeapons(
               // Strictly require the plug to identify itself as a weapon mod.
               // This filters out barrel perks, sight options, and other non-mod
               // plugs that happen to have stat investments in their investmentStats.
-              const looksLikeMod = (modPlug.itemTypeDisplayName ?? '').toLowerCase().includes('mod');
+              const modTypeDisplay = (modPlug.itemTypeDisplayName ?? '').toLowerCase();
+              const looksLikeMod = modTypeDisplay.includes('mod');
               if (!looksLikeMod) continue;
+              const isEnhancedMod = modTypeDisplay.includes('enhanced');
               // Extract stat changes from investmentStats
               const modStatChanges: Partial<Record<string, number>> = {};
               for (const s of (modPlug.investmentStats ?? [])) {
@@ -699,11 +702,12 @@ export function parseWeapons(
                 if (!statName || !BAR_STATS.has(statName)) continue;
                 modStatChanges[statName] = (modStatChanges[statName] ?? 0) + inv.value;
               }
-              weaponMods.push({
+              rawWeaponMods.push({
                 hash: modPlugHash.toString(),
                 name: modName,
                 description: modPlug.displayProperties.description?.trim() ?? '',
                 statChanges: modStatChanges,
+                isEnhanced: isEnhancedMod,
               });
             }
           }
@@ -873,9 +877,17 @@ export function parseWeapons(
             }
           }
 
+          // Determine column type early so we can decide whether to keep orphaned
+          // enhanced perks (barrel/mag columns drop them; perk columns keep them
+          // for craftable weapons that only surface enhanced trait variants).
+          const earlyColType = isOriginTrait
+            ? 'origin' as const
+            : columnTypeFromCategory(catName, slotPos, socketIndexes.length);
+          const isModCol = earlyColType === 'barrel' || earlyColType === 'mag';
+
           // Attach enhancedVersion to base perks, then drop enhanced perks that have a base
-          // partner. Orphaned enhanced perks (no base version) are kept as-is so columns
-          // don't end up empty on craftable weapons that only surface enhanced variants.
+          // partner. Orphaned enhanced perks (no base version) are kept for perk columns only
+          // so craftable weapons that surface only enhanced variants don't end up empty.
           const perks: Perk[] = [];
           for (const p of rawPerks) {
             if (p.isEnhanced) {
@@ -884,8 +896,8 @@ export function parseWeapons(
                const hasBase = rawPerks.some(
                  (b) => !b.isEnhanced && getCanonicalName(b.name) === key
                );
-
-              if (!hasBase) perks.push({ ...p, enhancedVersion: null });
+              // Also drop orphaned enhanced perks from barrel/mag columns (legacy artifacts).
+              if (!hasBase && !isModCol) perks.push({ ...p, enhancedVersion: null });
               continue;
             }
              const key = getCanonicalName(p.name);
@@ -900,15 +912,11 @@ export function parseWeapons(
             // Only store the first-seen intrinsic (frame perk)
             if (!intrinsicTrait) intrinsicTrait = perks[0];
           } else {
-            const colType = isOriginTrait
-              ? 'origin' as const
-              : columnTypeFromCategory(catName, slotPos, socketIndexes.length);
-
-            if (colType === 'perk') traitColumnCount += 1;
+            if (earlyColType === 'perk') traitColumnCount += 1;
 
             rawColumns.push({
-              columnType: colType,
-              name: columnLabel(colType, catName, traitColumnCount),
+              columnType: earlyColType,
+              name: columnLabel(earlyColType, catName, traitColumnCount),
               perks,
             });
           }
@@ -1025,6 +1033,27 @@ export function parseWeapons(
     const finalMwOptions = masterworkOptions
       .filter((s) => baseStats[s] !== undefined)
       .filter((s) => mwWhitelist === null || mwWhitelist.includes(s));
+
+    // ── Pair enhanced weapon mods with their base versions ───────────────────
+    // "Backup Mag" (Weapon Mod) and "Backup Mag" (Enhanced Weapon Mod) share the
+    // same display name. Attach the enhanced version to the base mod and drop the
+    // enhanced standalone entry so the UI shows one button per mod (click-twice to
+    // toggle the enhanced version, matching perk column behaviour).
+    {
+      const enhModMap = new Map<string, WeaponModOption>();
+      for (const m of rawWeaponMods) {
+        if (m.isEnhanced) enhModMap.set(m.name.toLowerCase(), m);
+      }
+      const seenModNames = new Set<string>();
+      for (const m of rawWeaponMods) {
+        const key = m.name.toLowerCase();
+        if (seenModNames.has(key)) continue;
+        seenModNames.add(key);
+        if (m.isEnhanced) continue; // drop orphaned enhanced mods
+        const enhanced = enhModMap.get(key) ?? null;
+        weaponMods.push({ hash: m.hash, name: m.name, description: m.description, statChanges: m.statChanges, enhancedVersion: enhanced });
+      }
+    }
 
     const weaponName = item.displayProperties.name;
     weapons.push({

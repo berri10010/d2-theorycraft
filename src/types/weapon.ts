@@ -86,6 +86,8 @@ export interface WeaponModOption {
   description: string;
   /** Flat stat changes from investmentStats (e.g. Backup Mag: { Reload: -10 }). */
   statChanges: Partial<Record<string, number>>;
+  /** Enhanced version of this mod (same name, better stats), if one exists. */
+  enhancedVersion?: WeaponModOption | null;
 }
 
 /** Semantic slot type — used for column labelling and UI rendering */

@@ -18,6 +18,8 @@ export interface WeaponMod {
   damageMultiplier: number;
   /** True for "Adept *" mods (detected by name prefix) */
   adeptOnly: boolean;
+  /** Enhanced version of this mod (same name, better stats). Click-twice selects it. */
+  enhancedVersion: WeaponMod | null;
 }
 
 /**
@@ -50,6 +52,7 @@ export const NONE_MOD: WeaponMod = {
   statChanges: {},
   damageMultiplier: 1.0,
   adeptOnly: false,
+  enhancedVersion: null,
 };
 
 /**
@@ -60,6 +63,7 @@ export const NONE_MOD: WeaponMod = {
 export function buildWeaponModsList(weapon: Weapon): WeaponMod[] {
   const mods: WeaponMod[] = [NONE_MOD];
   for (const opt of (weapon.weaponMods ?? [])) {
+    const ev = opt.enhancedVersion;
     mods.push({
       id: opt.hash,
       name: opt.name,
@@ -67,6 +71,15 @@ export function buildWeaponModsList(weapon: Weapon): WeaponMod[] {
       statChanges: opt.statChanges,
       damageMultiplier: MOD_DAMAGE_MULTIPLIERS[opt.name] ?? 1.0,
       adeptOnly: /\badept\b/i.test(opt.name),
+      enhancedVersion: ev ? {
+        id: ev.hash,
+        name: ev.name,
+        description: ev.description,
+        statChanges: ev.statChanges,
+        damageMultiplier: MOD_DAMAGE_MULTIPLIERS[ev.name] ?? 1.0,
+        adeptOnly: /\badept\b/i.test(ev.name),
+        enhancedVersion: null,
+      } : null,
     });
   }
   return mods;

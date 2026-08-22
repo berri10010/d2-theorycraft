@@ -168,33 +168,56 @@ export const MasterworkPanel: React.FC = () => {
       {/* ── Weapon Mod card ─────────────────────────────────────────────── */}
       {hasMods && (
         <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-          <div className="mb-3">
+          <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-bold text-white">Weapon Mod</h2>
+            {availableMods.some((m) => m.enhancedVersion) && (
+              <span className="text-xs text-slate-500 font-normal tracking-wide">Click twice to enhance</span>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-1.5">
             {availableMods.map((mod) => {
-              const isActive   = activeMod.id === mod.id;
-              const isNone     = mod.id === NONE_MOD.id;
-              const hasDmg     = mod.damageMultiplier > 1.0;
+              const isBaseActive     = activeMod.id === mod.id;
+              const isEnhancedActive = activeMod.id === mod.enhancedVersion?.id;
+              const isActive         = isBaseActive || isEnhancedActive;
+              const isUpgraded       = isEnhancedActive;
+              const isNone           = mod.id === NONE_MOD.id;
+              // Use the currently-active variant's stats for display
+              const displayMod       = isEnhancedActive && mod.enhancedVersion ? mod.enhancedVersion : mod;
+              const hasDmg     = displayMod.damageMultiplier > 1.0;
               const dmgLabel   = hasDmg
-                ? `+${((mod.damageMultiplier - 1) * 100).toFixed(1)}%`
+                ? `+${((displayMod.damageMultiplier - 1) * 100).toFixed(1)}%`
                 : null;
-              const statEntries = Object.entries(mod.statChanges)
+              const statEntries = Object.entries(displayMod.statChanges)
                 .filter(([, v]) => v !== undefined && v !== 0) as [string, number][];
 
+              const handleClick = () => {
+                if (!isActive || isNone) {
+                  setActiveMod(isActive ? NONE_MOD : mod);
+                } else if (isBaseActive && mod.enhancedVersion) {
+                  setActiveMod(mod.enhancedVersion);
+                } else {
+                  setActiveMod(NONE_MOD);
+                }
+              };
+
               // Prefer Clarity description over manifest description for mods
-              const clarityEntry = clarityPerks?.[mod.id];
+              const clarityEntry = clarityPerks?.[displayMod.id];
               const clarityDesc  = clarityEntry ? clarityPlainText(clarityEntry) : null;
-              const desc = clarityDesc || mod.description || null;
+              const desc = clarityDesc || displayMod.description || null;
 
               // Tooltip content — null for No Mod (suppresses the portal entirely)
               const tooltipContent = isNone ? null : (
                 <div>
                   <div className="flex items-center gap-1.5 mb-1">
                     <span className="text-[11px] font-bold text-white leading-tight">
-                      {mod.name}
+                      {displayMod.name}
                     </span>
+                    {isUpgraded && (
+                      <span className="text-[8px] font-black px-1 py-px rounded bg-amber-500/20 text-amber-400 leading-none">
+                        ENHANCED
+                      </span>
+                    )}
                     {mod.adeptOnly && (
                       <span className="text-[8px] font-black px-1 py-px rounded bg-amber-500/20 text-amber-400 leading-none">
                         ADEPT
@@ -227,27 +250,32 @@ export const MasterworkPanel: React.FC = () => {
                       )}
                     </div>
                   )}
+                  {!isActive && mod.enhancedVersion && (
+                    <p className="text-[9px] text-slate-500 mt-1.5">Click twice to enhance</p>
+                  )}
                 </div>
               );
 
               return (
                 <Tooltip key={mod.id} content={tooltipContent}>
                   <button
-                    onClick={() => setActiveMod(isActive && !isNone ? NONE_MOD : mod)}
+                    onClick={handleClick}
                     className={[
                       'flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
                       isNone
                         ? isActive
                           ? 'bg-white/5 text-slate-400 border-white/10'
                           : 'bg-transparent text-slate-600 border-white/5 hover:border-white/12 hover:text-slate-500'
-                        : isActive
-                          ? mod.adeptOnly
-                            ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
-                            : 'bg-blue-500/20 text-blue-400 border-blue-500/50'
-                          : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
+                        : isUpgraded
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-400/50 shadow-[0_0_10px_rgba(251,191,36,0.2)]'
+                          : isActive
+                            ? mod.adeptOnly
+                              ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
+                              : 'bg-blue-500/20 text-blue-400 border-blue-500/50'
+                            : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
                     ].join(' ')}
                   >
-                    <span>{mod.name}</span>
+                    <span>{displayMod.name}</span>
 
                     {/* Inline stat delta badges — abbreviated stat name, colour-coded */}
                     {!isNone && statEntries.map(([stat, val]) => (
