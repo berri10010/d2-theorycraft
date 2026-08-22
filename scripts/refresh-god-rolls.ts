@@ -108,7 +108,7 @@ async function main() {
             perk2:       splitOptions(c[o + 1]),
             originTrait: cellStr(c[o + 2]) || null,
             notes:       cellStr(c[o + 3]) || null,
-            rank:        c[o + 4]?.v != null ? Number(c[o + 4].v) || null : null,
+            rank:        c[o + 4]?.v != null ? Number(c[o + 4]!.v) || null : null,
             tier:        cellStr(c[o + 5]) || null,
           };
           count++;
