@@ -83,12 +83,18 @@ async function main() {
         const table = await fetchGvizTab(tab);
         if (!table) { console.warn(`  ✗ ${tab}: empty response`); return; }
 
+        // Swords and Glaives have an extra stat-recommendation column at c[12]
+        // (e.g. "Impact" for swords, "Shield Duration" for glaives) that shifts
+        // perk1 through tier columns by +1.
+        const perkOffset = (tab === 'Swords' || tab === 'Glaives') ? 1 : 0;
+
         let count = 0;
         for (const row of table.rows) {
           const c = row.c;
           const name = cellStr(c[1]);
           if (!name || name === 'Name') continue;
 
+          const o = 12 + perkOffset;
           db[name] = {
             weaponType:  TAB_TO_TYPE[tab] ?? tab,
             season:      cellStr(c[2]) || null,
@@ -98,12 +104,12 @@ async function main() {
             barrel:      splitOptions(c[9]),
             mag:         splitOptions(c[10]),
             mw:          cellStr(c[11]) || null,
-            perk1:       splitOptions(c[12]),
-            perk2:       splitOptions(c[13]),
-            originTrait: cellStr(c[14]) || null,
-            notes:       cellStr(c[15]) || null,
-            rank:        c[16]?.v != null ? Number(c[16].v) || null : null,
-            tier:        cellStr(c[17]) || null,
+            perk1:       splitOptions(c[o]),
+            perk2:       splitOptions(c[o + 1]),
+            originTrait: cellStr(c[o + 2]) || null,
+            notes:       cellStr(c[o + 3]) || null,
+            rank:        c[o + 4]?.v != null ? Number(c[o + 4].v) || null : null,
+            tier:        cellStr(c[o + 5]) || null,
           };
           count++;
         }
