@@ -83,10 +83,21 @@ async function main() {
         const table = await fetchGvizTab(tab);
         if (!table) { console.warn(`  ✗ ${tab}: empty response`); return; }
 
-        // Swords and Glaives have an extra stat-recommendation column at c[12]
-        // (e.g. "Impact" for swords, "Shield Duration" for glaives) that shifts
-        // perk1 through tier columns by +1.
-        const perkOffset = (tab === 'Swords' || tab === 'Glaives') ? 1 : 0;
+        // Each tab has a fixed column count; weapon-specific stat columns shift
+        // the barrel-through-tier block. Traces omit the Frame column, shifting
+        // source and all subsequent columns one position earlier.
+        //
+        // Tab layouts (verified against live sheet):
+        //   Standard (18 cols): src=5 barrel=9 mag=10 mw=11 p1=12 p2=13 ot=14 notes=15 rank=16 tier=17
+        //   Swords/Glaives (19 cols): src=5 barrel=10 mag=11 mw=12 p1=13 p2=14 ot=15 notes=16 rank=17 tier=18
+        //   Traces (17 cols):  src=4 barrel=8  mag=9  mw=10 p1=11 p2=12 ot=13 notes=14 rank=15 tier=16
+        const isSwordOrGlaive = tab === 'Swords' || tab === 'Glaives';
+        const isTrace = tab === 'Traces';
+        const COL = isSwordOrGlaive
+          ? { frame: 4, src: 5, barrel: 10, mag: 11, mw: 12, p1: 13, p2: 14, ot: 15, notes: 16, rank: 17, tier: 18 }
+          : isTrace
+            ? { frame: -1, src: 4, barrel: 8, mag: 9, mw: 10, p1: 11, p2: 12, ot: 13, notes: 14, rank: 15, tier: 16 }
+            : { frame: 4, src: 5, barrel: 9, mag: 10, mw: 11, p1: 12, p2: 13, ot: 14, notes: 15, rank: 16, tier: 17 };
 
         let count = 0;
         for (const row of table.rows) {
@@ -94,22 +105,22 @@ async function main() {
           const name = cellStr(c[1]);
           if (!name || name === 'Name') continue;
 
-          const o = 12 + perkOffset;
+          const rankCell = c[COL.rank];
           db[name] = {
             weaponType:  TAB_TO_TYPE[tab] ?? tab,
             season:      cellStr(c[2]) || null,
             energy:      cellStr(c[3]) || null,
-            frame:       cellStr(c[4]) || null,
-            source:      cellStr(c[5]) || null,
-            barrel:      splitOptions(c[9]),
-            mag:         splitOptions(c[10]),
-            mw:          cellStr(c[11]) || null,
-            perk1:       splitOptions(c[o]),
-            perk2:       splitOptions(c[o + 1]),
-            originTrait: cellStr(c[o + 2]) || null,
-            notes:       cellStr(c[o + 3]) || null,
-            rank:        c[o + 4]?.v != null ? Number(c[o + 4]!.v) || null : null,
-            tier:        cellStr(c[o + 5]) || null,
+            frame:       COL.frame >= 0 ? cellStr(c[COL.frame]) || null : null,
+            source:      cellStr(c[COL.src]) || null,
+            barrel:      splitOptions(c[COL.barrel]),
+            mag:         splitOptions(c[COL.mag]),
+            mw:          cellStr(c[COL.mw]) || null,
+            perk1:       splitOptions(c[COL.p1]),
+            perk2:       splitOptions(c[COL.p2]),
+            originTrait: cellStr(c[COL.ot]) || null,
+            notes:       cellStr(c[COL.notes]) || null,
+            rank:        rankCell?.v != null ? Number(rankCell.v) || null : null,
+            tier:        cellStr(c[COL.tier]) || null,
           };
           count++;
         }
