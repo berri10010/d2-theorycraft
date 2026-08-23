@@ -83,16 +83,22 @@ export const RollEditor: React.FC = () => {
     }
   }, [isTieredWeapon, weaponTier]);
 
-  // When tier drops, auto-downgrade enhanced perk selections in now-restricted columns.
+  // When tier changes, sync perk selections to the tier's enhancement rules:
+  // - Tier now allows a column → upgrade base → enhanced (if enhanced exists)
+  // - Tier no longer allows a column → downgrade enhanced → base
   useEffect(() => {
     if (!activeWeapon || !isTieredWeapon) return;
     const { selectedPerks: current, selectPerk: sp } = useWeaponStore.getState();
     for (const col of activeWeapon.perkSockets) {
-      if (tierAllowsEnhance(col.columnType)) continue;
       const selected = current[col.name];
       if (!selected) continue;
-      const basePerk = col.perks.find((p) => p.enhancedVersion?.hash === selected);
-      if (basePerk) sp(col.name, basePerk.hash);
+      if (tierAllowsEnhance(col.columnType)) {
+        const basePerk = col.perks.find((p) => p.hash === selected && p.enhancedVersion);
+        if (basePerk) sp(col.name, basePerk.enhancedVersion!.hash);
+      } else {
+        const basePerk = col.perks.find((p) => p.enhancedVersion?.hash === selected);
+        if (basePerk) sp(col.name, basePerk.hash);
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [weaponTier, activeWeapon]);
@@ -157,7 +163,7 @@ export const RollEditor: React.FC = () => {
       title="Weapon Perks"
       storageKey="weapon-perks"
       fullWidth
-      headerRight={hasPerkEnhanceable && !isCrafted && (!isTieredWeapon || weaponTier >= 2) && (
+      headerRight={hasPerkEnhanceable && !isCrafted && !isTieredWeapon && (
         <span className="text-xs text-slate-500 font-normal tracking-wide">
           Click twice to enhance
         </span>
@@ -232,25 +238,23 @@ export const RollEditor: React.FC = () => {
                     };
 
                     const canEnhanceCol = tierAllowsEnhance(column.columnType);
+                    // At a tier-unlocked column, if a perk has an enhanced version it must
+                    // be used — the base version is not selectable.
+                    const forceEnhanced = canEnhanceCol && !!perk.enhancedVersion;
 
                     const handleClick = () => {
                       if (!isActive) {
-                        selectPerk(column.name, perk.hash);
-                        flash(perk.hash);
-                      } else if (isBaseActive && perk.enhancedVersion && canEnhanceCol) {
-                        const enhHash = perk.enhancedVersion.hash;
-                        selectPerk(column.name, enhHash);
-                        flash(enhHash);
+                        const targetHash = forceEnhanced ? perk.enhancedVersion!.hash : perk.hash;
+                        selectPerk(column.name, targetHash);
+                        flash(targetHash);
                       } else {
                         clearPerk(column.name);
                       }
                     };
 
                     const nextAction = !isActive
-                      ? displayPerk.name
-                      : isBaseActive && perk.enhancedVersion && canEnhanceCol
-                        ? `Enhance → ${perk.enhancedVersion.name}`
-                        : `Deselect ${displayPerk.name}`;
+                      ? (forceEnhanced ? perk.enhancedVersion!.name : displayPerk.name)
+                      : `Deselect ${displayPerk.name}`;
 
                     const clarityEntry = clarityData?.[String(displayPerk.hash)] ?? clarityData?.[String(perk.hash)];
 

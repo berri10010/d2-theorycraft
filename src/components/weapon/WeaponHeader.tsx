@@ -347,7 +347,7 @@ export const WeaponHeader: React.FC = () => {
               <select
                 value={weaponTier}
                 onChange={(e) => setWeaponTier(Number(e.target.value))}
-                className="text-xs font-semibold px-2 py-1 rounded-md bg-white/5 text-sky-300 border border-sky-500/30 focus:outline-none focus:border-sky-400 transition-colors cursor-pointer"
+                className="text-xs font-semibold px-2 py-1 rounded-lg bg-white/5 text-slate-300 border border-white/10 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
               >
                 {TIER_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
