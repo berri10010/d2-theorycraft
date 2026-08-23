@@ -20,7 +20,7 @@ import { getPerkFamily } from '../../lib/perkFamily';
 export const RollEditor: React.FC = () => {
   const {
     activeWeapon, selectedPerks, selectPerk, clearPerk,
-    isCrafted, isEnhanced, setEnhanced, mode,
+    isCrafted, isEnhanced, setEnhanced, mode, weaponTier,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:  s.activeWeapon,
@@ -31,6 +31,7 @@ export const RollEditor: React.FC = () => {
       isEnhanced:    s.isEnhanced,
       setEnhanced:   s.setEnhanced,
       mode:          s.mode,
+      weaponTier:    s.weaponTier,
     }))
   );
 
@@ -67,10 +68,40 @@ export const RollEditor: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWeapon, godRollDb]);
 
+  const isTieredWeapon = (activeWeapon?.seasonNumber ?? 0) >= 27 && activeWeapon?.rarity !== 'Exotic';
+
+  // Which column types can be enhanced at the current weapon tier.
+  // For non-tiered weapons all columns are unrestricted.
+  const tierAllowsEnhance = useCallback((columnType: string): boolean => {
+    if (!isTieredWeapon) return true;
+    switch (columnType) {
+      case 'perk':   return weaponTier >= 2;
+      case 'barrel':
+      case 'mag':    return weaponTier >= 4;
+      case 'origin': return weaponTier >= 5;
+      default:       return false;
+    }
+  }, [isTieredWeapon, weaponTier]);
+
+  // When tier drops, auto-downgrade enhanced perk selections in now-restricted columns.
+  useEffect(() => {
+    if (!activeWeapon || !isTieredWeapon) return;
+    const { selectedPerks: current, selectPerk: sp } = useWeaponStore.getState();
+    for (const col of activeWeapon.perkSockets) {
+      if (tierAllowsEnhance(col.columnType)) continue;
+      const selected = current[col.name];
+      if (!selected) continue;
+      const basePerk = col.perks.find((p) => p.enhancedVersion?.hash === selected);
+      if (basePerk) sp(col.name, basePerk.hash);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weaponTier, activeWeapon]);
+
   // Auto-derive enhanced state: isEnhanced is true ONLY when both Perk 1 and Perk 2
   // have their enhanced version explicitly selected. Any other state disables it.
   const shouldBeEnhanced = useMemo(() => {
-    if (isCrafted || !activeWeapon) return false;
+    // Tiered weapons don't use the global isEnhanced flag — tier drives everything.
+    if (isTieredWeapon || isCrafted || !activeWeapon) return false;
     const perkCols = activeWeapon.perkSockets.filter((col) => col.columnType === 'perk');
     const perk1 = perkCols[0];
     const perk2 = perkCols[1];
@@ -126,7 +157,7 @@ export const RollEditor: React.FC = () => {
       title="Weapon Perks"
       storageKey="weapon-perks"
       fullWidth
-      headerRight={hasPerkEnhanceable && !isCrafted && (
+      headerRight={hasPerkEnhanceable && !isCrafted && (!isTieredWeapon || weaponTier >= 2) && (
         <span className="text-xs text-slate-500 font-normal tracking-wide">
           Click twice to enhance
         </span>
@@ -200,11 +231,13 @@ export const RollEditor: React.FC = () => {
                       // Cleared by motion's onAnimationComplete — no setTimeout needed
                     };
 
+                    const canEnhanceCol = tierAllowsEnhance(column.columnType);
+
                     const handleClick = () => {
                       if (!isActive) {
                         selectPerk(column.name, perk.hash);
                         flash(perk.hash);
-                      } else if (isBaseActive && perk.enhancedVersion) {
+                      } else if (isBaseActive && perk.enhancedVersion && canEnhanceCol) {
                         const enhHash = perk.enhancedVersion.hash;
                         selectPerk(column.name, enhHash);
                         flash(enhHash);
@@ -215,7 +248,7 @@ export const RollEditor: React.FC = () => {
 
                     const nextAction = !isActive
                       ? displayPerk.name
-                      : isBaseActive && perk.enhancedVersion
+                      : isBaseActive && perk.enhancedVersion && canEnhanceCol
                         ? `Enhance → ${perk.enhancedVersion.name}`
                         : `Deselect ${displayPerk.name}`;
 

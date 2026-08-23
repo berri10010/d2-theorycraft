@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   useWeaponStore,
   buildWeaponModsList,
@@ -54,9 +54,21 @@ export const MasterworkPanel: React.FC = () => {
     hoveredMasterworkStat, setHoveredMasterworkStat,
     isCrafted,
     isEnhanced,
-    weaponTier, setWeaponTier,
+    weaponTier,
     activeMod, setActiveMod,
   } = useWeaponStore();
+
+  const isTiered = (activeWeapon?.seasonNumber ?? 0) >= 27 && activeWeapon?.rarity !== 'Exotic';
+  const canEnhanceMod = !isTiered || weaponTier >= 3;
+
+  // Downgrade an active enhanced mod when tier drops below 3
+  useEffect(() => {
+    if (!activeWeapon || !isTiered || weaponTier >= 3) return;
+    const allMods = buildWeaponModsList(activeWeapon);
+    const baseMod = allMods.find((m) => m.enhancedVersion?.id === activeMod.id);
+    if (baseMod) setActiveMod(baseMod);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weaponTier, activeWeapon]);
   const { data: clarityPerks } = useClarityPerks();
 
   if (!activeWeapon) return null;
@@ -117,14 +129,6 @@ export const MasterworkPanel: React.FC = () => {
               isEnhanced ? 'text-violet-400' :
                            'text-slate-500';
 
-            const TIER_LABELS: Record<number, string> = {
-              1: 'Standard',
-              2: 'Enhanced Perks',
-              3: 'Enhanced Mods',
-              4: 'Enhanced Components',
-              5: 'Enhanced Origin',
-            };
-
             return (
               <>
                 <div className="flex items-center justify-between mb-3">
@@ -170,33 +174,6 @@ export const MasterworkPanel: React.FC = () => {
                   })}
                 </div>
 
-                {/* Tier selector — only for Season 27+ tiered weapons */}
-                {isTiered && (
-                  <div className="border-t border-white/8 pt-3">
-                    <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mb-2">Weapon Tier</p>
-                    <div className="flex gap-1.5">
-                      {([1, 2, 3, 4, 5] as const).map((t) => {
-                        const isActive = weaponTier === t;
-                        return (
-                          <button
-                            key={t}
-                            onClick={() => setWeaponTier(t)}
-                            title={TIER_LABELS[t]}
-                            className={[
-                              'flex-1 text-xs font-bold py-1.5 rounded-md border transition-all',
-                              isActive
-                                ? 'bg-sky-500/25 text-sky-300 border-sky-500/50'
-                                : 'bg-white/5 text-slate-500 border-white/10 hover:border-white/20 hover:text-slate-300',
-                            ].join(' ')}
-                          >
-                            T{t}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <p className="text-[10px] text-slate-500 mt-1.5">{TIER_LABELS[weaponTier]}{weaponTier >= 2 && ` · +${weaponTier} others`}</p>
-                  </div>
-                )}
               </>
             );
           })()}
@@ -208,8 +185,11 @@ export const MasterworkPanel: React.FC = () => {
         <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-bold text-white">Weapon Mod</h2>
-            {availableMods.some((m) => m.enhancedVersion) && (
+            {availableMods.some((m) => m.enhancedVersion) && canEnhanceMod && (
               <span className="text-xs text-slate-500 font-normal tracking-wide">Click twice to enhance</span>
+            )}
+            {availableMods.some((m) => m.enhancedVersion) && !canEnhanceMod && (
+              <span className="text-xs text-slate-600 font-normal tracking-wide">T3+ to enhance mods</span>
             )}
           </div>
 
@@ -232,7 +212,7 @@ export const MasterworkPanel: React.FC = () => {
               const handleClick = () => {
                 if (!isActive || isNone) {
                   setActiveMod(isActive ? NONE_MOD : mod);
-                } else if (isBaseActive && mod.enhancedVersion) {
+                } else if (isBaseActive && mod.enhancedVersion && canEnhanceMod) {
                   setActiveMod(mod.enhancedVersion);
                 } else {
                   setActiveMod(NONE_MOD);

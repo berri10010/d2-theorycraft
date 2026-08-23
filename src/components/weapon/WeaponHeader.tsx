@@ -134,7 +134,7 @@ function formatSeasonLabel(
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export const WeaponHeader: React.FC = () => {
-  const { activeWeapon, variantGroup, loadWeapon, isCrafted, toggleCrafted, setCrafted, isEnhanced } = useWeaponStore(
+  const { activeWeapon, variantGroup, loadWeapon, isCrafted, toggleCrafted, setCrafted, isEnhanced, weaponTier, setWeaponTier } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:    s.activeWeapon,
       variantGroup:    s.variantGroup,
@@ -143,6 +143,8 @@ export const WeaponHeader: React.FC = () => {
       toggleCrafted:   s.toggleCrafted,
       setCrafted:      s.setCrafted,
       isEnhanced:      s.isEnhanced,
+      weaponTier:      s.weaponTier,
+      setWeaponTier:   s.setWeaponTier,
     }))
   );
   const { data: compendiumPerks } = useCompendiumPerks();
@@ -151,6 +153,16 @@ export const WeaponHeader: React.FC = () => {
   const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => { setImgError(false); setImgLoaded(false); }, [activeWeapon?.hash]);
+
+  const isTieredWeapon = (activeWeapon?.seasonNumber ?? 0) >= 27 && activeWeapon?.rarity !== 'Exotic';
+
+  const TIER_OPTIONS: { value: number; label: string }[] = [
+    { value: 1, label: 'T1 — Standard' },
+    { value: 2, label: 'T2 — Enhanced Perks' },
+    { value: 3, label: 'T3 — Enhanced Mods' },
+    { value: 4, label: 'T4 — Enhanced Components' },
+    { value: 5, label: 'T5 — Enhanced Origin' },
+  ];
 
   const isLegacy = useMemo(() => {
     if (!activeWeapon) return false;
@@ -330,55 +342,67 @@ export const WeaponHeader: React.FC = () => {
               );
             })()}
 
-            {/* Craftable toggle */}
-            {activeWeapon.hasCraftedPattern && (
-              isCrafted ? (
-                <button
-                  onClick={toggleCrafted}
-                  title="Crafted mode active — click to disable"
-                  className="text-xs font-semibold px-2 py-1 rounded-md border transition-all bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30"
-                >
-                  Crafted
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    if (activeWeapon.isAdept) {
-                      const base = variantGroup.find((v) => !v.variantLabel && !v.isAdept);
-                      if (base) loadWeapon(base, variantGroup);
-                      setCrafted(true);
-                    } else {
-                      toggleCrafted();
-                    }
-                  }}
-                  title="This weapon has a craftable pattern — click to enable crafted mode (+2 stats, enhanced perks)"
-                  className="text-xs font-medium px-2 py-1 rounded-md border transition-all bg-white/3 text-slate-500 border-white/10 hover:border-red-500/30 hover:text-red-400 hover:bg-red-500/8"
-                >
-                  Craftable
-                </button>
-              )
-            )}
+            {/* Weapon Tier dropdown — S27+ legendaries only */}
+            {isTieredWeapon ? (
+              <select
+                value={weaponTier}
+                onChange={(e) => setWeaponTier(Number(e.target.value))}
+                className="text-xs font-semibold px-2 py-1 rounded-md bg-white/5 text-sky-300 border border-sky-500/30 focus:outline-none focus:border-sky-400 transition-colors cursor-pointer"
+              >
+                {TIER_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            ) : (
+              <>
+                {/* Craftable toggle */}
+                {activeWeapon.hasCraftedPattern && (
+                  isCrafted ? (
+                    <button
+                      onClick={toggleCrafted}
+                      title="Crafted mode active — click to disable"
+                      className="text-xs font-semibold px-2 py-1 rounded-md border transition-all bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30"
+                    >
+                      Crafted
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (activeWeapon.isAdept) {
+                          const base = variantGroup.find((v) => !v.variantLabel && !v.isAdept);
+                          if (base) loadWeapon(base, variantGroup);
+                          setCrafted(true);
+                        } else {
+                          toggleCrafted();
+                        }
+                      }}
+                      title="This weapon has a craftable pattern — click to enable crafted mode (+2 stats, enhanced perks)"
+                      className="text-xs font-medium px-2 py-1 rounded-md border transition-all bg-white/3 text-slate-500 border-white/10 hover:border-red-500/30 hover:text-red-400 hover:bg-red-500/8"
+                    >
+                      Craftable
+                    </button>
+                  )
+                )}
 
-            {/* Enhanceable / Enhanced indicator — non-interactive, auto-driven by perk selection.
-                Shown for any weapon that has enhanced perk versions, whenever crafted is off.
-                "Enhanceable" = waiting for user to double-click both Perk 1 & 2.
-                "Enhanced"    = both perk columns are in enhanced state (isEnhanced auto-set). */}
-            {!isCrafted && activeWeapon.perkSockets.some((col) => col.perks.some((p) => !!p.enhancedVersion)) && (
-              isEnhanced ? (
-                <div
-                  title="Enhanced — both perk slots are enhanced"
-                  className="text-xs font-semibold px-2 py-1 rounded-md border bg-violet-500/20 text-violet-400 border-violet-500/50 select-none"
-                >
-                  Enhanced
-                </div>
-              ) : (
-                <div
-                  title="Enhance both Perk 1 and Perk 2 (click twice on each) to activate enhanced mode"
-                  className="text-xs font-medium px-2 py-1 rounded-md border bg-white/3 text-slate-500 border-white/10 select-none"
-                >
-                  Enhanceable
-                </div>
-              )
+                {/* Enhanceable / Enhanced indicator */}
+                {!isCrafted && activeWeapon.perkSockets.some((col) => col.perks.some((p) => !!p.enhancedVersion)) && (
+                  isEnhanced ? (
+                    <div
+                      title="Enhanced — both perk slots are enhanced"
+                      className="text-xs font-semibold px-2 py-1 rounded-md border bg-violet-500/20 text-violet-400 border-violet-500/50 select-none"
+                    >
+                      Enhanced
+                    </div>
+                  ) : (
+                    <div
+                      title="Enhance both Perk 1 and Perk 2 (click twice on each) to activate enhanced mode"
+                      className="text-xs font-medium px-2 py-1 rounded-md border bg-white/3 text-slate-500 border-white/10 select-none"
+                    >
+                      Enhanceable
+                    </div>
+                  )
+                )}
+              </>
             )}
 
 

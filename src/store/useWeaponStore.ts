@@ -547,9 +547,10 @@ export const useWeaponStore = create<WeaponState>()(
            const basePerk = resolveBasePerk(column, perkHash);
            if (!basePerk) continue;
 
-           // In Enhanced or Crafted mode, use the enhanced perk version if one exists
-           // and the user hasn't explicitly selected the enhanced hash themselves.
-           const isUsingEnhanced = isCrafted || isEnhanced;
+           // For S27+ tiered legendaries, enhanced stats come only from the explicitly
+           // selected enhanced hash — the global crafted/enhanced flag does not apply.
+           const isTiered = (activeWeapon.seasonNumber ?? 0) >= 27 && activeWeapon.rarity !== 'Exotic';
+           const isUsingEnhanced = !isTiered && (isCrafted || isEnhanced);
            const perk = perkHash === basePerk.enhancedVersion?.hash
              ? basePerk.enhancedVersion
              : (isUsingEnhanced && basePerk.enhancedVersion ? basePerk.enhancedVersion : basePerk);
