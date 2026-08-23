@@ -10,7 +10,6 @@ import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { ClarityEntry } from '../../lib/clarity';
-import { DamageIcon } from '../ui/DamageIcon';
 
 // Compendium placeholder strings that should not be shown to users
 const BAD_COMPENDIUM_DESCRIPTIONS = new Set([
@@ -245,12 +244,9 @@ export const WeaponHeader: React.FC = () => {
 
           {/* Metadata row: ● Element · Ammo · RPM · Variant · Legacy */}
           <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-slate-400">
-            {/* Element with damage icon */}
-            <span className="flex items-center gap-1.5">
-              <DamageIcon type={activeWeapon.damageType} className={`w-3 h-3 shrink-0 ${dmg.text}`} />
-              <span className={dmg.text}>
-                {activeWeapon.damageType.charAt(0).toUpperCase() + activeWeapon.damageType.slice(1)}
-              </span>
+            {/* Element */}
+            <span className={dmg.text}>
+              {activeWeapon.damageType.charAt(0).toUpperCase() + activeWeapon.damageType.slice(1)}
             </span>
 
             {AMMO_LABELS[activeWeapon.ammoType] && (

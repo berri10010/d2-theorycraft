@@ -9,7 +9,6 @@ import { Weapon, WeaponGroup } from '../../types/weapon';
 import { groupWeapons } from '../../lib/weaponGroups';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
-import { DamageIcon } from '../ui/DamageIcon';
 import { useGodRolls } from '../../lib/useGodRolls';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -567,10 +566,6 @@ function WeaponListItem({
             )}
           </div>
           <p className="text-[10px] uppercase tracking-wider mt-0.5 flex items-center gap-1">
-            <DamageIcon
-              type={d.damageType}
-              className={`w-2.5 h-2.5 shrink-0 ${DAMAGE_COLORS[d.damageType] ?? 'text-slate-500'} opacity-80`}
-            />
             <span className={[DAMAGE_COLORS[d.damageType] ?? 'text-slate-500', 'opacity-70'].join(' ')}>
               {d.damageType}
             </span>

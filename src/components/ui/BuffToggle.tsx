@@ -250,7 +250,7 @@ function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, se
 
   return (
     <CollapsibleSection
-      label="Exotic Armor"
+      label={classType[0].toUpperCase() + classType.slice(1) + ' Exotics'}
       activeCount={selected ? 1 : 0}
       open={open}
       onToggle={() => setOpen((v) => !v)}

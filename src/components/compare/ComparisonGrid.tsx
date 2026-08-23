@@ -174,7 +174,7 @@ function SnapshotCard({
         className="absolute top-2 left-2 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500 hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 transition-all"
         aria-label="Restore build in editor"
         title="Restore perks, masterwork, and tier in the editor"
-      >Restore ↗</button>
+      >Restore</button>
 
       {/* ── Weapon identity ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 pr-6 pt-5">

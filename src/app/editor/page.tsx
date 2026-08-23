@@ -190,10 +190,28 @@ function Dashboard() {
     const entry = godRollDb[activeWeapon.name];
     if (!entry) { setPendingGodRoll(false); return; }
 
-    const nameToColumn = new Map<string, { columnName: string; perkHash: string }>();
+    const isTieredWeapon = (activeWeapon.seasonNumber ?? 0) >= 27 && activeWeapon.rarity !== 'Exotic';
+    const tierAllowsEnhance = (columnType: string): boolean => {
+      if (!isTieredWeapon) return false;
+      switch (columnType) {
+        case 'perk':   return weaponTier >= 2;
+        case 'barrel':
+        case 'mag':    return weaponTier >= 4;
+        case 'origin': return weaponTier >= 5;
+        default:       return false;
+      }
+    };
+
+    // Map perk name → column name + base perk hash (store the full perk too for enhanced lookup)
+    const nameToColumn = new Map<string, { columnName: string; columnType: string; perkHash: string; enhancedHash?: string }>();
     for (const col of activeWeapon.perkSockets) {
       for (const perk of col.perks) {
-        nameToColumn.set(perk.name.toLowerCase(), { columnName: col.name, perkHash: perk.hash });
+        nameToColumn.set(perk.name.toLowerCase(), {
+          columnName:   col.name,
+          columnType:   col.columnType,
+          perkHash:     perk.hash,
+          enhancedHash: perk.enhancedVersion?.hash,
+        });
       }
     }
 
@@ -215,7 +233,14 @@ function Dashboard() {
     for (const slot of slots) {
       for (const name of slot.names) {
         const match = nameToColumn.get(name.toLowerCase());
-        if (match) { selectPerk(match.columnName, match.perkHash); break; }
+        if (match) {
+          // Use enhanced hash when the tier unlocks this column and an enhanced version exists
+          const targetHash = tierAllowsEnhance(match.columnType) && match.enhancedHash
+            ? match.enhancedHash
+            : match.perkHash;
+          selectPerk(match.columnName, targetHash);
+          break;
+        }
       }
     }
 
