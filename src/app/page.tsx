@@ -371,14 +371,6 @@ function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps)
 
 // ── Featured God Rolls ────────────────────────────────────────────────────────
 
-const TIER_DESCS: Record<number, string> = {
-  1: 'Standard',
-  2: 'Enhanced Perks',
-  3: 'Enhanced Mods',
-  4: 'Enhanced Components',
-  5: 'Enhanced Origin',
-};
-
 function FeaturedGodRolls({
   groups,
   godRolls,
@@ -387,9 +379,6 @@ function FeaturedGodRolls({
   godRolls: Record<string, GodRollEntry> | null;
 }) {
   const router = useRouter();
-  // Per-card weapon tier state (1–5), keyed by weapon name
-  const [cardTiers, setCardTiers] = React.useState<Record<string, number>>({});
-
   const featured = useMemo(() => {
     if (!godRolls || !groups.length) return [];
 
@@ -455,7 +444,6 @@ function FeaturedGodRolls({
             const w = group.default;
             const sl = seasonLabel(w) ?? (roll.season ? `Season ${roll.season}` : null);
             const perks = [...roll.perk1.slice(0, 1), ...roll.perk2.slice(0, 1)];
-            const cardTier = cardTiers[name] ?? 1;
 
             return (
               <div
@@ -503,33 +491,10 @@ function FeaturedGodRolls({
                   </div>
                 )}
 
-                {/* Weapon Tier selector */}
-                <div className="border-t border-white/8 pt-2.5">
-                  <p className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider mb-1.5">Weapon Tier</p>
-                  <div className="flex gap-1">
-                    {([1, 2, 3, 4, 5] as const).map((t) => (
-                      <button
-                        key={t}
-                        onClick={() => setCardTiers(prev => ({ ...prev, [name]: t }))}
-                        title={TIER_DESCS[t]}
-                        className={[
-                          'flex-1 text-[10px] font-bold py-1 rounded border transition-all',
-                          cardTier === t
-                            ? 'bg-sky-500/25 text-sky-300 border-sky-500/50'
-                            : 'bg-white/5 text-slate-600 border-white/8 hover:border-white/20 hover:text-slate-400',
-                        ].join(' ')}
-                      >
-                        T{t}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-[9px] text-slate-600 mt-1">{TIER_DESCS[cardTier]} · +10 chosen · +{cardTier} others</p>
-                </div>
-
                 {/* Action */}
                 <div className="flex justify-end mt-auto">
                   <button
-                    onClick={() => router.push(`/editor?w=${w.hash}&godroll=1&tier=${cardTier}`)}
+                    onClick={() => router.push(`/editor?w=${w.hash}&godroll=1`)}
                     className="text-[10px] font-semibold text-amber-400 hover:text-amber-300 transition-colors"
                   >
                     View Roll →
