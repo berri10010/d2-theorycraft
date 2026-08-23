@@ -210,4 +210,8 @@ export interface CompareSnapshot {
   mode: GameMode;
   /** Combined damage multiplier (perks, buffs, mods, surge) at snapshot time. */
   multiplier: number;
+  /** Weapon tier (1–5) for S27+ legendaries; undefined for pre-S27 or exotics. */
+  weaponTier?: number;
+  /** Active masterwork stat at snapshot time, e.g. "Range". */
+  masterworkStat?: string | null;
 }

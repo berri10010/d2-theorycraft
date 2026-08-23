@@ -44,6 +44,7 @@ function SnapshotCard({
   sharedBarStatKeys,
   enemyTier,
   canReorder,
+  onLoadToEditor,
 }: {
   snapshot: CompareSnapshot;
   index: number;
@@ -53,13 +54,24 @@ function SnapshotCard({
   sharedBarStatKeys: string[];
   enemyTier: string;
   canReorder: boolean;
+  onLoadToEditor?: () => void;
 }) {
   const { removeSnapshot, renameSnapshot, reorderSnapshot } = useCompareStore();
-  const { loadWeapon } = useWeaponStore();
+  const { loadWeapon, selectPerk, setMasterworkStat, setWeaponTier } = useWeaponStore();
   const [editing, setEditing] = useState(false);
   const [labelValue, setLabel] = useState(snapshot.label);
 
   const handleRename = () => { renameSnapshot(snapshot.id, labelValue); setEditing(false); };
+
+  const handleRestore = () => {
+    loadWeapon(snapshot.weapon);
+    for (const [colName, perkHash] of Object.entries(snapshot.selectedPerks)) {
+      selectPerk(colName, perkHash);
+    }
+    if (snapshot.masterworkStat) setMasterworkStat(snapshot.masterworkStat);
+    if (snapshot.weaponTier !== undefined) setWeaponTier(snapshot.weaponTier);
+    onLoadToEditor?.();
+  };
 
   // ── Recalculate TTK dynamically based on the selected enemy tier ──────────
   const multiplier = snapshot.multiplier ?? 1.0;
@@ -106,13 +118,13 @@ function SnapshotCard({
 
   // ── Build selected perk list from weapon socket data ─────────────────────
   const selectedPerkList = useMemo(() => {
-    const result: Array<{ name: string; icon: string; columnType: string }> = [];
+    const result: Array<{ name: string; icon: string; columnType: string; isEnhanced: boolean }> = [];
     for (const column of snapshot.weapon.perkSockets) {
       const selectedHash = snapshot.selectedPerks[column.name];
       if (!selectedHash) continue;
       for (const perk of column.perks) {
         if (perk.hash === selectedHash) {
-          result.push({ name: perk.name, icon: perk.icon, columnType: column.columnType });
+          result.push({ name: perk.name, icon: perk.icon, columnType: column.columnType, isEnhanced: false });
           break;
         }
         if (perk.enhancedVersion?.hash === selectedHash) {
@@ -120,6 +132,7 @@ function SnapshotCard({
             name: perk.enhancedVersion.name,
             icon: perk.enhancedVersion.icon,
             columnType: column.columnType,
+            isEnhanced: true,
           });
           break;
         }
@@ -155,13 +168,13 @@ function SnapshotCard({
         >×</button>
       </div>
 
-      {/* Load in editor */}
+      {/* Restore full build in editor */}
       <button
-        onClick={() => loadWeapon(snapshot.weapon)}
+        onClick={handleRestore}
         className="absolute top-2 left-2 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500 hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 transition-all"
-        aria-label="Load in editor"
-        title="Load in editor"
-      >Load ↗</button>
+        aria-label="Restore build in editor"
+        title="Restore perks, masterwork, and tier in the editor"
+      >Restore ↗</button>
 
       {/* ── Weapon identity ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 pr-6 pt-5">
@@ -200,10 +213,20 @@ function SnapshotCard({
               <span className="ml-1 text-[9px] text-slate-600 font-normal">✎</span>
             </button>
           )}
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 flex items-center flex-wrap gap-x-1">
             {snapshot.weapon.itemTypeDisplayName} &bull; {snapshot.weapon.rpm} RPM &bull;{' '}
             <span className="uppercase text-slate-500">{snapshot.mode}</span>
+            {snapshot.weaponTier !== undefined && (
+              <span className="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/8 border border-white/10 text-slate-300">
+                T{snapshot.weaponTier}
+              </span>
+            )}
           </p>
+          {snapshot.masterworkStat && (
+            <p className="text-[10px] text-slate-500 mt-0.5">
+              MW: <span className="text-amber-400/80 font-medium">{snapshot.masterworkStat}</span>
+            </p>
+          )}
         </div>
       </div>
 
@@ -347,7 +370,12 @@ function SnapshotCard({
             {selectedPerkList.map((perk, idx) => (
               <div
                 key={idx}
-                className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-full border border-white/10"
+                className={[
+                  'flex items-center gap-1.5 px-2 py-1 rounded-full border',
+                  perk.isEnhanced
+                    ? 'bg-amber-500/10 border-amber-500/40'
+                    : 'bg-white/5 border-white/10',
+                ].join(' ')}
                 title={perk.name}
               >
                 <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 bg-white/5">
@@ -360,7 +388,10 @@ function SnapshotCard({
                     unoptimized
                   />
                 </div>
-                <span className="text-[10px] text-slate-300 font-medium max-w-[80px] truncate">
+                <span className={[
+                  'text-[10px] font-medium max-w-[80px] truncate',
+                  perk.isEnhanced ? 'text-amber-300' : 'text-slate-300',
+                ].join(' ')}>
                   {perk.name}
                 </span>
               </div>
@@ -373,7 +404,7 @@ function SnapshotCard({
 }
 
 // ─── Main component ────────────────────────────────────────────────────────────
-export const ComparisonGrid: React.FC = () => {
+export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLoadToEditor }) => {
   const { snapshots, clearSnapshots } = useCompareStore();
 
   const pveTierKeys = Object.keys(PVE_HEALTH_TIERS);
@@ -518,6 +549,7 @@ export const ComparisonGrid: React.FC = () => {
             sharedBarStatKeys={sharedBarStatKeys}
             enemyTier={enemyTier}
             canReorder={!sortStat}
+            onLoadToEditor={onLoadToEditor}
           />
         ))}
       </div>

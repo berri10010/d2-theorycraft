@@ -82,7 +82,7 @@ function Dashboard() {
     loadWeapon, activeWeapon, activeWeaponHash, selectedPerks, selectPerk,
     getCalculatedStats, getDamageMultiplier, mode, setMode,
     masterworkStat, activeBuffs, setWeaponsStat, weaponsStat,
-    setMasterworkStat, toggleBuff, clearRoll, setWeaponTier,
+    setMasterworkStat, toggleBuff, clearRoll, setWeaponTier, weaponTier,
   } = useWeaponStore();
   const { addSnapshot, snapshots } = useCompareStore();
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
@@ -306,6 +306,7 @@ function Dashboard() {
     if (!activeWeapon) return;
     const multiplier = getDamageMultiplier();
     const ttkResult  = calculateTTK(mode, activeWeapon, multiplier, 230, 'Minor');
+    const isTieredWeapon = (activeWeapon.seasonNumber ?? 0) >= 27 && activeWeapon.rarity !== 'Exotic';
     addSnapshot({
       label: activeWeapon.name,
       weapon: activeWeapon,
@@ -314,6 +315,8 @@ function Dashboard() {
       ttk: ttkResult?.ttk ?? null,
       mode,
       multiplier,
+      masterworkStat,
+      ...(isTieredWeapon ? { weaponTier } : {}),
     });
   };
 
@@ -699,7 +702,7 @@ function Dashboard() {
 
           {/* ── Compare tab ─────────────────────────────────────────────── */}
           <div role="tabpanel" aria-label="Comparison grid" hidden={activeTab !== 'compare'}>
-            <ErrorBoundary label="Comparison"><ComparisonGrid /></ErrorBoundary>
+            <ErrorBoundary label="Comparison"><ComparisonGrid onLoadToEditor={() => setActiveTab('editor')} /></ErrorBoundary>
           </div>
 
         </div>
