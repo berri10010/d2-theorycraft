@@ -227,6 +227,8 @@ interface WeaponState {
   isCrafted:             boolean;
   /** Enhanced Legendary state — enhanced perks active without crafted pattern. +2 secondary MW bonus. */
   isEnhanced:            boolean;
+  /** Weapon tier for Season 27+ tiered weapons (1–5). Drives the secondary MW bonus (+1 to +5). */
+  weaponTier:            number;
   activeMod:             WeaponMod;
   surgeStacks:           0 | 1 | 2 | 3 | 4;
   weaponsStat:           number;
@@ -254,6 +256,7 @@ interface WeaponState {
   setCrafted:        (val: boolean) => void;
   toggleEnhanced:    () => void;
   setEnhanced:       (val: boolean) => void;
+  setWeaponTier:     (tier: number) => void;
   setActiveMod:      (mod: WeaponMod) => void;
   setSurgeStacks:    (stacks: 0 | 1 | 2 | 3 | 4) => void;
   setWeaponsStat:    (stat: number) => void;
@@ -340,6 +343,7 @@ export const useWeaponStore = create<WeaponState>()(
       hoveredMasterworkStat: null,
       isCrafted:             false,
       isEnhanced:        false,
+      weaponTier:        1,
       activeMod:         NONE_MOD,
       surgeStacks:       0,
       weaponsStat:       0,
@@ -395,6 +399,7 @@ export const useWeaponStore = create<WeaponState>()(
           masterworkStat:   null,
           isCrafted:        false,
           isEnhanced:       false,
+          weaponTier:       1,
           activeMod:        newMod,
           armorMods:        DEFAULT_ARMOR_MODS,
           activeEffects:    {},
@@ -414,6 +419,7 @@ export const useWeaponStore = create<WeaponState>()(
           masterworkStat: null,
           isCrafted:      false,
           isEnhanced:     false,
+          weaponTier:     1,
           activeMod:      NONE_MOD,
           armorMods:      DEFAULT_ARMOR_MODS,
           activeEffects:  {},
@@ -508,6 +514,7 @@ export const useWeaponStore = create<WeaponState>()(
         ? { isEnhanced: false }
         : { isEnhanced: true, isCrafted: false }),
       setEnhanced:       (val)    => set(val ? { isEnhanced: true, isCrafted: false } : { isEnhanced: false }),
+      setWeaponTier:     (tier)   => set({ weaponTier: Math.max(1, Math.min(5, tier)) }),
       setActiveMod:      (mod)    => set({ activeMod: mod }),
       setSurgeStacks:    (stacks) => set({ surgeStacks: stacks }),
       setWeaponsStat:    (stat)   => set({ weaponsStat: Math.max(0, Math.min(200, stat)) }),
@@ -515,7 +522,7 @@ export const useWeaponStore = create<WeaponState>()(
       setExoticArmor:    (cls, id) => set((s) => ({ activeExoticArmor: { ...s.activeExoticArmor, [cls]: id } })),
 
       getCalculatedStats: () => {
-        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, isEnhanced, activeMod, armorMods, activeBuffs, activeExoticArmor } = get();
+        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, isEnhanced, weaponTier, activeMod, armorMods, activeBuffs, activeExoticArmor } = get();
         if (!activeWeapon) return {};
 
         const finalStats: StatMap = { ...activeWeapon.baseStats };
@@ -576,7 +583,7 @@ export const useWeaponStore = create<WeaponState>()(
         if (masterworkStat) {
           const primaryBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
           const isTiered = (activeWeapon.seasonNumber ?? 0) >= 27;
-          const secondaryBonus = isTiered ? 5 : (
+          const secondaryBonus = isTiered ? weaponTier : (
             activeWeapon.isAdept && isCrafted ? 4 :
             activeWeapon.isAdept              ? 3 :
             (isCrafted || isEnhanced)         ? 2 : 0);

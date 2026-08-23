@@ -371,6 +371,14 @@ function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps)
 
 // ── Featured God Rolls ────────────────────────────────────────────────────────
 
+const TIER_DESCS: Record<number, string> = {
+  1: 'Standard',
+  2: 'Enhanced Perks',
+  3: 'Enhanced Mods',
+  4: 'Enhanced Components',
+  5: 'Enhanced Origin',
+};
+
 function FeaturedGodRolls({
   groups,
   godRolls,
@@ -379,18 +387,29 @@ function FeaturedGodRolls({
   godRolls: Record<string, GodRollEntry> | null;
 }) {
   const router = useRouter();
+  // Per-card weapon tier state (1–5), keyed by weapon name
+  const [cardTiers, setCardTiers] = React.useState<Record<string, number>>({});
 
   const featured = useMemo(() => {
     if (!godRolls || !groups.length) return [];
 
     const byName = new Map(groups.map(g => [g.baseName.toLowerCase(), g]));
 
-    const sorted = (Object.entries(godRolls) as [string, GodRollEntry][])
-      .filter(([, r]) => r.season && parseInt(r.season) > 0)
-      .sort(([, a], [, b]) => (parseInt(b.season!) || 0) - (parseInt(a.season!) || 0));
+    // Filter to S-tier only
+    const sTier = (Object.entries(godRolls) as [string, GodRollEntry][])
+      .filter(([, r]) => r.tier === 'S');
+
+    // Stable daily random selection: seed by today's date string
+    const dateKey = new Date().toDateString();
+    let seed = dateKey.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const rand = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 0xffffffff;
+    };
+    const shuffled = [...sTier].sort(() => rand() - 0.5);
 
     const result: Array<{ name: string; group: WeaponGroupResult; roll: GodRollEntry }> = [];
-    for (const [name, roll] of sorted) {
+    for (const [name, roll] of shuffled) {
       if (result.length >= 6) break;
       const group = byName.get(name.toLowerCase());
       if (group) result.push({ name, group, roll });
@@ -427,7 +446,7 @@ function FeaturedGodRolls({
         <div className="flex items-center justify-between mb-5">
           <div>
             <h2 className="text-base font-bold text-white">Featured God Rolls</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Latest weapon additions and their recommended perks</p>
+            <p className="text-xs text-slate-500 mt-0.5">Today&apos;s S-tier picks from TheAegisRelic</p>
           </div>
         </div>
 
@@ -436,14 +455,14 @@ function FeaturedGodRolls({
             const w = group.default;
             const sl = seasonLabel(w) ?? (roll.season ? `Season ${roll.season}` : null);
             const perks = [...roll.perk1.slice(0, 1), ...roll.perk2.slice(0, 1)];
+            const cardTier = cardTiers[name] ?? 1;
 
             return (
-              <button
+              <div
                 key={name}
-                onClick={() => router.push(`/editor?w=${w.hash}&godroll=1`)}
-                className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 hover:border-white/15 transition-colors text-left flex flex-col gap-3 group"
+                className="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/8 hover:border-white/15 transition-colors flex flex-col gap-3"
               >
-                {/* Header: icon + name + tier */}
+                {/* Header: icon + name + aegis tier badge */}
                 <div className="flex items-start gap-3">
                   <div className="w-12 h-12 rounded-lg overflow-hidden bg-white/5 border border-white/10 shrink-0">
                     <img src={BUNGIE_URL + w.icon} alt="" className="w-full h-full object-cover" />
@@ -484,13 +503,39 @@ function FeaturedGodRolls({
                   </div>
                 )}
 
+                {/* Weapon Tier selector */}
+                <div className="border-t border-white/8 pt-2.5">
+                  <p className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider mb-1.5">Weapon Tier</p>
+                  <div className="flex gap-1">
+                    {([1, 2, 3, 4, 5] as const).map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => setCardTiers(prev => ({ ...prev, [name]: t }))}
+                        title={TIER_DESCS[t]}
+                        className={[
+                          'flex-1 text-[10px] font-bold py-1 rounded border transition-all',
+                          cardTier === t
+                            ? 'bg-sky-500/25 text-sky-300 border-sky-500/50'
+                            : 'bg-white/5 text-slate-600 border-white/8 hover:border-white/20 hover:text-slate-400',
+                        ].join(' ')}
+                      >
+                        T{t}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[9px] text-slate-600 mt-1">{TIER_DESCS[cardTier]} · +10 chosen · +{cardTier} others</p>
+                </div>
+
                 {/* Action */}
                 <div className="flex justify-end mt-auto">
-                  <span className="text-[10px] font-semibold text-amber-400 group-hover:text-amber-300 transition-colors">
+                  <button
+                    onClick={() => router.push(`/editor?w=${w.hash}&godroll=1&tier=${cardTier}`)}
+                    className="text-[10px] font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+                  >
                     View Roll →
-                  </span>
+                  </button>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

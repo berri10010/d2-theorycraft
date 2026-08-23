@@ -82,7 +82,7 @@ function Dashboard() {
     loadWeapon, activeWeapon, activeWeaponHash, selectedPerks, selectPerk,
     getCalculatedStats, getDamageMultiplier, mode, setMode,
     masterworkStat, activeBuffs, setWeaponsStat, weaponsStat,
-    setMasterworkStat, toggleBuff, clearRoll,
+    setMasterworkStat, toggleBuff, clearRoll, setWeaponTier,
   } = useWeaponStore();
   const { addSnapshot, snapshots } = useCompareStore();
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
@@ -151,6 +151,7 @@ function Dashboard() {
     const mwParam    = searchParams.get('mw');
     const wsParam    = searchParams.get('ws');
     const buffsParam = searchParams.get('b');
+    const tierParam  = searchParams.get('tier');
 
     if (!weaponHash || weapons.length === 0) return;
     const found = weapons.find((w) => w.hash === weaponHash);
@@ -174,6 +175,7 @@ function Dashboard() {
     if (mwParam && (MASTERWORK_STATS as readonly string[]).includes(mwParam))
       setMasterworkStat(mwParam as MasterworkStat);
     if (wsParam) setWeaponsStat(Number(wsParam));
+    if (tierParam) { const t = Number(tierParam); if (t >= 1 && t <= 5) setWeaponTier(t); }
     if (buffsParam) {
       const toActivate = buffsParam.split(',').filter(Boolean);
       const currentBuffs = useWeaponStore.getState().activeBuffs;

@@ -54,6 +54,7 @@ export const MasterworkPanel: React.FC = () => {
     hoveredMasterworkStat, setHoveredMasterworkStat,
     isCrafted,
     isEnhanced,
+    weaponTier, setWeaponTier,
     activeMod, setActiveMod,
   } = useWeaponStore();
   const { data: clarityPerks } = useClarityPerks();
@@ -103,65 +104,102 @@ export const MasterworkPanel: React.FC = () => {
       {/* ── Masterwork card ─────────────────────────────────────────────── */}
       {hasMw && (
         <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-bold text-white">Masterwork</h2>
-            {(() => {
-              const isTiered = (activeWeapon.seasonNumber ?? 0) >= 27;
-              const secondaryBonus = isTiered ? 5 : (
-                isAdept && isCrafted ? 4 :
-                isAdept              ? 3 :
-                (isCrafted || isEnhanced) ? 2 : 0);
-              const labelColor =
-                isAdept    ? 'text-amber-400'  :
-                isCrafted  ? 'text-emerald-400':
-                isEnhanced ? 'text-violet-400' :
-                isTiered   ? 'text-slate-300'  :
-                             'text-slate-500';
+          {(() => {
+            const isTiered = (activeWeapon.seasonNumber ?? 0) >= 27;
+            const secondaryBonus = isTiered ? weaponTier : (
+              isAdept && isCrafted ? 4 :
+              isAdept              ? 3 :
+              (isCrafted || isEnhanced) ? 2 : 0);
+            const labelColor =
+              isTiered   ? 'text-sky-400'    :
+              isAdept    ? 'text-amber-400'  :
+              isCrafted  ? 'text-emerald-400':
+              isEnhanced ? 'text-violet-400' :
+                           'text-slate-500';
 
-              if (masterworkStat) {
-                const primaryBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
-                const primaryLabel = primaryBonus < 0
-                  ? `${primaryBonus} ${masterworkStat}`
-                  : `+${primaryBonus} ${masterworkStat}`;
-                return (
-                  <span className={`text-[10px] ${labelColor} font-semibold`}>
-                    {primaryLabel}
-                    {secondaryBonus > 0 && ` · +${secondaryBonus} others`}
-                  </span>
-                );
-              }
-              if (secondaryBonus === 0) return null;
-              return (
-                <span className={`text-[10px] ${labelColor} font-semibold`}>
-                  +10 chosen · +{secondaryBonus} others
-                </span>
-              );
-            })()}
-          </div>
+            const TIER_LABELS: Record<number, string> = {
+              1: 'Standard',
+              2: 'Enhanced Perks',
+              3: 'Enhanced Mods',
+              4: 'Enhanced Components',
+              5: 'Enhanced Origin',
+            };
 
-          <div className="flex flex-wrap gap-1.5">
-            {mwOptions.map((stat) => {
-              const isActive = masterworkStat === stat;
-              return (
-                <button
-                  key={stat}
-                  onClick={() => setMasterworkStat(isActive ? null : stat)}
-                  onMouseEnter={() => setHoveredMasterworkStat(stat)}
-                  onMouseLeave={() => setHoveredMasterworkStat(null)}
-                  className={[
-                    'text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
-                    isActive
-                      ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
-                      : hoveredMasterworkStat === stat
-                        ? 'bg-amber-500/10 text-amber-300/70 border-amber-500/25'
-                        : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
-                  ].join(' ')}
-                >
-                  {stat}
-                </button>
-              );
-            })}
-          </div>
+            return (
+              <>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xl font-bold text-white">Masterwork</h2>
+                  {masterworkStat ? (
+                    <span className={`text-[10px] ${labelColor} font-semibold`}>
+                      {(() => {
+                        const primaryBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
+                        const primaryLabel = primaryBonus < 0
+                          ? `${primaryBonus} ${masterworkStat}`
+                          : `+${primaryBonus} ${masterworkStat}`;
+                        return <>{primaryLabel}{secondaryBonus > 0 && ` · +${secondaryBonus} others`}</>;
+                      })()}
+                    </span>
+                  ) : secondaryBonus > 0 ? (
+                    <span className={`text-[10px] ${labelColor} font-semibold`}>
+                      +10 chosen · +{secondaryBonus} others
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {mwOptions.map((stat) => {
+                    const isActive = masterworkStat === stat;
+                    return (
+                      <button
+                        key={stat}
+                        onClick={() => setMasterworkStat(isActive ? null : stat)}
+                        onMouseEnter={() => setHoveredMasterworkStat(stat)}
+                        onMouseLeave={() => setHoveredMasterworkStat(null)}
+                        className={[
+                          'text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
+                          isActive
+                            ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
+                            : hoveredMasterworkStat === stat
+                              ? 'bg-amber-500/10 text-amber-300/70 border-amber-500/25'
+                              : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
+                        ].join(' ')}
+                      >
+                        {stat}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Tier selector — only for Season 27+ tiered weapons */}
+                {isTiered && (
+                  <div className="border-t border-white/8 pt-3">
+                    <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mb-2">Weapon Tier</p>
+                    <div className="flex gap-1.5">
+                      {([1, 2, 3, 4, 5] as const).map((t) => {
+                        const isActive = weaponTier === t;
+                        return (
+                          <button
+                            key={t}
+                            onClick={() => setWeaponTier(t)}
+                            title={TIER_LABELS[t]}
+                            className={[
+                              'flex-1 text-xs font-bold py-1.5 rounded-md border transition-all',
+                              isActive
+                                ? 'bg-sky-500/25 text-sky-300 border-sky-500/50'
+                                : 'bg-white/5 text-slate-500 border-white/10 hover:border-white/20 hover:text-slate-300',
+                            ].join(' ')}
+                          >
+                            T{t}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1.5">{TIER_LABELS[weaponTier]}{weaponTier >= 2 && ` · +${weaponTier} others`}</p>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       )}
 
