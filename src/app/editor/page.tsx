@@ -17,6 +17,7 @@ import { groupWeapons } from '../../lib/weaponGroups';
 import { GodRollPanel } from '../../components/weapon/GodRollPanel';
 import { WishlistPanel } from '../../components/weapon/WishlistPanel';
 import { SimilarWeaponsPanel } from '../../components/weapon/SimilarWeaponsPanel';
+import { TierListPanel } from '../../components/weapon/TierListPanel';
 import { WeaponDataPanel } from '../../components/weapon/WeaponDataPanel';
 import { calculateTTK } from '../../lib/damageMath';
 import { MasterworkStat } from '../../store/useWeaponStore';
@@ -719,6 +720,7 @@ function Dashboard() {
                     <ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary>
                     <ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary>
                     <ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary>
+                    <ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary>
                   </div>
                 </div>
               </motion.div>

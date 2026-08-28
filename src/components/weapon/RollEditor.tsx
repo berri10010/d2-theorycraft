@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
+import { useTierListStore, TIER_CYCLE } from '../../store/useTierListStore';
 import { Perk, PerkColumn } from '../../types/weapon';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { Tooltip } from '../ui/Tooltip';
@@ -38,6 +39,8 @@ export const RollEditor: React.FC = () => {
   const { data: clarityData } = useClarityPerks();
   const { data: godRollDb }   = useGodRolls();
   const [flashHash, setFlashHash] = useState<string | null>(null);
+
+  const { getPerkTier, setPerkTier, pveModeList, pvpModeList } = useTierListStore();
 
   // Build a map of column-type → Set<lowercase perk name> for god roll highlights
   const godRollNames = useMemo(() => {
@@ -214,7 +217,16 @@ export const RollEditor: React.FC = () => {
                       ? perk.enhancedVersion
                       : perk;
 
-                    const tierCfg = perk.tier ? TIER_CONFIG[perk.tier as PerkTier] : null;
+                    const activeTier = getPerkTier(mode, perk.name);
+                    const tierCfg = activeTier ? TIER_CONFIG[activeTier] : null;
+
+                    const handleTierClick = (e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      const listName = mode === 'pve' ? pveModeList : pvpModeList;
+                      const idx = TIER_CYCLE.indexOf(activeTier ?? null);
+                      const next = TIER_CYCLE[(idx + 1) % TIER_CYCLE.length];
+                      setPerkTier(listName, perk.name, next);
+                    };
 
                     // God roll indicator — amber star on matching perks (PvE only)
                     let isGodRoll = false;
@@ -273,18 +285,18 @@ export const RollEditor: React.FC = () => {
                       <div>
                         <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                           <span className="text-[11px] font-bold text-white leading-tight">{displayPerk.name}</span>
-                          {perk.tier && (
+                          {activeTier && (
                             <span className={`text-[9px] font-black px-1 py-px rounded leading-none ${
-                              perk.tier === 'S' ? 'bg-amber-500/30 text-amber-300' :
-                              perk.tier === 'A' ? 'bg-emerald-500/25 text-emerald-300' :
-                              perk.tier === 'B' ? 'bg-blue-500/25 text-blue-300' :
-                              perk.tier === 'C' ? 'bg-slate-500/30 text-slate-300' :
-                              perk.tier === 'D' ? 'bg-slate-600/30 text-slate-400' :
-                              perk.tier === 'E' ? 'bg-slate-700/30 text-slate-500' :
-                              perk.tier === 'F' ? 'bg-slate-800/30 text-slate-600' :
-                              perk.tier === 'G' ? 'bg-red-900/30 text-red-400' :
+                              activeTier === 'S' ? 'bg-amber-500/30 text-amber-300' :
+                              activeTier === 'A' ? 'bg-emerald-500/25 text-emerald-300' :
+                              activeTier === 'B' ? 'bg-blue-500/25 text-blue-300' :
+                              activeTier === 'C' ? 'bg-slate-500/30 text-slate-300' :
+                              activeTier === 'D' ? 'bg-slate-600/30 text-slate-400' :
+                              activeTier === 'E' ? 'bg-slate-700/30 text-slate-500' :
+                              activeTier === 'F' ? 'bg-slate-800/30 text-slate-600' :
+                              activeTier === 'G' ? 'bg-red-900/30 text-red-400' :
                               'bg-white/10 text-slate-400'
-                            }`}>{perk.tier}</span>
+                            }`}>{activeTier}</span>
                           )}
                         </div>
                         <div className="text-[10px] text-slate-400 leading-relaxed">
@@ -312,7 +324,7 @@ export const RollEditor: React.FC = () => {
 
                     return (
                       <Tooltip key={perk.hash} content={tooltipContent}>
-                      <div className="relative shrink-0">
+                      <div className="relative shrink-0 group/perk">
                         {isFlashing && (
                           <motion.span
                             className="absolute inset-0 rounded-full pointer-events-none z-10"
@@ -355,10 +367,19 @@ export const RollEditor: React.FC = () => {
                           )}
                         </button>
 
-                        {mode === 'pve' && tierCfg && !isUpgraded && (
-                          <span className={`absolute -bottom-1 -right-1 text-[8px] font-black leading-none px-1 py-px rounded-full z-10 ${tierCfg.badge}`}>
-                            {tierCfg.label}
-                          </span>
+                        {!isUpgraded && (
+                          <button
+                            onClick={handleTierClick}
+                            title={tierCfg ? `${tierCfg.label} tier — click to change` : 'Unrated — click to rate'}
+                            className={[
+                              'absolute -bottom-1 -right-1 text-[8px] font-black leading-none px-1 py-px rounded-full z-10 transition-opacity',
+                              tierCfg
+                                ? `${tierCfg.badge} opacity-100`
+                                : 'bg-white/10 text-slate-500 opacity-0 group-hover/perk:opacity-100',
+                            ].join(' ')}
+                          >
+                            {tierCfg ? tierCfg.label : '+'}
+                          </button>
                         )}
 
                         {isUpgraded && (

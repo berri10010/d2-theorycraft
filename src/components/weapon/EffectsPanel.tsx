@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE } from '../../lib/buffDatabase';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
+import { useTierListStore } from '../../store/useTierListStore';
 import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
@@ -172,7 +173,7 @@ function StatModPills({
 
 // ── Main component ────────────────────────────────────────────────────────────
 export const EffectsPanel: React.FC = () => {
-  const { activeWeapon, selectedPerks, activeBuffs, activeEffects, clearPerk, toggleBuff, setEffectState } = useWeaponStore(
+  const { activeWeapon, selectedPerks, activeBuffs, activeEffects, clearPerk, toggleBuff, setEffectState, mode } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:   s.activeWeapon,
       selectedPerks:  s.selectedPerks,
@@ -181,11 +182,13 @@ export const EffectsPanel: React.FC = () => {
       clearPerk:      s.clearPerk,
       toggleBuff:     s.toggleBuff,
       setEffectState: s.setEffectState,
+      mode:           s.mode,
     }))
   );
 
   const { data: clarityData  } = useClarityPerks();
   const { data: compendiumData } = useCompendiumPerks();
+  const { getPerkTier: getTier } = useTierListStore();
 
   // Memoize active perk resolution — only recomputes when selections change.
   const activePerkEntries = useMemo(() => {
@@ -316,11 +319,9 @@ export const EffectsPanel: React.FC = () => {
                             </span>
                             {/* Tier badge */}
                             {(() => {
-                              const p = activeWeapon.perkSockets
-                                .find((c) => c.name === columnName)
-                                ?.perks.find((p) => p.hash === perkHash);
-                              if (!p?.tier) return null;
-                              const cfg = TIER_CONFIG[p.tier as PerkTier];
+                              const perkTierVal = getTier(mode, name);
+                              if (!perkTierVal) return null;
+                              const cfg = TIER_CONFIG[perkTierVal as PerkTier];
                               return cfg ? (
                                 <span className={`text-[10px] font-black px-1.5 py-0.5 rounded leading-none shrink-0 ${cfg.badge}`}>
                                   {cfg.label}
@@ -530,11 +531,9 @@ export const EffectsPanel: React.FC = () => {
                           </span>
                           {/* Tier badge */}
                           {(() => {
-                            const p = activeWeapon.perkSockets
-                              .find((c) => c.name === columnName)
-                              ?.perks.find((p) => p.hash === perkHash);
-                            if (!p?.tier) return null;
-                            const cfg = TIER_CONFIG[p.tier as PerkTier];
+                            const t = getTier(mode, name);
+                            if (!t) return null;
+                            const cfg = TIER_CONFIG[t as PerkTier];
                             return cfg ? (
                               <span className={`text-[10px] font-black px-1.5 py-0.5 rounded leading-none shrink-0 ${cfg.badge}`}>
                                 {cfg.label}
