@@ -8,6 +8,9 @@ import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import Image from 'next/image';
 
+// Standalone dev server — see scripts/admin-server.mjs
+const ADMIN = 'http://localhost:3001';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type AdminTab = 'coverage' | 'godroll' | 'perktiers';
@@ -306,7 +309,7 @@ function CoverageTab({ groups, onEdit }: { groups: WeaponGroup[]; onEdit: (g: We
   const [sortDir, setSortDir]   = useState<SortDir>('asc');
 
   useEffect(() => {
-    fetch('/api/admin/god-roll?weapon=__coverage__')
+    fetch(`${ADMIN}/god-roll?weapon=__coverage__`)
       .then((r) => r.json())
       .then((d: { coverage: Coverage }) => setCoverage(d.coverage ?? {}))
       .catch(() => {});
@@ -661,7 +664,7 @@ function GodRollTab({ groups, initialGroup, onGroupChange }: {
     const keysToTry = [g.baseName, g.default.name].filter((v, i, a) => a.indexOf(v) === i);
     for (const key of keysToTry) {
       try {
-        const res  = await fetch(`/api/admin/god-roll?weapon=${encodeURIComponent(key)}`);
+        const res  = await fetch(`${ADMIN}/god-roll?weapon=${encodeURIComponent(key)}`);
         const data = await res.json() as { entry: Record<string, unknown> | null };
         if (data.entry) {
           const e = data.entry;
@@ -709,7 +712,7 @@ function GodRollTab({ groups, initialGroup, onGroupChange }: {
         pvpOriginTrait:pvpSlot.originTrait,pvpMw:pvpSlot.mw||null,pvpTier:pvpSlot.tier||null,
         pvpRank:pvpSlot.rank?Number(pvpSlot.rank):null,pvpNotes:pvpSlot.notes||null,
       };
-      const res = await fetch('/api/admin/god-roll', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({weaponName:saveKey,entry}) });
+      const res = await fetch(`${ADMIN}/god-roll`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({weaponName:saveKey,entry}) });
       if (!res.ok) throw new Error(await res.text());
       setStatus('Saved!');
     } catch (err) { setStatus(`Error: ${String(err)}`); }
@@ -825,13 +828,14 @@ export default function AdminPage() {
 
   useEffect(() => { fetchWeapons(); }, [fetchWeapons]);
 
+  // Show an error if the standalone admin server (port 3001) isn't running
   useEffect(() => {
-    fetch('/api/admin/god-roll?weapon=__check__').then((r) => { if (r.status === 403) setIsDev(false); }).catch(() => {});
+    fetch(`${ADMIN}/god-roll?weapon=__check__`).catch(() => setIsDev(false));
   }, []);
 
   // Load all perk tiers globally
   useEffect(() => {
-    fetch('/api/admin/perk-tiers').then((r) => r.json()).then((data: Record<string, {
+    fetch(`${ADMIN}/perk-tiers`).then((r) => r.json()).then((data: Record<string, {
       tier?: string; rank?: number; tags?: string[]; notes?: string;
       pvpTier?: string; pvpRank?: number; pvpTags?: string[]; pvpNotes?: string;
     }>) => {
@@ -875,7 +879,7 @@ export default function AdminPage() {
           pvpTags:  row.pvpTags.split(',').map((t) => t.trim()).filter(Boolean),
         };
       }
-      const res = await fetch('/api/admin/perk-tiers', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ updates }) });
+      const res = await fetch(`${ADMIN}/perk-tiers`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ updates }) });
       if (!res.ok) throw new Error(await res.text());
       setOrigRows({ ...perkRows });
       setStatus('Perk tiers saved!');
@@ -892,8 +896,8 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center space-y-2">
-          <p className="text-red-400 font-bold text-lg">Admin — Development Only</p>
-          <p className="text-slate-500 text-sm">This page is only accessible in development mode.</p>
+          <p className="text-red-400 font-bold text-lg">Admin server not running</p>
+          <p className="text-slate-500 text-sm">Start it with: <code className="text-amber-400">node scripts/admin-server.mjs</code></p>
         </div>
       </div>
     );
