@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import DEFAULT_PVE_DATA from '../data/perkTiers.json';
 import { PerkTier } from '../lib/perkTierDatabase';
 
 export interface TierEntry {
@@ -9,14 +8,6 @@ export interface TierEntry {
 }
 
 export type TierList = Record<string, TierEntry>;
-
-// Seed the default PvE list from the bundled JSON
-const SEED_PVE: TierList = Object.fromEntries(
-  Object.entries(DEFAULT_PVE_DATA).map(([name, e]) => [
-    name,
-    { tier: (e as { tier: string }).tier as PerkTier, notes: (e as { notes?: string }).notes ?? '' },
-  ])
-);
 
 export const DEFAULT_PVE = 'PvE';
 export const DEFAULT_PVP = 'PvP';
@@ -45,7 +36,7 @@ export const useTierListStore = create<TierListStore>()(
   persist(
     (set, get) => ({
       lists: {
-        [DEFAULT_PVE]: SEED_PVE,
+        [DEFAULT_PVE]: {},
         [DEFAULT_PVP]: {},
       },
       pveModeList: DEFAULT_PVE,
@@ -96,13 +87,8 @@ export const useTierListStore = create<TierListStore>()(
         }),
 
       resetList: (listName) =>
-        set((s) => ({
-          lists: {
-            ...s.lists,
-            [listName]: listName === DEFAULT_PVE ? SEED_PVE : {},
-          },
-        })),
+        set((s) => ({ lists: { ...s.lists, [listName]: {} } })),
     }),
-    { name: 'perk-tier-lists', version: 1 }
+    { name: 'perk-tier-lists', version: 2 }
   )
 );

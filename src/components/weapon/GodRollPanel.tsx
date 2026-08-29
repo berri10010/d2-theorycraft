@@ -5,6 +5,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useGodRolls } from '../../lib/useGodRolls';
+import { lookupGodRoll } from '../../lib/godRolls';
 
 // ── Tier colour config ────────────────────────────
 const WEAPON_TIER_CONFIG: Record<string, { bg: string; text: string; label: string }> = {
@@ -128,7 +129,7 @@ export const GodRollPanel: React.FC = () => {
     );
   }
 
-  const entry = godRollDb?.[activeWeapon.name];
+  const entry = godRollDb ? lookupGodRoll(godRollDb, activeWeapon) : null;
 
   if (!entry) return null;
 

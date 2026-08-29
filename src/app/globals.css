@@ -2,25 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root { color-scheme: dark; }
 * { box-sizing: border-box; }
 
-/* True OLED black base — matches in-game UI */
 body {
   background-color: #000000;
   color: #e2e8f0;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Thin scrollbar for sidebar */
+/* Thin scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.24); }
 
-
-
-/* Frosted select elements — Firefox only; Chrome/Edge use OS-native dropdowns
-   that cannot be styled.  The select itself gets dark styling inline. */
+/* Firefox / Chrome select options */
 select option { background: #111; color: #e2e8f0; }
+
+/* ── Light theme ─────────────────────────────────────────────────────────────── */
+
+[data-theme="light"] { color-scheme: light; }
+
+[data-theme="light"] body {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Backgrounds */
+[data-theme="light"] .bg-black           { background-color: #f1f5f9 !important; }
+[data-theme="light"] .bg-\[\#111\]       { background-color: #ffffff !important; }
+[data-theme="light"] .bg-\[\#0a0a0a\]   { background-color: #f8fafc !important; }
+[data-theme="light"] .bg-white\/3        { background-color: rgba(0,0,0,0.025) !important; }
+[data-theme="light"] .bg-white\/4        { background-color: rgba(0,0,0,0.03)  !important; }
+[data-theme="light"] .bg-white\/5        { background-color: rgba(0,0,0,0.04)  !important; }
+[data-theme="light"] .bg-white\/6        { background-color: rgba(0,0,0,0.05)  !important; }
+[data-theme="light"] .bg-white\/8        { background-color: rgba(0,0,0,0.06)  !important; }
+[data-theme="light"] .bg-white\/10       { background-color: rgba(0,0,0,0.08)  !important; }
+[data-theme="light"] .bg-white\/15       { background-color: rgba(0,0,0,0.11)  !important; }
+[data-theme="light"] .bg-white\/20       { background-color: rgba(0,0,0,0.14)  !important; }
+[data-theme="light"] .bg-white\/25       { background-color: rgba(0,0,0,0.18)  !important; }
+
+/* Hover backgrounds handled by opacity — invert from white to black base */
+[data-theme="light"] .hover\:bg-white\/4:hover  { background-color: rgba(0,0,0,0.04)  !important; }
+[data-theme="light"] .hover\:bg-white\/6:hover  { background-color: rgba(0,0,0,0.05)  !important; }
+[data-theme="light"] .hover\:bg-white\/8:hover  { background-color: rgba(0,0,0,0.06)  !important; }
+
+/* Text */
+[data-theme="light"] .text-white    { color: #0f172a  !important; }
+[data-theme="light"] .text-slate-200 { color: #1e293b !important; }
+[data-theme="light"] .text-slate-300 { color: #334155 !important; }
+[data-theme="light"] .text-slate-400 { color: #475569 !important; }
+[data-theme="light"] .text-slate-500 { color: #64748b !important; }
+[data-theme="light"] .text-slate-600 { color: #94a3b8 !important; }
+[data-theme="light"] .text-slate-700 { color: #94a3b8 !important; }
+
+/* Borders */
+[data-theme="light"] .border-white\/8  { border-color: rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .border-white\/10 { border-color: rgba(0,0,0,0.10) !important; }
+[data-theme="light"] .border-white\/12 { border-color: rgba(0,0,0,0.12) !important; }
+[data-theme="light"] .border-white\/15 { border-color: rgba(0,0,0,0.15) !important; }
+[data-theme="light"] .border-white\/20 { border-color: rgba(0,0,0,0.20) !important; }
+
+/* Inputs & selects */
+[data-theme="light"] input, [data-theme="light"] select, [data-theme="light"] textarea {
+  color: #1e293b;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder { color: #94a3b8; }
+[data-theme="light"] select option { background: #fff; color: #0f172a; }
+
+/* Scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-thumb       { background: rgba(0,0,0,0.15); }
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }

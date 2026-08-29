@@ -22,9 +22,33 @@ export interface GodRollEntry {
   rank: number | null;
   /** Overall tier for PvE: S / A / B / C / D */
   tier: string | null;
+
+  // PvP god roll fields (optional — absent means no PvP entry curated)
+  pvpBarrel?: string[];
+  pvpMag?: string[];
+  pvpPerk1?: string[];
+  pvpPerk2?: string[];
+  pvpOriginTrait?: string | null;
+  pvpMw?: string | null;
+  pvpNotes?: string | null;
+  pvpTier?: string | null;
+  pvpRank?: number | null;
 }
 
 export type GodRollDatabase = Record<string, GodRollEntry>;
+
+/**
+ * Look up a god roll entry for a weapon using the family hierarchy:
+ *   1. Exact weapon name (version-specific override)
+ *   2. baseName (applies to the whole weapon family)
+ * Returns null if neither exists.
+ */
+export function lookupGodRoll(
+  db: GodRollDatabase,
+  weapon: { name: string; baseName: string },
+): GodRollEntry | null {
+  return db[weapon.name] ?? db[weapon.baseName] ?? null;
+}
 
 // ──────────────────────────────────────────────────
 // Column-name → god-roll field mapping

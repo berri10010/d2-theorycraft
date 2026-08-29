@@ -5,8 +5,9 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
-import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
+import { TIER_CONFIG, PerkTier, getOfficialTier } from '../../lib/perkTierDatabase';
 import { useTierListStore, TIER_CYCLE } from '../../store/useTierListStore';
+import { useSiteSettings } from '../../store/useSiteSettings';
 import { Perk, PerkColumn } from '../../types/weapon';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { Tooltip } from '../ui/Tooltip';
@@ -14,6 +15,7 @@ import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
 import { useGodRolls } from '../../lib/useGodRolls';
+import { lookupGodRoll } from '../../lib/godRolls';
 import { getPerkFamily } from '../../lib/perkFamily';
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -41,11 +43,13 @@ export const RollEditor: React.FC = () => {
   const [flashHash, setFlashHash] = useState<string | null>(null);
 
   const { getPerkTier, setPerkTier, pveModeList, pvpModeList } = useTierListStore();
+  const tierEditEnabled  = useSiteSettings((s) => s.inAppTierEditing);
+  const tierBadgeStyle   = useSiteSettings((s) => s.tierBadgeStyle);
 
   // Build a map of column-type → Set<lowercase perk name> for god roll highlights
   const godRollNames = useMemo(() => {
     if (!activeWeapon || !godRollDb) return null;
-    const entry = godRollDb[activeWeapon.name];
+    const entry = lookupGodRoll(godRollDb, activeWeapon);
     if (!entry) return null;
 
     const toSet = (arr: string[]) => new Set(arr.map((n) => n.toLowerCase()));
@@ -217,7 +221,9 @@ export const RollEditor: React.FC = () => {
                       ? perk.enhancedVersion
                       : perk;
 
-                    const activeTier = getPerkTier(mode, perk.name);
+                    const activeTier: PerkTier | null = tierEditEnabled
+                      ? getPerkTier(mode, perk.name)
+                      : getOfficialTier(perk.name, mode);
                     const tierCfg = activeTier ? TIER_CONFIG[activeTier] : null;
 
                     const handleTierClick = (e: React.MouseEvent) => {
@@ -285,18 +291,31 @@ export const RollEditor: React.FC = () => {
                       <div>
                         <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                           <span className="text-[11px] font-bold text-white leading-tight">{displayPerk.name}</span>
-                          {activeTier && (
-                            <span className={`text-[9px] font-black px-1 py-px rounded leading-none ${
-                              activeTier === 'S' ? 'bg-amber-500/30 text-amber-300' :
-                              activeTier === 'A' ? 'bg-emerald-500/25 text-emerald-300' :
-                              activeTier === 'B' ? 'bg-blue-500/25 text-blue-300' :
-                              activeTier === 'C' ? 'bg-slate-500/30 text-slate-300' :
-                              activeTier === 'D' ? 'bg-slate-600/30 text-slate-400' :
-                              activeTier === 'E' ? 'bg-slate-700/30 text-slate-500' :
-                              activeTier === 'F' ? 'bg-slate-800/30 text-slate-600' :
-                              activeTier === 'G' ? 'bg-red-900/30 text-red-400' :
-                              'bg-white/10 text-slate-400'
+                          {activeTier && tierBadgeStyle !== 'dot' && (
+                            <span className={`text-[9px] font-black leading-none ${
+                              tierBadgeStyle === 'pill' ? 'px-1 py-px rounded' : ''
+                            } ${
+                              activeTier === 'S' ? (tierBadgeStyle === 'pill' ? 'bg-amber-500/30 text-amber-300' : 'text-amber-400') :
+                              activeTier === 'A' ? (tierBadgeStyle === 'pill' ? 'bg-emerald-500/25 text-emerald-300' : 'text-emerald-400') :
+                              activeTier === 'B' ? (tierBadgeStyle === 'pill' ? 'bg-blue-500/25 text-blue-300' : 'text-blue-400') :
+                              activeTier === 'C' ? (tierBadgeStyle === 'pill' ? 'bg-slate-500/30 text-slate-300' : 'text-slate-400') :
+                              activeTier === 'D' ? (tierBadgeStyle === 'pill' ? 'bg-slate-600/30 text-slate-400' : 'text-slate-500') :
+                              activeTier === 'E' ? (tierBadgeStyle === 'pill' ? 'bg-slate-700/30 text-slate-500' : 'text-slate-500') :
+                              activeTier === 'F' ? (tierBadgeStyle === 'pill' ? 'bg-slate-800/30 text-slate-600' : 'text-slate-600') :
+                              activeTier === 'G' ? (tierBadgeStyle === 'pill' ? 'bg-red-900/30 text-red-400' : 'text-red-500') :
+                              (tierBadgeStyle === 'pill' ? 'bg-white/10 text-slate-400' : 'text-slate-500')
                             }`}>{activeTier}</span>
+                          )}
+                          {activeTier && tierBadgeStyle === 'dot' && (
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                              activeTier === 'S' ? 'bg-amber-400' :
+                              activeTier === 'A' ? 'bg-emerald-400' :
+                              activeTier === 'B' ? 'bg-blue-400' :
+                              activeTier === 'C' ? 'bg-slate-400' :
+                              activeTier === 'D' ? 'bg-slate-500' :
+                              activeTier === 'G' ? 'bg-red-500' :
+                              'bg-slate-600'
+                            }`} title={`${activeTier}-Tier`} />
                           )}
                         </div>
                         <div className="text-[10px] text-slate-400 leading-relaxed">
@@ -367,7 +386,16 @@ export const RollEditor: React.FC = () => {
                           )}
                         </button>
 
-                        {!isUpgraded && (
+                        {!isUpgraded && tierCfg && !tierEditEnabled && (
+                          tierBadgeStyle === 'dot' ? (
+                            <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full z-10 ring-1 ring-black/30 ${tierCfg.badge.replace(/text-\S+/, '')}`} title={tierCfg.label} />
+                          ) : (
+                            <span className={`absolute -bottom-1 -right-1 text-[8px] font-black leading-none z-10 ${tierBadgeStyle === 'pill' ? 'px-1 py-px rounded-full' : ''} ${tierCfg.badge}`}>
+                              {tierCfg.label}
+                            </span>
+                          )
+                        )}
+                        {!isUpgraded && tierEditEnabled && (
                           <button
                             onClick={handleTierClick}
                             title={tierCfg ? `${tierCfg.label} tier — click to change` : 'Unrated — click to rate'}

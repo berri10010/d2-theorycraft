@@ -24,6 +24,9 @@ import { MasterworkStat } from '../../store/useWeaponStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { useGodRolls } from '../../lib/useGodRolls';
+import { SettingsButton } from '../../components/ui/SettingsPanel';
+import { useSiteSettings } from '../../store/useSiteSettings';
+import { lookupGodRoll } from '../../lib/godRolls';
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -88,6 +91,7 @@ function Dashboard() {
   const { addSnapshot, snapshots } = useCompareStore();
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
   const { data: godRollDb } = useGodRolls();
+  const settings = useSiteSettings();
   const searchParams = useSearchParams();
 
   const [activeTab,          setActiveTab]          = useState<'editor' | 'compare'>('editor');
@@ -173,6 +177,7 @@ function Dashboard() {
       );
     }
     if (modeParam === 'pvp' || modeParam === 'pve') setMode(modeParam);
+    else setMode(useSiteSettings.getState().defaultMode);
     if (mwParam && (MASTERWORK_STATS as readonly string[]).includes(mwParam))
       setMasterworkStat(mwParam as MasterworkStat);
     if (wsParam) setWeaponsStat(Number(wsParam));
@@ -188,7 +193,7 @@ function Dashboard() {
   // Auto-apply god roll when navigated from homepage card (?godroll=1)
   useEffect(() => {
     if (!pendingGodRoll || !activeWeapon || !godRollDb) return;
-    const entry = godRollDb[activeWeapon.name];
+    const entry = lookupGodRoll(godRollDb, activeWeapon);
     if (!entry) { setPendingGodRoll(false); return; }
 
     const isTieredWeapon = (activeWeapon.seasonNumber ?? 0) >= 27 && activeWeapon.rarity !== 'Exotic';
@@ -247,6 +252,15 @@ function Dashboard() {
 
     setPendingGodRoll(false);
   }, [pendingGodRoll, activeWeapon, godRollDb, selectPerk]);
+
+  // Auto-apply god roll whenever the active weapon changes (setting-gated)
+  const prevAutoWeaponRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!settings.autoApplyGodRoll || !activeWeapon) return;
+    if (prevAutoWeaponRef.current === activeWeapon.hash) return;
+    prevAutoWeaponRef.current = activeWeapon.hash;
+    setPendingGodRoll(true);
+  }, [activeWeapon?.hash, settings.autoApplyGodRoll]);
 
   // ── Share helpers ────────────────────────────────────────────────────────────
 
@@ -573,6 +587,9 @@ function Dashboard() {
                   ?
                 </button>
 
+                {/* Site settings */}
+                <SettingsButton />
+
                 {/* Share dropdown */}
                 <div className="relative" ref={shareRef}>
                   <button
@@ -698,17 +715,17 @@ function Dashboard() {
                       >
                         {mode === 'pve' && (
                           <>
-                            <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>
-                            <ErrorBoundary label="Wishlists"><WishlistPanel /></ErrorBoundary>
-                            <ErrorBoundary label="Effects"><EffectsPanel /></ErrorBoundary>
-                            <BuffToggle />
+                            {settings.showGodRollPanel  && <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>}
+                            {settings.showWishlistPanel && <ErrorBoundary label="Wishlists"><WishlistPanel /></ErrorBoundary>}
+                            {settings.showEffectsPanel  && <ErrorBoundary label="Effects"><EffectsPanel /></ErrorBoundary>}
+                            {settings.showExternalBuffs && <BuffToggle />}
                           </>
                         )}
                         {mode === 'pvp' && (
                           <>
-                            <ErrorBoundary label="Wishlists"><WishlistPanel /></ErrorBoundary>
-                            <ErrorBoundary label="Effects"><EffectsPanel /></ErrorBoundary>
-                            <BuffToggle />
+                            {settings.showWishlistPanel && <ErrorBoundary label="Wishlists"><WishlistPanel /></ErrorBoundary>}
+                            {settings.showEffectsPanel  && <ErrorBoundary label="Effects"><EffectsPanel /></ErrorBoundary>}
+                            {settings.showExternalBuffs && <BuffToggle />}
                           </>
                         )}
                       </motion.div>
@@ -718,9 +735,9 @@ function Dashboard() {
                   {/* Right column */}
                   <div className="lg:col-span-6 space-y-6">
                     <ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary>
-                    <ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary>
-                    <ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary>
-                    <ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary>
+                    {settings.showWeaponData    && <ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary>}
+                    {settings.showSimilarWeapons && <ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary>}
+                    {settings.showTierListPanel  && <ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary>}
                   </div>
                 </div>
               </motion.div>

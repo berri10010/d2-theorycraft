@@ -5,8 +5,9 @@ import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { BUFF_DATABASE } from '../../lib/buffDatabase';
-import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
+import { TIER_CONFIG, PerkTier, getOfficialTier } from '../../lib/perkTierDatabase';
 import { useTierListStore } from '../../store/useTierListStore';
+import { useSiteSettings } from '../../store/useSiteSettings';
 import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
@@ -188,7 +189,11 @@ export const EffectsPanel: React.FC = () => {
 
   const { data: clarityData  } = useClarityPerks();
   const { data: compendiumData } = useCompendiumPerks();
-  const { getPerkTier: getTier } = useTierListStore();
+  const { getPerkTier: getTierFromStore } = useTierListStore();
+  const tierEditEnabled = useSiteSettings((s) => s.inAppTierEditing);
+  const tierBadgeStyle  = useSiteSettings((s) => s.tierBadgeStyle);
+  const getTier = (m: 'pve' | 'pvp', name: string): PerkTier | null =>
+    tierEditEnabled ? getTierFromStore(m, name) : getOfficialTier(name, m);
 
   // Memoize active perk resolution — only recomputes when selections change.
   const activePerkEntries = useMemo(() => {
@@ -322,11 +327,15 @@ export const EffectsPanel: React.FC = () => {
                               const perkTierVal = getTier(mode, name);
                               if (!perkTierVal) return null;
                               const cfg = TIER_CONFIG[perkTierVal as PerkTier];
-                              return cfg ? (
-                                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded leading-none shrink-0 ${cfg.badge}`}>
+                              if (!cfg) return null;
+                              if (tierBadgeStyle === 'dot') return (
+                                <span className={`w-2 h-2 rounded-full shrink-0 ${cfg.badge.replace(/text-\S+/, '')}`} title={cfg.label} />
+                              );
+                              return (
+                                <span className={`text-[10px] font-black leading-none shrink-0 ${tierBadgeStyle === 'pill' ? 'px-1.5 py-0.5 rounded' : ''} ${cfg.badge}`}>
                                   {cfg.label}
                                 </span>
-                              ) : null;
+                              );
                             })()}
                             {/* Active / inactive badge */}
                             <span className={[
@@ -534,11 +543,15 @@ export const EffectsPanel: React.FC = () => {
                             const t = getTier(mode, name);
                             if (!t) return null;
                             const cfg = TIER_CONFIG[t as PerkTier];
-                            return cfg ? (
-                              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded leading-none shrink-0 ${cfg.badge}`}>
+                            if (!cfg) return null;
+                            if (tierBadgeStyle === 'dot') return (
+                              <span className={`w-2 h-2 rounded-full shrink-0 ${cfg.badge.replace(/text-\S+/, '')}`} title={cfg.label} />
+                            );
+                            return (
+                              <span className={`text-[10px] font-black leading-none shrink-0 ${tierBadgeStyle === 'pill' ? 'px-1.5 py-0.5 rounded' : ''} ${cfg.badge}`}>
                                 {cfg.label}
                               </span>
-                            ) : null;
+                            );
                           })()}
                         </div>
                         <span className="text-xs text-slate-500 uppercase tracking-wide">{columnName}</span>

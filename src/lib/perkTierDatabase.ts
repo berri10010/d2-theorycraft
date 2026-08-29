@@ -3,24 +3,41 @@ import tierData from '../data/perkTiers.json';
 export type PerkTier = 'S' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 
 export interface PerkTierEntry {
-  tier: PerkTier;
-  rank: number;
-  tags: string[];
-  notes: string;
+  tier:     PerkTier;
+  rank:     number;
+  tags:     string[];
+  notes:    string;
+  // PvP fields — optional, only present when curated
+  pvpTier?:  PerkTier;
+  pvpRank?:  number;
+  pvpTags?:  string[];
+  pvpNotes?: string;
 }
 
 export const PERK_TIER_DATABASE = tierData as Record<string, PerkTierEntry>;
 
-/** Returns the tier entry for a perk name, or null if not in the database. */
-export function getPerkTier(perkName: string): PerkTierEntry | null {
-  // Direct match
+function resolve(perkName: string): PerkTierEntry | null {
   if (PERK_TIER_DATABASE[perkName]) return PERK_TIER_DATABASE[perkName];
-  // Enhanced perks — strip the "Enhanced " prefix and look up base perk
   if (perkName.startsWith('Enhanced ')) {
     const base = perkName.replace(/^Enhanced\s+/, '');
     if (PERK_TIER_DATABASE[base]) return PERK_TIER_DATABASE[base];
   }
   return null;
+}
+
+/** Returns the full tier entry for a perk (PvE-centric). Null if not curated. */
+export function getPerkTier(perkName: string): PerkTierEntry | null {
+  return resolve(perkName);
+}
+
+/**
+ * Returns the official curated tier for a perk in the given mode.
+ * Null if the perk has no curated rating for that mode.
+ */
+export function getOfficialTier(perkName: string, mode: 'pve' | 'pvp'): PerkTier | null {
+  const entry = resolve(perkName);
+  if (!entry) return null;
+  return mode === 'pvp' ? (entry.pvpTier ?? null) : (entry.tier ?? null);
 }
 
 /** Tier display config: colour classes and label for each tier. */
