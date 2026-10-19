@@ -2,6 +2,7 @@
  * Dev-only admin server — runs on port 3001 alongside `next dev`.
  * Handles god roll and perk tier file reads/writes for the /admin page.
  * Start with: node scripts/admin-server.mjs
+ * Bound to 127.0.0.1 and CORS-restricted to the local `next dev` origin.
  */
 
 import { createServer } from 'node:http';
@@ -16,7 +17,7 @@ const GOD_ROLLS_FILE  = join(ROOT, 'public', 'data', 'god-rolls.json');
 const PERK_TIERS_FILE = join(ROOT, 'src', 'data', 'perkTiers.json');
 
 function cors(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
@@ -99,7 +100,7 @@ createServer(async (req, res) => {
 
   json(res, 404, { error: 'Not found' });
 
-}).listen(PORT, () => {
+}).listen(PORT, '127.0.0.1', () => {
   console.log(`\n  D2 Theorycraft Admin Server`);
   console.log(`  http://localhost:${PORT}`);
   console.log(`  Writes to: ${ROOT}\n`);

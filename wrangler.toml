@@ -11,17 +11,5 @@ main = "worker.ts"
 directory = "./out"
 binding = "ASSETS"
 
-[observability]
-enabled = false
-head_sampling_rate = 1
-
-[observability.logs]
-enabled = true
-head_sampling_rate = 1
-persist = true
-invocation_logs = true
-
-[observability.traces]
-enabled = false
-persist = true
-head_sampling_rate = 1
+# The Worker is a pass-through, so per-invocation log persistence is just cost
+# and noise. Re-enable `[observability]` here if request logs are ever needed.

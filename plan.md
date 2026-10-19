@@ -631,3 +631,9 @@ npm run build
 *Last updated: 2026-04-24 — Session summary (bug fix):*
 
 *1. Weapon Surge dmg label floating-point fix (commit eb1c920, ArmorModPanel.tsx line 175): `(multiplier - 1) * 100` with no rounding produced `5.499999999999994%` due to IEEE 754 representation of `1.055`. Fixed with `.toFixed(2)` + unary `+` to strip trailing zeros → displays `+5.5% dmg`.*
+
+---
+
+## Data format note (weapon payload)
+
+`public/data/weapons-{0,1,2}.json` (~50 MB) was replaced by a normalised pack: `weapons.json` (weapons reference perks/mods by hash), `perks.json`, `mods.json` (~6 MB total). Format + pack/unpack live in `src/lib/weaponPack.ts`; `useWeaponDb` unpacks into the plain `Weapon[]` the UI uses, and the landing page loads `weapons.json` alone. `scripts/build-static-data.ts` writes the pack. `/admin` is now `src/app/admin/page.dev.tsx` and only exists under `next dev` (see `pageExtensions` in `next.config.mjs`).

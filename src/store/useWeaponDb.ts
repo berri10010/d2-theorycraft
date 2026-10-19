@@ -1,5 +1,12 @@
 import { create } from 'zustand';
 import { Weapon } from '../types/weapon';
+import { unpackWeapons, type WeaponPack } from '../lib/weaponPack';
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + url);
+  return res.json() as Promise<T>;
+}
 
 interface WeaponDbState {
   weapons: Weapon[];
@@ -16,20 +23,13 @@ export const useWeaponDb = create<WeaponDbState>((set) => ({
   fetchWeapons: async () => {
     set({ isLoading: true, error: null });
     try {
-      // weapons-{0,1,2}.json are pre-built at deploy time by scripts/build-static-data.ts.
-      // The file is split into three chunks to stay under Cloudflare's 25 MiB per-file limit.
-      const fetchChunk = async (name: string) => {
-        const res = await fetch(name);
-        if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + name);
-        return res.json() as Promise<Weapon[]>;
-      };
-      const [chunk0, chunk1, chunk2] = await Promise.all([
-        fetchChunk('/data/weapons-0.json'),
-        fetchChunk('/data/weapons-1.json'),
-        fetchChunk('/data/weapons-2.json'),
+      // Packed weapon data is pre-built at deploy time by scripts/build-static-data.ts.
+      const [weapons, perks, mods] = await Promise.all([
+        fetchJson<WeaponPack['weapons']>('/data/weapons.json'),
+        fetchJson<WeaponPack['perks']>('/data/perks.json'),
+        fetchJson<WeaponPack['mods']>('/data/mods.json'),
       ]);
-      const weapons: Weapon[] = [...chunk0, ...chunk1, ...chunk2];
-      set({ weapons, isLoading: false });
+      set({ weapons: unpackWeapons({ weapons, perks, mods }), isLoading: false });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to load weapons', isLoading: false });
     }

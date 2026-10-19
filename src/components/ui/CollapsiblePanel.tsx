@@ -37,39 +37,51 @@ export function CollapsiblePanel({
     return defaultOpen;
   });
 
+  const toggle = () => setOpen((o) => {
+    const next = !o;
+    if (storageKey) {
+      try { localStorage.setItem(`panel-${storageKey}`, next ? 'open' : 'closed'); } catch { /* ignore */ }
+    }
+    return next;
+  });
+
   return (
     <div className={`bg-white/5 backdrop-blur-sm rounded-xl border ${className}`}>
-      <button
-        onClick={() => setOpen((o) => {
-          const next = !o;
-          if (storageKey) {
-            try { localStorage.setItem(`panel-${storageKey}`, next ? 'open' : 'closed'); } catch { /* ignore */ }
-          }
-          return next;
-        })}
-        className="w-full flex items-center gap-3 p-4 md:p-6 text-left"
-        aria-expanded={open}
-      >
-        <div className="flex-1 min-w-0 text-xl font-bold text-white">{title}</div>
+      {/* The header row is not a <button> itself: headerRight may contain buttons, which can't nest. */}
+      <div className="flex items-center gap-3 p-4 md:p-6">
+        <button
+          onClick={toggle}
+          className="flex-1 min-w-0 text-left text-xl font-bold text-white"
+          aria-expanded={open}
+        >
+          {title}
+        </button>
         {headerRight && (
-          <div className="shrink-0 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          <div className="shrink-0 flex items-center gap-2">
             {headerRight}
           </div>
         )}
-        <motion.svg
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className="w-4 h-4 text-slate-500 shrink-0"
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.2, ease: 'easeInOut' }}
+        <button
+          onClick={toggle}
+          aria-label={open ? 'Collapse panel' : 'Expand panel'}
+          aria-expanded={open}
+          className="shrink-0 text-slate-500"
         >
-          <path
-            fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-            clipRule="evenodd"
-          />
-        </motion.svg>
-      </button>
+          <motion.svg
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="w-4 h-4"
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+              clipRule="evenodd"
+            />
+          </motion.svg>
+        </button>
+      </div>
 
       <AnimatePresence initial={false}>
         {open && (

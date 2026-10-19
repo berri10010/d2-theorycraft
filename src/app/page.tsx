@@ -521,18 +521,15 @@ export default function HomePage() {
   const loadWeapons = useCallback(() => {
     setWeaponError(false);
     setWeaponLoaded(false);
-    const fetchChunk = async (name: string) => {
-      const res = await fetch(name);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json() as Promise<WeaponResult[]>;
-    };
-    Promise.all([
-      fetchChunk('/data/weapons-0.json'),
-      fetchChunk('/data/weapons-1.json'),
-      fetchChunk('/data/weapons-2.json'),
-    ])
-      .then(([c0, c1, c2]) => {
-        setWeaponGroups(groupWeapons([...c0, ...c1, ...c2]));
+    // The landing page only needs top-level weapon fields, so it loads the packed
+    // weapon list without the (much larger) perk / mod tables.
+    fetch('/data/weapons.json')
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<WeaponResult[]>;
+      })
+      .then((weapons) => {
+        setWeaponGroups(groupWeapons(weapons));
         setWeaponLoaded(true);
       })
       .catch(() => {

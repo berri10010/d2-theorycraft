@@ -15,22 +15,23 @@
  *   BUNGIE_API_KEY  — your Bungie developer API key
  *
  * Outputs:
- *   public/data/weapons-0.json        Parsed Weapon[] — first third (perk.description stripped)
- *   public/data/weapons-1.json        Parsed Weapon[] — second third (perk.description stripped)
- *   public/data/weapons-2.json        Parsed Weapon[] — third third (perk.description stripped)
+ *   public/data/weapons.json          Packed weapons (perks/mods referenced by hash)
+ *   public/data/perks.json            Each distinct perk once (description stripped)
+ *   public/data/mods.json             Each distinct weapon mod once
  *   public/data/clarity.json          Filtered Clarity perk descriptions
  *   public/data/god-rolls.json        God roll recommendations
  *   public/data/perk-descriptions.json Destiny Data Compendium perk text
  *
- * Note: perk.description is stripped from weapons-*.json to stay under the
- * Cloudflare Pages 25 MiB per-file asset limit.  Clarity + Compendium cover
- * perk descriptions at runtime.
+ * Note: perk.description is stripped from the weapon data to keep it small.
+ * Clarity + Compendium cover perk descriptions at runtime.  See
+ * src/lib/weaponPack.ts for the packed format.
  */
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parseWeapons } from '../src/lib/bungie/parser.js';
+import { packWeapons, type PackedWeapon } from '../src/lib/weaponPack.js';
 import type { Weapon, Perk } from '../src/types/weapon.js';
 import type { BungieSeasonDefinition } from '../src/lib/bungie/bungieTypes.js';
 
@@ -86,7 +87,7 @@ function write(name: string, data: unknown) {
 // so this file survives across deployments as long as the cache is warm.
 //
 // DATA_FORMAT_VERSION: bump this whenever parser logic changes in a way that
-// would produce different weapons-*.json output from the same manifest.
+// would produce different weapon data output from the same manifest.
 // This forces a re-parse even when the Bungie manifest version is unchanged.
 const DATA_FORMAT_VERSION = '15';
 
@@ -214,6 +215,8 @@ function stripDescriptions(weapons: Weapon[]): Weapon[] {
   }));
 }
 
+const WEAPON_FILES = ['weapons.json', 'perks.json', 'mods.json'];
+
 // ── Step 1: Weapons ───────────────────────────────────────────────────────────
 
 async function buildWeapons() {
@@ -228,7 +231,7 @@ async function buildWeapons() {
   // ── Cache check: skip the ~24 MB table download if version unchanged ──────
   const cacheKey = `${DATA_FORMAT_VERSION}:${version}`;
   const cachedVersion = readCachedManifestVersion();
-  if (cachedVersion === cacheKey && fs.existsSync(outPath('weapons-0.json')) && fs.existsSync(outPath('weapons-1.json')) && fs.existsSync(outPath('weapons-2.json'))) {
+  if (cachedVersion === cacheKey && WEAPON_FILES.every((f) => fs.existsSync(outPath(f)))) {
     console.log(`  ✓ Manifest unchanged since last build — skipping table download`);
     console.log(`    (delete .next/cache/bungie-manifest-version to force a refresh)`);
     return;
@@ -279,15 +282,11 @@ async function buildWeapons() {
   // Null out 404 screenshot URLs for tie-breaking candidates before writing.
   const weapons = await validateTieBreakerScreenshots(rawWeapons);
 
-  // Strip perk descriptions and split into three chunks to stay under the
-  // Cloudflare Workers 25 MiB per-file asset limit.
-  // (Two chunks were sufficient before weaponMods was added; three keeps each
-  //  chunk well under the limit with room for future data growth.)
-  const stripped = stripDescriptions(weapons);
-  const third = Math.ceil(stripped.length / 3);
-  write('weapons-0.json', stripped.slice(0, third));
-  write('weapons-1.json', stripped.slice(third, third * 2));
-  write('weapons-2.json', stripped.slice(third * 2));
+  // Strip perk descriptions, then store each distinct perk / mod once.
+  const pack = packWeapons(stripDescriptions(weapons));
+  write('weapons.json', pack.weapons);
+  write('perks.json', pack.perks);
+  write('mods.json', pack.mods);
 
   // Persist the version so the next build can skip this download if unchanged.
   writeCachedManifestVersion(version);
@@ -423,17 +422,15 @@ async function buildGodRolls() {
 // Event weapons (Dawning, Solstice, FotL, etc.) have null seasonNumber in the
 // Bungie manifest because their watermarks are not in the DIM watermark map.
 // TheAegisRelic's god-rolls database records the correct season for these, so
-// we patch weapons-*.json after both files are written.
+// we patch weapons.json after both files are written.
 
 async function patchEventWeaponSeasons() {
   console.log('\n[patch-seasons] Back-filling null seasonNumbers from god-rolls...');
 
   const grPath = outPath('god-rolls.json');
-  const w0Path = outPath('weapons-0.json');
-  const w1Path = outPath('weapons-1.json');
-  const w2Path = outPath('weapons-2.json');
+  const wPath = outPath('weapons.json');
 
-  if (!fs.existsSync(grPath) || !fs.existsSync(w0Path) || !fs.existsSync(w1Path) || !fs.existsSync(w2Path)) {
+  if (!fs.existsSync(grPath) || !fs.existsSync(wPath)) {
     console.log('  Skipping — required files not present.');
     return;
   }
@@ -450,17 +447,14 @@ async function patchEventWeaponSeasons() {
   }
 
   let patchCount = 0;
-  for (const file of ['weapons-0.json', 'weapons-1.json', 'weapons-2.json'] as const) {
-    const weapons = JSON.parse(fs.readFileSync(outPath(file), 'utf8')) as Array<{ name: string; seasonNumber: number | null }>;
-    let changed = false;
-    for (const w of weapons) {
-      if (w.seasonNumber === null) {
-        const s = grSeason.get(w.name);
-        if (s !== undefined) { w.seasonNumber = s; patchCount++; changed = true; }
-      }
+  const weapons = JSON.parse(fs.readFileSync(wPath, 'utf8')) as PackedWeapon[];
+  for (const w of weapons) {
+    if (w.seasonNumber === null) {
+      const s = grSeason.get(w.name);
+      if (s !== undefined) { w.seasonNumber = s; patchCount++; }
     }
-    if (changed) write(file, weapons);
   }
+  if (patchCount > 0) write('weapons.json', weapons);
 
   console.log(`  Patched ${patchCount} weapon entries (${grSeason.size} god-roll seasons available).`);
 }

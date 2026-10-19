@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWeaponStore, MASTERWORK_STATS } from '../../store/useWeaponStore';
 import { useCompareStore } from '../../store/useCompareStore';
@@ -12,13 +13,8 @@ import { RollEditor } from '../../components/weapon/RollEditor';
 import { EffectsPanel } from '../../components/weapon/EffectsPanel';
 import { StatDisplay } from '../../components/weapon/StatDisplay';
 import { BuffToggle } from '../../components/ui/BuffToggle';
-import { ComparisonGrid } from '../../components/compare/ComparisonGrid';
 import { groupWeapons } from '../../lib/weaponGroups';
 import { GodRollPanel } from '../../components/weapon/GodRollPanel';
-import { WishlistPanel } from '../../components/weapon/WishlistPanel';
-import { SimilarWeaponsPanel } from '../../components/weapon/SimilarWeaponsPanel';
-import { TierListPanel } from '../../components/weapon/TierListPanel';
-import { WeaponDataPanel } from '../../components/weapon/WeaponDataPanel';
 import { calculateTTK } from '../../lib/damageMath';
 import { MasterworkStat } from '../../store/useWeaponStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
@@ -27,6 +23,14 @@ import { useGodRolls } from '../../lib/useGodRolls';
 import { SettingsButton } from '../../components/ui/SettingsPanel';
 import { useSiteSettings } from '../../store/useSiteSettings';
 import { lookupGodRoll } from '../../lib/godRolls';
+
+// Below-the-fold / secondary panels are split into their own chunks so the
+// first paint only ships the roll editor, stats and effects.
+const ComparisonGrid     = dynamic(() => import('../../components/compare/ComparisonGrid').then((m) => m.ComparisonGrid));
+const WishlistPanel      = dynamic(() => import('../../components/weapon/WishlistPanel').then((m) => m.WishlistPanel));
+const SimilarWeaponsPanel = dynamic(() => import('../../components/weapon/SimilarWeaponsPanel').then((m) => m.SimilarWeaponsPanel));
+const TierListPanel      = dynamic(() => import('../../components/weapon/TierListPanel').then((m) => m.TierListPanel));
+const WeaponDataPanel    = dynamic(() => import('../../components/weapon/WeaponDataPanel').then((m) => m.WeaponDataPanel));
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -95,6 +99,9 @@ function Dashboard() {
   const searchParams = useSearchParams();
 
   const [activeTab,          setActiveTab]          = useState<'editor' | 'compare'>('editor');
+  // Mount the comparison grid on first visit, then keep it mounted (hidden) so its state survives tab switches.
+  const [compareMounted,     setCompareMounted]     = useState(false);
+  useEffect(() => { if (activeTab === 'compare') setCompareMounted(true); }, [activeTab]);
   const [shareOpen,          setShareOpen]          = useState(false);
   const [copiedType,         setCopiedType]         = useState<'permalink' | 'dim' | null>(null);
   const [sidebarOpen,        setSidebarOpen]        = useState(false);
@@ -746,7 +753,7 @@ function Dashboard() {
 
           {/* ── Compare tab ─────────────────────────────────────────────── */}
           <div role="tabpanel" aria-label="Comparison grid" hidden={activeTab !== 'compare'}>
-            <ErrorBoundary label="Comparison"><ComparisonGrid onLoadToEditor={() => setActiveTab('editor')} /></ErrorBoundary>
+            {compareMounted && <ErrorBoundary label="Comparison"><ComparisonGrid onLoadToEditor={() => setActiveTab('editor')} /></ErrorBoundary>}
           </div>
 
         </div>
