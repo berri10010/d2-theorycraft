@@ -2,7 +2,7 @@
 
 import { lookupWeaponStat, isChargeWeapon, isBurstWeapon } from './weaponStats';
 import { calcReloadTime } from './reloadTimes';
-import rawCombatantScalars from '../data/combatantScalars.json';
+import { getCombatantScalar } from './damageMath';
 
 export interface DpsResult {
   /** Continuous fire, all-crit (PvP damage). */
@@ -19,13 +19,6 @@ export interface DpsResult {
   magSize: number;
   /** RPM derived from timing data. */
   rpm: number;
-}
-
-const COMBATANT_SCALARS = rawCombatantScalars as Record<string, Record<string, number>>;
-const FALLBACK_PVE_SCALAR = 3.0;
-
-function getPveScalar(itemSubType: number, enemyTier: string): number {
-  return COMBATANT_SCALARS[String(itemSubType)]?.[enemyTier] ?? FALLBACK_PVE_SCALAR;
 }
 
 export function calcDps(
@@ -63,24 +56,37 @@ export function calcDps(
   const rpm = Math.round(60 / timePerShot_s);
 
   // ── Optimal DPS (continuous fire, all crits) ───────────────────────────────
-  const pveScalar      = getPveScalar(itemSubType, enemyTier);
+  const pveScalar      = getCombatantScalar(itemSubType, enemyTier, ammoType);
   const critPerTrigger = entry.critDamage * burstSize;
   const optimalDpsPvp  = critPerTrigger / timePerShot_s;
   const optimalDpsPve  = optimalDpsPvp * pveScalar;
 
   // ── Sustained DPS (mag + reload) ───────────────────────────────────────────
   let magDuration_s: number;
+  let totalDmg: number;
 
   if (isChargeWeapon(entry)) {
     const chargeS  = (entry.chargeMs ?? 500) / 1000;
     const betweenS = entry.shotDelay != null ? entry.shotDelay / 30 : chargeS;
     // First shot: just charge. Subsequent shots: charge + gap between shots.
     magDuration_s = chargeS + (magSize - 1) * (chargeS + betweenS);
+    totalDmg      = magSize * critPerTrigger;
+  } else if (isBurstWeapon(entry)) {
+    // The magazine stat counts individual rounds, and every bullet in a burst
+    // spends one.  Walk the magazine bullet-by-bullet instead of treating each
+    // round as a full burst (which over-counted both damage and time).
+    const intraF     = entry.burstDelay ?? 1;
+    const interF     = entry.shotDelay  ?? 1;
+    const fullBursts = Math.floor((magSize - 1) / burstSize);
+    const remainder  = (magSize - 1) % burstSize;
+    const frames     = fullBursts * ((burstSize - 1) * intraF + interF) + remainder * intraF;
+    magDuration_s = frames / 30;
+    totalDmg      = magSize * entry.critDamage;
   } else {
     magDuration_s = (magSize - 1) * timePerShot_s;
+    totalDmg      = magSize * critPerTrigger;
   }
 
-  const totalDmg       = magSize * critPerTrigger;
   const reloadS        = reloadMs != null ? reloadMs / 1000 : 2.0;
   const cycleTime_s    = magDuration_s + reloadS;
   const sustainedDpsPvp = totalDmg / cycleTime_s;

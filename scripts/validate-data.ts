@@ -53,8 +53,10 @@ const STAT_NAME_ALIASES: Record<string, string> = {
   'Fire Rate':     'RPM',
 };
 
-// Weapon subtypes with combatant scalars — must stay in sync with SUBTYPE_TO_TYPE.
-const KNOWN_SUBTYPES = new Set([6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 22, 24, 25, 29, 31, 33, 34, 35, 36, 37]);
+// Weapon subtypes with combatant scalars — Bungie DestinyItemSubType ids, as they appear in the
+// parsed weapon data (checked against public/data/weapons-*.json in check [4]).
+// Scalar keys may also be ammo-specific ("23_3" = Heavy Grenade Launcher).
+const KNOWN_SUBTYPES = new Set([6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 22, 23, 24, 25, 31, 33]);
 const EXPECTED_TIERS = new Set(['Minor', 'Major / Elite', 'Miniboss', 'Boss', 'Champion']);
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -119,7 +121,7 @@ for (const subtype of KNOWN_SUBTYPES) {
 
 // Check for unknown subtypes in scalars file
 for (const key of Object.keys(combatantScalars)) {
-  if (!KNOWN_SUBTYPES.has(Number(key))) {
+  if (!KNOWN_SUBTYPES.has(Number(key.split('_')[0]))) {
     warn(`combatantScalars.json has entry for subtype ${key} which is not in KNOWN_SUBTYPES`);
   }
 }
@@ -147,6 +149,39 @@ for (const subtype of arcSubtypes) {
 
 if (missingArcEntries === 0) {
   console.log('  ✓ All archetypes.json subtypes have at least one archetype entry.');
+}
+
+// ── Check 4: subtype ids vs the real weapon data ─────────────────────────────
+// Scalar / timing tables are keyed by itemSubType.  If those ids drift from the ids
+// actually present on parsed weapons, whole weapon classes silently fall back to
+// generic numbers — so cross-check against the generated weapon files when present.
+
+console.log('\n[4] weapon data — itemSubType coverage');
+
+const weaponFiles = [0, 1, 2]
+  .map((i) => path.join(process.cwd(), 'public', 'data', `weapons-${i}.json`))
+  .filter((f) => fs.existsSync(f));
+
+if (weaponFiles.length === 0) {
+  console.log('  (skipped — public/data/weapons-*.json not generated yet; run the build first)');
+} else {
+  const seen = new Map<number, { name: string; count: number }>();
+  for (const f of weaponFiles) {
+    const list = JSON.parse(fs.readFileSync(f, 'utf-8')) as Array<{ itemSubType: number; itemTypeDisplayName: string }>;
+    for (const w of list) {
+      const cur = seen.get(w.itemSubType);
+      if (cur) cur.count++;
+      else seen.set(w.itemSubType, { name: w.itemTypeDisplayName, count: 1 });
+    }
+  }
+  let uncovered = 0;
+  for (const [sub, { name, count }] of [...seen].sort((a, b) => a[0] - b[0])) {
+    if (!KNOWN_SUBTYPES.has(sub)) {
+      warn(`${count} weapon(s) of type "${name}" have itemSubType ${sub}, which has no combatant scalars`);
+      uncovered++;
+    }
+  }
+  if (uncovered === 0) console.log('  ✓ Every weapon subtype in the data has combatant scalars.');
 }
 
 // ── Summary ──────────────────────────────────────────────────────────────────

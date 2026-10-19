@@ -11,12 +11,10 @@
   "17": { "Minor": 3.366, "Major / Elite": 3.0, "Miniboss": 2.013, "Boss": 2.013, "Champion": 2.013 },
   "22": { "Minor": 3.171, "Major / Elite": 3.0, "Miniboss": 2.549, "Boss": 2.404, "Champion": 2.549 },
   "24": { "Minor": 3.238, "Major / Elite": 3.0, "Miniboss": 2.259, "Boss": 2.259, "Champion": 2.259 },
-  "25": { "Minor": 3.571, "Major / Elite": 3.0, "Miniboss": 3.0,   "Boss": 2.857, "Champion": 3.0   },
-  "29": { "Minor": 3.353, "Major / Elite": 3.0, "Miniboss": 2.500, "Boss": 2.206, "Champion": 2.500 },
+  "23": { "Minor": 3.571, "Major / Elite": 3.0, "Miniboss": 3.0,   "Boss": 2.857, "Champion": 3.0   },
+  "25": { "Minor": 3.353, "Major / Elite": 3.0, "Miniboss": 2.500, "Boss": 2.206, "Champion": 2.500 },
   "31": { "Minor": 4.428, "Major / Elite": 3.0, "Miniboss": 2.214, "Boss": 2.214, "Champion": 2.214 },
   "33": { "Minor": 4.5,   "Major / Elite": 3.0, "Miniboss": 3.0,   "Boss": 3.0,   "Champion": 3.0   },
-  "34": { "Minor": 3.8,   "Major / Elite": 3.0, "Miniboss": 2.55,  "Boss": 2.55,  "Champion": 2.55  },
-  "35": { "Minor": 4.174, "Major / Elite": 3.0, "Miniboss": 3.0,   "Boss": 2.577, "Champion": 2.863 },
-  "36": { "Minor": 5.0,   "Major / Elite": 3.0, "Miniboss": 3.0,   "Boss": 2.857, "Champion": 3.0   },
-  "37": { "Minor": 3.366, "Major / Elite": 3.0, "Miniboss": 1.610, "Boss": 1.610, "Champion": 1.610 }
+  "18": { "Minor": 3.8,   "Major / Elite": 3.0, "Miniboss": 2.55,  "Boss": 2.55,  "Champion": 2.55  },
+  "23_3": { "Minor": 4.174, "Major / Elite": 3.0, "Miniboss": 3.0,   "Boss": 2.577, "Champion": 2.863 }
 }

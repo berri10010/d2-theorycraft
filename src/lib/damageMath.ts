@@ -65,8 +65,15 @@ export const PVE_HEALTH_TIERS: Record<string, number> = {
  */
 const COMBATANT_SCALARS = rawCombatantScalars as Record<string, Record<string, number>>;
 
-function getCombatantScalar(itemSubType: number, tier: string): number {
-  const entry = COMBATANT_SCALARS[String(itemSubType)];
+/**
+ * Looks up the PvE scalar for a weapon subtype + enemy tier.  An ammo-specific
+ * row (`"<subtype>_<ammoType>"`, e.g. `"23_3"` for Heavy Grenade Launchers) wins
+ * over the plain subtype row.  Shared with dpsCalc so both use one table.
+ */
+export function getCombatantScalar(itemSubType: number, tier: string, ammoType?: number): number {
+  const entry =
+    (ammoType != null ? COMBATANT_SCALARS[`${itemSubType}_${ammoType}`] : undefined) ??
+    COMBATANT_SCALARS[String(itemSubType)];
   return entry?.[tier] ?? PVE_DAMAGE_SCALAR;
 }
 
@@ -113,14 +120,18 @@ function findOptimalShots(
 ): [shots: number, crits: number, bodies: number] | null {
   if (critDmg <= 0) return null;
 
-  const minShots = Math.ceil(targetHp / critDmg);
+  // Tolerance guards against float noise: when HP is an exact multiple of the
+  // crit damage, hp / crit can land a hair above the integer and ceil() would
+  // report one shot too many.
+  const EPS = 1e-9;
+  const minShots = Math.ceil(targetHp / critDmg - EPS);
   let optimalCrits  = minShots;
   let optimalBodies = 0;
 
   for (let c = minShots; c >= 0; c--) {
     const b      = minShots - c;
     const damage = c * critDmg + b * bodyDmg;
-    if (damage >= targetHp) {
+    if (damage >= targetHp - EPS) {
       optimalCrits  = c;
       optimalBodies = b;
     } else {
@@ -293,7 +304,7 @@ export function calculateTTK(
   );
   if (!entry) return null;
   const hp        = mode === 'pvp' ? pvpHp : (PVE_HEALTH_TIERS[enemyTier] ?? 336);
-  const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
+  const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier, weapon.ammoType) : 1.0;
   return calcTTKCore(entry, hp, multiplier, mode, pveScalar);
 }
 
@@ -335,7 +346,7 @@ export function calculateTTKCurve(
   if (!entry) return [];
 
   const hp        = mode === 'pvp' ? pvpHp : (PVE_HEALTH_TIERS[enemyTier] ?? 336);
-  const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
+  const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier, weapon.ammoType) : 1.0;
   const steps = 40;
   const result: TTKBreakpoint[] = [];
   const calc = getTtkCalculator(entry);

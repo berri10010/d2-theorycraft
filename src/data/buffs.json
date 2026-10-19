@@ -44,8 +44,8 @@
     "name": "Bait and Switch",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.35,
-    "description": "Deal damage with all three equipped weapons within a short window to activate +35% damage.",
+    "multiplier": 1.3,
+    "description": "Deal damage with all three equipped weapons within a short window to activate +30% damage for 10s (11s Enhanced).",
     "perkNames": ["Bait and Switch", "Enhanced Bait and Switch"],
     "icon": null
   },
@@ -64,14 +64,14 @@
     "name": "Rampage",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.66,
-    "description": "Kills grant a stacking damage bonus (PvE: 20/41/66% at ×1/×2/×3). Stacks expire one at a time every 4.5s.",
+    "multiplier": 1.331,
+    "description": "Kills grant a stacking damage bonus (+10% / +21% / +33.1% at ×1/×2/×3). Stacks expire one at a time every 4.5s (5s Enhanced).",
     "perkNames": ["Rampage", "Enhanced Rampage"],
     "icon": null,
     "stacks": [
-      { "count": 1, "label": "×1", "multiplier": 1.20 },
-      { "count": 2, "label": "×2", "multiplier": 1.41 },
-      { "count": 3, "label": "×3", "multiplier": 1.66 }
+      { "count": 1, "label": "×1", "multiplier": 1.1 },
+      { "count": 2, "label": "×2", "multiplier": 1.21 },
+      { "count": 3, "label": "×3", "multiplier": 1.331 }
     ]
   },
   "golden_tricorn": {
@@ -79,13 +79,13 @@
     "name": "Golden Tricorn",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.50,
-    "description": "×2 from a weapon kill of matching element (+15%). ×3 from an ability kill of matching element (+50%).",
+    "multiplier": 1.5,
+    "description": "×1 from a weapon kill (+15%). ×2 from a matching-element grenade or elemental melee kill (+50%).",
     "perkNames": ["Golden Tricorn", "Enhanced Golden Tricorn"],
     "icon": null,
     "stacks": [
-      { "count": 2, "label": "×2", "multiplier": 1.15 },
-      { "count": 3, "label": "×3", "multiplier": 1.50 }
+      { "count": 1, "label": "×1", "multiplier": 1.15 },
+      { "count": 2, "label": "×2", "multiplier": 1.5 }
     ]
   },
   "swashbuckler": {
@@ -110,16 +110,16 @@
     "name": "Adrenaline Junkie",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.25,
-    "description": "Grenade kills or rapid weapon kills grant a stacking damage bonus up to ×5.",
+    "multiplier": 1.333,
+    "description": "Grenade kills or rapid weapon kills grant a stacking damage bonus (+6.7% per stack, up to +33.3% at ×5).",
     "perkNames": ["Adrenaline Junkie", "Enhanced Adrenaline Junkie"],
     "icon": null,
     "stacks": [
-      { "count": 1, "label": "×1", "multiplier": 1.05 },
-      { "count": 2, "label": "×2", "multiplier": 1.10 },
-      { "count": 3, "label": "×3", "multiplier": 1.15 },
-      { "count": 4, "label": "×4", "multiplier": 1.20 },
-      { "count": 5, "label": "×5", "multiplier": 1.25 }
+      { "count": 1, "label": "×1", "multiplier": 1.067 },
+      { "count": 2, "label": "×2", "multiplier": 1.133 },
+      { "count": 3, "label": "×3", "multiplier": 1.2 },
+      { "count": 4, "label": "×4", "multiplier": 1.266 },
+      { "count": 5, "label": "×5", "multiplier": 1.333 }
     ]
   },
   "successful_warm_up": {
@@ -127,17 +127,10 @@
     "name": "Successful Warm-Up",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.33,
-    "description": "Rapid kills build stacks granting up to +33% damage on linear fusion rifles.",
+    "multiplier": 1.0,
+    "description": "Weapon kills reduce Charge/Draw Time by 37.5% for a short window. Speed perk — no direct damage bonus.",
     "perkNames": ["Successful Warm-Up", "Enhanced Successful Warm-Up"],
-    "icon": null,
-    "stacks": [
-      { "count": 1, "label": "×1", "multiplier": 1.066 },
-      { "count": 2, "label": "×2", "multiplier": 1.132 },
-      { "count": 3, "label": "×3", "multiplier": 1.20 },
-      { "count": 4, "label": "×4", "multiplier": 1.266 },
-      { "count": 5, "label": "×5", "multiplier": 1.33 }
-    ]
+    "icon": null
   },
   "vorpal_weapon": {
     "hash": "vorpal_weapon",
@@ -159,8 +152,8 @@
     "name": "Firing Line",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.25,
-    "description": "+25% precision damage when near two or more allies aiming at the same target.",
+    "multiplier": 1.2,
+    "description": "+20% precision damage when within 15m of two or more allies. Precision hits only — body shots are unaffected.",
     "perkNames": ["Firing Line", "Enhanced Firing Line"],
     "icon": null
   },
@@ -179,8 +172,8 @@
     "name": "One-Two Punch",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.50,
-    "description": "Hitting an enemy with every pellet in a shot briefly grants +50% melee damage. Shotgun only.",
+    "multiplier": 1.0,
+    "description": "Hitting enough pellets of a shot boosts your next melee attack (+150% base melee damage on Shotguns). Melee only — no weapon damage bonus.",
     "perkNames": ["One-Two Punch", "Enhanced One-Two Punch"],
     "icon": null
   },
@@ -189,8 +182,8 @@
     "name": "Desperado",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.40,
-    "description": "After a precision kill that empties the magazine, the next magazine deals +40% damage. Pulse rifles only.",
+    "multiplier": 1.0,
+    "description": "Reloading after a precision kill (or rapid kills) reduces Firing Delay by 30% for 6s. Rate-of-fire perk — no direct damage bonus.",
     "perkNames": ["Desperado"],
     "icon": null
   },
@@ -199,10 +192,15 @@
     "name": "High Ground",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.10,
-    "description": "+10% weapon damage when shooting at targets that are below you.",
+    "multiplier": 1.25,
+    "description": "Kills grant stacks of +10% / +17.5% / +25% weapon damage (×1/×2/×3). Hitting targets well below you grants max stacks instantly.",
     "perkNames": ["High Ground"],
-    "icon": null
+    "icon": null,
+    "stacks": [
+      { "count": 1, "label": "×1", "multiplier": 1.1 },
+      { "count": 2, "label": "×2", "multiplier": 1.175 },
+      { "count": 3, "label": "×3", "multiplier": 1.25 }
+    ]
   },
   "killing_tally": {
     "hash": "killing_tally",

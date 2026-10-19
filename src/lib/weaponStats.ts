@@ -62,16 +62,13 @@ const SUBTYPE_TO_TYPE: Record<number, string> = {
    13: 'Pulse',
    14: 'Scout',
    17: 'Sidearm',
+   18: 'Sword',
    22: 'Linear Fusion',
+   23: 'Grenade Launcher',
    24: 'SMG',
-   25: 'Grenade Launcher',
-   29: 'Trace',
+   25: 'Trace',
    31: 'Bow',
    33: 'Glaive',
-   34: 'Sword',
-   35: 'Heavy Grenade Launcher',
-   36: 'Breech Grenade Launcher',
-   37: 'Rocket Sidearm',
 };
 
 /** ammoType (1/2/3) → spreadsheet ammo slot (p/s/h) */
@@ -85,6 +82,7 @@ const AMMO_TO_SLOT: Record<number, string> = { 1: 'p', 2: 's', 3: 'h' };
 function normalizeFrameName(bungieName: string): string {
   return bungieName
     .replace(/ Frame$/, '')           // "Adaptive Frame" → "Adaptive"
+    .replace(/ Glaive$/, '')          // "Aggressive Glaive" → "Aggressive"
     .replace(/^Rapid-Fire$/, 'Rapid Fire'); // hyphen → space
 }
 
