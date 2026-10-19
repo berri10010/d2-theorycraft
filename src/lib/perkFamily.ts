@@ -166,23 +166,3 @@ export function getPerkFamily(perk: Perk, col: PerkColumn): PerkFamily {
 
   return 'Trait';
 }
-
-/**
- * Short badge label used in compact UI (≤6 chars).
- */
-export function getPerkFamilyBadge(perk: Perk, col: PerkColumn): string {
-  const family = getPerkFamily(perk, col);
-  switch (family) {
-    case 'Origin Trait': return 'Origin';
-    case 'Barrel':       return 'Barrel';
-    case 'Bowstring':    return 'Bow';
-    case 'Blade':        return 'Blade';
-    case 'Haft':         return 'Haft';
-    case 'Scope':        return 'Scope';
-    case 'Magazine':     return 'Mag';
-    case 'Grip':         return 'Grip';
-    case 'Stock':        return 'Stock';
-    case 'Frame':        return 'Frame';
-    case 'Trait':        return 'Trait';
-  }
-}

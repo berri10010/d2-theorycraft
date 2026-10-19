@@ -5,3 +5,9 @@ node_modules
 items.json
 plugsets.json
 weapon_formulas.json
+out
+.wrangler
+.Xil
+clockInfo.txt
+*.tsbuildinfo
+.claude/settings.local.json

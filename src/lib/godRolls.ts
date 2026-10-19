@@ -49,29 +49,3 @@ export function lookupGodRoll(
 ): GodRollEntry | null {
   return db[weapon.name] ?? db[weapon.baseName] ?? null;
 }
-
-// ──────────────────────────────────────────────────
-// Column-name → god-roll field mapping
-// ──────────────────────────────────────────────────
-
-const BARREL_PATTERNS = ['barrel', 'sight', 'bowstring', 'blade', 'guard', 'battery'];
-const MAG_PATTERNS = ['magazine', 'arrow', 'projectile'];
-
-export type GodRollField = keyof Pick<GodRollEntry, 'barrel' | 'mag' | 'perk1' | 'perk2' | 'originTrait'>;
-
-/**
- * Given a perk-socket column name (e.g. "Barrel", "Magazine", "Trait 1", "Origin Trait"),
- * returns which field in GodRollEntry holds the recommendation(s) for it,
- * or null if this column isn't tracked.
- *
- * Note: 'originTrait' maps to a string | null (single value), all others to string[].
- */
-export function godRollFieldForColumn(columnName: string): GodRollField | null {
-  const lower = columnName.toLowerCase();
-  if (lower === 'origin trait') return 'originTrait';
-  if (BARREL_PATTERNS.some((p) => lower.includes(p))) return 'barrel';
-  if (MAG_PATTERNS.some((p) => lower.includes(p))) return 'mag';
-  if (lower.startsWith('trait 1')) return 'perk1';
-  if (lower.startsWith('trait 2')) return 'perk2';
-  return null;
-}
