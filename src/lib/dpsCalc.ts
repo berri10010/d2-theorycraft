@@ -3,6 +3,7 @@
 import { lookupWeaponStat, isChargeWeapon, isBurstWeapon } from './weaponStats';
 import { calcReloadTime } from './reloadTimes';
 import rawCombatantScalars from '../data/combatantScalars.json';
+import { sheetSubType } from './subtypes';
 
 export interface DpsResult {
   /** Continuous fire, all-crit (PvP damage). */
@@ -25,7 +26,7 @@ const COMBATANT_SCALARS = rawCombatantScalars as Record<string, Record<string, n
 const FALLBACK_PVE_SCALAR = 3.0;
 
 function getPveScalar(itemSubType: number, enemyTier: string): number {
-  return COMBATANT_SCALARS[String(itemSubType)]?.[enemyTier] ?? FALLBACK_PVE_SCALAR;
+  return COMBATANT_SCALARS[String(sheetSubType(itemSubType))]?.[enemyTier] ?? FALLBACK_PVE_SCALAR;
 }
 
 export function calcDps(

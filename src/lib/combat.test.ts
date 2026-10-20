@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculateTTK, calculateTTKCurve, getFalloffFloor, PVE_HEALTH_TIERS } from './damageMath';
+import { ammoFromStats } from './ttkAmmo';
 import { calcDps } from './dpsCalc';
 import { findWeapon } from '../test/realData';
 
@@ -78,5 +79,45 @@ describe('calcDps', () => {
   });
   it('faster reloads never lower sustained DPS', () => {
     expect(run(100, 50)!.sustainedDpsPvp).toBeGreaterThanOrEqual(run(10, 50)!.sustainedDpsPvp);
+  });
+});
+
+describe('reload-aware TTK', () => {
+  const ammo = { magSize: 10, reloadSeconds: 2 };
+
+  it('is unchanged when the kill fits in one magazine', () => {
+    const short = calculateTTK('pvp', info, 1, 230, 'Minor')!;
+    expect(short.shotsToKill).toBeLessThanOrEqual(ammo.magSize);
+    expect(calculateTTK('pvp', info, 1, 230, 'Minor', ammo)).toEqual({ ...short, reloads: 0 });
+  });
+
+  it('adds one reload per full magazine spent before the last shot', () => {
+    const plain = calculateTTK('pve', info, 0.2, 230, 'Boss')!; // weak enough to need many shots
+    expect(plain.shotsToKill).toBeGreaterThan(ammo.magSize * 2);
+    const withAmmo = calculateTTK('pve', info, 0.2, 230, 'Boss', ammo)!;
+    const reloads = Math.floor((plain.shotsToKill - 1) / ammo.magSize);
+    expect(withAmmo.reloads).toBe(reloads);
+    expect(withAmmo.shotsToKill).toBe(plain.shotsToKill);
+    expect(withAmmo.ttk).toBeCloseTo(plain.ttk + reloads * ammo.reloadSeconds, 2);
+  });
+
+  it('ignores reloads when reload speed is unknown', () => {
+    const plain = calculateTTK('pve', info, 0.2, 230, 'Boss')!;
+    expect(calculateTTK('pve', info, 0.2, 230, 'Boss', { magSize: 10, reloadSeconds: null })!.ttk).toBe(plain.ttk);
+  });
+
+  it('the TTK curve includes reloads too', () => {
+    const noAmmo = calculateTTKCurve('pve', info, 0.2, 230, 'Boss', 20, 60, 0.5);
+    const withAmmo = calculateTTKCurve('pve', info, 0.2, 230, 'Boss', 20, 60, 0.5, ammo);
+    expect(withAmmo[0].ttk).toBeGreaterThan(noAmmo[0].ttk);
+    expect(withAmmo[0].reloads).toBeGreaterThan(0);
+  });
+
+  it('builds ammo from calculated stats', () => {
+    const a = ammoFromStats(hc, { Magazine: 11, Reload: 50 })!;
+    expect(a.magSize).toBe(11);
+    expect(a.reloadSeconds).toBeGreaterThan(1);
+    expect(a.reloadSeconds).toBeLessThan(4);
+    expect(ammoFromStats(hc, { Reload: 50 })).toBeUndefined();
   });
 });

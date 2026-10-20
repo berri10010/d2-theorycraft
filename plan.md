@@ -648,3 +648,21 @@ npm run build
 - **Theming:** colours are CSS variables (`globals.css`); Tailwind maps `black`/`white` plus `ink`/`ink-2..4` (text) and `surface`/`surface-2`. Light mode and "System" (OS) are just variable sets. Use `text-ink-*` for text; `perk-icon` gives Bungie glyphs a dark disc in light mode.
 - **URL sync:** the editor keeps `?w&p&m&mw&ws&b&tier` current via `history.replaceState` (see `lastWrittenRef` in `editor/page.tsx` for the loop guard). Saved rolls ("My Rolls" in the Wishlist panel) can be loaded back with one tap.
 - **Known leftover:** `useWeaponStore.loadWeapon` still records each weapon's roll in `weaponRolls` (and persists it) but only restores the mod; perk restore was removed in ed77958.
+
+---
+
+## Formula accuracy audit (what changed, what is still an estimate)
+
+**Fixed (verified against Bungie's own data, with tests)**
+- *Stat maths:* the manifest's `stats` are **display** values, but every modifier (perks, mods, masterwork, armour) is in **raw investment** units. Stats with a non-1:1 display curve (Magazine, Impact, RPM, Draw/Charge Time, Ammo Capacity…) were being added to as if both were the same unit — e.g. a sniper with Extended Mag showed 34 rounds (now ≈5), and a faster bowstring *raised* draw time. `src/lib/statCalc.ts` adds raw deltas to the raw base and re-interpolates through `DestinyStatGroupDefinition` (`Weapon.rawStats` + `displayCurves`, shipped as `statgroups.json`). Contributions are summed once and clamped once (no per-source clamping).
+- *Masterwork Draw/Charge Time:* hard-coded −34/−33 ms replaced by the raw +10 so the curve gives the exact per-frame value.
+- *Subtype mapping:* the stat spreadsheets number Sword/Grenade Launcher/Trace Rifle differently from Bungie (`src/lib/subtypes.ts`); Trace Rifles were reading Grenade Launcher data. Bow Reload is clamped at 85 like the reference engine.
+- *TTK now includes reloads* when a kill needs more shots than the magazine (reload speed from the Reload stat).
+
+**Still estimates / unverified (no ground truth available offline)**
+- Range falloff: `archetypes.json` range curves are 3-point calibrations; falloff end distance and the damage floor are assumed (end = 2× ADS start, floor 0.5). The d2foundry oracle models start/end/floor per frame, but its data stops at patch 8.2.6 (May 2025) and disagrees with ours by up to ~18%.
+- ADS range multiplier is derived from the Zoom stat; the oracle uses fixed per-archetype constants.
+- Frame damage/timing data (huwugo / rockstarmatt, patch 9.7) is newer than the oracle's; refresh it when balance patches land.
+- Perk audit stat values (`perkAudit.json`) mix display and raw units (Sneak Bow's draw time was corrected to raw); other audit magazine entries are unverified.
+- Magazine for burst weapons snaps to multiples of the burst size in game; modifiers are applied as a curve *delta* on the displayed base, so results can be ±1–3 rounds off after perks.
+- LFR charge-time damage penalty and PvP resilience HP table are not modelled / unverified.

@@ -9,6 +9,7 @@ import {
 import { Tooltip } from '../ui/Tooltip';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { ClarityEntry } from '../../lib/clarity';
+import { displayedDelta } from '../../lib/statCalc';
 
 /** Flatten a Clarity entry's English description into plain text. */
 function clarityPlainText(entry: ClarityEntry): string | null {
@@ -136,7 +137,11 @@ export const MasterworkPanel: React.FC = () => {
                   {masterworkStat ? (
                     <span className={`text-[10px] ${labelColor} font-semibold`}>
                       {(() => {
-                        const primaryBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
+                        const rawBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
+                        // Curved stats (Draw Time, Charge Time, Impact…) show the change in the displayed value.
+                        const primaryBonus = activeWeapon.displayCurves?.[masterworkStat] && activeWeapon.baseStats[masterworkStat] !== undefined
+                          ? displayedDelta(masterworkStat, activeWeapon.baseStats[masterworkStat], rawBonus, activeWeapon)
+                          : rawBonus;
                         const primaryLabel = primaryBonus < 0
                           ? `${primaryBonus} ${masterworkStat}`
                           : `+${primaryBonus} ${masterworkStat}`;

@@ -8,6 +8,7 @@
  *   public/data/weapons.json  PackedWeapon[]   (landing page loads just this)
  *   public/data/perks.json    Record<hash, PackedPerk>
  *   public/data/mods.json     Record<hash, WeaponModOption>
+ *   public/data/statgroups.json  Record<groupHash, Record<stat, StatCurveNode[]>>
  *
  * A perk's (or mod's) enhancedVersion depends on the slot it sits in (the same
  * hash can appear with and without one on a single weapon), so a slot entry is
@@ -17,7 +18,7 @@
  * shared by reference, which also cuts runtime memory.
  */
 
-import type { Weapon, Perk, PerkColumn, WeaponModOption } from '../types/weapon';
+import type { Weapon, Perk, PerkColumn, WeaponModOption, StatCurveNode } from '../types/weapon';
 
 type Upgradable = { hash: string; enhancedVersion?: Upgradable | null };
 
@@ -26,7 +27,7 @@ export type Ref = string | [string, string];
 export type PackedPerk = Omit<Perk, 'enhancedVersion'>;
 export type PackedMod = Omit<WeaponModOption, 'enhancedVersion'>;
 export type PackedColumn = Omit<PerkColumn, 'perks'> & { perks: Ref[] };
-export type PackedWeapon = Omit<Weapon, 'intrinsicTrait' | 'perkSockets' | 'weaponMods'> & {
+export type PackedWeapon = Omit<Weapon, 'intrinsicTrait' | 'perkSockets' | 'weaponMods' | 'displayCurves'> & {
   intrinsicTrait: Ref | null;
   perkSockets: PackedColumn[];
   weaponMods: Ref[];
@@ -36,6 +37,8 @@ export interface WeaponPack {
   weapons: PackedWeapon[];
   perks: Record<string, PackedPerk>;
   mods: Record<string, PackedMod>;
+  /** Display curves keyed by Bungie stat group; weapons reference them via `statGroup`. */
+  statGroups: Record<string, Record<string, StatCurveNode[]>>;
 }
 
 /** Register `value` under `hash`, refusing to merge entries that differ. */
@@ -65,17 +68,25 @@ function makePacker<T extends Upgradable>(table: Record<string, Omit<T, 'enhance
 export function packWeapons(weapons: Weapon[]): WeaponPack {
   const perks: Record<string, PackedPerk> = {};
   const mods: Record<string, PackedMod> = {};
+  const statGroups: Record<string, Record<string, StatCurveNode[]>> = {};
   const packPerk = makePacker<Perk>(perks, 'perk');
   const packMod = makePacker<WeaponModOption>(mods, 'mod');
 
-  const packed = weapons.map((w): PackedWeapon => ({
-    ...w,
+  const packed = weapons.map((w): PackedWeapon => {
+    const { displayCurves, ...rest } = w;
+    if (displayCurves) {
+      if (!w.statGroup) throw new Error(`weaponPack: ${w.name} has displayCurves but no statGroup`);
+      intern(statGroups, w.statGroup, displayCurves, 'stat group');
+    }
+    return {
+    ...rest,
     intrinsicTrait: w.intrinsicTrait ? packPerk(w.intrinsicTrait) : null,
     perkSockets: w.perkSockets.map((col) => ({ ...col, perks: col.perks.map(packPerk) })),
     weaponMods: w.weaponMods.map(packMod),
-  }));
+    };
+  });
 
-  return { weapons: packed, perks, mods };
+  return { weapons: packed, perks, mods, statGroups };
 }
 
 /**
@@ -118,5 +129,6 @@ export function unpackWeapons(pack: WeaponPack): Weapon[] {
     intrinsicTrait: w.intrinsicTrait ? perk(w.intrinsicTrait) : null,
     perkSockets: w.perkSockets.map((col) => ({ ...col, perks: col.perks.map(perk) })),
     weaponMods: w.weaponMods.map(mod),
+    ...(w.statGroup && pack.statGroups[w.statGroup] ? { displayCurves: pack.statGroups[w.statGroup] } : {}),
   }));
 }

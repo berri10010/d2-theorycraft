@@ -7,6 +7,7 @@ import { useWeaponStore } from '../../store/useWeaponStore';
 import { CompareSnapshot, StatCurveNode } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
+import { ammoFromStats } from '../../lib/ttkAmmo';
 import { interpolateStat, adsMultiplier } from '../../lib/math';
 import { calcHandlingTimes } from '../../lib/handlingTimes';
 import { calcReloadTime } from '../../lib/reloadTimes';
@@ -76,11 +77,12 @@ function SnapshotCard({
   // ── Recalculate TTK dynamically based on the selected enemy tier ──────────
   const multiplier = snapshot.multiplier ?? 1.0;
   const liveTtk = useMemo(() => {
+    const ammo = ammoFromStats(snapshot.weapon, snapshot.calculatedStats);
     if (snapshot.mode === 'pvp') {
-      return calculateTTK('pvp', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, 'Minor');
+      return calculateTTK('pvp', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, 'Minor', ammo);
     }
-    return calculateTTK('pve', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, enemyTier);
-  }, [snapshot.weapon, snapshot.mode, multiplier, enemyTier]);
+    return calculateTTK('pve', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, enemyTier, ammo);
+  }, [snapshot.weapon, snapshot.calculatedStats, snapshot.mode, multiplier, enemyTier]);
 
   // ── Derive falloff distances from snapshot data ───────────────────────────
   const rangeCurve = snapshot.weapon.statCurves?.['Range'];
@@ -444,8 +446,8 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
       if (sortStat === 'TTK') {
         const tierA = a.mode === 'pve' ? enemyTier : 'Minor';
         const tierB = b.mode === 'pve' ? enemyTier : 'Minor';
-        valA = calculateTTK(a.mode, a.weapon, a.multiplier ?? 1.0, PVP_GUARDIAN_HP, tierA)?.ttk ?? Infinity;
-        valB = calculateTTK(b.mode, b.weapon, b.multiplier ?? 1.0, PVP_GUARDIAN_HP, tierB)?.ttk ?? Infinity;
+        valA = calculateTTK(a.mode, a.weapon, a.multiplier ?? 1.0, PVP_GUARDIAN_HP, tierA, ammoFromStats(a.weapon, a.calculatedStats))?.ttk ?? Infinity;
+        valB = calculateTTK(b.mode, b.weapon, b.multiplier ?? 1.0, PVP_GUARDIAN_HP, tierB, ammoFromStats(b.weapon, b.calculatedStats))?.ttk ?? Infinity;
       } else {
         valA = a.calculatedStats[sortStat] ?? 0;
         valB = b.calculatedStats[sortStat] ?? 0;

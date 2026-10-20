@@ -10,6 +10,7 @@
  */
 
 import rawData from '../data/weaponStats.json';
+import { sheetSubType } from './subtypes';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -49,7 +50,8 @@ export interface WeaponStatEntry {
 }
 
 // ── Subtype → spreadsheet type string ────────────────────────────────────────
-//  Values match Bungie's DestinyItemSubType enum.
+//  Keys are the *spreadsheet's* subtype numbers (see ./subtypes.ts for the three that differ
+//  from Bungie's DestinyItemSubType); lookupWeaponStat converts before indexing.
 
 const SUBTYPE_TO_TYPE: Record<number, string> = {
     6: 'Auto',
@@ -108,7 +110,7 @@ export function lookupWeaponStat(
 ): WeaponStatEntry | null {
   if (!intrinsicName) return null;
 
-  const typeStr  = SUBTYPE_TO_TYPE[itemSubType];
+  const typeStr  = SUBTYPE_TO_TYPE[sheetSubType(itemSubType)];
   const ammoSlot = AMMO_TO_SLOT[ammoType];
   if (!typeStr || !ammoSlot) {
     if (process.env.NODE_ENV === 'development' && typeStr === undefined) {

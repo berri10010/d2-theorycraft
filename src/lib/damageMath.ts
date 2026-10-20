@@ -21,6 +21,7 @@
 import { GameMode } from '../types/weapon';
 import { lookupWeaponStat, isChargeWeapon, isBurstWeapon, WeaponStatEntry } from './weaponStats';
 import rawCombatantScalars from '../data/combatantScalars.json';
+import { sheetSubType } from './subtypes';
 import { roundTo3 } from './math';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -66,14 +67,17 @@ export const PVE_HEALTH_TIERS: Record<string, number> = {
 const COMBATANT_SCALARS = rawCombatantScalars as Record<string, Record<string, number>>;
 
 function getCombatantScalar(itemSubType: number, tier: string): number {
-  const entry = COMBATANT_SCALARS[String(itemSubType)];
+  const entry = COMBATANT_SCALARS[String(sheetSubType(itemSubType))];
   return entry?.[tier] ?? PVE_DAMAGE_SCALAR;
 }
 
 // ── Result type ───────────────────────────────────────────────────────────────
 
 export interface TTKResult {
+  /** Seconds from the first trigger pull to the killing shot, including any reloads. */
   ttk: number;
+  /** Reloads needed mid-kill (0 unless the kill takes more shots than the magazine holds). */
+  reloads: number;
   /** "Shots" appropriate for the weapon category:
    *   Standard / Burst → total individual bullets.
    *   Charge           → trigger pulls.
@@ -203,6 +207,7 @@ function getTtkCalculator(entry: WeaponStatEntry): TTKCalculator {
       const [shots, crits, bodies] = found;
       return {
         ttk: roundTo3(ttkCharge(shots, entry.chargeMs!, entry.shotDelay)),
+        reloads: 0,
         shotsToKill: shots,
         crits,
         bodies,
@@ -223,6 +228,7 @@ function getTtkCalculator(entry: WeaponStatEntry): TTKCalculator {
       const [shots, crits, bodies] = found;
       return {
         ttk: roundTo3(ttkBurst(shots, entry.shotsPerBurst!, entry.burstDelay, entry.shotDelay)),
+        reloads: 0,
         shotsToKill: shots,
         crits,
         bodies,
@@ -243,6 +249,7 @@ function getTtkCalculator(entry: WeaponStatEntry): TTKCalculator {
     const [shots, crits, bodies] = found;
     return {
       ttk: roundTo3(ttkStandard(shots, entry.shotDelay)),
+      reloads: 0,
       shotsToKill: shots,
       crits,
       bodies,
@@ -259,6 +266,28 @@ function calcTTKCore(
   pveScalar = PVE_DAMAGE_SCALAR,
 ): TTKResult | null {
   return getTtkCalculator(entry)(targetHp, effectiveMultiplier, mode, pveScalar);
+}
+
+// ── Reloads ───────────────────────────────────────────────────────────────────
+
+/** Magazine and reload speed, so a long kill can include the time spent reloading. */
+export interface TTKAmmo {
+  /** Rounds per magazine (the displayed Magazine stat). */
+  magSize: number;
+  /** Seconds per reload, or null when unknown (reloads are then ignored). */
+  reloadSeconds: number | null;
+}
+
+/**
+ * Add reload time to a kill that needs more shots than one magazine holds.
+ * Every shot (a trigger pull, or each bullet of a burst) uses one round, so a kill of N shots
+ * needs floor((N - 1) / magSize) reloads before the last shot.
+ */
+function withReloads(result: TTKResult, ammo: TTKAmmo | undefined): TTKResult {
+  if (!ammo || ammo.reloadSeconds == null || ammo.magSize < 1) return result;
+  const reloads = Math.floor((result.shotsToKill - 1) / Math.floor(ammo.magSize));
+  if (reloads <= 0) return result;
+  return { ...result, reloads, ttk: roundTo3(result.ttk + reloads * ammo.reloadSeconds) };
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -278,6 +307,7 @@ export interface TTKWeaponInfo {
  * @param multiplier   Combined damage multiplier from active buffs / mods
  * @param pvpHp        Guardian HP for PvP (typically 230)
  * @param enemyTier    Key from PVE_HEALTH_TIERS (e.g. 'Minor', 'Boss') — ignored for pvp
+ * @param ammo         Magazine + reload speed; when given, reloads needed mid-kill are included
  */
 export function calculateTTK(
   mode: GameMode,
@@ -285,6 +315,7 @@ export function calculateTTK(
   multiplier: number,
   pvpHp: number,
   enemyTier: string,
+  ammo?: TTKAmmo,
 ): TTKResult | null {
   const entry = lookupWeaponStat(
     weapon.itemSubType,
@@ -294,7 +325,8 @@ export function calculateTTK(
   if (!entry) return null;
   const hp        = mode === 'pvp' ? pvpHp : (PVE_HEALTH_TIERS[enemyTier] ?? 336);
   const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
-  return calcTTKCore(entry, hp, multiplier, mode, pveScalar);
+  const result = calcTTKCore(entry, hp, multiplier, mode, pveScalar);
+  return result ? withReloads(result, ammo) : null;
 }
 
 // ── TTK vs Distance (breakpoint visualization) ────────────────────────────────
@@ -302,6 +334,7 @@ export function calculateTTK(
 export interface TTKBreakpoint {
   distance: number;
   ttk: number;
+  reloads: number;
   shotsToKill: number;
   crits: number;
   bodies: number;
@@ -326,6 +359,7 @@ export function calculateTTKCurve(
   falloffStart: number,
   maxDist: number,
   falloffFloor = 0.5,
+  ammo?: TTKAmmo,
 ): TTKBreakpoint[] {
   const entry = lookupWeaponStat(
     weapon.itemSubType,
@@ -350,11 +384,13 @@ export function calculateTTKCurve(
       frac = 1.0 - (1.0 - falloffFloor) * t;
     }
 
-    const ttkResult = calc(hp, multiplier * frac, mode, pveScalar);
+    const raw = calc(hp, multiplier * frac, mode, pveScalar);
+    const ttkResult = raw ? withReloads(raw, ammo) : null;
     if (ttkResult) {
       result.push({
         distance: dist,
         ttk: ttkResult.ttk,
+        reloads: ttkResult.reloads,
         shotsToKill: ttkResult.shotsToKill,
         crits: ttkResult.crits,
         bodies: ttkResult.bodies,

@@ -3202,7 +3202,7 @@
     "statModifiers": [
       {
         "statName": "Draw Time",
-        "value": -40,
+        "value": 12,
         "isConditional": true
       },
       {

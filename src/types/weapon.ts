@@ -148,6 +148,24 @@ export interface Weapon {
   /** Populated from archetypes.json at parse time */
   statCurves: Record<string, StatCurveNode[]>;
   /**
+   * Bungie stat group this weapon's display curves come from. Weapons in the same
+   * group share identical curves, which lets the packed data store them once.
+   */
+  statGroup?: string;
+  /**
+   * Base investment (raw 0–100 units, non-conditional) for each curved stat, e.g.
+   * { Magazine: 65, Impact: 60, RPM: 40 }. `baseStats` holds the matching display values
+   * (15 rounds, 49, 300). Perk / mod / masterwork modifiers are raw units too, so
+   * they must be added here and re-interpolated — never added to the display value.
+   */
+  rawStats?: Record<string, number>;
+  /**
+   * Bungie's raw → display interpolation (DestinyStatGroupDefinition) for stats whose
+   * display value is not simply the raw value. Nodes are { stat: raw, value: display }.
+   * Stats not listed here are 1:1.
+   */
+  displayCurves?: Record<string, StatCurveNode[]>;
+  /**
    * Human-readable acquisition source from Bungie's DestinyCollectibleDefinition.
    * Examples: "Complete the Deep Stone Crypt raid.", "Sold by Banshee-44, Gunsmith."
    * Null for weapons without a collectible entry (e.g. sunset / unobtainable).
@@ -165,7 +183,8 @@ export interface Weapon {
    * from the manifest's tier-plug investmentStats.
    * Examples: { Range: 10, Stability: 10 } for a Hand Cannon,
    *           { Impact: 4 } for a Sword,
-   *           { 'Draw Time': -34, Accuracy: 10 } for a Combat Bow.
+   *           { 'Draw Time': 10, Accuracy: 10 } for a Combat Bow (raw units; Draw Time's
+   *           display value falls as raw rises — see `displayCurves`).
    * Optional for backward-compatibility with cached data built before this field.
    */
   masterworkBonuses?: Record<string, number>;

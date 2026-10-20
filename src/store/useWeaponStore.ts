@@ -4,6 +4,7 @@ import { Weapon, StatMap, GameMode, WeaponGroup, Perk, PerkColumn } from '../typ
 import { BUFF_DATABASE, getBuffMultiplier } from '../lib/buffDatabase';
 import { EXOTIC_ARMOR, ExoticClassType } from '../data/exoticArmor';
 import { getCurves } from '../lib/archetypes';
+import { applyStatDeltas } from '../lib/statCalc';
 
 // ─── Weapon Mods ────────────────────────────────────────────────────────────
 
@@ -152,16 +153,6 @@ export function ammoGenReadout(tier: ArmorModTier): string {
 
 // Re-export tier tables for use in UI components
 export { TARGETING_AA, LOADER_RELOAD, DEXTERITY_MULT, UNFLINCHING_PCT, INFLIGHT_AE, AMMO_GEN };
-
-// ─── Stats that are NOT on a 0-100 scale ─────────────────────────────────────
-// Draw Time / Charge Time are in milliseconds (e.g. 667ms), Cooling Efficiency
-// and Heat Generated also use their own scales.  For these, the 0-100 clamp used
-// by standard stat bars would corrupt the value, so we skip it entirely and let
-// the bar renderer handle display clamping on its own.
-const UNCAPPED_STATS = new Set([
-  'Draw Time', 'Charge Time', 'RPM', 'Magazine', 'Ammo Capacity',
-  'Cooling Efficiency', 'Heat Generated', 'Vent Speed', 'Persistence',
-]);
 
 // ─── Masterwork stats ────────────────────────────────────────────────────────
 
@@ -525,7 +516,7 @@ export const useWeaponStore = create<WeaponState>()(
         const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, isEnhanced, weaponTier, activeMod, armorMods, activeBuffs, activeExoticArmor } = get();
         if (!activeWeapon) return {};
 
-        const finalStats: StatMap = { ...activeWeapon.baseStats };
+        const baseStats: StatMap = { ...activeWeapon.baseStats };
 
         // Some stats (e.g. Guard Resistance / Guard Endurance on swords) aren't
         // stored in baseStats because the manifest only includes them via socket
@@ -534,39 +525,37 @@ export const useWeaponStore = create<WeaponState>()(
         for (const col of activeWeapon.perkSockets) {
           for (const perk of col.perks) {
             for (const mod of perk.statModifiers) {
-              if (!(mod.statName in finalStats)) finalStats[mod.statName] = 0;
+              if (!(mod.statName in baseStats)) baseStats[mod.statName] = 0;
             }
           }
         }
 
+        // Every source below contributes a raw delta. They are summed per stat and applied
+        // once (with Bungie's display curves and a single clamp) by applyStatDeltas.
+        const deltas: Record<string, number> = {};
+        const add = (stat: string, value: number) => { deltas[stat] = (deltas[stat] ?? 0) + value; };
+
         // Perk stat modifiers.
-         for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
-           const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
-           if (!column) continue;
+        for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+          const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+          if (!column) continue;
 
-           const basePerk = resolveBasePerk(column, perkHash);
-           if (!basePerk) continue;
+          const basePerk = resolveBasePerk(column, perkHash);
+          if (!basePerk) continue;
 
-           // For S27+ tiered legendaries, enhanced stats come only from the explicitly
-           // selected enhanced hash — the global crafted/enhanced flag does not apply.
-           const isTiered = (activeWeapon.seasonNumber ?? 0) >= 27 && activeWeapon.rarity !== 'Exotic';
-           const isUsingEnhanced = !isTiered && (isCrafted || isEnhanced);
-           const perk = perkHash === basePerk.enhancedVersion?.hash
-             ? basePerk.enhancedVersion
-             : (isUsingEnhanced && basePerk.enhancedVersion ? basePerk.enhancedVersion : basePerk);
+          // For S27+ tiered legendaries, enhanced stats come only from the explicitly
+          // selected enhanced hash — the global crafted/enhanced flag does not apply.
+          const isTiered = (activeWeapon.seasonNumber ?? 0) >= 27 && activeWeapon.rarity !== 'Exotic';
+          const isUsingEnhanced = !isTiered && (isCrafted || isEnhanced);
+          const perk = perkHash === basePerk.enhancedVersion?.hash
+            ? basePerk.enhancedVersion
+            : (isUsingEnhanced && basePerk.enhancedVersion ? basePerk.enhancedVersion : basePerk);
 
-           const effectState    = activeEffects[perkHash] ?? 0;
-
-          const isEffectActive = effectState > 0;
+          const isEffectActive = (activeEffects[perkHash] ?? 0) > 0;
 
           for (const mod of perk.statModifiers) {
             if ((mod.isConditional ?? false) && !isEffectActive) continue;
-            if (finalStats[mod.statName] !== undefined) {
-              const raw = finalStats[mod.statName] + mod.value;
-              finalStats[mod.statName] = UNCAPPED_STATS.has(mod.statName)
-                ? Math.max(0, raw)
-                : Math.max(0, Math.min(100, raw));
-            }
+            add(mod.statName, mod.value);
           }
         }
 
@@ -589,13 +578,7 @@ export const useWeaponStore = create<WeaponState>()(
             activeWeapon.isAdept              ? 3 :
             (isCrafted || isEnhanced)         ? 2 : 0);
 
-          // Primary stat
-          if (finalStats[masterworkStat] !== undefined) {
-            const raw = finalStats[masterworkStat] + primaryBonus;
-            finalStats[masterworkStat] = UNCAPPED_STATS.has(masterworkStat)
-              ? Math.max(0, raw)
-              : Math.max(0, Math.min(100, raw));
-          }
+          add(masterworkStat, primaryBonus);
 
           // Secondary bonus: other choosable MW stats + weapon-specific secondary stats
           if (secondaryBonus > 0) {
@@ -603,35 +586,18 @@ export const useWeaponStore = create<WeaponState>()(
               ...(activeWeapon.masterworkOptions ?? []).filter(s => s !== masterworkStat),
               ...(activeWeapon.masterworkSecondaryStats ?? []),
             ]);
-            for (const stat of secondaryStats) {
-              if (finalStats[stat] !== undefined) {
-                const raw = finalStats[stat] + secondaryBonus;
-                finalStats[stat] = UNCAPPED_STATS.has(stat)
-                  ? Math.max(0, raw)
-                  : Math.max(0, Math.min(100, raw));
-              }
-            }
+            for (const stat of secondaryStats) add(stat, secondaryBonus);
           }
         }
 
         // Weapon mod stat changes
         for (const [stat, delta] of Object.entries(activeMod.statChanges)) {
-          if (delta && finalStats[stat] !== undefined) {
-            const raw = finalStats[stat] + delta;
-            finalStats[stat] = UNCAPPED_STATS.has(stat)
-              ? Math.max(0, raw)
-              : Math.max(0, Math.min(100, raw));
-          }
+          if (delta) add(stat, delta);
         }
 
         // Armor mod stat bonuses
         for (const [stat, delta] of Object.entries(armorModStatDeltas(armorMods))) {
-          if (delta && finalStats[stat] !== undefined) {
-            const raw = finalStats[stat] + delta;
-            finalStats[stat] = UNCAPPED_STATS.has(stat)
-              ? Math.max(0, raw)
-              : Math.max(0, Math.min(100, raw));
-          }
+          if (delta) add(stat, delta);
         }
 
         // Active external buff stat bonuses (e.g. Amplified +40 Handling)
@@ -646,14 +612,7 @@ export const useWeaponStore = create<WeaponState>()(
         for (const buffKey of activeBuffKeys) {
           const buff = BUFF_DATABASE[buffKey];
           if (!buff?.statBonuses) continue;
-          for (const [stat, bonus] of Object.entries(buff.statBonuses)) {
-            if (finalStats[stat] !== undefined) {
-              const raw = finalStats[stat] + bonus;
-              finalStats[stat] = UNCAPPED_STATS.has(stat)
-                ? Math.max(0, raw)
-                : Math.max(0, Math.min(100, raw));
-            }
-          }
+          for (const [stat, bonus] of Object.entries(buff.statBonuses)) add(stat, bonus);
         }
 
         // Exotic armor stat bonuses
@@ -662,33 +621,19 @@ export const useWeaponStore = create<WeaponState>()(
           const piece = EXOTIC_ARMOR[cls]?.find((e) => e.id === exoticId);
           if (!piece) continue;
           if (piece.statBonuses) {
-            for (const [stat, bonus] of Object.entries(piece.statBonuses)) {
-              if (finalStats[stat] !== undefined) {
-                const raw = finalStats[stat] + bonus;
-                finalStats[stat] = UNCAPPED_STATS.has(stat)
-                  ? Math.max(0, raw)
-                  : Math.max(0, Math.min(100, raw));
-              }
-            }
+            for (const [stat, bonus] of Object.entries(piece.statBonuses)) add(stat, bonus);
           }
           if (piece.weaponTypeStatBonuses && activeWeapon.itemTypeDisplayName) {
             const { types, bonuses } = piece.weaponTypeStatBonuses;
             if (types.includes(activeWeapon.itemTypeDisplayName)) {
-              for (const [stat, bonus] of Object.entries(bonuses)) {
-                if (finalStats[stat] !== undefined) {
-                  const raw = finalStats[stat] + bonus;
-                  finalStats[stat] = UNCAPPED_STATS.has(stat)
-                    ? Math.max(0, raw)
-                    : Math.max(0, Math.min(100, raw));
-                }
-              }
+              for (const [stat, bonus] of Object.entries(bonuses)) add(stat, bonus);
             }
           }
         }
 
         // isCrafted is tracked in state; stat impact is via perk slot availability
 
-        return finalStats;
+        return applyStatDeltas(baseStats, deltas, activeWeapon);
       },
 
       getDamageMultiplier: () => {

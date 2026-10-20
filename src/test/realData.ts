@@ -15,6 +15,7 @@ export function loadRealData() {
       weapons: read('weapons.json'),
       perks: read('perks.json'),
       mods: read('mods.json'),
+      statGroups: read('statgroups.json'),
     };
     cache = { pack, weapons: unpackWeapons(pack) };
   }

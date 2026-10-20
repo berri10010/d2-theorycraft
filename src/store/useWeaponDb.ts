@@ -24,12 +24,13 @@ export const useWeaponDb = create<WeaponDbState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       // Packed weapon data is pre-built at deploy time by scripts/build-static-data.ts.
-      const [weapons, perks, mods] = await Promise.all([
+      const [weapons, perks, mods, statGroups] = await Promise.all([
         fetchJson<WeaponPack['weapons']>('/data/weapons.json'),
         fetchJson<WeaponPack['perks']>('/data/perks.json'),
         fetchJson<WeaponPack['mods']>('/data/mods.json'),
+        fetchJson<WeaponPack['statGroups']>('/data/statgroups.json'),
       ]);
-      set({ weapons: unpackWeapons({ weapons, perks, mods }), isLoading: false });
+      set({ weapons: unpackWeapons({ weapons, perks, mods, statGroups }), isLoading: false });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to load weapons', isLoading: false });
     }

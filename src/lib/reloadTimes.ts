@@ -38,8 +38,11 @@ const NORMALIZE: Record<string, string> = {
   'Micro-Missile Frame':          'Sidearm',
 };
 
-function solveQuad(c: QuadCoeff, stat: number): number {
-  const x = Math.max(0, Math.min(100, stat));
+/** Combat bows stop improving at 85 Reload in game (d2foundry/oracle_engine clamps them there). */
+const MAX_RELOAD_STAT: Record<string, number> = { 'Combat Bow': 85 };
+
+function solveQuad(c: QuadCoeff, stat: number, max = 100): number {
+  const x = Math.max(0, Math.min(max, stat));
   return c.evpp * x * x + c.vpp * x + c.offset;
 }
 
@@ -57,5 +60,5 @@ export function calcReloadTime(
     ? (ammoType === 3 ? formula.heavy : formula.special)
     : formula as QuadCoeff;
 
-  return Math.round(solveQuad(coeff, reloadStat) * 1000);
+  return Math.round(solveQuad(coeff, reloadStat, MAX_RELOAD_STAT[key] ?? 100) * 1000);
 }

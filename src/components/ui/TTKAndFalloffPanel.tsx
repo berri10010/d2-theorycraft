@@ -11,6 +11,7 @@ import { getPlDeltaMultiplier, fmtPlDelta } from '../../lib/plDelta';
 import { useAnimatedPath } from '../../hooks/useAnimatedPath';
 import { useAnimatedValue } from '../../hooks/useAnimatedValue';
 import { IW, toSvg, interpolate } from '../../lib/chartMath';
+import { ammoFromStats } from '../../lib/ttkAmmo';
 import { ShotsChart, FalloffChart } from './ttkCharts';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -64,6 +65,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
   }, [expanded, closeExpanded]);
 
   const calcStats = getCalculatedStats();
+  const ammo = activeWeapon ? ammoFromStats(activeWeapon, calcStats) : undefined;
   const rangeStat = calcStats['Range'] ?? 0;
   const zoomStat  = calcStats['Zoom'] ?? 14;
 
@@ -86,7 +88,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
   // pattern, so we suppress the result until a mod is selected.
   const ttkResult = championModMissing
     ? null
-    : calculateTTK(mode, activeWeapon, effectiveMultiplier, PVP_GUARDIAN_HP, enemyTier);
+    : calculateTTK(mode, activeWeapon, effectiveMultiplier, PVP_GUARDIAN_HP, enemyTier, ammo);
 
   // ── Falloff curve data ────────────────────────────────────────────────
   const rangeCurve   = activeWeapon.statCurves?.['Range'];
@@ -116,9 +118,10 @@ export const TTKAndFalloffPanel: React.FC = () => {
     if (!hasFalloffData || championModMissing) return [];
     return calculateTTKCurve(
       mode, activeWeapon, effectiveMultiplier, PVP_GUARDIAN_HP, enemyTier,
-      hipFalloffStart!, maxDist, falloffFloor,
+      hipFalloffStart!, maxDist, falloffFloor, ammo,
     );
-  }, [mode, activeWeapon, effectiveMultiplier, hipFalloffStart, maxDist, enemyTier, hasFalloffData, championModMissing]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, activeWeapon, effectiveMultiplier, hipFalloffStart, maxDist, enemyTier, hasFalloffData, championModMissing, ammo?.magSize, ammo?.reloadSeconds]);
 
   // ── Damage falloff curves ─────────────────────────────────────────────
   function buildDamageCurve(falloffStart: number, maxD: number, critVal: number, bodyVal: number) {
@@ -440,6 +443,9 @@ export const TTKAndFalloffPanel: React.FC = () => {
               }>
                 {`${ttkResult.ttk.toFixed(2)}s`}
               </span>
+              {ttkResult.reloads > 0 && (
+                <span className="text-xs text-ink-4 mt-2">incl. {ttkResult.reloads} reload{ttkResult.reloads === 1 ? '' : 's'}</span>
+              )}
             </div>
             <div className="bg-black/40 p-4 rounded-lg border border-white/10 flex flex-col items-center">
               <span className="text-sm text-ink-3 mb-1">Shots</span>

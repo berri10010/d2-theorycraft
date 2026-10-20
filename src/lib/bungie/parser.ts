@@ -1,10 +1,11 @@
-import { Weapon, Perk, PerkColumn, ColumnType, StatMap, PerkActivation, WeaponModOption } from '../../types/weapon';
+import { Weapon, Perk, PerkColumn, ColumnType, StatMap, StatCurveNode, PerkActivation, WeaponModOption } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../bungieUrl';
 import {
   BungieInventoryItem,
   BungieSocketCategoryDefinition,
   BungiePlugSetDefinition,
   BungieSeasonDefinition,
+  BungieStatGroupDefinition,
 } from './bungieTypes';
 // Explicit type alias used to annotate variables whose type TypeScript cannot
 // infer without circularity when the same BungieInventoryItem graph is traversed
@@ -189,6 +190,44 @@ const STAT_HASH_MAP: Record<number, string> = {
   // Bow-specific stat:
   3085395333: 'Persistence',        // Increases the amount of time that bolts linger
 };
+
+/** True when an interpolation table is just y = x on 0–100 (nothing to convert). */
+function isIdentityInterpolation(points: Array<{ value: number; weight: number }>): boolean {
+  return points.length === 2
+    && points[0].value === 0 && points[0].weight === 0
+    && points[1].value === 100 && points[1].weight === 100;
+}
+
+/**
+ * Raw investment + display curve for every stat whose display value is not 1:1 with the
+ * raw value (Magazine, Impact, RPM, Draw Time, …). Verified against the manifest: for
+ * these stats `stats.stats` is the interpolated display value of the summed investment.
+ */
+function extractStatCurves(
+  item: BungieInventoryItem,
+  statGroupDefs: Record<string, BungieStatGroupDefinition>,
+): { statGroup?: string; rawStats?: Record<string, number>; displayCurves?: Record<string, StatCurveNode[]> } {
+  const groupHash = item.stats?.statGroupHash;
+  const group = groupHash !== undefined ? statGroupDefs[String(groupHash)] : undefined;
+  if (!group) return {};
+
+  const rawStats: Record<string, number> = {};
+  const displayCurves: Record<string, StatCurveNode[]> = {};
+
+  for (const scaled of group.scaledStats) {
+    const name = STAT_HASH_MAP[scaled.statHash];
+    if (!name || !DISPLAY_STATS.has(name)) continue;
+    if (!scaled.displayInterpolation?.length || isIdentityInterpolation(scaled.displayInterpolation)) continue;
+
+    displayCurves[name] = scaled.displayInterpolation.map((p) => ({ stat: p.value, value: p.weight }));
+    rawStats[name] = (item.investmentStats ?? [])
+      .filter((s) => s.statTypeHash === scaled.statHash && !s.isConditionallyActive)
+      .reduce((sum, s) => sum + s.value, 0);
+  }
+
+  if (Object.keys(displayCurves).length === 0) return {};
+  return { statGroup: String(groupHash), rawStats, displayCurves };
+}
 
 // Stats stored in baseStats (used for display + stat modifier math)
 const DISPLAY_STATS = new Set([
@@ -434,6 +473,8 @@ export function parseWeapons(
   // collectibleHash (string) → sourceString from DestinyCollectibleDefinition.
   // Used to populate the weapon's acquisition source string.
   collectibleMap: Record<string, string> = {},
+  // DestinyStatGroupDefinition table: raw investment → displayed stat curves.
+  statGroupDefs: Record<string, BungieStatGroupDefinition> = {},
 ): Weapon[] {
   const seasonNumberToName = buildSeasonNumberToName(seasonDefs);
 
@@ -1001,31 +1042,18 @@ export function parseWeapons(
       }
     }
 
-    // Step 2: Draw Time and Charge Time are "lower is better" stats stored as
-    // positive integers in the Bungie manifest.  Replace the raw bonus with the
-    // correct in-game value so getCalculatedStats shows the right signed delta.
-    //   Draw Time (Combat Bow):      always −34 ms
-    //   Charge Time (LFR):           always −33 ms
-    //   Charge Time (FR Rapid-Fire or Precision frame): −33 ms
-    //   Charge Time (all other FR frames):              −34 ms
-    const mwFrameName = intrinsicTrait !== null ? (intrinsicTrait as { name: string }).name : '';
-    if ('Draw Time' in masterworkBonuses) {
-      masterworkBonuses['Draw Time'] = -34;
-    }
-    if ('Charge Time' in masterworkBonuses) {
-      const weaponType = item.itemTypeDisplayName ?? '';
-      const isLFR = weaponType === 'Linear Fusion Rifle';
-      const isFR  = weaponType === 'Fusion Rifle';
-      const isRapidFireOrPrecision =
-        mwFrameName.includes('Rapid') || mwFrameName === 'Precision Frame';
-      masterworkBonuses['Charge Time'] =
-        isLFR || (isFR && isRapidFireOrPrecision) ? -33 : -34;
+    // Step 2: Draw Time / Charge Time are raw-investment stats whose *display* value (ms) falls as
+    // the raw value rises (bow: raw 0 → 867 ms, raw 100 → 533 ms). The masterwork plug adds +10 raw,
+    // and the store converts that through the stat group's curve (≈ −33/−34 ms depending on the
+    // frame), so keep the raw manifest value rather than hard-coding a millisecond delta.
+    for (const stat of ['Draw Time', 'Charge Time']) {
+      if (stat in masterworkBonuses) masterworkBonuses[stat] = Math.abs(masterworkBonuses[stat]) || 10;
     }
 
     // Step 3: Apply per-type / per-frame whitelist to block cross-plug-set bleed
     // (e.g. Impact appearing on bows, Charge Time on swords).
     // Returns null for unknown weapon types → no whitelist applied (safe fallback).
-    // mwFrameName is computed above (Step 2).
+    const mwFrameName = intrinsicTrait !== null ? (intrinsicTrait as { name: string }).name : '';
     const mwWhitelist = getMwWhitelist(
       item.itemTypeDisplayName ?? '',
       mwFrameName,
@@ -1079,6 +1107,7 @@ export function parseWeapons(
       intrinsicTrait,
       perkSockets,
       statCurves,
+      ...extractStatCurves(item, statGroupDefs),
       source: item.collectibleHash
         ? (collectibleMap[item.collectibleHash.toString()] ?? null)
         : null,

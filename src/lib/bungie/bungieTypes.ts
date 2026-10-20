@@ -5,6 +5,7 @@ export interface BungieManifestResponse {
       en: {
         DestinyInventoryItemDefinition: string;
         DestinyStatDefinition: string;
+        DestinyStatGroupDefinition: string;
         DestinySocketCategoryDefinition: string;
         DestinyPlugSetDefinition: string;
         DestinySeasonDefinition: string;
@@ -55,6 +56,7 @@ export interface BungieInventoryItem {
   traitIds?: string[];
   inventory?: { recipeItemHash?: number; tierTypeName?: string };
   stats?: {
+    statGroupHash?: number;
     stats: Record<string, { statHash: number; value: number }>;
   };
   sockets?: {
@@ -94,4 +96,16 @@ export interface BungiePlugSetDefinition {
 export interface BungieStatDefinition {
   hash: number;
   displayProperties: { name: string; description: string };
+}
+/** DestinyStatGroupDefinition: how raw investment maps to the displayed stat value. */
+export interface BungieStatGroupDefinition {
+  hash: number;
+  maximumValue: number;
+  scaledStats: Array<{
+    statHash: number;
+    maximumValue: number;
+    displayAsNumeric: boolean;
+    /** Interpolation points: `value` is the raw input, `weight` the displayed output. */
+    displayInterpolation: Array<{ value: number; weight: number }>;
+  }>;
 }

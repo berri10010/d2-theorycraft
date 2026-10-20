@@ -18,6 +18,7 @@
  *   public/data/weapons.json          Packed weapons (perks/mods referenced by hash)
  *   public/data/perks.json            Each distinct perk once (description stripped)
  *   public/data/mods.json             Each distinct weapon mod once
+ *   public/data/statgroups.json       Bungie raw → display stat curves, per stat group
  *   public/data/clarity.json          Filtered Clarity perk descriptions
  *   public/data/god-rolls.json        God roll recommendations
  *
@@ -32,7 +33,7 @@ import { fileURLToPath } from 'url';
 import { parseWeapons } from '../src/lib/bungie/parser.js';
 import { packWeapons, type PackedWeapon } from '../src/lib/weaponPack.js';
 import type { Weapon, Perk } from '../src/types/weapon.js';
-import type { BungieSeasonDefinition } from '../src/lib/bungie/bungieTypes.js';
+import type { BungieSeasonDefinition, BungieStatGroupDefinition } from '../src/lib/bungie/bungieTypes.js';
 
 // ── Path helpers ─────────────────────────────────────────────────────────────
 
@@ -88,7 +89,7 @@ function write(name: string, data: unknown) {
 // DATA_FORMAT_VERSION: bump this whenever parser logic changes in a way that
 // would produce different weapon data output from the same manifest.
 // This forces a re-parse even when the Bungie manifest version is unchanged.
-const DATA_FORMAT_VERSION = '15';
+const DATA_FORMAT_VERSION = '18';
 
 const NEXT_CACHE_DIR     = path.join(ROOT, '.next', 'cache');
 const MANIFEST_VER_CACHE = path.join(NEXT_CACHE_DIR, 'bungie-manifest-version');
@@ -214,7 +215,7 @@ function stripDescriptions(weapons: Weapon[]): Weapon[] {
   }));
 }
 
-const WEAPON_FILES = ['weapons.json', 'perks.json', 'mods.json'];
+const WEAPON_FILES = ['weapons.json', 'perks.json', 'mods.json', 'statgroups.json'];
 
 // ── Step 1: Weapons ───────────────────────────────────────────────────────────
 
@@ -241,12 +242,13 @@ async function buildWeapons() {
   // ─────────────────────────────────────────────────────────────────────────
 
   console.log('  Downloading tables (parallel)...');
-  const [items, socketCategoryDefs, plugSetDefs, seasonDefs, collectibleDefs, dimWatermarkMap] = await Promise.all([
+  const [items, socketCategoryDefs, plugSetDefs, seasonDefs, collectibleDefs, statGroupDefs, dimWatermarkMap] = await Promise.all([
     fetchTable(paths.DestinyInventoryItemDefinition),
     fetchTable(paths.DestinySocketCategoryDefinition),
     fetchTable(paths.DestinyPlugSetDefinition),
     fetchTable(paths.DestinySeasonDefinition),
     fetchTable(paths.DestinyCollectibleDefinition),
+    fetchTable(paths.DestinyStatGroupDefinition),
     fetch('https://raw.githubusercontent.com/DestinyItemManager/d2-additional-info/master/output/watermark-to-season.json')
       .then(r => r.ok ? r.json() : {})
       .catch(() => ({})),
@@ -275,7 +277,7 @@ async function buildWeapons() {
   console.log(`  Collectibles: ${Object.keys(collectibleMap).length} entries with sourceString`);
 
   console.log('  Parsing weapons...');
-  const rawWeapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs, combinedWatermarkMap, collectibleMap);
+  const rawWeapons = parseWeapons(items, socketCategoryDefs, plugSetDefs, seasonDefs, combinedWatermarkMap, collectibleMap, statGroupDefs as Record<string, BungieStatGroupDefinition>);
   console.log(`  Parsed ${rawWeapons.length} weapons`);
 
   // Null out 404 screenshot URLs for tie-breaking candidates before writing.
@@ -286,6 +288,7 @@ async function buildWeapons() {
   write('weapons.json', pack.weapons);
   write('perks.json', pack.perks);
   write('mods.json', pack.mods);
+  write('statgroups.json', pack.statGroups);
 
   // Persist the version so the next build can skip this download if unchanged.
   writeCachedManifestVersion(version);

@@ -17,6 +17,7 @@ import { BuffToggle } from '../../components/ui/BuffToggle';
 import { groupWeapons } from '../../lib/weaponGroups';
 import { GodRollPanel } from '../../components/weapon/GodRollPanel';
 import { calculateTTK } from '../../lib/damageMath';
+import { ammoFromStats } from '../../lib/ttkAmmo';
 import { MasterworkStat } from '../../store/useWeaponStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
@@ -353,12 +354,13 @@ function Dashboard() {
   const handleAddToCompare = () => {
     if (!activeWeapon) return;
     const multiplier = getDamageMultiplier();
-    const ttkResult  = calculateTTK(mode, activeWeapon, multiplier, 230, 'Minor');
+    const calculatedStats = getCalculatedStats();
+    const ttkResult  = calculateTTK(mode, activeWeapon, multiplier, 230, 'Minor', ammoFromStats(activeWeapon, calculatedStats));
     const isTieredWeapon = (activeWeapon.seasonNumber ?? 0) >= 27 && activeWeapon.rarity !== 'Exotic';
     addSnapshot({
       label: activeWeapon.name,
       weapon: activeWeapon,
-      calculatedStats: getCalculatedStats(),
+      calculatedStats,
       selectedPerks,
       ttk: ttkResult?.ttk ?? null,
       mode,

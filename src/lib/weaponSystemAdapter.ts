@@ -57,7 +57,7 @@ export interface DamageProfileResult {
 const ROCKET_SUBTYPES  = new Set([10]);
 const SHOTGUN_SUBTYPES = new Set([7, 45]);
 const SNIPER_SUBTYPES  = new Set([12, 44]);
-const SWORD_SUBTYPES   = new Set([34, 48]);
+const SWORD_SUBTYPES   = new Set([18, 34, 48]);
 const TRACE_SUBTYPES   = new Set([25]);
 
 export function detectArchetype(itemSubType: number): SupportedArchetype | null {
