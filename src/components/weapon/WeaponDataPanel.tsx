@@ -37,7 +37,7 @@ export function WeaponDataPanel() {
       {/* Collapsible section header */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between mb-3 group"
+        className="w-full flex items-center justify-between mb-1 md:mb-3 py-2 md:py-0 group"
         aria-expanded={open}
       >
         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">
@@ -65,7 +65,7 @@ export function WeaponDataPanel() {
                 key={tab.key}
                 onClick={() => setActive(tab.key)}
                 className={[
-                  'text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all',
+                  'text-xs font-semibold px-3 py-2.5 md:py-1.5 rounded-lg border transition-all',
                   active === tab.key
                     ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
                     : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',

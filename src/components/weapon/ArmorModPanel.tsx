@@ -31,7 +31,7 @@ function TierSelector({ value, onChange, color }: TierSelectorProps) {
           onClick={() => onChange(t === value ? 0 : t)}
           title={t === 0 ? 'None' : `Tier ${t}`}
           className={[
-            'w-5 h-5 rounded-full border transition-all text-[9px] font-bold leading-none flex items-center justify-center',
+            'w-8 h-8 md:w-5 md:h-5 rounded-full border transition-all text-[10px] md:text-[9px] font-bold leading-none flex items-center justify-center',
             t === 0 && value === 0
               ? 'bg-white/5 border-white/15 text-white/30'
               : t === 0

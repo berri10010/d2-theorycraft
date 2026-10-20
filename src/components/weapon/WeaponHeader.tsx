@@ -323,7 +323,7 @@ export const WeaponHeader: React.FC = () => {
                     const v = variantGroup.find((w) => w.hash === e.target.value);
                     if (v) loadWeapon(v, variantGroup);
                   }}
-                  className="text-xs font-semibold px-2 py-1 rounded-lg bg-white/5 text-slate-300 border border-white/10 focus:outline-none focus:border-amber-500 transition-colors"
+                  className="max-w-full text-xs font-semibold px-2 py-1 rounded-lg bg-white/5 text-slate-300 border border-white/10 focus:outline-none focus:border-amber-500 transition-colors"
                 >
                   {variantGroup.map((variant) => {
                     const label = variant.variantLabel ?? 'Base';

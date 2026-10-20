@@ -4,6 +4,10 @@ import React, { useState, useRef, useCallback, useEffect, ReactNode } from 'reac
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const MAX_WIDTH = 260;
+const EDGE_MARGIN = 8;
+const TOUCH_DISMISS_MS = 3500;
+
 interface TooltipProps {
   content: ReactNode;
   children: React.ReactElement;
@@ -25,29 +29,46 @@ export function Tooltip({ content, children, delay = 220 }: TooltipProps) {
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
-  const show = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    timerRef.current = setTimeout(() => {
-      const above = rect.top > 140;
-      tipRef.current = {
-        x: rect.left + rect.width / 2,
-        y: above ? rect.top : rect.bottom,
-        above,
-      };
-      setVisible(true);
-    }, delay);
-  }, [delay]);
-
   const hide = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     setVisible(false);
   }, []);
 
+  // Pointer events cover mouse and touch. A touch has no hover, so show right
+  // away on tap and auto-dismiss; a mouse keeps the hover delay / leave behaviour.
+  const show = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const touch = e.pointerType === 'touch';
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      const above = rect.top > 140;
+      // Keep the (up to MAX_WIDTH wide, centred) bubble inside the viewport.
+      const half = MAX_WIDTH / 2 + EDGE_MARGIN;
+      const x = Math.min(Math.max(rect.left + rect.width / 2, half), Math.max(half, window.innerWidth - half));
+      tipRef.current = { x, y: above ? rect.top : rect.bottom, above };
+      setVisible(true);
+      if (touch) timerRef.current = setTimeout(hide, TOUCH_DISMISS_MS);
+    }, touch ? 0 : delay);
+  }, [delay, hide]);
+
+  const onLeave = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    // pointerleave fires on finger-lift for touch, so rely on the auto-dismiss there.
+    if (e.pointerType !== 'touch') hide();
+  }, [hide]);
+
+  // Tapping anywhere else dismisses a touch tooltip.
+  useEffect(() => {
+    if (!visible) return;
+    const onDown = (e: PointerEvent) => { if (e.pointerType === 'touch') hide(); };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [visible, hide]);
+
   if (!content) return children;
 
   return (
     <>
-      <div onMouseEnter={show} onMouseLeave={hide}>
+      <div onPointerEnter={show} onPointerLeave={onLeave}>
         {children}
       </div>
       {mounted && createPortal(

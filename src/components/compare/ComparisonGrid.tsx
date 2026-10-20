@@ -150,20 +150,20 @@ function SnapshotCard({
             <button
               onClick={() => reorderSnapshot(snapshot.id, 'left')}
               disabled={index === 0}
-              className="w-5 h-5 bg-white/5 text-slate-500 rounded hover:bg-white/10 hover:text-slate-200 transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
+              className="w-9 h-9 md:w-5 md:h-5 bg-white/5 text-slate-500 rounded hover:bg-white/10 hover:text-slate-200 transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
               aria-label="Move left"
             >‹</button>
             <button
               onClick={() => reorderSnapshot(snapshot.id, 'right')}
               disabled={index === total - 1}
-              className="w-5 h-5 bg-white/5 text-slate-500 rounded hover:bg-white/10 hover:text-slate-200 transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
+              className="w-9 h-9 md:w-5 md:h-5 bg-white/5 text-slate-500 rounded hover:bg-white/10 hover:text-slate-200 transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
               aria-label="Move right"
             >›</button>
           </>
         )}
         <button
           onClick={() => removeSnapshot(snapshot.id)}
-          className="w-5 h-5 bg-white/5 text-slate-400 rounded hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center text-[10px] font-bold"
+          className="w-9 h-9 md:w-5 md:h-5 bg-white/5 text-slate-400 rounded hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center text-[10px] font-bold"
           aria-label="Remove"
         >×</button>
       </div>
@@ -171,13 +171,13 @@ function SnapshotCard({
       {/* Restore full build in editor */}
       <button
         onClick={handleRestore}
-        className="absolute top-2 left-2 text-[9px] font-semibold px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-500 hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 transition-all"
+        className="absolute top-2 left-2 text-[10px] md:text-[9px] font-semibold px-2.5 py-2 md:px-1.5 md:py-0.5 rounded bg-white/5 border border-white/10 text-slate-500 hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 transition-all"
         aria-label="Restore build in editor"
         title="Restore perks, masterwork, and tier in the editor"
       >Restore</button>
 
       {/* ── Weapon identity ──────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 pr-6 pt-5">
+      <div className="flex items-center gap-3 pr-6 pt-9 md:pt-5">
         <div className="w-12 h-12 bg-white/5 rounded overflow-hidden flex-shrink-0 border border-white/10">
           {snapshot.weapon.icon && (
             <Image
@@ -506,7 +506,7 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
             <span title="Colors show each stat's delta above the lowest value across all snapshots">
               Δ from min: <span className="text-green-300">■</span> +1–5 <span className="text-green-400">■</span> +6–15 <span className="text-green-400 font-bold">■</span> +16+ <span className="text-red-400">■</span> lower
             </span>
-            <button onClick={clearSnapshots} className="text-red-400 hover:text-red-300 transition-colors text-xs">
+            <button onClick={clearSnapshots} className="text-red-400 hover:text-red-300 transition-colors text-xs py-2 px-1 md:py-0 md:px-0">
               Clear all
             </button>
           </div>
@@ -522,7 +522,7 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
                     key={stat}
                     onClick={() => handleSortClick(stat)}
                     className={[
-                      'text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-all leading-none',
+                      'text-[10px] font-semibold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded-full border transition-all leading-none',
                       isActive
                         ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
                         : 'bg-white/5 border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300',

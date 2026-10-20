@@ -179,7 +179,7 @@ export const RollEditor: React.FC = () => {
 
       {/* ── Perk columns — identical layout regardless of single vs. multiple options ── */}
       {activeWeapon.perkSockets.length > 0 && (
-        <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${activeWeapon.perkSockets.length}, minmax(0, 1fr))` }}>
+        <div className="grid gap-1.5 md:gap-3 px-2 md:px-0" style={{ gridTemplateColumns: `repeat(${activeWeapon.perkSockets.length}, minmax(0, 1fr))` }}>
           {activeWeapon.perkSockets.map((column, colIdx) => {
             const displayLabel     = colDisplayName(column);
             const isOriginTraitCol = column.columnType === 'origin' || displayLabel === 'Origin Trait';
@@ -191,13 +191,13 @@ export const RollEditor: React.FC = () => {
               <div
                 key={column.name}
                 className={[
-                  'flex flex-col items-center min-w-[60px]',
-                  !isLast ? 'border-r border-white/5 pr-3 md:pr-4' : '',
+                  'flex flex-col items-center min-w-0',
+                  !isLast ? 'border-r border-white/5 pr-1.5 md:pr-4' : '',
                 ].join(' ')}
               >
                 {/* Column header */}
                 <div className="w-full flex flex-col items-center gap-1 mb-3">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                  <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider md:tracking-widest text-center leading-tight md:whitespace-nowrap">
                     {displayLabel}
                   </span>
                   <div className={`h-0.5 w-8 rounded-full ${accentBar}`} />

@@ -48,16 +48,16 @@ export function CollapsiblePanel({
   return (
     <div className={`bg-white/5 backdrop-blur-sm rounded-xl border ${className}`}>
       {/* The header row is not a <button> itself: headerRight may contain buttons, which can't nest. */}
-      <div className="flex items-center gap-3 p-4 md:p-6">
+      <div className="flex items-center">
         <button
           onClick={toggle}
-          className="flex-1 min-w-0 text-left text-xl font-bold text-white"
+          className="flex-1 min-w-0 text-left text-xl font-bold text-white pl-4 md:pl-6 py-4 md:py-6"
           aria-expanded={open}
         >
           {title}
         </button>
         {headerRight && (
-          <div className="shrink-0 flex items-center gap-2">
+          <div className="shrink-0 flex items-center gap-2 px-2">
             {headerRight}
           </div>
         )}
@@ -65,7 +65,7 @@ export function CollapsiblePanel({
           onClick={toggle}
           aria-label={open ? 'Collapse panel' : 'Expand panel'}
           aria-expanded={open}
-          className="shrink-0 text-slate-500"
+          className="shrink-0 text-slate-500 p-4 md:p-6 pl-3 md:pl-3"
         >
           <motion.svg
             viewBox="0 0 20 20"

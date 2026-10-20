@@ -548,7 +548,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-slate-200 font-sans flex flex-col overflow-x-hidden">
+    <div className="min-h-screen min-h-dvh safe-pad bg-black text-slate-200 font-sans flex flex-col overflow-x-hidden">
 
       {/* Redirect handler for legacy share links */}
       <Suspense fallback={null}>

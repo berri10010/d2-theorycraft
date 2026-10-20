@@ -160,7 +160,7 @@ export const MasterworkPanel: React.FC = () => {
                         onMouseEnter={() => setHoveredMasterworkStat(stat)}
                         onMouseLeave={() => setHoveredMasterworkStat(null)}
                         className={[
-                          'text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
+                          'text-xs font-semibold px-2.5 py-2 md:py-1 rounded-md border transition-all',
                           isActive
                             ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
                             : hoveredMasterworkStat === stat
@@ -279,7 +279,7 @@ export const MasterworkPanel: React.FC = () => {
                   <button
                     onClick={handleClick}
                     className={[
-                      'flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-md border transition-all',
+                      'flex items-center gap-1 text-xs font-semibold px-2.5 py-2 md:py-1 rounded-md border transition-all',
                       isNone
                         ? isActive
                           ? 'bg-white/5 text-slate-400 border-white/10'

@@ -405,7 +405,7 @@ function Dashboard() {
   // ── Main layout ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="h-screen bg-black text-slate-200 font-sans flex overflow-hidden">
+    <div className="h-screen h-dvh safe-pad bg-black text-slate-200 font-sans flex overflow-hidden">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-amber-500 focus:text-slate-950 focus:font-bold focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:outline-none"
@@ -524,7 +524,7 @@ function Dashboard() {
               Row 2: [Share] [Clear] [+Compare]  (centered)
             Desktop (md+): single flex row, action buttons pushed right via ml-auto
           */}
-          <header className="flex flex-nowrap items-center gap-2 sm:gap-3 min-w-0">
+          <header className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
 
             {/* Nav group: hamburger + tabs */}
             <div className="flex items-center gap-2 sm:gap-3">
@@ -583,7 +583,7 @@ function Dashboard() {
 
             {/* Action buttons — full-width on mobile (forces new row, centered); auto+right on desktop */}
             {activeTab === 'editor' && (
-              <div className="flex items-center gap-2 ml-auto">
+              <div className="flex items-center gap-2 w-full justify-center sm:w-auto sm:ml-auto sm:justify-end">
                 {/* Keyboard shortcut legend */}
                 <button
                   onClick={() => setShowShortcuts(true)}
