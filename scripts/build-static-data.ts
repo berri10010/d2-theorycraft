@@ -36,6 +36,10 @@ import { parseWeapons } from '../src/lib/bungie/parser.js';
 import { packWeapons, unpackWeapons, type PackedWeapon } from '../src/lib/weaponPack.js';
 import { PVP_WISHLIST_URL, parseWishlistBlocks, buildPvpEntries } from '../src/lib/pvpWishlist.js';
 import { SAX_SHEET_ID, SAX_TABS, buildSourceTable, type SaxTab } from '../src/lib/weaponSources.js';
+import {
+  WEAPON_STAT_SHEET_ID, WEAPON_STAT_TAB_GID, parseWeaponStatSheet, mergeWeaponStats, sheetIsMidUpdate,
+} from '../src/lib/weaponStatSheet.js';
+import type { WeaponStatEntry } from '../src/lib/weaponStats.js';
 import type { Weapon, Perk } from '../src/types/weapon.js';
 import type { BungieSeasonDefinition, BungieStatGroupDefinition } from '../src/lib/bungie/bungieTypes.js';
 
@@ -520,6 +524,40 @@ async function buildWeaponSources() {
   }
 }
 
+// Frame damage + timing from huwugo's WeaponStat Chart -> src/data/weaponStats.json (bundled, not in public/).
+// While the sheet carries its "CURRENTLY UPDATING / MAY BE INACCURATE" banner the automated job leaves
+// the committed data alone; set FORCE_WEAPON_STATS=1 to ingest it anyway.
+async function buildWeaponStats() {
+  console.log("\n[weapon-stats] Fetching huwugo's WeaponStat Chart...");
+  const target = path.join(ROOT, 'src', 'data', 'weaponStats.json');
+  const metaPath = path.join(ROOT, 'src', 'data', 'weaponStatsMeta.json');
+  try {
+    const csv = await fetchText(`https://docs.google.com/spreadsheets/d/${WEAPON_STAT_SHEET_ID}/export?format=csv&gid=${WEAPON_STAT_TAB_GID}`);
+    const parsed = parseWeaponStatSheet(csv);
+    if (parsed.entries.length < 100) throw new Error(`only ${parsed.entries.length} usable rows — refusing to overwrite`);
+    console.log(`  ${parsed.entries.length} usable rows (${parsed.skipped.length} skipped), ${parsed.version || 'version unknown'}`);
+
+    if (sheetIsMidUpdate(parsed.banner) && process.env.FORCE_WEAPON_STATS !== '1') {
+      console.warn(`  ⚠ Sheet is flagged mid-update ("${parsed.banner.slice(0, 60)}…") — keeping the committed data. Set FORCE_WEAPON_STATS=1 to ingest anyway.`);
+      return;
+    }
+
+    const existing = JSON.parse(fs.readFileSync(target, 'utf8')) as WeaponStatEntry[];
+    const merged = mergeWeaponStats(existing, parsed.entries);
+    const next = JSON.stringify(merged.entries);
+    if (next === JSON.stringify(existing)) { console.log('  No changes.'); return; }
+    fs.writeFileSync(target, next);
+    fs.writeFileSync(metaPath, JSON.stringify({
+      source: `https://docs.google.com/spreadsheets/d/${WEAPON_STAT_SHEET_ID}`,
+      sheetVersion: parsed.version, rows: parsed.entries.length, keptFromPrevious: merged.kept,
+      sheetBanner: parsed.banner || null,
+    }, null, 2) + '\n');
+    console.log(`  ✓ weaponStats.json: ${merged.updated} updated, ${merged.added} added, ${merged.kept} kept (no longer in the sheet)`);
+  } catch (err) {
+    console.warn(`  ⚠ Weapon stats not updated: ${err instanceof Error ? err.message : err}`);
+  }
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -533,6 +571,7 @@ async function main() {
     { name: 'patch-event-seasons',  fn: patchEventWeaponSeasons },
     { name: 'pvp-wishlist',         fn: buildPvpWishlist },
     { name: 'weapon-sources',       fn: buildWeaponSources },
+    { name: 'weapon-stats',         fn: buildWeaponStats },
   ];
 
   let failed = 0;

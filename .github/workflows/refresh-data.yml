@@ -47,13 +47,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if git diff --quiet -- public/data; then
+          if git diff --quiet -- public/data src/data/weaponStats.json src/data/weaponStatsMeta.json && [ -z "$(git ls-files --others --exclude-standard -- src/data public/data)" ]; then
             echo "No data changes."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/data
+          git add public/data src/data/weaponStats.json src/data/weaponStatsMeta.json
           git commit -m "chore(data): refresh static data"
           git pull --rebase origin main
           git push origin HEAD:main
