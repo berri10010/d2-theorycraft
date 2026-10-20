@@ -8,6 +8,7 @@ import { useWeaponStore, MASTERWORK_STATS } from '../../store/useWeaponStore';
 import { useCompareStore } from '../../store/useCompareStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
 import { SearchSidebar } from '../../components/layout/SearchSidebar';
+import { MobileTopBar, MobileBottomNav, MobileMoreSheet, MobileToast } from '../../components/layout/MobileNav';
 import { WeaponHeader } from '../../components/weapon/WeaponHeader';
 import { RollEditor } from '../../components/weapon/RollEditor';
 import { EffectsPanel } from '../../components/weapon/EffectsPanel';
@@ -105,6 +106,8 @@ function Dashboard() {
   const [shareOpen,          setShareOpen]          = useState(false);
   const [copiedType,         setCopiedType]         = useState<'permalink' | 'dim' | null>(null);
   const [sidebarOpen,        setSidebarOpen]        = useState(false);
+  const [moreOpen,           setMoreOpen]           = useState(false);
+  const [savedToast,         setSavedToast]         = useState(false);
   const [sidebarCollapsed,   setSidebarCollapsed]   = useState(false);
   const [clearPending,       setClearPending]       = useState(false);
   const [showShortcuts,      setShowShortcuts]      = useState(false);
@@ -365,6 +368,8 @@ function Dashboard() {
       masterworkStat,
       ...(isTieredWeapon ? { weaponTier } : {}),
     });
+    setSavedToast(true);
+    setTimeout(() => setSavedToast(false), 1800);
   };
 
   // ── No weapon yet ────────────────────────────────────────────────────────────
@@ -496,6 +501,28 @@ function Dashboard() {
         )}
       </AnimatePresence>
 
+      {/* Mobile chrome (md:hidden inside each component) */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        compareCount={snapshots.length}
+        onOpenWeapons={() => setSidebarOpen(true)}
+        onAddToCompare={handleAddToCompare}
+        onOpenMore={() => setMoreOpen(true)}
+        moreOpen={moreOpen}
+      />
+      <MobileToast
+        message={savedToast ? 'Saved to Compare' : copiedType === 'permalink' ? 'Roll link copied' : copiedType === 'dim' ? 'DIM entry copied' : null}
+      />
+      <MobileMoreSheet
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        onSharePermalink={() => { handleSharePermalink(); setMoreOpen(false); }}
+        onShareDim={() => { handleShareDim(); setMoreOpen(false); }}
+        onClear={() => { const wasPending = clearPending; handleClearClick(); if (wasPending) setMoreOpen(false); }}
+        clearPending={clearPending}
+      />
+
       {/* Desktop sidebar collapse toggle */}
       <button
         onClick={() => setSidebarCollapsed((v) => !v)}
@@ -515,7 +542,14 @@ function Dashboard() {
         aria-label="Weapon theorycrafting editor"
         className="flex-1 overflow-y-auto overscroll-y-contain min-w-0 focus:outline-none"
       >
-        <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+        <MobileTopBar
+          activeTab={activeTab}
+          weapon={activeWeapon}
+          mode={mode}
+          onModeChange={setMode}
+          onOpenWeapons={() => setSidebarOpen(true)}
+        />
+        <div className="max-w-7xl mx-auto p-4 pb-28 md:p-8 space-y-6">
 
           {/* ── Top action bar ─────────────────────────────────────────── */}
           {/*
@@ -524,7 +558,7 @@ function Dashboard() {
               Row 2: [Share] [Clear] [+Compare]  (centered)
             Desktop (md+): single flex row, action buttons pushed right via ml-auto
           */}
-          <header className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
+          <header className="hidden md:flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
 
             {/* Nav group: hamburger + tabs */}
             <div className="flex items-center gap-2 sm:gap-3">
