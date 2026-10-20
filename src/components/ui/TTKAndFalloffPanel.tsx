@@ -10,52 +10,13 @@ import { adsMultiplier } from '../../lib/math';
 import { getPlDeltaMultiplier, fmtPlDelta } from '../../lib/plDelta';
 import { useAnimatedPath } from '../../hooks/useAnimatedPath';
 import { useAnimatedValue } from '../../hooks/useAnimatedValue';
+import { IW, toSvg, interpolate } from '../../lib/chartMath';
+import { ShotsChart, FalloffChart } from './ttkCharts';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const PVP_GUARDIAN_HP = 230;
 const PVE_TIERS_KEYS = Object.keys(PVE_HEALTH_TIERS);
-
-// SVG dimensions
-const W = 500, H = 200, PL = 46, PB = 28, PR = 14, PT = 14;
-const IW = W - PL - PR;
-const IH = H - PT - PB;
-
-function toSvg(x: number, y: number, yMin: number, yMax: number): [number, number] {
-  return [x * IW, IH - ((y - yMin) / (yMax - yMin)) * IH];
-}
-
-
-function interpolate(curve: Array<{ stat: number; value: number }>, statVal: number): number {
-  if (!curve || curve.length === 0) return 0;
-  const clamped = Math.max(curve[0].stat, Math.min(curve[curve.length - 1].stat, statVal));
-  for (let i = 0; i < curve.length - 1; i++) {
-    const a = curve[i], b = curve[i + 1];
-    if (clamped >= a.stat && clamped <= b.stat) {
-      const t = (clamped - a.stat) / (b.stat - a.stat);
-      return a.value + t * (b.value - a.value);
-    }
-  }
-  return curve[curve.length - 1].value;
-}
-
-// ── Sparkline helpers ─────────────────────────────────────────────────────────
-
-function buildSparklinePath(
-  breakpoints: TTKBreakpoint[],
-  maxDist: number,
-  yMin: number,
-  yMax: number,
-): [number, number][] {
-  if (breakpoints.length === 0) return [];
-  return breakpoints.map((bp) =>
-    toSvg(bp.distance / maxDist, bp.shotsToKill, yMin, yMax)
-  );
-}
-
-function pathStr(pts: [number, number][]): string {
-  return pts.map(([x, y], i) => `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
-}
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -280,15 +241,15 @@ export const TTKAndFalloffPanel: React.FC = () => {
       {mode === 'pvp' && (
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">Guardian HP</span>
+            <span className="text-ink-3">Guardian HP</span>
             <span className="font-mono font-bold text-white">{PVP_GUARDIAN_HP}</span>
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-400">Weapons Stat</span>
+              <span className="text-sm text-ink-3">Weapons Stat</span>
               <span className={[
                 'text-xs font-bold tabular-nums',
-                localWeaponsStat > 100 ? 'text-amber-400' : 'text-slate-500',
+                localWeaponsStat > 100 ? 'text-amber-400' : 'text-ink-4',
               ].join(' ')}>
                 {localWeaponsStat}
                 {pvpWeaponsBonus > 0
@@ -315,8 +276,8 @@ export const TTKAndFalloffPanel: React.FC = () => {
                     localWeaponsStat === v
                       ? v > 100
                         ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
-                        : 'bg-white/10 border-white/20 text-slate-300'
-                      : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-300',
+                        : 'bg-white/10 border-white/20 text-ink-2'
+                      : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink-2',
                   ].join(' ')}
                 >
                   {v}
@@ -330,11 +291,11 @@ export const TTKAndFalloffPanel: React.FC = () => {
       {mode === 'pve' && (
         <div className="space-y-3">
           <div>
-            <label className="text-sm text-slate-400 block mb-1">Enemy Type</label>
+            <label className="text-sm text-ink-3 block mb-1">Enemy Type</label>
             <select
               value={enemyTier}
               onChange={(e) => { setEnemyTier(e.target.value); setChampionMod('none'); }}
-              className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-1.5 text-sm text-slate-200 focus:outline-none focus:border-amber-500"
+              className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-amber-500"
             >
               {Object.entries(PVE_HEALTH_TIERS).map(([tier, hp]) => (
                 <option key={tier} value={tier}>{tier} ({hp} HP)</option>
@@ -345,13 +306,13 @@ export const TTKAndFalloffPanel: React.FC = () => {
           {/* Champion mod selector — required when facing Champion-tier enemies */}
           {isChampionTier && (
             <div>
-              <label className="text-sm text-slate-400 block mb-1">
+              <label className="text-sm text-ink-3 block mb-1">
                 Champion Mod
                 <span className="ml-1.5 text-[10px] text-amber-500/80">required to stagger</span>
               </label>
               <div className="flex gap-1.5 flex-wrap">
                 {([
-                  { id: 'none',         label: 'None',          color: 'text-slate-500 border-white/10' },
+                  { id: 'none',         label: 'None',          color: 'text-ink-4 border-white/10' },
                   { id: 'overload',     label: 'Overload',      color: 'text-orange-400 border-orange-500/40' },
                   { id: 'unstoppable',  label: 'Unstoppable',   color: 'text-red-400    border-red-500/40'    },
                   { id: 'barrier',      label: 'Barrier',       color: 'text-blue-400   border-blue-500/40'   },
@@ -363,7 +324,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
                       'text-[11px] font-bold px-2.5 py-2 md:py-1 rounded border transition-colors',
                       championMod === id
                         ? `bg-white/10 ${color}`
-                        : 'bg-white/5 text-slate-600 border-white/10 hover:text-slate-300',
+                        : 'bg-white/5 text-ink-4 border-white/10 hover:text-ink-2',
                     ].join(' ')}
                   >
                     {label}
@@ -381,7 +342,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
           {/* Weapons Stat */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm text-slate-400">Weapons Stat</span>
+              <span className="text-sm text-ink-3">Weapons Stat</span>
               <span className={[
                 'text-xs font-bold tabular-nums',
                 localWeaponsStat > 100 ? 'text-amber-400' : 'text-green-400',
@@ -411,14 +372,14 @@ export const TTKAndFalloffPanel: React.FC = () => {
                       ? v > 100
                         ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
                         : 'bg-green-500/20 border-green-500/50 text-green-400'
-                      : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-300',
+                      : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink-2',
                   ].join(' ')}
                 >
                   {v}
                 </button>
               ))}
             </div>
-            <div className="text-[10px] text-slate-600 mt-1 space-y-0.5">
+            <div className="text-[10px] text-ink-4 mt-1 space-y-0.5">
               <p><span className="text-green-600">0–100:</span> 0–15% vs minors &amp; majors, 0–10% for Heavy.</p>
               <p><span className="text-amber-600">100–200:</span> additional 0–15% vs bosses.</p>
             </div>
@@ -427,10 +388,10 @@ export const TTKAndFalloffPanel: React.FC = () => {
           {/* Power-level delta slider */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-sm text-slate-400">Power Delta</label>
+              <label className="text-sm text-ink-3">Power Delta</label>
               <span className={[
                 'text-xs font-bold font-mono tabular-nums',
-                powerDelta < 0 ? 'text-red-400' : powerDelta > 0 ? 'text-green-400' : 'text-slate-500',
+                powerDelta < 0 ? 'text-red-400' : powerDelta > 0 ? 'text-green-400' : 'text-ink-4',
               ].join(' ')}>
                 {fmtPlDelta(powerDelta)}
               </span>
@@ -456,8 +417,8 @@ export const TTKAndFalloffPanel: React.FC = () => {
                         ? 'bg-red-500/20 border-red-500/50 text-red-400'
                         : v > 0
                           ? 'bg-green-500/20 border-green-500/50 text-green-400'
-                          : 'bg-white/10 border-white/20 text-slate-300'
-                      : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-300',
+                          : 'bg-white/10 border-white/20 text-ink-2'
+                      : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink-2',
                   ].join(' ')}
                 >
                   {v > 0 ? `+${v}` : v}
@@ -473,7 +434,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-black/40 p-4 rounded-lg border border-white/10 flex flex-col items-center">
-              <span className="text-sm text-slate-400 mb-1">TTK</span>
+              <span className="text-sm text-ink-3 mb-1">TTK</span>
               <span className={
                 'text-3xl font-mono font-bold ' + (multiplier > 1 ? 'text-amber-400' : 'text-white')
               }>
@@ -481,23 +442,23 @@ export const TTKAndFalloffPanel: React.FC = () => {
               </span>
             </div>
             <div className="bg-black/40 p-4 rounded-lg border border-white/10 flex flex-col items-center">
-              <span className="text-sm text-slate-400 mb-1">Shots</span>
+              <span className="text-sm text-ink-3 mb-1">Shots</span>
               <span className="text-3xl font-mono font-bold text-white">{ttkResult.shotsToKill}</span>
-              <span className="text-xs text-slate-500 mt-2">to kill</span>
+              <span className="text-xs text-ink-4 mt-2">to kill</span>
             </div>
           </div>
 
           <div className="bg-black/30 px-4 py-2.5 rounded-lg border border-white/10 flex items-center justify-between gap-3">
-            <span className="text-xs text-slate-500 shrink-0">Optimal pattern</span>
+            <span className="text-xs text-ink-4 shrink-0">Optimal pattern</span>
             <div className="flex items-center gap-2 font-mono font-semibold text-sm">
               {ttkResult.crits > 0 && (
                 <span className="text-amber-400">{ttkResult.crits}× Head</span>
               )}
               {ttkResult.crits > 0 && ttkResult.bodies > 0 && (
-                <span className="text-slate-600">+</span>
+                <span className="text-ink-4">+</span>
               )}
               {ttkResult.bodies > 0 && (
-                <span className="text-slate-300">{ttkResult.bodies}× Body</span>
+                <span className="text-ink-2">{ttkResult.bodies}× Body</span>
               )}
             </div>
           </div>
@@ -509,7 +470,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
               Champion mod required — select Overload, Unstoppable, or Barrier above.
             </span>
           ) : (
-            <span className="text-slate-500">TTK calculation not available for this weapon type.</span>
+            <span className="text-ink-4">TTK calculation not available for this weapon type.</span>
           )}
         </div>
       )}
@@ -518,9 +479,9 @@ export const TTKAndFalloffPanel: React.FC = () => {
       {ttkBreakpoints.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-bold text-slate-300">Shots vs Distance</h3>
+            <h3 className="text-sm font-bold text-ink-2">Shots vs Distance</h3>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-slate-500">
+              <span className="text-[10px] text-ink-4">
                 {ttkSMin === ttkSMax
                   ? `No breakpoints — always ${ttkSMin} shots`
                   : `${ttkSMin} → ${ttkSMax} shots across range`}
@@ -528,102 +489,12 @@ export const TTKAndFalloffPanel: React.FC = () => {
               <button
                 onClick={() => setExpanded('ttk')}
                 title="Expand chart"
-                className="text-slate-500 hover:text-slate-200 transition-colors text-sm leading-none px-1"
+                className="text-ink-4 hover:text-ink transition-colors text-sm leading-none px-1"
               >⛶</button>
             </div>
           </div>
           <div className="relative select-none">
-            <svg
-              width="100%"
-              viewBox={`0 0 ${W} ${H}`}
-              preserveAspectRatio="xMidYMid meet"
-              style={{ display: 'block' }}
-              className="overflow-visible"
-              onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const svgX = ((e.clientX - rect.left) / rect.width) * W - PL;
-                setHoverX(Math.max(0, Math.min(IW, svgX)));
-              }}
-              onMouseLeave={() => setHoverX(null)}
-            >
-              <g transform={`translate(${PL},${PT})`}>
-                {/* Grid */}
-                {ttkYTicks.map((v) => {
-                  const [, cy] = toSvg(0, v, ttkPadMin, ttkPadMax);
-                  return (
-                    <line key={v} x1={0} y1={cy} x2={IW} y2={cy}
-                      stroke="rgba(255,255,255,0.05)" strokeWidth={1} />
-                  );
-                })}
-
-                {/* Fill */}
-                {ttkSparklineFill && (
-                  <path d={ttkSparklineFill} fill="rgba(168,85,247,0.08)" />
-                )}
-
-                {/* Line */}
-                {ttkSparklinePath && (
-                  <path d={ttkSparklinePath} fill="none" stroke="rgba(168,85,247,0.8)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                )}
-
-                {/* Breakpoint dots — where shot count changes */}
-                {ttkBreakpoints.map((bp, i) => {
-                  if (i === 0) return null;
-                  const prev = ttkBreakpoints[i - 1];
-                  if (bp.shotsToKill === prev.shotsToKill) return null;
-                  const [cx, cy] = toSvg(bp.distance / maxDist, bp.shotsToKill, ttkPadMin, ttkPadMax);
-                  return (
-                    <circle key={i} cx={cx} cy={cy} r={3} fill="#a855f7" stroke="rgba(0,0,0,0.5)" strokeWidth={1} />
-                  );
-                })}
-
-                {/* Hover crosshair */}
-                {hoverX !== null && hoverDist !== null && (
-                  <>
-                    <line x1={hoverX} y1={0} x2={hoverX} y2={IH}
-                      stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
-                    {hoverTtkBp && (() => {
-                      const [cx, cy] = toSvg(hoverTtkBp.distance / maxDist, hoverTtkBp.shotsToKill, ttkPadMin, ttkPadMax);
-                      return (
-                        <>
-                          <circle cx={cx} cy={cy} r={4} fill="#a855f7" stroke="white" strokeWidth={1.5} />
-                          <rect x={Math.min(hoverX + 4, IW - 70)} y={4} width={68} height={26} rx={3} fill="rgba(0,0,0,0.85)" />
-                          <text x={Math.min(hoverX + 8, IW - 66)} y={14} fill="white" fontSize={8} fontFamily="monospace">
-                            {hoverDist.toFixed(1)}m
-                          </text>
-                          <text x={Math.min(hoverX + 8, IW - 66)} y={24} fill="#a855f7" fontSize={8} fontFamily="monospace">
-                            {hoverTtkBp.shotsToKill} shots · {hoverTtkBp.ttk.toFixed(2)}s
-                          </text>
-                        </>
-                      );
-                    })()}
-                  </>
-                )}
-
-                {/* Y labels */}
-                {ttkYTicks.map((v) => {
-                  const [, cy] = toSvg(0, v, ttkPadMin, ttkPadMax);
-                  return (
-                    <text key={v} x={-4} y={cy + 3}
-                      fill="rgba(148,163,184,0.6)" fontSize={8} textAnchor="end" fontFamily="monospace">
-                      {v}
-                    </text>
-                  );
-                })}
-
-                {/* X labels */}
-                {xTicks.map(({ frac, m }) => (
-                  <text key={frac} x={frac * IW} y={IH + 16}
-                    fill="rgba(148,163,184,0.6)" fontSize={8} textAnchor="middle" fontFamily="monospace">
-                    {m}m
-                  </text>
-                ))}
-
-                {/* Axes */}
-                <line x1={0} y1={0} x2={0} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
-                <line x1={0} y1={IH} x2={IW} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
-              </g>
-            </svg>
+            <ShotsChart breakpoints={ttkBreakpoints} maxDist={maxDist} yTicks={ttkYTicks} padMin={ttkPadMin} padMax={ttkPadMax} linePath={ttkSparklinePath} fillPath={ttkSparklineFill} xTicks={xTicks} hoverX={hoverX} hoverDist={hoverDist} hoverBp={hoverTtkBp} onHover={setHoverX} />
           </div>
         </div>
       )}
@@ -632,18 +503,18 @@ export const TTKAndFalloffPanel: React.FC = () => {
       {hasFalloffData ? (
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-bold text-slate-300">Damage Falloff</h3>
+            <h3 className="text-sm font-bold text-ink-2">Damage Falloff</h3>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setExpanded('falloff')}
                 title="Expand chart"
-                className="text-slate-500 hover:text-slate-200 transition-colors text-sm leading-none px-1"
+                className="text-ink-4 hover:text-ink transition-colors text-sm leading-none px-1"
               >⛶</button>
               <button
                 onClick={() => setShowHip((v) => !v)}
                 className={[
                   'text-[10px] font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
-                  showHip ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40' : 'bg-white/5 text-slate-600 border-white/10',
+                  showHip ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40' : 'bg-white/5 text-ink-4 border-white/10',
                 ].join(' ')}
               >
                 Hip
@@ -652,7 +523,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
                 onClick={() => setShowAds((v) => !v)}
                 className={[
                   'text-[10px] font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
-                  showAds ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' : 'bg-white/5 text-slate-600 border-white/10',
+                  showAds ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' : 'bg-white/5 text-ink-4 border-white/10',
                 ].join(' ')}
               >
                 ADS
@@ -661,143 +532,32 @@ export const TTKAndFalloffPanel: React.FC = () => {
           </div>
 
           <div className="flex gap-4 text-xs mb-3">
-            <span className="text-slate-500">Range <span className="text-white font-mono">{rangeStat}</span></span>
-            <span className="text-slate-500">Zoom <span className="text-white font-mono">{zoomStat}</span></span>
+            <span className="text-ink-4">Range <span className="text-white font-mono">{rangeStat}</span></span>
+            <span className="text-ink-4">Zoom <span className="text-white font-mono">{zoomStat}</span></span>
             <span className="text-cyan-400/70">Hip <span className="text-white font-mono">{hipFalloffStart!.toFixed(1)}m</span></span>
             <span className="text-amber-400/70">ADS <span className="text-white font-mono">{adsFalloffStart.toFixed(1)}m</span></span>
           </div>
 
           <div className="relative select-none">
-            <svg
-              width="100%"
-              viewBox={`0 0 ${W} ${H}`}
-              preserveAspectRatio="xMidYMid meet"
-              style={{ display: 'block' }}
-              className="overflow-visible"
-              onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const svgX = ((e.clientX - rect.left) / rect.width) * W - PL;
-                setHoverX(Math.max(0, Math.min(IW, svgX)));
-              }}
-              onMouseLeave={() => setHoverX(null)}
-            >
-              <g transform={`translate(${PL},${PT})`}>
-                {/* Grid */}
-                {yTicks.map((v) => (
-                  <line key={v}
-                    x1={0} y1={toSvg(0, v, yMin, yMax)[1]}
-                    x2={IW} y2={toSvg(0, v, yMin, yMax)[1]}
-                    stroke="rgba(255,255,255,0.05)" strokeWidth={1} />
-                ))}
-
-                {/* ADS filled area */}
-                {showAds && adsFillPath && (
-                  <path d={adsFillPath} fill="rgba(251,191,36,0.05)" />
-                )}
-
-                {/* Falloff markers */}
-                {showHip && (
-                  <line x1={animHipFalloffX} y1={0} x2={animHipFalloffX} y2={IH}
-                    stroke="rgba(34,211,238,0.3)" strokeWidth={1} strokeDasharray="3 3" />
-                )}
-                {showAds && (
-                  <line x1={animAdsFalloffX} y1={0} x2={animAdsFalloffX} y2={IH}
-                    stroke="rgba(251,191,36,0.3)" strokeWidth={1} strokeDasharray="3 3" />
-                )}
-
-                {/* Hip curves */}
-                {showHip && hipCritPath && <>
-                  <path d={hipBodyPath} fill="none" stroke="rgba(34,211,238,0.35)" strokeWidth={1.5} strokeDasharray="4 2" />
-                  <path d={hipCritPath} fill="none" stroke="rgba(34,211,238,0.9)" strokeWidth={2} strokeLinecap="round" />
-                </>}
-
-                {/* ADS curves */}
-                {showAds && adsCritPath && <>
-                  <path d={adsBodyPath} fill="none" stroke="rgba(251,191,36,0.35)" strokeWidth={1.5} strokeDasharray="4 2" />
-                  <path d={adsCritPath} fill="none" stroke="rgba(251,191,36,0.9)" strokeWidth={2} strokeLinecap="round" />
-                </>}
-
-                {/* Hover crosshair */}
-                {hoverX !== null && hoverDist !== null && (
-                  <>
-                    <line x1={hoverX} y1={0} x2={hoverX} y2={IH}
-                      stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
-                    {showHip && hoverHipCrit !== null && (() => {
-                      const [cx, cy] = toSvg(hoverX / IW, hoverHipCrit, yMin, yMax);
-                      return <circle cx={cx} cy={cy} r={3} fill="#22d3ee" />;
-                    })()}
-                    {showAds && hoverAdsCrit !== null && (() => {
-                      const [cx, cy] = toSvg(hoverX / IW, hoverAdsCrit, yMin, yMax);
-                      return <circle cx={cx} cy={cy} r={3} fill="#fbbf24" />;
-                    })()}
-                    {(() => {
-                      const tx = Math.min(hoverX + 4, IW - 80);
-                      const ty = 4;
-                      const h = showHip && showAds ? 30 : 18;
-                      return (
-                        <>
-                          <rect x={tx} y={ty} width={78} height={h} rx={3} fill="rgba(0,0,0,0.85)" />
-                          <text x={tx + 4} y={ty + 10} fill="white" fontSize={8} fontFamily="monospace">
-                            {hoverDist.toFixed(1)}m
-                          </text>
-                          {showHip && hoverHipCrit !== null && (
-                            <text x={tx + 4} y={ty + 20} fill="#22d3ee" fontSize={8} fontFamily="monospace">
-                              Hip: {hoverHipCrit.toFixed(1)}
-                            </text>
-                          )}
-                          {showAds && hoverAdsCrit !== null && (
-                            <text x={tx + 4} y={ty + (showHip ? 30 : 20)} fill="#fbbf24" fontSize={8} fontFamily="monospace">
-                              ADS: {hoverAdsCrit.toFixed(1)}
-                            </text>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </>
-                )}
-
-                {/* Y labels */}
-                {yTicks.filter((v) => v > 0).map((v) => {
-                  const [, cy] = toSvg(0, v, yMin, yMax);
-                  return (
-                    <text key={v} x={-4} y={cy + 3}
-                      fill="rgba(148,163,184,0.6)" fontSize={8} textAnchor="end" fontFamily="monospace">
-                      {v}
-                    </text>
-                  );
-                })}
-
-                {/* X labels */}
-                {xTicks.map(({ frac, m }) => (
-                  <text key={frac} x={frac * IW} y={IH + 16}
-                    fill="rgba(148,163,184,0.6)" fontSize={8} textAnchor="middle" fontFamily="monospace">
-                    {m}m
-                  </text>
-                ))}
-
-                {/* Axes */}
-                <line x1={0} y1={0} x2={0} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
-                <line x1={0} y1={IH} x2={IW} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
-              </g>
-            </svg>
+            <FalloffChart yTicks={yTicks} yMin={yMin} yMax={yMax} xTicks={xTicks} showHip={showHip} showAds={showAds} adsFillPath={adsFillPath} hipBodyPath={hipBodyPath} hipCritPath={hipCritPath} adsBodyPath={adsBodyPath} adsCritPath={adsCritPath} hipFalloffX={animHipFalloffX} adsFalloffX={animAdsFalloffX} hoverX={hoverX} hoverDist={hoverDist} hoverHipCrit={hoverHipCrit} hoverAdsCrit={hoverAdsCrit} onHover={setHoverX} />
           </div>
 
-          <div className="flex gap-4 mt-2 text-[10px] text-slate-500 flex-wrap">
+          <div className="flex gap-4 mt-2 text-[10px] text-ink-4 flex-wrap">
             <span><span className="text-cyan-400 font-bold">─</span> Hip crit</span>
             <span><span className="text-cyan-400/40 font-bold">- -</span> Hip body</span>
             <span><span className="text-amber-400 font-bold">─</span> ADS crit</span>
             <span><span className="text-amber-400/40 font-bold">- -</span> ADS body</span>
-            <span className="text-slate-600">Mode: {mode.toUpperCase()} · Hover to inspect</span>
+            <span className="text-ink-4">Mode: {mode.toUpperCase()} · Hover to inspect</span>
           </div>
         </div>
       ) : (
-        <div className="bg-black/40 p-4 rounded-lg border border-white/10 text-center text-slate-500 text-sm">
+        <div className="bg-black/40 p-4 rounded-lg border border-white/10 text-center text-ink-4 text-sm">
           Falloff data not available for this weapon archetype.
         </div>
       )}
 
       {/* ── Data vintage note ─────────────────────────────────── */}
-      <p className="text-[9px] text-slate-700 text-right">
+      <p className="text-[9px] text-ink-4 text-right">
         TTK &amp; falloff data: Season 26
       </p>
 
@@ -814,7 +574,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
             </h2>
             <button
               onClick={closeExpanded}
-              className="text-slate-400 hover:text-white text-2xl leading-none px-2 transition-colors"
+              className="text-ink-3 hover:text-white text-2xl leading-none px-2 transition-colors"
               title="Close (Esc)"
             >✕</button>
           </div>
@@ -822,126 +582,21 @@ export const TTKAndFalloffPanel: React.FC = () => {
           {/* Expanded chart */}
           <div className="flex-1 overflow-auto p-6">
             {expanded === 'ttk' && ttkBreakpoints.length > 0 && (
-              <svg
-                width="100%"
-                height="100%"
-                viewBox={`0 0 ${W} ${H}`}
-                preserveAspectRatio="xMidYMid meet"
-                style={{ display: 'block', maxHeight: 'calc(100vh - 120px)' }}
-                className="overflow-visible"
-                onMouseMove={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const svgX = ((e.clientX - rect.left) / rect.width) * W - PL;
-                  setHoverX(Math.max(0, Math.min(IW, svgX)));
-                }}
-                onMouseLeave={() => setHoverX(null)}
-              >
-                <g transform={`translate(${PL},${PT})`}>
-                  {ttkYTicks.map((v) => {
-                    const [, cy] = toSvg(0, v, ttkPadMin, ttkPadMax);
-                    return <line key={v} x1={0} y1={cy} x2={IW} y2={cy} stroke="rgba(255,255,255,0.05)" strokeWidth={1} />;
-                  })}
-                  {ttkSparklineFill && <path d={ttkSparklineFill} fill="rgba(168,85,247,0.08)" />}
-                  {ttkSparklinePath && <path d={ttkSparklinePath} fill="none" stroke="rgba(168,85,247,0.8)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />}
-                  {ttkBreakpoints.map((bp, i) => {
-                    if (i === 0) return null;
-                    const prev = ttkBreakpoints[i - 1];
-                    if (bp.shotsToKill === prev.shotsToKill) return null;
-                    const [cx, cy] = toSvg(bp.distance / maxDist, bp.shotsToKill, ttkPadMin, ttkPadMax);
-                    return <circle key={i} cx={cx} cy={cy} r={4} fill="#a855f7" stroke="rgba(0,0,0,0.5)" strokeWidth={1} />;
-                  })}
-                  {hoverX !== null && hoverDist !== null && hoverTtkBp && (() => {
-                    const [cx, cy] = toSvg(hoverTtkBp.distance / maxDist, hoverTtkBp.shotsToKill, ttkPadMin, ttkPadMax);
-                    return (
-                      <>
-                        <line x1={hoverX} y1={0} x2={hoverX} y2={IH} stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
-                        <circle cx={cx} cy={cy} r={5} fill="#a855f7" stroke="white" strokeWidth={1.5} />
-                        <rect x={Math.min(hoverX + 4, IW - 80)} y={4} width={78} height={28} rx={3} fill="rgba(0,0,0,0.85)" />
-                        <text x={Math.min(hoverX + 8, IW - 76)} y={15} fill="white" fontSize={9} fontFamily="monospace">{hoverDist.toFixed(1)}m</text>
-                        <text x={Math.min(hoverX + 8, IW - 76)} y={26} fill="#a855f7" fontSize={9} fontFamily="monospace">{hoverTtkBp.shotsToKill} shots · {hoverTtkBp.ttk.toFixed(2)}s</text>
-                      </>
-                    );
-                  })()}
-                  {ttkYTicks.map((v) => {
-                    const [, cy] = toSvg(0, v, ttkPadMin, ttkPadMax);
-                    return <text key={v} x={-4} y={cy + 3} fill="rgba(148,163,184,0.6)" fontSize={9} textAnchor="end" fontFamily="monospace">{v}</text>;
-                  })}
-                  {xTicks.map(({ frac, m }) => (
-                    <text key={frac} x={frac * IW} y={IH + 18} fill="rgba(148,163,184,0.6)" fontSize={9} textAnchor="middle" fontFamily="monospace">{m}m</text>
-                  ))}
-                  <line x1={0} y1={0} x2={0} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
-                  <line x1={0} y1={IH} x2={IW} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
-                </g>
-              </svg>
+              <ShotsChart big breakpoints={ttkBreakpoints} maxDist={maxDist} yTicks={ttkYTicks} padMin={ttkPadMin} padMax={ttkPadMax} linePath={ttkSparklinePath} fillPath={ttkSparklineFill} xTicks={xTicks} hoverX={hoverX} hoverDist={hoverDist} hoverBp={hoverTtkBp} onHover={setHoverX} />
             )}
 
             {expanded === 'falloff' && hasFalloffData && (
-              <svg
-                width="100%"
-                height="100%"
-                viewBox={`0 0 ${W} ${H}`}
-                preserveAspectRatio="xMidYMid meet"
-                style={{ display: 'block', maxHeight: 'calc(100vh - 120px)' }}
-                className="overflow-visible"
-                onMouseMove={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const svgX = ((e.clientX - rect.left) / rect.width) * W - PL;
-                  setHoverX(Math.max(0, Math.min(IW, svgX)));
-                }}
-                onMouseLeave={() => setHoverX(null)}
-              >
-                <g transform={`translate(${PL},${PT})`}>
-                  {yTicks.map((v) => (
-                    <line key={v} x1={0} y1={toSvg(0, v, yMin, yMax)[1]} x2={IW} y2={toSvg(0, v, yMin, yMax)[1]} stroke="rgba(255,255,255,0.05)" strokeWidth={1} />
-                  ))}
-                  {showAds && adsFillPath && <path d={adsFillPath} fill="rgba(251,191,36,0.05)" />}
-                  {showHip && <line x1={animHipFalloffX} y1={0} x2={animHipFalloffX} y2={IH} stroke="rgba(34,211,238,0.3)" strokeWidth={1} strokeDasharray="3 3" />}
-                  {showAds && <line x1={animAdsFalloffX} y1={0} x2={animAdsFalloffX} y2={IH} stroke="rgba(251,191,36,0.3)" strokeWidth={1} strokeDasharray="3 3" />}
-                  {showHip && hipCritPath && <>
-                    <path d={hipBodyPath} fill="none" stroke="rgba(34,211,238,0.35)" strokeWidth={2} strokeDasharray="4 2" />
-                    <path d={hipCritPath} fill="none" stroke="rgba(34,211,238,0.9)" strokeWidth={2.5} strokeLinecap="round" />
-                  </>}
-                  {showAds && adsCritPath && <>
-                    <path d={adsBodyPath} fill="none" stroke="rgba(251,191,36,0.35)" strokeWidth={2} strokeDasharray="4 2" />
-                    <path d={adsCritPath} fill="none" stroke="rgba(251,191,36,0.9)" strokeWidth={2.5} strokeLinecap="round" />
-                  </>}
-                  {hoverX !== null && hoverDist !== null && (() => {
-                    const tx = Math.min(hoverX + 4, IW - 80);
-                    const ty = 4;
-                    const h  = showHip && showAds ? 32 : 20;
-                    return (
-                      <>
-                        <line x1={hoverX} y1={0} x2={hoverX} y2={IH} stroke="rgba(255,255,255,0.2)" strokeWidth={1} />
-                        {showHip && hoverHipCrit !== null && <circle cx={toSvg(hoverX / IW, hoverHipCrit, yMin, yMax)[0]} cy={toSvg(hoverX / IW, hoverHipCrit, yMin, yMax)[1]} r={4} fill="#22d3ee" />}
-                        {showAds && hoverAdsCrit !== null && <circle cx={toSvg(hoverX / IW, hoverAdsCrit, yMin, yMax)[0]} cy={toSvg(hoverX / IW, hoverAdsCrit, yMin, yMax)[1]} r={4} fill="#fbbf24" />}
-                        <rect x={tx} y={ty} width={78} height={h} rx={3} fill="rgba(0,0,0,0.85)" />
-                        <text x={tx + 4} y={ty + 11} fill="white" fontSize={9} fontFamily="monospace">{hoverDist.toFixed(1)}m</text>
-                        {showHip && hoverHipCrit !== null && <text x={tx + 4} y={ty + 22} fill="#22d3ee" fontSize={9} fontFamily="monospace">Hip: {hoverHipCrit.toFixed(1)}</text>}
-                        {showAds && hoverAdsCrit !== null && <text x={tx + 4} y={ty + (showHip ? 32 : 22)} fill="#fbbf24" fontSize={9} fontFamily="monospace">ADS: {hoverAdsCrit.toFixed(1)}</text>}
-                      </>
-                    );
-                  })()}
-                  {yTicks.filter((v) => v > 0).map((v) => {
-                    const [, cy] = toSvg(0, v, yMin, yMax);
-                    return <text key={v} x={-4} y={cy + 3} fill="rgba(148,163,184,0.6)" fontSize={9} textAnchor="end" fontFamily="monospace">{v}</text>;
-                  })}
-                  {xTicks.map(({ frac, m }) => (
-                    <text key={frac} x={frac * IW} y={IH + 18} fill="rgba(148,163,184,0.6)" fontSize={9} textAnchor="middle" fontFamily="monospace">{m}m</text>
-                  ))}
-                  <line x1={0} y1={0} x2={0} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
-                  <line x1={0} y1={IH} x2={IW} y2={IH} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
-                </g>
-              </svg>
+              <FalloffChart big yTicks={yTicks} yMin={yMin} yMax={yMax} xTicks={xTicks} showHip={showHip} showAds={showAds} adsFillPath={adsFillPath} hipBodyPath={hipBodyPath} hipCritPath={hipCritPath} adsBodyPath={adsBodyPath} adsCritPath={adsCritPath} hipFalloffX={animHipFalloffX} adsFalloffX={animAdsFalloffX} hoverX={hoverX} hoverDist={hoverDist} hoverHipCrit={hoverHipCrit} hoverAdsCrit={hoverAdsCrit} onHover={setHoverX} />
             )}
           </div>
 
           {/* Overlay footer */}
           {expanded === 'falloff' && hasFalloffData && (
             <div className="flex items-center gap-4 px-6 py-3 border-t border-white/10 shrink-0 flex-wrap">
-              <button onClick={() => setShowHip((v) => !v)} className={['text-xs font-bold px-3 py-2 md:px-2 md:py-1 rounded border transition-colors', showHip ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40' : 'bg-white/5 text-slate-600 border-white/10'].join(' ')}>Hip</button>
-              <button onClick={() => setShowAds((v) => !v)} className={['text-xs font-bold px-3 py-2 md:px-2 md:py-1 rounded border transition-colors', showAds ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' : 'bg-white/5 text-slate-600 border-white/10'].join(' ')}>ADS</button>
-              <span className="text-xs text-slate-500">Range <span className="text-white font-mono">{rangeStat}</span></span>
-              <span className="text-xs text-slate-500">Zoom <span className="text-white font-mono">{zoomStat}</span></span>
+              <button onClick={() => setShowHip((v) => !v)} className={['text-xs font-bold px-3 py-2 md:px-2 md:py-1 rounded border transition-colors', showHip ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40' : 'bg-white/5 text-ink-4 border-white/10'].join(' ')}>Hip</button>
+              <button onClick={() => setShowAds((v) => !v)} className={['text-xs font-bold px-3 py-2 md:px-2 md:py-1 rounded border transition-colors', showAds ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' : 'bg-white/5 text-ink-4 border-white/10'].join(' ')}>ADS</button>
+              <span className="text-xs text-ink-4">Range <span className="text-white font-mono">{rangeStat}</span></span>
+              <span className="text-xs text-ink-4">Zoom <span className="text-white font-mono">{zoomStat}</span></span>
               <span className="text-cyan-400/70 text-xs">Hip <span className="text-white font-mono">{hipFalloffStart!.toFixed(1)}m</span></span>
               <span className="text-amber-400/70 text-xs">ADS <span className="text-white font-mono">{adsFalloffStart.toFixed(1)}m</span></span>
             </div>

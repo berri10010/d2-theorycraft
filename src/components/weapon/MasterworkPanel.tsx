@@ -82,11 +82,11 @@ export const MasterworkPanel: React.FC = () => {
           <span className="text-amber-400 text-xl leading-none mt-0.5">⬡</span>
           <div>
             <h2 className="text-xl font-bold text-white mb-1">Catalyst</h2>
-            <p className="text-sm text-slate-400 leading-relaxed">
+            <p className="text-sm text-ink-3 leading-relaxed">
               Exotic weapons upgrade via a <span className="text-amber-400 font-semibold">Catalyst</span> instead of a masterwork.
               Equip and complete the catalyst objective in-game to unlock bonus stats and an intrinsic perk upgrade.
             </p>
-            <p className="text-[10px] text-slate-600 mt-2">
+            <p className="text-[10px] text-ink-4 mt-2">
               Catalyst bonuses are not reflected in this builder.
             </p>
           </div>
@@ -127,7 +127,7 @@ export const MasterworkPanel: React.FC = () => {
               isAdept    ? 'text-amber-400'  :
               isCrafted  ? 'text-emerald-400':
               isEnhanced ? 'text-violet-400' :
-                           'text-slate-500';
+                           'text-ink-4';
 
             return (
               <>
@@ -165,7 +165,7 @@ export const MasterworkPanel: React.FC = () => {
                             ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
                             : hoveredMasterworkStat === stat
                               ? 'bg-amber-500/10 text-amber-300/70 border-amber-500/25'
-                              : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
+                              : 'bg-white/5 text-ink-3 border-white/10 hover:border-white/20 hover:text-ink',
                         ].join(' ')}
                       >
                         {stat}
@@ -186,10 +186,10 @@ export const MasterworkPanel: React.FC = () => {
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-bold text-white">Weapon Mod</h2>
             {availableMods.some((m) => m.enhancedVersion) && canEnhanceMod && (
-              <span className="text-xs text-slate-500 font-normal tracking-wide">Click twice to enhance</span>
+              <span className="text-xs text-ink-4 font-normal tracking-wide">Click twice to enhance</span>
             )}
             {availableMods.some((m) => m.enhancedVersion) && !canEnhanceMod && (
-              <span className="text-xs text-slate-600 font-normal tracking-wide">T3+ to enhance mods</span>
+              <span className="text-xs text-ink-4 font-normal tracking-wide">T3+ to enhance mods</span>
             )}
           </div>
 
@@ -243,7 +243,7 @@ export const MasterworkPanel: React.FC = () => {
                     )}
                   </div>
                   {desc && (
-                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                    <p className="text-[10px] text-ink-3 leading-relaxed">
                       {desc}
                     </p>
                   )}
@@ -269,7 +269,7 @@ export const MasterworkPanel: React.FC = () => {
                     </div>
                   )}
                   {!isActive && mod.enhancedVersion && (
-                    <p className="text-[9px] text-slate-500 mt-1.5">Click twice to enhance</p>
+                    <p className="text-[9px] text-ink-4 mt-1.5">Click twice to enhance</p>
                   )}
                 </div>
               );
@@ -282,15 +282,15 @@ export const MasterworkPanel: React.FC = () => {
                       'flex items-center gap-1 text-xs font-semibold px-2.5 py-2 md:py-1 rounded-md border transition-all',
                       isNone
                         ? isActive
-                          ? 'bg-white/5 text-slate-400 border-white/10'
-                          : 'bg-transparent text-slate-600 border-white/5 hover:border-white/12 hover:text-slate-500'
+                          ? 'bg-white/5 text-ink-3 border-white/10'
+                          : 'bg-transparent text-ink-4 border-white/5 hover:border-white/12 hover:text-ink-4'
                         : isUpgraded
                           ? 'bg-amber-500/20 text-amber-300 border-amber-400/50 shadow-[0_0_10px_rgba(251,191,36,0.2)]'
                           : isActive
                             ? mod.adeptOnly
                               ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
                               : 'bg-blue-500/20 text-blue-400 border-blue-500/50'
-                            : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
+                            : 'bg-white/5 text-ink-3 border-white/10 hover:border-white/20 hover:text-ink',
                     ].join(' ')}
                   >
                     <span>{displayMod.name}</span>

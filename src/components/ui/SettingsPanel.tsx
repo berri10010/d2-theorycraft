@@ -25,7 +25,7 @@ function ToggleSwitch({ on, onChange }: { on: boolean; onChange: (v: boolean) =>
       ].join(' ')}
     >
       <span className={[
-        'absolute left-0 top-0.5 w-5 h-5 md:w-3 md:h-3 rounded-full bg-white transition-transform shadow-sm',
+        'absolute left-0 top-0.5 w-5 h-5 md:w-3 md:h-3 rounded-full bg-[#fff] transition-transform shadow-sm',
         on ? 'translate-x-[22px] md:translate-x-[18px]' : 'translate-x-0.5',
       ].join(' ')} />
     </button>
@@ -49,7 +49,7 @@ function SegmentControl<T extends string>({
             'px-3 py-1.5 md:px-2 md:py-0.5 text-xs md:text-[10px] font-semibold rounded transition-colors',
             value === o.value
               ? 'bg-amber-500/25 text-amber-300'
-              : 'text-slate-500 hover:text-slate-300',
+              : 'text-ink-4 hover:text-ink-2',
           ].join(' ')}
         >
           {o.label}
@@ -61,7 +61,7 @@ function SegmentControl<T extends string>({
 
 function SectionLabel({ label }: { label: string }) {
   return (
-    <p className="px-4 pt-3 md:pt-2 pb-1 text-[10px] md:text-[9px] font-semibold text-slate-600 uppercase tracking-widest">
+    <p className="px-4 pt-3 md:pt-2 pb-1 text-[10px] md:text-[9px] font-semibold text-ink-4 uppercase tracking-widest">
       {label}
     </p>
   );
@@ -72,7 +72,7 @@ function ToggleRow({ label, value, onChange }: {
 }) {
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3 md:py-1.5 hover:bg-white/4 transition-colors">
-      <span className="text-sm md:text-xs text-slate-300">{label}</span>
+      <span className="text-sm md:text-xs text-ink-2">{label}</span>
       <ToggleSwitch on={value} onChange={onChange} />
     </div>
   );
@@ -83,7 +83,7 @@ function SegmentRow<T extends string>({ label, value, onChange, options }: {
 }) {
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-2.5 md:py-1.5">
-      <span className="text-sm md:text-xs text-slate-300 shrink-0">{label}</span>
+      <span className="text-sm md:text-xs text-ink-2 shrink-0">{label}</span>
       <SegmentControl value={value} onChange={onChange} options={options} />
     </div>
   );
@@ -174,17 +174,17 @@ export function SettingsButton() {
         className={[
           'flex items-center justify-center w-8 h-8 rounded-lg border transition-colors',
           open
-            ? 'bg-white/10 border-white/20 text-slate-200'
-            : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20',
+            ? 'bg-white/10 border-white/20 text-ink'
+            : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink-2 hover:border-white/20',
         ].join(' ')}
       >
         <GearIcon />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-64 bg-[#111] border border-white/15 rounded-xl shadow-2xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-1.5 w-64 bg-surface border border-white/15 rounded-xl shadow-2xl z-50 overflow-hidden">
           <div className="px-4 py-3 border-b border-white/8">
-            <p className="text-xs font-semibold text-slate-300">Settings</p>
+            <p className="text-xs font-semibold text-ink-2">Settings</p>
           </div>
           <div className="max-h-[80vh] overflow-y-auto">
             <SettingsBody />

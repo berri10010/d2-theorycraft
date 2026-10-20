@@ -65,7 +65,7 @@ export function CollapsiblePanel({
           onClick={toggle}
           aria-label={open ? 'Collapse panel' : 'Expand panel'}
           aria-expanded={open}
-          className="shrink-0 text-slate-500 p-4 md:p-6 pl-3 md:pl-3"
+          className="shrink-0 text-ink-4 p-4 md:p-6 pl-3 md:pl-3"
         >
           <motion.svg
             viewBox="0 0 20 20"

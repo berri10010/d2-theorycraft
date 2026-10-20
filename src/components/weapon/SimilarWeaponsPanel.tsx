@@ -131,7 +131,7 @@ function similarityScore(
 // ─── Ammo slot label ──────────────────────────────────────────────────────────
 
 const AMMO_META: Record<number, { label: string; cls: string }> = {
-  1: { label: 'Primary', cls: 'text-slate-400' },
+  1: { label: 'Primary', cls: 'text-ink-3' },
   2: { label: 'Special', cls: 'text-green-400' },
   3: { label: 'Heavy',   cls: 'text-purple-400' },
 };
@@ -153,7 +153,7 @@ function SimilarRow({
   const pctClass =
     pct >= 80 ? 'text-green-400'
     : pct >= 60 ? 'text-amber-400'
-    : 'text-slate-500';
+    : 'text-ink-4';
 
   const ELEMENT_BORDER: Record<string, string> = {
     arc:     'border-sky-500/60',
@@ -184,10 +184,10 @@ function SimilarRow({
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-slate-200 truncate leading-tight">
+        <p className="text-xs font-semibold text-ink truncate leading-tight">
           {weapon.name}
         </p>
-        <p className="text-[10px] text-slate-500 leading-tight">
+        <p className="text-[10px] text-ink-4 leading-tight">
           {seasonLabel ?? 'Unknown season'} · {weapon.intrinsicTrait?.name ?? weapon.itemTypeDisplayName}
           {' · '}<span className={ammoMeta.cls}>{ammoMeta.label}</span>
         </p>
@@ -270,17 +270,17 @@ export const SimilarWeaponsPanel: React.FC = () => {
       title={
         <div>
           <div>Similar Weapons</div>
-          <p className="text-[11px] text-slate-500 mt-0.5 font-normal">Same archetype · stat &amp; perk match</p>
+          <p className="text-[11px] text-ink-4 mt-0.5 font-normal">Same archetype · stat &amp; perk match</p>
         </div>
       }
       headerRight={
-        <span className="text-[10px] text-slate-500">{recommendations.length} found</span>
+        <span className="text-[10px] text-ink-4">{recommendations.length} found</span>
       }
     >
       <div className="flex items-center gap-3 pb-1.5 mb-1 border-b border-white/10">
         <span className="w-9 shrink-0" />
-        <span className="flex-1 text-[9px] text-slate-600 uppercase tracking-wider">Weapon</span>
-        <span className="text-[9px] text-slate-600 uppercase tracking-wider shrink-0">Match</span>
+        <span className="flex-1 text-[9px] text-ink-4 uppercase tracking-wider">Weapon</span>
+        <span className="text-[9px] text-ink-4 uppercase tracking-wider shrink-0">Match</span>
         <span className="w-8 shrink-0" />
       </div>
 
@@ -300,7 +300,7 @@ export const SimilarWeaponsPanel: React.FC = () => {
       {recommendations.length > 5 && (
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="mt-3 w-full text-center text-[10px] font-semibold text-slate-500 hover:text-slate-300 transition-colors"
+          className="mt-3 w-full text-center text-[10px] font-semibold text-ink-4 hover:text-ink-2 transition-colors"
         >
           {showAll ? 'Show fewer' : `Show all ${recommendations.length} →`}
         </button>

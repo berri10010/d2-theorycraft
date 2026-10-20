@@ -24,6 +24,8 @@ import { useGodRolls } from '../../lib/useGodRolls';
 import { SettingsButton } from '../../components/ui/SettingsPanel';
 import { useSiteSettings } from '../../store/useSiteSettings';
 import { lookupGodRoll } from '../../lib/godRolls';
+import { perkSelectionFromHashes } from '../../lib/rollHelpers';
+import { buildRollParams as buildRollParamsFor, buildDimWishlistEntry } from '../../lib/shareRoll';
 
 // Below-the-fold / secondary panels are split into their own chunks so the
 // first paint only ships the roll editor, stats and effects.
@@ -113,6 +115,11 @@ function Dashboard() {
   const [showShortcuts,      setShowShortcuts]      = useState(false);
   const [pendingGodRoll,     setPendingGodRoll]     = useState(false);
 
+  // URL <-> roll sync: ready once the first restore from the URL has run, and a ref of
+  // the last query string we wrote so our own replaceState doesn't re-trigger a restore.
+  const [urlSyncReady,       setUrlSyncReady]       = useState(false);
+  const lastWrittenRef = useRef<string | null>(null);
+
   const shareRef    = useRef<HTMLDivElement>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -160,6 +167,9 @@ function Dashboard() {
 
   // Restore state from URL params
   useEffect(() => {
+    // Ignore URL changes we made ourselves (see the sync effect below).
+    if (searchParams.toString() === lastWrittenRef.current) return;
+
     const weaponHash = searchParams.get('w');
     const perkParam  = searchParams.get('p');
     const modeParam  = searchParams.get('m');
@@ -168,9 +178,10 @@ function Dashboard() {
     const buffsParam = searchParams.get('b');
     const tierParam  = searchParams.get('tier');
 
-    if (!weaponHash || weapons.length === 0) return;
+    if (weapons.length === 0) return;
+    if (!weaponHash) { setUrlSyncReady(true); return; }
     const found = weapons.find((w) => w.hash === weaponHash);
-    if (!found) return;
+    if (!found) { setUrlSyncReady(true); return; }
 
     const group = weaponGroups.find((g) => g.variants.some((v) => v.hash === weaponHash));
     loadWeapon(found, group?.variants);
@@ -178,13 +189,7 @@ function Dashboard() {
 
     if (perkParam) {
       const hashes = perkParam.split(',');
-      found.perkSockets.forEach((col) =>
-        col.perks.forEach((p) => {
-          if (hashes.includes(p.hash)) selectPerk(col.name, p.hash);
-          if (p.enhancedVersion && hashes.includes(p.enhancedVersion.hash))
-            selectPerk(col.name, p.enhancedVersion.hash);
-        })
-      );
+      for (const { column, hash } of perkSelectionFromHashes(found, hashes)) selectPerk(column, hash);
     }
     if (modeParam === 'pvp' || modeParam === 'pve') setMode(modeParam);
     else setMode(useSiteSettings.getState().defaultMode);
@@ -197,6 +202,7 @@ function Dashboard() {
       const currentBuffs = useWeaponStore.getState().activeBuffs;
       toActivate.forEach((hash) => { if (!currentBuffs.includes(hash)) toggleBuff(hash); });
     }
+    setUrlSyncReady(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, weapons.length]);
 
@@ -274,21 +280,30 @@ function Dashboard() {
 
   // ── Share helpers ────────────────────────────────────────────────────────────
 
+  const buildRollParams = (): URLSearchParams | null =>
+    activeWeapon
+      ? buildRollParamsFor({ weapon: activeWeapon, selectedPerks, mode, masterworkStat, weaponsStat, activeBuffs, weaponTier })
+      : null;
+
   const buildPermalink = () => {
-    if (!activeWeapon) return '';
-    const params = new URLSearchParams({ w: activeWeapon.hash });
-    // Human-readable slug makes shared URLs legible (e.g. ?w=123&name=the-messenger).
-    // The slug is decorative — the editor always resolves via the hash.
-    const slug = activeWeapon.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    params.set('name', slug);
-    const perkHashes = Object.values(selectedPerks);
-    if (perkHashes.length) params.set('p', perkHashes.join(','));
-    params.set('m', mode);
-    if (masterworkStat) params.set('mw', masterworkStat);
-    if (weaponsStat !== 0) params.set('ws', String(weaponsStat));
-    if (activeBuffs.length) params.set('b', activeBuffs.join(','));
-    return `${window.location.origin}${window.location.pathname}?${params}`;
+    const params = buildRollParams();
+    return params ? `${window.location.origin}${window.location.pathname}?${params}` : '';
   };
+
+  // Keep the address bar in step with the roll so refresh / bookmark / back-forward never lose it.
+  useEffect(() => {
+    if (!urlSyncReady || !activeWeapon) return;
+    const timer = setTimeout(() => {
+      const qs = buildRollParams()?.toString();
+      if (!qs || qs === window.location.search.slice(1)) return;
+      lastWrittenRef.current = qs;
+      try {
+        window.history.replaceState(window.history.state, '', `${window.location.pathname}?${qs}`);
+      } catch { /* history API can be rate-limited (Safari); the URL is a convenience */ }
+    }, 250);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlSyncReady, activeWeapon?.hash, selectedPerks, mode, masterworkStat, weaponsStat, activeBuffs, weaponTier]);
 
   const handleSharePermalink = () => {
     const url = buildPermalink();
@@ -302,24 +317,7 @@ function Dashboard() {
 
   const handleShareDim = () => {
     if (!activeWeapon) return;
-    const hashMeta = new Map<string, { idx: number; isOrigin: boolean }>();
-    activeWeapon.perkSockets.forEach((col, i) => {
-      const isOrigin = col.columnType === 'origin';
-      col.perks.forEach(p => {
-        hashMeta.set(p.hash, { idx: i, isOrigin });
-        if (p.enhancedVersion) hashMeta.set(p.enhancedVersion.hash, { idx: i, isOrigin });
-      });
-    });
-    const perkHashes = Object.values(selectedPerks);
-    const sorted = [...perkHashes].sort((a, b) => {
-      const ma = hashMeta.get(a), mb = hashMeta.get(b);
-      const aOrigin = ma?.isOrigin ?? false, bOrigin = mb?.isOrigin ?? false;
-      if (aOrigin !== bOrigin) return aOrigin ? 1 : -1;
-      return (mb?.idx ?? 0) - (ma?.idx ?? 0);
-    });
-    let entry = `dimwishlist:item=${activeWeapon.hash}`;
-    if (sorted.length) entry += `&perks=${sorted.join(',')}`;
-    entry += `\n//notes:${activeWeapon.name} — via D2 Theorycraft`;
+    const entry = buildDimWishlistEntry(activeWeapon, Object.values(selectedPerks));
     navigator.clipboard.writeText(entry).then(() => {
       setCopiedType('dim');
       setTimeout(() => setCopiedType(null), 2000);
@@ -376,21 +374,21 @@ function Dashboard() {
 
   if (!activeWeapon) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-slate-500 p-8">
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 text-ink-4 p-8">
         {isLoading && (
           <div className="flex flex-col items-center gap-5">
             <div className="relative w-10 h-10">
               <div className="absolute inset-0 rounded-full border-2 border-white/5" />
               <div className="absolute inset-0 rounded-full border-2 border-t-amber-500/60 animate-spin" />
             </div>
-            <p className="text-slate-600 text-sm tracking-wide">Loading weapon database…</p>
+            <p className="text-ink-4 text-sm tracking-wide">Loading weapon database…</p>
           </div>
         )}
         {error && (
           <div className="text-center space-y-3 max-w-md">
             <p className="text-red-400 font-bold text-lg">Failed to load weapons</p>
-            <p className="text-slate-400 text-sm font-mono bg-slate-900 p-3 rounded-lg break-all">{error}</p>
-            <p className="text-slate-500 text-sm">
+            <p className="text-ink-3 text-sm font-mono bg-slate-900 p-3 rounded-lg break-all">{error}</p>
+            <p className="text-ink-4 text-sm">
               Weapon data is loaded from the static build. Try refreshing — if the problem
               persists the site may need to be redeployed.
             </p>
@@ -402,7 +400,7 @@ function Dashboard() {
             </button>
           </div>
         )}
-        {!isLoading && !error && <p className="text-slate-600 text-sm">No weapons found.</p>}
+        {!isLoading && !error && <p className="text-ink-4 text-sm">No weapons found.</p>}
       </div>
     );
   }
@@ -410,7 +408,7 @@ function Dashboard() {
   // ── Main layout ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="h-screen h-dvh safe-pad bg-black text-slate-200 font-sans flex overflow-hidden">
+    <div className="h-screen h-dvh safe-pad bg-black text-ink font-sans flex overflow-hidden">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:bg-amber-500 focus:text-slate-950 focus:font-bold focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:outline-none"
@@ -463,13 +461,13 @@ function Dashboard() {
               exit={{ scale: 0.94,    y: 12 }}
               transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-[#111] border border-white/15 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+              className="bg-surface border border-white/15 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
             >
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-base font-bold text-white">Keyboard Shortcuts</h3>
                 <button
                   onClick={() => setShowShortcuts(false)}
-                  className="w-6 h-6 flex items-center justify-center rounded-md text-slate-500 hover:text-slate-200 transition-colors"
+                  className="w-6 h-6 flex items-center justify-center rounded-md text-ink-4 hover:text-ink transition-colors"
                 >
                   <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -486,14 +484,14 @@ function Dashboard() {
                   { key: '?',   label: 'Show this shortcut legend' },
                 ].map(({ key, label }) => (
                   <div key={key} className="flex items-center justify-between gap-4">
-                    <span className="text-sm text-slate-300">{label}</span>
-                    <kbd className="shrink-0 text-xs font-mono font-bold bg-white/8 border border-white/15 px-2.5 py-1 rounded-lg text-slate-200 min-w-[2rem] text-center leading-none">
+                    <span className="text-sm text-ink-2">{label}</span>
+                    <kbd className="shrink-0 text-xs font-mono font-bold bg-white/8 border border-white/15 px-2.5 py-1 rounded-lg text-ink min-w-[2rem] text-center leading-none">
                       {key}
                     </kbd>
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-slate-600 mt-5 text-center">
+              <p className="text-[10px] text-ink-4 mt-5 text-center">
                 Shortcuts are disabled when typing in text fields.
               </p>
             </motion.div>
@@ -528,7 +526,7 @@ function Dashboard() {
         onClick={() => setSidebarCollapsed((v) => !v)}
         aria-label={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
         title={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
-        className="hidden md:flex self-center shrink-0 items-center justify-center w-4 h-10 text-slate-600 hover:text-slate-300 transition-colors"
+        className="hidden md:flex self-center shrink-0 items-center justify-center w-4 h-10 text-ink-4 hover:text-ink-2 transition-colors"
       >
         <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className={`w-3 h-3 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`}>
           <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -582,7 +580,7 @@ function Dashboard() {
                     onClick={() => setActiveTab(tab)}
                     className={
                       'px-3 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] flex items-center gap-1.5 capitalize ' +
-                      (activeTab === tab ? 'bg-white/10 text-amber-400' : 'text-slate-400 hover:text-slate-200')
+                      (activeTab === tab ? 'bg-white/10 text-amber-400' : 'text-ink-3 hover:text-ink')
                     }
                   >
                     {tab}
@@ -606,7 +604,7 @@ function Dashboard() {
                     aria-pressed={mode === m}
                     className={[
                       'px-3 sm:px-4 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] uppercase',
-                      mode === m ? 'bg-white/10 text-amber-400' : 'text-slate-400 hover:text-slate-200',
+                      mode === m ? 'bg-white/10 text-amber-400' : 'text-ink-3 hover:text-ink',
                     ].join(' ')}
                   >
                     {m}
@@ -623,7 +621,7 @@ function Dashboard() {
                   onClick={() => setShowShortcuts(true)}
                   aria-label="Keyboard shortcuts"
                   title="Keyboard shortcuts (?)"
-                  className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-slate-500 hover:text-slate-300 hover:border-white/20 transition-colors text-xs font-bold"
+                  className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/10 text-ink-4 hover:text-ink-2 hover:border-white/20 transition-colors text-xs font-bold"
                 >
                   ?
                 </button>
@@ -641,7 +639,7 @@ function Dashboard() {
                       'flex items-center gap-1.5 font-medium px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-colors border min-h-[44px] min-w-[44px]',
                       copiedType
                         ? 'bg-green-500/20 border-green-500/40 text-green-400'
-                        : 'bg-white/5 hover:bg-white/10 text-slate-200 border-white/10',
+                        : 'bg-white/5 hover:bg-white/10 text-ink border-white/10',
                     ].join(' ')}
                   >
                     <ShareIcon className="w-3.5 h-3.5 shrink-0" />
@@ -649,7 +647,7 @@ function Dashboard() {
                       {copiedType === 'permalink' ? 'Copied!' : copiedType === 'dim' ? 'DIM copied!' : 'Share'}
                     </span>
                     {!copiedType && (
-                      <svg viewBox="0 0 20 20" fill="currentColor" className={`hidden sm:block w-3 h-3 text-slate-500 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
+                      <svg viewBox="0 0 20 20" fill="currentColor" className={`hidden sm:block w-3 h-3 text-ink-4 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
                         <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.937a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                       </svg>
                     )}
@@ -664,7 +662,7 @@ function Dashboard() {
                         exit={{ opacity: 0, scale: 0.95,    y: -6 }}
                         transition={{ duration: 0.12, ease: 'easeOut' }}
                         style={{ transformOrigin: 'top right' }}
-                        className="absolute right-0 top-full mt-1.5 w-52 bg-[#111] border border-white/15 rounded-xl shadow-2xl z-50 overflow-hidden"
+                        className="absolute right-0 top-full mt-1.5 w-52 bg-surface border border-white/15 rounded-xl shadow-2xl z-50 overflow-hidden"
                       >
                         <button
                           onClick={handleSharePermalink}
@@ -674,8 +672,8 @@ function Dashboard() {
                             <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
                           </svg>
                           <div>
-                            <p className="text-xs font-semibold text-slate-200">Roll Permalink</p>
-                            <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Copies a URL with your full roll state</p>
+                            <p className="text-xs font-semibold text-ink">Roll Permalink</p>
+                            <p className="text-[10px] text-ink-4 leading-tight mt-0.5">Copies a URL with your full roll state</p>
                           </div>
                         </button>
                         <div className="border-t border-white/8" />
@@ -687,8 +685,8 @@ function Dashboard() {
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                           </svg>
                           <div>
-                            <p className="text-xs font-semibold text-slate-200">DIM Wishlist Item</p>
-                            <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Copies a wishlist entry to paste into DIM</p>
+                            <p className="text-xs font-semibold text-ink">DIM Wishlist Item</p>
+                            <p className="text-[10px] text-ink-4 leading-tight mt-0.5">Copies a wishlist entry to paste into DIM</p>
                           </div>
                         </button>
                       </motion.div>
@@ -705,7 +703,7 @@ function Dashboard() {
                     'flex items-center gap-1.5 font-medium px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-all border min-h-[44px] min-w-[44px]',
                     clearPending
                       ? 'bg-red-500/20 border-red-500/40 text-red-400 scale-[1.02]'
-                      : 'bg-white/5 hover:bg-red-500/10 text-slate-400 hover:text-red-400 border-white/10 hover:border-red-500/30',
+                      : 'bg-white/5 hover:bg-red-500/10 text-ink-3 hover:text-red-400 border-white/10 hover:border-red-500/30',
                   ].join(' ')}
                 >
                   <TrashIcon className="w-3.5 h-3.5 shrink-0" />

@@ -20,10 +20,9 @@
  *   public/data/mods.json             Each distinct weapon mod once
  *   public/data/clarity.json          Filtered Clarity perk descriptions
  *   public/data/god-rolls.json        God roll recommendations
- *   public/data/perk-descriptions.json Destiny Data Compendium perk text
  *
  * Note: perk.description is stripped from the weapon data to keep it small.
- * Clarity + Compendium cover perk descriptions at runtime.  See
+ * Clarity covers perk descriptions at runtime.  See
  * src/lib/weaponPack.ts for the packed format.
  */
 
@@ -193,7 +192,7 @@ async function validateTieBreakerScreenshots(weapons: Weapon[]): Promise<Weapon[
 // ── Strip perk descriptions ───────────────────────────────────────────────────
 //
 // perk.description (Bungie manifest text) is the largest text field per perk.
-// Clarity + Compendium cover descriptions at runtime, so we strip this field
+// Clarity covers descriptions at runtime, so we strip this field
 // before writing to keep each chunk under the Cloudflare 25 MiB asset limit.
 
 function stripPerk(perk: Perk): Perk {
@@ -459,77 +458,6 @@ async function patchEventWeaponSeasons() {
   console.log(`  Patched ${patchCount} weapon entries (${grSeason.size} god-roll seasons available).`);
 }
 
-// ── Step 5: Perk descriptions (Destiny Data Compendium) ──────────────────────
-
-function parseCSVSimple(text: string): string[][] {
-  const rows: string[][] = [];
-  const lines = text.split('\n');
-  for (const line of lines) {
-    if (!line.trim()) continue;
-    const row: string[] = [];
-    let inQuote = false;
-    let cell = '';
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        if (inQuote && line[i + 1] === '"') { cell += '"'; i++; }
-        else inQuote = !inQuote;
-      } else if (ch === ',' && !inQuote) {
-        row.push(cell); cell = '';
-      } else {
-        cell += ch;
-      }
-    }
-    row.push(cell);
-    rows.push(row);
-  }
-  return rows;
-}
-
-async function buildPerkDescriptions() {
-  console.log('\n[perk-descriptions] Fetching Destiny Data Compendium...');
-  const COMPENDIUM_ID = '1WaxvbLx7UoSZaBqdFr1u32F2uWVLo-CJunJB4nlGUE4';
-  const url = `https://docs.google.com/spreadsheets/d/${COMPENDIUM_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent('Gear Perks')}`;
-
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Compendium fetch failed: ${res.status}`);
-  const text = await res.text();
-  const rows = parseCSVSimple(text);
-
-  const SKIP_NAMES = new Set([
-    'Weapon Traits','Weapon Mods','Intrinsic Traits','Origin Traits',
-    'Armor Set Bonuses','Perk','Gear Perks, Traits, and Mods',
-    'Enhanced Traits will have their bonuses in',
-  ]);
-
-  const db: Record<string, unknown> = {};
-  let section = 'Weapon Traits';
-
-  for (const r of rows) {
-    const name = r[0]?.trim();
-    const desc = r[2]?.trim();
-    if (!name) continue;
-    if (['Weapon Traits','Weapon Mods','Intrinsic Traits','Origin Traits','Armor Set Bonuses'].includes(name)) {
-      section = name; continue;
-    }
-    if (SKIP_NAMES.has(name) || name.startsWith('↑') || name.startsWith('(')) continue;
-    if (!desc || desc.length < 10) continue;
-
-    const baseDescription = desc.replace(/↑[^\n]*/g, '').replace(/\n+/g, '\n').replace(/\n/g, ' ').trim();
-    const enhancedBonuses = Array.from(desc.matchAll(/↑([^\n]+)/g)).map(m => m[1].trim());
-
-    db[name] = {
-      description: desc.replace(/\n/g, ' ').trim(),
-      baseDescription,
-      enhancedBonuses,
-      section,
-    };
-  }
-
-  console.log(`  ${Object.keys(db).length} perk entries`);
-  write('perk-descriptions.json', db);
-}
-
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -541,7 +469,6 @@ async function main() {
     { name: 'clarity',              fn: buildClarity },
     { name: 'god-rolls',            fn: buildGodRolls },
     { name: 'patch-event-seasons',  fn: patchEventWeaponSeasons },
-    { name: 'perk-descriptions',    fn: buildPerkDescriptions },
   ];
 
   let failed = 0;

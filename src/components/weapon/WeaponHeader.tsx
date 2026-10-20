@@ -7,14 +7,8 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { isLegacyVariant } from '../../lib/weaponGroups';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
-import { useCompendiumPerks } from '../../lib/useCompendiumPerks';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { ClarityEntry } from '../../lib/clarity';
-
-// Compendium placeholder strings that should not be shown to users
-const BAD_COMPENDIUM_DESCRIPTIONS = new Set([
-  'No intrinsic bonuses whatsoever.',
-]);
 
 /**
  * Last-resort descriptions for frame intrinsics whose plug items carry no
@@ -59,7 +53,7 @@ function clarityPlainText(entry: ClarityEntry): string | null {
 // ── Colour maps ───────────────────────────────────────────────────────────────
 
 const DAMAGE_COLORS: Record<string, { text: string; dot: string }> = {
-  kinetic: { text: 'text-slate-300',   dot: 'bg-slate-400'   },
+  kinetic: { text: 'text-ink-2',   dot: 'bg-slate-400'   },
   arc:     { text: 'text-blue-300',    dot: 'bg-blue-400'    },
   solar:   { text: 'text-orange-300',  dot: 'bg-orange-400'  },
   void:    { text: 'text-purple-300',  dot: 'bg-purple-400'  },
@@ -75,7 +69,7 @@ const RARITY_NAME_COLOR: Record<string, string> = {
   Legendary: 'text-purple-300',
   Rare:      'text-blue-300',
   Uncommon:  'text-green-300',
-  Common:    'text-slate-300',
+  Common:    'text-ink-2',
 };
 
 /** Inline text colour for variant labels in the metadata row. */
@@ -146,7 +140,6 @@ export const WeaponHeader: React.FC = () => {
       setWeaponTier:   s.setWeaponTier,
     }))
   );
-  const { data: compendiumPerks } = useCompendiumPerks();
   const { data: clarityPerks }   = useClarityPerks();
   const [imgError,  setImgError]  = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -236,14 +229,14 @@ export const WeaponHeader: React.FC = () => {
               <h2 className={`text-xl md:text-2xl font-bold leading-tight truncate ${nameColor}`}>
                 {activeWeapon.baseName}
               </h2>
-              <p className="text-slate-400 text-xs mt-0.5 truncate">
+              <p className="text-ink-3 text-xs mt-0.5 truncate">
                 {activeWeapon.itemTypeDisplayName}
               </p>
             </div>
           </div>
 
           {/* Metadata row: ● Element · Ammo · RPM · Variant · Legacy */}
-          <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-slate-400">
+          <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-ink-3">
             {/* Element */}
             <span className={dmg.text}>
               {activeWeapon.damageType.charAt(0).toUpperCase() + activeWeapon.damageType.slice(1)}
@@ -251,22 +244,22 @@ export const WeaponHeader: React.FC = () => {
 
             {AMMO_LABELS[activeWeapon.ammoType] && (
               <>
-                <span className="text-slate-600">·</span>
+                <span className="text-ink-4">·</span>
                 <span>{AMMO_LABELS[activeWeapon.ammoType]}</span>
               </>
             )}
 
             {activeWeapon.rpm > 0 && (
               <>
-                <span className="text-slate-600">·</span>
+                <span className="text-ink-4">·</span>
                 <span>{activeWeapon.rpm} RPM</span>
               </>
             )}
 
             {activeWeapon.variantLabel && (
               <>
-                <span className="text-slate-600">·</span>
-                <span className={VARIANT_TEXT_COLOR[activeWeapon.variantLabel] ?? 'text-slate-400'}>
+                <span className="text-ink-4">·</span>
+                <span className={VARIANT_TEXT_COLOR[activeWeapon.variantLabel] ?? 'text-ink-3'}>
                   {activeWeapon.variantLabel}
                 </span>
               </>
@@ -274,8 +267,8 @@ export const WeaponHeader: React.FC = () => {
 
             {isLegacy && (
               <>
-                <span className="text-slate-600">·</span>
-                <span className="text-slate-500 italic">Legacy Frame</span>
+                <span className="text-ink-4">·</span>
+                <span className="text-ink-4 italic">Legacy Frame</span>
               </>
             )}
           </div>
@@ -284,10 +277,10 @@ export const WeaponHeader: React.FC = () => {
           {(seasonLabel || activeWeapon.source) && (
             <div className="space-y-0.5">
               {seasonLabel && (
-                <p className="text-xs text-slate-500">{seasonLabel}</p>
+                <p className="text-xs text-ink-4">{seasonLabel}</p>
               )}
               {activeWeapon.source && (
-                <p className="text-xs text-slate-500">{activeWeapon.source}</p>
+                <p className="text-xs text-ink-4">{activeWeapon.source}</p>
               )}
             </div>
           )}
@@ -308,7 +301,7 @@ export const WeaponHeader: React.FC = () => {
                       'text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-all',
                       isAdeptSelected
                         ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
-                        : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
+                        : 'bg-white/5 text-ink-3 border-white/10 hover:border-white/20 hover:text-ink',
                     ].join(' ')}
                   >
                     {isAdeptSelected ? adeptVariant.variantLabel : 'Base'}
@@ -323,7 +316,7 @@ export const WeaponHeader: React.FC = () => {
                     const v = variantGroup.find((w) => w.hash === e.target.value);
                     if (v) loadWeapon(v, variantGroup);
                   }}
-                  className="max-w-full text-xs font-semibold px-2 py-1 rounded-lg bg-white/5 text-slate-300 border border-white/10 focus:outline-none focus:border-amber-500 transition-colors"
+                  className="max-w-full text-xs font-semibold px-2 py-1 rounded-lg bg-white/5 text-ink-2 border border-white/10 focus:outline-none focus:border-amber-500 transition-colors"
                 >
                   {variantGroup.map((variant) => {
                     const label = variant.variantLabel ?? 'Base';
@@ -343,7 +336,7 @@ export const WeaponHeader: React.FC = () => {
               <select
                 value={weaponTier}
                 onChange={(e) => setWeaponTier(Number(e.target.value))}
-                className="text-xs font-semibold px-2 py-1 rounded-lg bg-white/5 text-slate-300 border border-white/10 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
+                className="text-xs font-semibold px-2 py-1 rounded-lg bg-white/5 text-ink-2 border border-white/10 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
               >
                 {TIER_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>{o.label}</option>
@@ -373,7 +366,7 @@ export const WeaponHeader: React.FC = () => {
                         }
                       }}
                       title="This weapon has a craftable pattern — click to enable crafted mode (+2 stats, enhanced perks)"
-                      className="text-xs font-medium px-2 py-1 rounded-md border transition-all bg-white/3 text-slate-500 border-white/10 hover:border-red-500/30 hover:text-red-400 hover:bg-red-500/8"
+                      className="text-xs font-medium px-2 py-1 rounded-md border transition-all bg-white/3 text-ink-4 border-white/10 hover:border-red-500/30 hover:text-red-400 hover:bg-red-500/8"
                     >
                       Craftable
                     </button>
@@ -392,7 +385,7 @@ export const WeaponHeader: React.FC = () => {
                   ) : (
                     <div
                       title="Enhance both Perk 1 and Perk 2 (click twice on each) to activate enhanced mode"
-                      className="text-xs font-medium px-2 py-1 rounded-md border bg-white/3 text-slate-500 border-white/10 select-none"
+                      className="text-xs font-medium px-2 py-1 rounded-md border bg-white/3 text-ink-4 border-white/10 select-none"
                     >
                       Enhanceable
                     </div>
@@ -408,22 +401,15 @@ export const WeaponHeader: React.FC = () => {
         {/* Intrinsic trait — constrained to left column */}
         {activeWeapon.intrinsicTrait && (() => {
           const trait = activeWeapon.intrinsicTrait!;
-          // Cascade: manifest → Clarity (plain text) → compendium (filtered) → null
-          // Compendium is filtered for: known placeholder strings, and
-          // trigger-only lines that end with ":" (e.g. "Upon reload while empty:")
+          // Cascade: manifest → Clarity (plain text) → hardcoded frame fallback
           const manifestDesc = trait.description || null;
           const clarityDesc  = clarityPerks?.[trait.hash]
             ? clarityPlainText(clarityPerks[trait.hash]) : null;
-          const rawCompendium = compendiumPerks?.[trait.name]?.baseDescription ?? null;
-          const compendiumDesc = rawCompendium &&
-            !BAD_COMPENDIUM_DESCRIPTIONS.has(rawCompendium) &&
-            !rawCompendium.trimEnd().endsWith(':')
-            ? rawCompendium : null;
           const frameFallback = FRAME_FALLBACK[trait.name] ?? null;
-          const desc = manifestDesc ?? clarityDesc ?? compendiumDesc ?? frameFallback;
+          const desc = manifestDesc ?? clarityDesc ?? frameFallback;
           return (
             <div className="flex gap-3 p-3 bg-black/50 rounded-lg border border-white/10 backdrop-blur-sm max-w-sm">
-              <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
+              <div className="perk-icon relative w-10 h-10 rounded-xl overflow-hidden shrink-0">
                 <Image
                   src={BUNGIE_URL + trait.icon}
                   alt={trait.name}
@@ -458,7 +444,7 @@ export const WeaponHeader: React.FC = () => {
                   </div>
                 )}
                 {desc && (
-                  <p className="text-xs text-slate-400 leading-relaxed">
+                  <p className="text-xs text-ink-3 leading-relaxed">
                     {desc}
                   </p>
                 )}
@@ -469,7 +455,7 @@ export const WeaponHeader: React.FC = () => {
 
         {/* Flavor text */}
         {activeWeapon.flavorText && (
-          <p className="text-xs italic text-slate-500 leading-relaxed border-l-2 border-white/10 pl-3 max-w-sm">
+          <p className="text-xs italic text-ink-4 leading-relaxed border-l-2 border-white/10 pl-3 max-w-sm">
             {activeWeapon.flavorText}
           </p>
         )}

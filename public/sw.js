@@ -6,7 +6,6 @@ const DATA_FILES = [
   '/data/perks.json',
   '/data/mods.json',
   '/data/clarity.json',
-  '/data/perk-descriptions.json',
   '/data/god-rolls.json',
 ];
 

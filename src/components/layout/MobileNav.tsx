@@ -59,11 +59,11 @@ export function MobileTopBar({ activeTab, weapon, mode, onModeChange, onOpenWeap
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-bold text-white leading-tight">{weapon.name}</span>
-              <span className="block truncate text-[11px] text-slate-500 leading-tight">
+              <span className="block truncate text-[11px] text-ink-4 leading-tight">
                 {weapon.itemTypeDisplayName}{weapon.variantLabel ? ` · ${weapon.variantLabel}` : ''}
               </span>
             </span>
-            <span className="text-slate-500 shrink-0"><ChevronDown /></span>
+            <span className="text-ink-4 shrink-0"><ChevronDown /></span>
           </button>
 
           <div role="group" aria-label="Game mode" className="flex shrink-0 bg-white/5 rounded-xl p-0.5 border border-white/10">
@@ -74,7 +74,7 @@ export function MobileTopBar({ activeTab, weapon, mode, onModeChange, onOpenWeap
                 aria-pressed={mode === m}
                 className={[
                   'h-10 px-3.5 text-xs font-bold rounded-[10px] uppercase transition-colors',
-                  mode === m ? 'bg-amber-500/20 text-amber-400' : 'text-slate-500',
+                  mode === m ? 'bg-amber-500/20 text-amber-400' : 'text-ink-4',
                 ].join(' ')}
               >
                 {m}
@@ -103,13 +103,13 @@ interface BottomNavProps {
 
 export function MobileBottomNav({ activeTab, onTabChange, compareCount, onOpenWeapons, onAddToCompare, onOpenMore, moreOpen }: BottomNavProps) {
   const item = 'relative flex flex-col items-center justify-center gap-0.5 min-h-[56px] text-[10px] font-semibold transition-colors active:bg-white/5';
-  const idle = 'text-slate-500';
+  const idle = 'text-ink-4';
   const active = 'text-amber-400';
 
   return (
     <nav
       aria-label="Primary"
-      className="md:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-5 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-white/10 pb-[env(safe-area-inset-bottom)]"
+      className="md:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-5 bg-surface-2/95 backdrop-blur-md border-t border-white/10 pb-[env(safe-area-inset-bottom)]"
     >
       <button onClick={onOpenWeapons} className={`${item} ${idle}`}>
         <ListIcon />
@@ -122,7 +122,7 @@ export function MobileBottomNav({ activeTab, onTabChange, compareCount, onOpenWe
       </button>
 
       <button onClick={onAddToCompare} aria-label="Save current roll to comparison" className={`${item} text-slate-950`}>
-        <span className="flex items-center justify-center w-12 h-12 -mt-5 rounded-full bg-amber-500 shadow-lg shadow-amber-500/25 ring-4 ring-[#0a0a0a] active:scale-95 transition-transform">
+        <span className="flex items-center justify-center w-12 h-12 -mt-5 rounded-full bg-amber-500 shadow-lg shadow-amber-500/25 ring-4 ring-surface-2 active:scale-95 transition-transform">
           <PlusIcon />
         </span>
         <span className="text-amber-400 -mt-0.5">Save</span>
@@ -189,13 +189,13 @@ function SheetRow({ icon, title, hint, onClick, danger, trailing }: {
       onClick={onClick}
       className={[
         'w-full flex items-center gap-4 px-5 min-h-[60px] text-left active:bg-white/5 transition-colors',
-        danger ? 'text-red-400' : 'text-slate-200',
+        danger ? 'text-red-400' : 'text-ink',
       ].join(' ')}
     >
-      <span className={danger ? 'text-red-400' : 'text-slate-400'}>{icon}</span>
+      <span className={danger ? 'text-red-400' : 'text-ink-3'}>{icon}</span>
       <span className="flex-1 min-w-0">
         <span className="block text-[15px] font-semibold leading-tight">{title}</span>
-        {hint && <span className="block text-xs text-slate-500 mt-0.5 leading-tight">{hint}</span>}
+        {hint && <span className="block text-xs text-ink-4 mt-0.5 leading-tight">{hint}</span>}
       </span>
       {trailing}
     </button>
@@ -244,7 +244,7 @@ export function MobileMoreSheet({ open, onClose, onSharePermalink, onShareDim, o
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.5 }}
             onDragEnd={(_, info) => { if (info.offset.y > 90 || info.velocity.y > 500) onClose(); }}
-            className="absolute bottom-0 inset-x-0 max-h-[88dvh] flex flex-col bg-[#111] border-t border-white/15 rounded-t-3xl shadow-2xl"
+            className="absolute bottom-0 inset-x-0 max-h-[88dvh] flex flex-col bg-surface border-t border-white/15 rounded-t-3xl shadow-2xl"
           >
             {/* Drag handle + header */}
             <div onPointerDown={(e) => controls.start(e)} className="shrink-0 touch-none cursor-grab pt-2.5 pb-1">
@@ -255,7 +255,7 @@ export function MobileMoreSheet({ open, onClose, onSharePermalink, onShareDim, o
                     onPointerDown={(e) => e.stopPropagation()}
                     onClick={() => setView('menu')}
                     aria-label="Back"
-                    className="flex items-center justify-center w-11 h-11 -ml-1 text-slate-400 active:text-white"
+                    className="flex items-center justify-center w-11 h-11 -ml-1 text-ink-3 active:text-white"
                   >
                     <ChevronLeft />
                   </button>
@@ -278,7 +278,7 @@ export function MobileMoreSheet({ open, onClose, onSharePermalink, onShareDim, o
                     onClick={onClear}
                     danger
                   />
-                  <SheetRow icon={<GearIcon />} title="Settings" hint="Theme, panels, defaults" onClick={() => setView('settings')} trailing={<span className="text-slate-600"><ChevronRight /></span>} />
+                  <SheetRow icon={<GearIcon />} title="Settings" hint="Theme, panels, defaults" onClick={() => setView('settings')} trailing={<span className="text-ink-4"><ChevronRight /></span>} />
                 </div>
               ) : (
                 <SettingsBody />

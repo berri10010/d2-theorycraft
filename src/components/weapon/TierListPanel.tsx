@@ -29,8 +29,8 @@ function TierSelect({
               isActive
                 ? cfg
                   ? cfg.badge
-                  : 'bg-white/10 text-slate-400'
-                : 'bg-white/5 text-slate-600 hover:text-slate-300 hover:bg-white/10',
+                  : 'bg-white/10 text-ink-3'
+                : 'bg-white/5 text-ink-4 hover:text-ink-2 hover:bg-white/10',
             ].join(' ')}
             title={t ? `Set tier ${t}` : 'Remove rating'}
           >
@@ -93,13 +93,13 @@ export const TierListPanel: React.FC = () => {
       title={
         <div>
           <div>Tier Lists</div>
-          <p className="text-[11px] text-slate-500 mt-0.5 font-normal">
+          <p className="text-[11px] text-ink-4 mt-0.5 font-normal">
             Click any tier badge on a perk to cycle rating
           </p>
         </div>
       }
       headerRight={
-        <span className="text-[10px] text-slate-500">
+        <span className="text-[10px] text-ink-4">
           {Object.keys(lists[activeListName] ?? {}).length} rated
         </span>
       }
@@ -107,13 +107,13 @@ export const TierListPanel: React.FC = () => {
       {/* ── List selector ─────────────────────────────────────────── */}
       <div className="space-y-3 mb-4">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-slate-500 uppercase tracking-wider shrink-0 w-8">
+          <span className="text-[10px] text-ink-4 uppercase tracking-wider shrink-0 w-8">
             {mode.toUpperCase()}
           </span>
           <select
             value={activeListName}
             onChange={(e) => setActiveList(mode, e.target.value)}
-            className="flex-1 text-xs font-semibold px-2 py-1 rounded-lg bg-white/5 text-slate-300 border border-white/10 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
+            className="flex-1 text-xs font-semibold px-2 py-1 rounded-lg bg-white/5 text-ink-2 border border-white/10 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
           >
             {listNames.map((name) => (
               <option key={name} value={name}>{name}</option>
@@ -132,12 +132,12 @@ export const TierListPanel: React.FC = () => {
                 className="text-xs px-2 py-1 rounded-md bg-black/40 border border-amber-500/50 text-white focus:outline-none w-28"
               />
               <button onClick={handleCreate} className="text-emerald-400 text-xs font-bold px-1">✓</button>
-              <button onClick={() => setShowNew(false)} className="text-slate-500 text-xs font-bold px-1">✕</button>
+              <button onClick={() => setShowNew(false)} className="text-ink-4 text-xs font-bold px-1">✕</button>
             </div>
           ) : (
             <button
               onClick={() => setShowNew(true)}
-              className="text-[10px] font-semibold px-2 py-1 rounded-md bg-white/5 border border-white/10 text-slate-400 hover:text-slate-200 hover:border-white/20 transition-colors shrink-0"
+              className="text-[10px] font-semibold px-2 py-1 rounded-md bg-white/5 border border-white/10 text-ink-3 hover:text-ink hover:border-white/20 transition-colors shrink-0"
               title="New list"
             >
               + New
@@ -150,7 +150,7 @@ export const TierListPanel: React.FC = () => {
           {activeListName === DEFAULT_PVE && (
             <button
               onClick={() => { if (confirm('Reset PvE list to defaults?')) resetList(DEFAULT_PVE); }}
-              className="text-[9px] font-semibold px-2 py-0.5 rounded border border-white/10 text-slate-600 hover:text-amber-400 hover:border-amber-500/30 transition-colors"
+              className="text-[9px] font-semibold px-2 py-0.5 rounded border border-white/10 text-ink-4 hover:text-amber-400 hover:border-amber-500/30 transition-colors"
             >
               Reset to default
             </button>
@@ -158,12 +158,12 @@ export const TierListPanel: React.FC = () => {
           {activeListName !== DEFAULT_PVE && listNames.length > 1 && (
             <button
               onClick={handleDelete}
-              className="text-[9px] font-semibold px-2 py-0.5 rounded border border-white/10 text-slate-600 hover:text-red-400 hover:border-red-500/30 transition-colors"
+              className="text-[9px] font-semibold px-2 py-0.5 rounded border border-white/10 text-ink-4 hover:text-red-400 hover:border-red-500/30 transition-colors"
             >
               Delete list
             </button>
           )}
-          <span className="text-[9px] text-slate-700 ml-auto">
+          <span className="text-[9px] text-ink-4 ml-auto">
             Active for {mode.toUpperCase()}
           </span>
         </div>
@@ -172,14 +172,14 @@ export const TierListPanel: React.FC = () => {
       {/* ── Perk rows for current weapon ──────────────────────────── */}
       {activeWeapon && perkRows.length > 0 ? (
         <div className="space-y-1">
-          <p className="text-[9px] text-slate-600 uppercase tracking-widest mb-2">
+          <p className="text-[9px] text-ink-4 uppercase tracking-widest mb-2">
             {activeWeapon.baseName} perks
           </p>
           {perkRows.map(({ colName, perkName }) => {
             const current = getPerkTier(mode, perkName);
             return (
               <div key={perkName} className="flex items-center gap-2">
-                <span className="text-[10px] text-slate-400 flex-1 truncate" title={perkName}>
+                <span className="text-[10px] text-ink-3 flex-1 truncate" title={perkName}>
                   {perkName}
                 </span>
                 <TierSelect
@@ -191,7 +191,7 @@ export const TierListPanel: React.FC = () => {
           })}
         </div>
       ) : (
-        <p className="text-[10px] text-slate-600 text-center py-4">
+        <p className="text-[10px] text-ink-4 text-center py-4">
           Load a weapon to rate its perks.
         </p>
       )}

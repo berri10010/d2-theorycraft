@@ -637,3 +637,14 @@ npm run build
 ## Data format note (weapon payload)
 
 `public/data/weapons-{0,1,2}.json` (~50 MB) was replaced by a normalised pack: `weapons.json` (weapons reference perks/mods by hash), `perks.json`, `mods.json` (~6 MB total). Format + pack/unpack live in `src/lib/weaponPack.ts`; `useWeaponDb` unpacks into the plain `Weapon[]` the UI uses, and the landing page loads `weapons.json` alone. `scripts/build-static-data.ts` writes the pack. `/admin` is now `src/app/admin/page.dev.tsx` and only exists under `next dev` (see `pageExtensions` in `next.config.mjs`).
+
+---
+
+## Engineering notes (tests, CI, theming)
+
+- **Tests:** `npm test` (vitest, `src/**/*.test.ts`) — covers `weaponPack`, damage/TTK/DPS math, stat calculation in `useWeaponStore`, filters, wishlist parsing, share/DIM builders and chart geometry. Tests load the committed `public/data` pack, so a bad data refresh fails them.
+- **CI:** `deploy.yml` runs typecheck → tests → `build:ci` (no data fetch) → `wrangler deploy`. `ci.yml` does the same on PRs. `refresh-data.yml` (daily + manual) re-fetches Bungie/Clarity data, validates it, commits `public/data` and dispatches the deploy.
+- **Compendium removed:** the Google "Gear Perks" tab now returns an HTMLView placeholder, so the Data Compendium integration was deleted. Perk text = manifest → Clarity → frame fallback.
+- **Theming:** colours are CSS variables (`globals.css`); Tailwind maps `black`/`white` plus `ink`/`ink-2..4` (text) and `surface`/`surface-2`. Light mode and "System" (OS) are just variable sets. Use `text-ink-*` for text; `perk-icon` gives Bungie glyphs a dark disc in light mode.
+- **URL sync:** the editor keeps `?w&p&m&mw&ws&b&tier` current via `history.replaceState` (see `lastWrittenRef` in `editor/page.tsx` for the loop guard). Saved rolls ("My Rolls" in the Wishlist panel) can be loaded back with one tap.
+- **Known leftover:** `useWeaponStore.loadWeapon` still records each weapon's roll in `weaponRolls` (and persists it) but only restores the mod; perk restore was removed in ed77958.

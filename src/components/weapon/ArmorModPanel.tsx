@@ -63,12 +63,12 @@ function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProp
   return (
     <div className="flex items-center gap-3">
       <div className="w-36 shrink-0">
-        <p className="text-xs font-semibold text-slate-200 leading-tight">{label}</p>
-        <p className="text-[10px] text-slate-500 leading-tight">{subLabel}</p>
+        <p className="text-xs font-semibold text-ink leading-tight">{label}</p>
+        <p className="text-[10px] text-ink-4 leading-tight">{subLabel}</p>
       </div>
       <TierSelector value={value} onChange={onChange} color={color} />
       {readout && (
-        <span className="text-[10px] text-slate-400 tabular-nums">{readout}</span>
+        <span className="text-[10px] text-ink-3 tabular-nums">{readout}</span>
       )}
     </div>
   );
@@ -95,7 +95,7 @@ export const ArmorModPanel: React.FC = () => {
               targeting: 0, loader: 0, dexterity: 0,
               unflinching: 0, inFlight: 0, ammoGeneration: 0,
             })}
-            className="text-[10px] font-bold text-slate-500 hover:text-red-400 transition-colors"
+            className="text-[10px] font-bold text-ink-4 hover:text-red-400 transition-colors"
           >
             Reset
           </button>
@@ -167,7 +167,7 @@ export const ArmorModPanel: React.FC = () => {
       {/* ── Weapon Surge ──────────────────────────────────────────────── */}
       <div className="pt-3 border-t border-white/5">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <h3 className="text-xs font-semibold text-ink-3 uppercase tracking-wider">
             Weapon Surge
           </h3>
           {surgeStacks > 0 && (
@@ -187,7 +187,7 @@ export const ArmorModPanel: React.FC = () => {
                 'flex-1 text-xs font-bold py-2 rounded-md border transition-all',
                 surgeStacks === stacks
                   ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
-                  : 'bg-white/5 text-slate-500 border-white/10 hover:border-white/20 hover:text-slate-300',
+                  : 'bg-white/5 text-ink-4 border-white/10 hover:border-white/20 hover:text-ink-2',
                 stacks === 4 ? 'opacity-60' : '',
               ].join(' ')}
             >
@@ -196,7 +196,7 @@ export const ArmorModPanel: React.FC = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-x-3 mt-2 text-[10px] text-slate-600">
+        <div className="grid grid-cols-2 gap-x-3 mt-2 text-[10px] text-ink-4">
           <div>
             <span className="text-blue-400 font-bold">PvE:</span>{' '}
             {[1, 2, 3, 4].map((s) => `${((SURGE_PVE[s] - 1) * 100).toFixed(0)}%`).join(' | ')}
@@ -206,15 +206,15 @@ export const ArmorModPanel: React.FC = () => {
             {[1, 2, 3, 4].map((s) => `${((SURGE_PVP[s] - 1) * 100).toFixed(1)}%`).join(' | ')}
           </div>
         </div>
-        <p className="text-[10px] text-slate-700 mt-0.5">×4 via Artifact or Exotic Armor only.</p>
+        <p className="text-[10px] text-ink-4 mt-0.5">×4 via Artifact or Exotic Armor only.</p>
       </div>
 
       <div className="mt-4 pt-3 border-t border-white/5 space-y-1">
-        <p className="text-[10px] text-slate-600 leading-relaxed">
+        <p className="text-[10px] text-ink-4 leading-relaxed">
           Tier 1 | 2 | 3 = 1, 2, or 3 copies of the mod equipped.
           All mods require element-matching weapon except In-Flight Compensator.
         </p>
-        <p className="text-[10px] text-slate-600 leading-relaxed">
+        <p className="text-[10px] text-ink-4 leading-relaxed">
           Targeting, Loader, Dexterity, and In-Flight are reflected in stat bars.
           Unflinching and Ammo Generation have no stat bar.
         </p>

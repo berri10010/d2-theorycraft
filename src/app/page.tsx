@@ -114,7 +114,7 @@ const VARIANT_COLOURS: Record<string, string> = {
 };
 
 const DAMAGE_COLORS: Record<string, string> = {
-  kinetic: 'text-slate-300',
+  kinetic: 'text-ink-2',
   solar:   'text-orange-400',
   arc:     'text-blue-400',
   void:    'text-purple-400',
@@ -134,9 +134,9 @@ const TIER_COLORS: Record<string, string> = {
   A: 'bg-green-400 text-slate-950',
   B: 'bg-blue-400 text-slate-950',
   C: 'bg-slate-500 text-white',
-  D: 'bg-slate-600 text-slate-300',
-  E: 'bg-slate-700 text-slate-400',
-  F: 'bg-slate-800 text-slate-500',
+  D: 'bg-slate-600 text-ink-2',
+  E: 'bg-slate-700 text-ink-3',
+  F: 'bg-slate-800 text-ink-4',
   G: 'bg-red-900 text-red-400',
 };
 
@@ -252,7 +252,7 @@ function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps)
       <div className="relative">
         <svg
           viewBox="0 0 20 20" fill="currentColor"
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 pointer-events-none"
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-4 pointer-events-none"
         >
           <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
         </svg>
@@ -267,7 +267,7 @@ function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps)
           placeholder={loadError ? 'Failed to load weapons' : loaded ? `Search ${groups.length}+ weapons…` : 'Loading weapons…'}
           disabled={!loaded || loadError}
           className={[
-            'w-full bg-white/8 border rounded-xl pl-12 pr-4 py-4 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:bg-white/10 transition-all disabled:opacity-40',
+            'w-full bg-white/8 border rounded-xl pl-12 pr-4 py-4 text-base text-ink placeholder-ink-4 focus:outline-none focus:bg-white/10 transition-all disabled:opacity-40',
             loadError ? 'border-red-500/40 focus:border-red-500/60' : 'border-white/15 focus:border-amber-500/60',
           ].join(' ')}
           autoComplete="off"
@@ -294,7 +294,7 @@ function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps)
       {open && (
         <ul
           ref={listRef}
-          className="absolute z-[100] left-0 right-0 top-full mt-2 bg-[#0d0d0d] border border-white/10 rounded-xl overflow-y-auto shadow-2xl max-h-[420px]"
+          className="absolute z-[100] left-0 right-0 top-full mt-2 bg-surface-2 border border-white/10 rounded-xl overflow-y-auto shadow-2xl max-h-[420px]"
         >
           {results.map((group, i) => {
             const w = group.default;
@@ -323,32 +323,32 @@ function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps)
                   {/* Name + meta */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className={`text-sm font-semibold truncate ${w.rarity === 'Exotic' ? 'text-yellow-400' : 'text-slate-100'}`}>
+                      <p className={`text-sm font-semibold truncate ${w.rarity === 'Exotic' ? 'text-yellow-400' : 'text-ink'}`}>
                         {group.baseName}
                       </p>
                       {altVariants.map(v => (
                         <button
                           key={v.hash}
                           onMouseDown={e => { e.stopPropagation(); go(v.hash); }}
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded border transition-colors ${VARIANT_COLOURS[v.variantLabel!] ?? 'bg-white/10 text-slate-400 border-white/20 hover:bg-white/20'}`}
+                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded border transition-colors ${VARIANT_COLOURS[v.variantLabel!] ?? 'bg-white/10 text-ink-3 border-white/20 hover:bg-white/20'}`}
                         >
                           {v.variantLabel}
                         </button>
                       ))}
                     </div>
-                    <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                      <span className={DAMAGE_COLORS[w.damageType] ?? 'text-slate-400'}>
+                    <p className="text-[11px] text-ink-4 flex items-center gap-1.5 mt-0.5">
+                      <span className={DAMAGE_COLORS[w.damageType] ?? 'text-ink-3'}>
                         {w.damageType.charAt(0).toUpperCase() + w.damageType.slice(1)}
                       </span>
-                      <span className="text-slate-700">·</span>
-                      <span className={AMMO_COLORS[w.ammoType] ?? 'text-slate-400'}>
+                      <span className="text-ink-4">·</span>
+                      <span className={AMMO_COLORS[w.ammoType] ?? 'text-ink-3'}>
                         {AMMO_LABELS[w.ammoType] ?? ''}
                       </span>
-                      <span className="text-slate-700">·</span>
+                      <span className="text-ink-4">·</span>
                       <span>{w.itemTypeDisplayName}</span>
                       {sl && (
                         <>
-                          <span className="text-slate-700">·</span>
+                          <span className="text-ink-4">·</span>
                           <span>{sl}</span>
                         </>
                       )}
@@ -356,7 +356,7 @@ function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps)
                   </div>
 
                   {/* Arrow */}
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-slate-600 shrink-0">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-ink-4 shrink-0">
                     <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clipRule="evenodd" />
                   </svg>
                 </button>
@@ -435,7 +435,7 @@ function FeaturedGodRolls({
         <div className="flex items-center justify-between mb-5">
           <div>
             <h2 className="text-base font-bold text-white">Featured God Rolls</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Today&apos;s S-tier picks from TheAegisRelic</p>
+            <p className="text-xs text-ink-4 mt-0.5">Today&apos;s S-tier picks from TheAegisRelic</p>
           </div>
         </div>
 
@@ -457,7 +457,7 @@ function FeaturedGodRolls({
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className={`font-bold text-sm leading-tight truncate ${w.rarity === 'Exotic' ? 'text-yellow-400' : 'text-slate-100'}`}>
+                      <p className={`font-bold text-sm leading-tight truncate ${w.rarity === 'Exotic' ? 'text-yellow-400' : 'text-ink'}`}>
                         {name}
                       </p>
                       {roll.tier && TIER_COLORS[roll.tier] && (
@@ -466,8 +466,8 @@ function FeaturedGodRolls({
                         </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-slate-500 mt-0.5 truncate">
-                      <span className={DAMAGE_COLORS[w.damageType] ?? 'text-slate-400'}>
+                    <p className="text-[10px] text-ink-4 mt-0.5 truncate">
+                      <span className={DAMAGE_COLORS[w.damageType] ?? 'text-ink-3'}>
                         {w.damageType.charAt(0).toUpperCase() + w.damageType.slice(1)}
                       </span>
                       {' · '}
@@ -483,7 +483,7 @@ function FeaturedGodRolls({
                     {perks.map((p, idx) => (
                       <span
                         key={idx}
-                        className="text-[10px] bg-white/8 border border-white/10 rounded px-2 py-0.5 text-slate-300"
+                        className="text-[10px] bg-white/8 border border-white/10 rounded px-2 py-0.5 text-ink-2"
                       >
                         {p}
                       </span>
@@ -548,7 +548,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen min-h-dvh safe-pad bg-black text-slate-200 font-sans flex flex-col overflow-x-hidden">
+    <div className="min-h-screen min-h-dvh safe-pad bg-black text-ink font-sans flex flex-col overflow-x-hidden">
 
       {/* Redirect handler for legacy share links */}
       <Suspense fallback={null}>
@@ -577,7 +577,7 @@ export default function HomePage() {
           Build the <span className="text-amber-400">perfect</span><br />weapon roll.
         </h1>
 
-        <p className="text-base md:text-lg text-slate-500 max-w-md mb-10">
+        <p className="text-base md:text-lg text-ink-4 max-w-md mb-10">
           Search for any weapon to get started.
         </p>
 
@@ -588,9 +588,9 @@ export default function HomePage() {
           onRetry={loadWeapons}
         />
 
-        <p className="text-xs text-slate-700 mt-5">
+        <p className="text-xs text-ink-4 mt-5">
           Or{' '}
-          <Link href="/editor" className="text-slate-500 hover:text-amber-400 transition-colors underline underline-offset-2">
+          <Link href="/editor" className="text-ink-4 hover:text-amber-400 transition-colors underline underline-offset-2">
             browse all weapons in the editor
           </Link>
         </p>
@@ -606,13 +606,13 @@ export default function HomePage() {
             onClick={() => setFeaturesOpen(o => !o)}
             className="w-full flex items-center justify-between gap-3 py-3 border-t border-white/5 group"
           >
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-bold text-ink-4 uppercase tracking-wider">
               Tools &amp; Features
             </span>
             <svg
               viewBox="0 0 20 20" fill="currentColor"
               className={[
-                'w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-all',
+                'w-4 h-4 text-ink-4 group-hover:text-ink-3 transition-all',
                 featuresOpen ? 'rotate-180' : '',
               ].join(' ')}
             >
@@ -631,7 +631,7 @@ export default function HomePage() {
                     {f.icon}
                   </div>
                   <h3 className="font-bold text-white text-sm mb-2">{f.title}</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">{f.desc}</p>
+                  <p className="text-xs text-ink-4 leading-relaxed">{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -641,27 +641,27 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/5 px-6 py-6 text-center space-y-1">
-        <p className="text-xs text-slate-600">
+        <p className="text-xs text-ink-4">
           Weapon data via{' '}
-          <a href="https://bungie.net" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors underline underline-offset-2">
+          <a href="https://bungie.net" target="_blank" rel="noopener noreferrer" className="hover:text-ink-3 transition-colors underline underline-offset-2">
             Bungie API
           </a>
           {' · '}God roll analysis by{' '}
-          <a href="https://twitter.com/theaegisrelic" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors underline underline-offset-2">
+          <a href="https://twitter.com/theaegisrelic" target="_blank" rel="noopener noreferrer" className="hover:text-ink-3 transition-colors underline underline-offset-2">
             TheAegisRelic
           </a>
         </p>
-        <p className="text-xs text-slate-600">
+        <p className="text-xs text-ink-4">
           Perk descriptions from{' '}
-          <a href="https://d2clarity.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors underline underline-offset-2">
+          <a href="https://d2clarity.com" target="_blank" rel="noopener noreferrer" className="hover:text-ink-3 transition-colors underline underline-offset-2">
             Clarity
           </a>
           {' · '}Description feedback via{' '}
-          <a href="https://d2clarity.com/discord" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors underline underline-offset-2">
+          <a href="https://d2clarity.com/discord" target="_blank" rel="noopener noreferrer" className="hover:text-ink-3 transition-colors underline underline-offset-2">
             Clarity Discord
           </a>
         </p>
-        <p className="text-xs text-slate-700">Not affiliated with or endorsed by Bungie, Inc.</p>
+        <p className="text-xs text-ink-4">Not affiliated with or endorsed by Bungie, Inc.</p>
       </footer>
 
     </div>

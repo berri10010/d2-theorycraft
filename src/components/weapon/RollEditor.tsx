@@ -141,7 +141,7 @@ export const RollEditor: React.FC = () => {
     [activeWeapon]
   );
 
-  if (!activeWeapon) return <div className="text-slate-500 text-center p-4">No weapon loaded.</div>;
+  if (!activeWeapon) return <div className="text-ink-4 text-center p-4">No weapon loaded.</div>;
 
   // Derive the display label for a column.
   // For perk columns, if every perk shares the same non-Trait family (e.g. all
@@ -171,7 +171,7 @@ export const RollEditor: React.FC = () => {
       storageKey="weapon-perks"
       fullWidth
       headerRight={hasPerkEnhanceable && !isCrafted && !isTieredWeapon && (
-        <span className="text-xs text-slate-500 font-normal tracking-wide">
+        <span className="text-xs text-ink-4 font-normal tracking-wide">
           Click twice to enhance
         </span>
       )}
@@ -197,7 +197,7 @@ export const RollEditor: React.FC = () => {
               >
                 {/* Column header */}
                 <div className="w-full flex flex-col items-center gap-1 mb-3">
-                  <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider md:tracking-widest text-center leading-tight md:whitespace-nowrap">
+                  <span className="text-[9px] md:text-[10px] font-bold text-ink-3 uppercase tracking-wider md:tracking-widest text-center leading-tight md:whitespace-nowrap">
                     {displayLabel}
                   </span>
                   <div className={`h-0.5 w-8 rounded-full ${accentBar}`} />
@@ -298,12 +298,12 @@ export const RollEditor: React.FC = () => {
                               activeTier === 'S' ? (tierBadgeStyle === 'pill' ? 'bg-amber-500/30 text-amber-300' : 'text-amber-400') :
                               activeTier === 'A' ? (tierBadgeStyle === 'pill' ? 'bg-emerald-500/25 text-emerald-300' : 'text-emerald-400') :
                               activeTier === 'B' ? (tierBadgeStyle === 'pill' ? 'bg-blue-500/25 text-blue-300' : 'text-blue-400') :
-                              activeTier === 'C' ? (tierBadgeStyle === 'pill' ? 'bg-slate-500/30 text-slate-300' : 'text-slate-400') :
-                              activeTier === 'D' ? (tierBadgeStyle === 'pill' ? 'bg-slate-600/30 text-slate-400' : 'text-slate-500') :
-                              activeTier === 'E' ? (tierBadgeStyle === 'pill' ? 'bg-slate-700/30 text-slate-500' : 'text-slate-500') :
-                              activeTier === 'F' ? (tierBadgeStyle === 'pill' ? 'bg-slate-800/30 text-slate-600' : 'text-slate-600') :
+                              activeTier === 'C' ? (tierBadgeStyle === 'pill' ? 'bg-slate-500/30 text-ink-2' : 'text-ink-3') :
+                              activeTier === 'D' ? (tierBadgeStyle === 'pill' ? 'bg-slate-600/30 text-ink-3' : 'text-ink-4') :
+                              activeTier === 'E' ? (tierBadgeStyle === 'pill' ? 'bg-slate-700/30 text-ink-4' : 'text-ink-4') :
+                              activeTier === 'F' ? (tierBadgeStyle === 'pill' ? 'bg-slate-800/30 text-ink-4' : 'text-ink-4') :
                               activeTier === 'G' ? (tierBadgeStyle === 'pill' ? 'bg-red-900/30 text-red-400' : 'text-red-500') :
-                              (tierBadgeStyle === 'pill' ? 'bg-white/10 text-slate-400' : 'text-slate-500')
+                              (tierBadgeStyle === 'pill' ? 'bg-white/10 text-ink-3' : 'text-ink-4')
                             }`}>{activeTier}</span>
                           )}
                           {activeTier && tierBadgeStyle === 'dot' && (
@@ -318,7 +318,7 @@ export const RollEditor: React.FC = () => {
                             }`} title={`${activeTier}-Tier`} />
                           )}
                         </div>
-                        <div className="text-[10px] text-slate-400 leading-relaxed">
+                        <div className="text-[10px] text-ink-3 leading-relaxed">
                           {clarityEntry ? renderClarityDesc(clarityEntry) : displayPerk.description}
                         </div>
                         {statMods.length > 0 && (
@@ -335,7 +335,7 @@ export const RollEditor: React.FC = () => {
                             ))}
                           </div>
                         )}
-                        <div className="text-[9px] text-slate-600 mt-1">{nextAction}</div>
+                        <div className="text-[9px] text-ink-4 mt-1">{nextAction}</div>
                       </div>
                     );
 
@@ -361,7 +361,7 @@ export const RollEditor: React.FC = () => {
                           onClick={handleClick}
                           aria-pressed={isActive}
                           className={[
-                            'relative w-12 h-12 md:w-13 md:h-13 rounded-full border-2 transition-all duration-150 overflow-hidden block',
+                            'perk-icon relative w-12 h-12 md:w-13 md:h-13 rounded-full border-2 transition-all duration-150 overflow-hidden block',
                             isActive
                               ? isUpgraded
                                 ? 'border-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.45)] scale-110 opacity-100'
@@ -403,7 +403,7 @@ export const RollEditor: React.FC = () => {
                               'absolute -bottom-1 -right-1 text-[8px] font-black leading-none px-1 py-px rounded-full z-10 transition-opacity',
                               tierCfg
                                 ? `${tierCfg.badge} opacity-100`
-                                : 'bg-white/10 text-slate-500 opacity-0 group-hover/perk:opacity-100',
+                                : 'bg-white/10 text-ink-4 opacity-0 group-hover/perk:opacity-100',
                             ].join(' ')}
                           >
                             {tierCfg ? tierCfg.label : '+'}

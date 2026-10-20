@@ -54,7 +54,7 @@ function StackSelector({ buff, activeStackIndex, onSelect }: StackSelectorProps)
             'text-[10px] font-bold px-2 py-0.5 rounded border transition-colors leading-none',
             idx === activeStackIndex
               ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
-              : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-200 hover:border-white/20',
+              : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink hover:border-white/20',
           ].join(' ')}
         >
           {stack.label}
@@ -95,7 +95,7 @@ function BuffRow({ buff, isActive, isOverridden, activeStackIndex, onToggle, onS
         : isUtility
           ? 'bg-sky-500/15 border-sky-500/50 text-sky-300'
           : 'bg-amber-500/15 border-amber-500/50 text-amber-300'
-      : 'bg-white/3 border-white/8 text-slate-400 hover:border-white/20 hover:text-slate-200',
+      : 'bg-white/3 border-white/8 text-ink-3 hover:border-white/20 hover:text-ink',
   ].join(' ');
 
   return (
@@ -111,12 +111,12 @@ function BuffRow({ buff, isActive, isOverridden, activeStackIndex, onToggle, onS
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold truncate">{buff.name}</span>
             {isActive && isOverridden && (
-              <span className="shrink-0 text-[8px] text-slate-500 bg-slate-900 px-1 py-0.5 rounded border border-slate-700 leading-none">
+              <span className="shrink-0 text-[8px] text-ink-4 bg-slate-900 px-1 py-0.5 rounded border border-slate-700 leading-none">
                 overridden
               </span>
             )}
           </div>
-          <p className="text-[10px] text-slate-500 leading-snug mt-0.5 line-clamp-2 pr-1">
+          <p className="text-[10px] text-ink-4 leading-snug mt-0.5 line-clamp-2 pr-1">
             {buff.description}
           </p>
         </div>
@@ -124,7 +124,7 @@ function BuffRow({ buff, isActive, isOverridden, activeStackIndex, onToggle, onS
           'shrink-0 text-xs font-bold tabular-nums self-center',
           isActive && !isOverridden
             ? isDebuff ? 'text-red-400' : isUtility ? 'text-sky-400' : 'text-amber-400'
-            : 'text-slate-600',
+            : 'text-ink-4',
         ].join(' ')}>
           {pctStr(effectiveMult)}
         </span>
@@ -151,7 +151,7 @@ function CollapsibleSection({ label, note, activeCount, open, onToggle, children
   return (
     <div>
       <button onClick={onToggle} className="w-full flex items-center gap-2 mb-2 group">
-        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</span>
+        <span className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">{label}</span>
         {activeCount > 0 && (
           <span className="text-[9px] font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full leading-none">
             {activeCount}
@@ -159,11 +159,11 @@ function CollapsibleSection({ label, note, activeCount, open, onToggle, children
         )}
         <div className="flex-1 h-px bg-white/5" />
         {note && !open && (
-          <span className="text-[9px] text-slate-600 italic shrink-0">{note}</span>
+          <span className="text-[9px] text-ink-4 italic shrink-0">{note}</span>
         )}
         <svg
           className={[
-            'shrink-0 w-3 h-3 text-slate-600 transition-transform duration-200 group-hover:text-slate-400',
+            'shrink-0 w-3 h-3 text-ink-4 transition-transform duration-200 group-hover:text-ink-3',
             open ? 'rotate-180' : '',
           ].join(' ')}
           viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"
@@ -173,7 +173,7 @@ function CollapsibleSection({ label, note, activeCount, open, onToggle, children
       </button>
       {open && (
         <>
-          {note && <p className="text-[9px] text-slate-600 italic mb-2">{note}</p>}
+          {note && <p className="text-[9px] text-ink-4 italic mb-2">{note}</p>}
           <div className="space-y-1.5">{children}</div>
         </>
       )}
@@ -206,17 +206,17 @@ function ExternalMultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] })
   return (
     <div className="mb-5 p-3 bg-black/40 rounded-lg border border-white/10">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">External Multiplier</span>
+        <span className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">External Multiplier</span>
         <span className="text-xl font-black text-amber-400 tabular-nums">{multStr(total)}</span>
       </div>
       {parts.length > 1 && (
         <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
           {parts.map((p, i) => (
             <React.Fragment key={p.label}>
-              {i > 0 && <span className="text-slate-600 text-xs">×</span>}
+              {i > 0 && <span className="text-ink-4 text-xs">×</span>}
               <span className={`text-xs font-mono font-bold ${p.color}`}>
                 {multStr(p.value)}
-                <span className="text-[10px] font-normal text-slate-500 ml-0.5">{p.label}</span>
+                <span className="text-[10px] font-normal text-ink-4 ml-0.5">{p.label}</span>
               </span>
             </React.Fragment>
           ))}
@@ -260,7 +260,7 @@ function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, se
         <select
           value={selectedId ?? ''}
           onChange={(e) => setExoticArmor(classType, e.target.value || null)}
-          className="w-full bg-black/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500/40 transition-colors"
+          className="w-full bg-black/50 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-ink focus:outline-none focus:border-amber-500/40 transition-colors"
         >
           <option value="">— None equipped —</option>
           {exotics.map((e) => (
@@ -271,7 +271,7 @@ function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, se
         {/* Selected exotic details */}
         {selected && (
           <div className="p-2.5 bg-amber-500/5 rounded-lg border border-amber-500/15 space-y-1.5">
-            <p className="text-[10px] text-slate-400 leading-relaxed">{selected.description}</p>
+            <p className="text-[10px] text-ink-3 leading-relaxed">{selected.description}</p>
 
             {/* Universal stat bonuses */}
             {universalBonuses && (
@@ -295,7 +295,7 @@ function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, se
                         'text-[9px] font-bold font-mono px-1.5 py-0.5 rounded border',
                         typeMatches
                           ? 'bg-green-400/10 border-green-400/20 text-green-400'
-                          : 'bg-white/5 border-white/10 text-slate-500',
+                          : 'bg-white/5 border-white/10 text-ink-4',
                       ].join(' ')}
                     >
                       +{bonus} {stat}
@@ -303,7 +303,7 @@ function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, se
                   ))}
                 </div>
                 {!typeMatches && (
-                  <p className="text-[9px] text-slate-600 italic">
+                  <p className="text-[9px] text-ink-4 italic">
                     Applies to: {typeSpecific.types.join(', ')}
                   </p>
                 )}
@@ -312,7 +312,7 @@ function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, se
 
             {/* Effect note for complex mechanics */}
             {selected.effectNote && (
-              <p className="text-[9px] text-slate-600 italic">{selected.effectNote}</p>
+              <p className="text-[9px] text-ink-4 italic">{selected.effectNote}</p>
             )}
           </div>
         )}

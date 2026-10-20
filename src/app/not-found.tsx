@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen min-h-dvh safe-pad bg-black text-slate-200 font-sans flex flex-col overflow-x-hidden">
+    <div className="min-h-screen min-h-dvh safe-pad bg-black text-ink font-sans flex flex-col overflow-x-hidden">
 
       {/* Ambient glow */}
       <div
@@ -21,7 +21,7 @@ export default function NotFound() {
         </Link>
         <Link
           href="/editor"
-          className="text-sm font-semibold px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-colors"
+          className="text-sm font-semibold px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-ink-2 border border-white/10 transition-colors"
         >
           Open Editor
         </Link>
@@ -36,7 +36,7 @@ export default function NotFound() {
           Page not found
         </h1>
 
-        <p className="text-slate-500 max-w-sm mb-10">
+        <p className="text-ink-4 max-w-sm mb-10">
           That roll doesn&apos;t exist. It may have been moved, deleted, or the link might be wrong.
         </p>
 
@@ -49,7 +49,7 @@ export default function NotFound() {
           </Link>
           <Link
             href="/"
-            className="bg-white/5 hover:bg-white/10 text-slate-300 font-semibold px-6 py-3 rounded-xl text-sm transition-colors border border-white/10 min-w-[160px] text-center"
+            className="bg-white/5 hover:bg-white/10 text-ink-2 font-semibold px-6 py-3 rounded-xl text-sm transition-colors border border-white/10 min-w-[160px] text-center"
           >
             Back to Home
           </Link>
@@ -59,7 +59,7 @@ export default function NotFound() {
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/5 px-6 py-6 text-center">
-        <p className="text-xs text-slate-700">Not affiliated with or endorsed by Bungie, Inc.</p>
+        <p className="text-xs text-ink-4">Not affiliated with or endorsed by Bungie, Inc.</p>
       </footer>
 
     </div>

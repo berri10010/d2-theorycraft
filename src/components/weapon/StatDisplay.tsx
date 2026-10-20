@@ -111,7 +111,7 @@ function StatBarRow({ label, base, current, highlighted }: {
 
   return (
     <div className={`flex items-center text-sm rounded-md transition-colors duration-150 ${highlighted ? 'bg-amber-500/8' : ''}`}>
-      <div className={`w-24 md:w-28 font-medium shrink-0 transition-colors duration-150 ${highlighted ? 'text-amber-300' : 'text-slate-300'}`}>
+      <div className={`w-24 md:w-28 font-medium shrink-0 transition-colors duration-150 ${highlighted ? 'text-amber-300' : 'text-ink-2'}`}>
         {label}
       </div>
 
@@ -168,10 +168,10 @@ function CompactStatCard({ statName, base, current, label }: {
     <div className="bg-black/30 rounded-lg px-2.5 py-2 border border-white/5 flex items-center gap-2">
       {isRecoil && <RecoilChart value={current} />}
       <div className="min-w-0">
-        <div className="text-[10px] text-slate-500 leading-none mb-0.5">{label}</div>
+        <div className="text-[10px] text-ink-4 leading-none mb-0.5">{label}</div>
         <div className={[
           'text-sm font-mono font-bold leading-none',
-          diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-slate-200',
+          diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-ink',
         ].join(' ')}>
           {animVal}
           {diff !== 0 && (
@@ -284,11 +284,11 @@ export const StatDisplay: React.FC = () => {
               tooltipContent = (
                 <div className="flex gap-5">
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] text-slate-500">Hip</span>
+                    <span className="text-[10px] text-ink-4">Hip</span>
                     <span className="text-sm font-mono font-bold text-cyan-400">{hip.toFixed(1)}m</span>
                   </div>
                   <div className="flex flex-col items-center">
-                    <span className="text-[10px] text-slate-500">ADS</span>
+                    <span className="text-[10px] text-ink-4">ADS</span>
                     <span className="text-sm font-mono font-bold text-amber-300">{ads.toFixed(1)}m</span>
                   </div>
                 </div>
@@ -298,7 +298,7 @@ export const StatDisplay: React.FC = () => {
             const flinchResist = current * 0.1;
             tooltipContent = (
               <div className="flex items-baseline gap-2">
-                <span className="text-xs text-slate-400">Flinch resistance</span>
+                <span className="text-xs text-ink-3">Flinch resistance</span>
                 <span className="text-sm font-mono font-bold text-amber-400">-{flinchResist.toFixed(1)}%</span>
               </div>
             );
@@ -308,7 +308,7 @@ export const StatDisplay: React.FC = () => {
                 <div className="flex gap-4">
                   {([['Ready', handlingTimes.readyMs], ['ADS', handlingTimes.adsMs], ['Stow', handlingTimes.stowMs]] as [string, number][]).map(([lbl, ms]) => (
                     <div key={lbl} className="flex flex-col items-center">
-                      <span className="text-[10px] text-slate-500">{lbl}</span>
+                      <span className="text-[10px] text-ink-4">{lbl}</span>
                       <span className="text-sm font-mono font-bold text-amber-400">{ms}ms</span>
                     </div>
                   ))}
@@ -318,21 +318,21 @@ export const StatDisplay: React.FC = () => {
           } else if (statName === 'Reload' && reloadMs != null) {
             tooltipContent = (
               <div className="flex items-baseline gap-2">
-                <span className="text-xs text-slate-400">Reload time</span>
+                <span className="text-xs text-ink-3">Reload time</span>
                 <span className="text-sm font-mono font-bold text-amber-400">{(reloadMs / 1000).toFixed(2)}s</span>
               </div>
             );
           } else if (statName === 'Charge Time' && current > 0) {
             tooltipContent = (
               <div className="flex items-baseline gap-2">
-                <span className="text-xs text-slate-400">Charge time</span>
+                <span className="text-xs text-ink-3">Charge time</span>
                 <span className="text-sm font-mono font-bold text-amber-400">{(current / 1000).toFixed(2)}s</span>
               </div>
             );
           } else if (statName === 'Draw Time' && bowPerfectDrawMs != null) {
             tooltipContent = (
               <div className="flex items-baseline gap-2">
-                <span className="text-xs text-slate-400">Perfect draw</span>
+                <span className="text-xs text-ink-3">Perfect draw</span>
                 <span className="text-sm font-mono font-bold text-amber-400">{(bowPerfectDrawMs / 1000).toFixed(2)}s</span>
               </div>
             );
@@ -368,7 +368,7 @@ export const StatDisplay: React.FC = () => {
               const zoomTooltip = (statName === 'Zoom' && current > 0)
                 ? (
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xs text-slate-400">Magnification</span>
+                    <span className="text-xs text-ink-3">Magnification</span>
                     <span className="text-sm font-mono font-bold text-amber-400">{(current / 10).toFixed(1)}×</span>
                   </div>
                 )

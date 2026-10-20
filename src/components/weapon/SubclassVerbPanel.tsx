@@ -37,14 +37,14 @@ function VerbChip({ verb, active, onSelect }: {
         'flex flex-col items-center gap-1 px-3 py-2 rounded-lg border transition-all text-center',
         active
           ? `${c.bg} ${c.border} ${c.text}`
-          : 'bg-white/3 border-white/8 text-slate-400 hover:border-white/20 hover:text-slate-300',
+          : 'bg-white/3 border-white/8 text-ink-3 hover:border-white/20 hover:text-ink-2',
       ].join(' ')}
     >
       <span className="text-[10px] font-bold uppercase tracking-wide leading-none">
         {verb.element}
       </span>
       <span className="text-xs font-semibold leading-tight">{verb.perkName}</span>
-      <span className="text-[9px] text-slate-500 leading-tight">→ {verb.name}</span>
+      <span className="text-[9px] text-ink-4 leading-tight">→ {verb.name}</span>
     </button>
   );
 }
@@ -65,7 +65,7 @@ function TierPicker({ value, onChange }: {
             'px-2.5 py-1 rounded-md text-[10px] font-semibold border transition-all',
             value === t.key
               ? 'bg-white/15 border-white/30 text-white'
-              : 'bg-white/3 border-white/8 text-slate-400 hover:border-white/20',
+              : 'bg-white/3 border-white/8 text-ink-3 hover:border-white/20',
           ].join(' ')}
         >
           {t.label}
@@ -93,17 +93,17 @@ function ResultCard({ verb, baseImpact, rps, tier, magSize }: {
       <div className="space-y-1.5">
         {result.rows.map((row) => (
           <div key={row.label} className="flex justify-between items-baseline gap-4">
-            <span className="text-[11px] text-slate-400">{row.label}</span>
-            <span className="text-[11px] font-semibold text-slate-200 tabular-nums shrink-0">
+            <span className="text-[11px] text-ink-3">{row.label}</span>
+            <span className="text-[11px] font-semibold text-ink tabular-nums shrink-0">
               {row.value}
             </span>
           </div>
         ))}
       </div>
-      <p className="mt-3 pt-2 border-t border-white/5 text-[9px] text-slate-600 leading-snug">
+      <p className="mt-3 pt-2 border-t border-white/5 text-[9px] text-ink-4 leading-snug">
         {verb.tagline}
       </p>
-      <p className="mt-1 text-[9px] text-slate-700 italic">
+      <p className="mt-1 text-[9px] text-ink-4 italic">
         Estimates based on community testing (Season 23 baseline). Actual values vary with buffs, mods & patch notes.
       </p>
     </div>
@@ -135,7 +135,7 @@ export const SubclassVerbPanel: React.FC = () => {
         {activeVerbKey && (
           <button
             onClick={() => setActiveVerbKey(null)}
-            className="text-[10px] font-bold text-slate-500 hover:text-red-400 transition-colors"
+            className="text-[10px] font-bold text-ink-4 hover:text-red-400 transition-colors"
           >
             Clear
           </button>
@@ -158,7 +158,7 @@ export const SubclassVerbPanel: React.FC = () => {
         <>
           {/* Enemy tier */}
           <div className="mb-4">
-            <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mb-2">
+            <p className="text-[10px] text-ink-4 font-semibold uppercase tracking-wider mb-2">
               Enemy Tier
             </p>
             <TierPicker value={enemyTier} onChange={setEnemyTier} />
@@ -176,7 +176,7 @@ export const SubclassVerbPanel: React.FC = () => {
       )}
 
       {!activeVerb && (
-        <p className="text-[11px] text-slate-600 italic">
+        <p className="text-[11px] text-ink-4 italic">
           Select a subclass verb perk above to see estimated damage contribution.
         </p>
       )}

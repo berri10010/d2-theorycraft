@@ -1,0 +1,61 @@
+name: Refresh data
+
+# Pulls the latest Bungie manifest + Clarity data into public/data, validates it
+# with the test suite, commits any change, and triggers a deploy.
+# Run manually from the Actions tab at any time (e.g. right after a season drop).
+on:
+  schedule:
+    - cron: '17 6 * * *'   # daily, 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write   # commit refreshed data
+  actions: write    # dispatch the deploy workflow
+
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Fetch and rebuild static data
+        run: npm run refresh-data
+        env:
+          BUNGIE_API_KEY: ${{ secrets.BUNGIE_API_KEY }}
+
+      # The tests load the freshly written data, so a bad refresh fails here
+      # instead of reaching production.
+      - name: Validate
+        run: |
+          npm run typecheck
+          npm test
+
+      - name: Commit and deploy if data changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- public/data; then
+            echo "No data changes."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data
+          git commit -m "chore(data): refresh static data"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          # Pushes made with GITHUB_TOKEN don't trigger other workflows, so start the deploy explicitly.
+          gh workflow run deploy.yml --ref main

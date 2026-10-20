@@ -10,14 +10,14 @@ import { calcDps, DpsResult } from '../../lib/dpsCalc';
 function Row({ label, pvp, pve }: { label: string; pvp: number; pve: number }) {
   return (
     <div className="flex items-center justify-between text-sm">
-      <span className="text-slate-400 w-36">{label}</span>
+      <span className="text-ink-3 w-36">{label}</span>
       <div className="flex gap-4 text-right">
         <div>
-          <div className="text-[9px] text-slate-600 leading-none mb-0.5">PvP</div>
+          <div className="text-[9px] text-ink-4 leading-none mb-0.5">PvP</div>
           <div className="font-mono font-bold text-white">{pvp.toLocaleString()}</div>
         </div>
         <div>
-          <div className="text-[9px] text-slate-600 leading-none mb-0.5">PvE</div>
+          <div className="text-[9px] text-ink-4 leading-none mb-0.5">PvE</div>
           <div className="font-mono font-bold text-amber-400">{pve.toLocaleString()}</div>
         </div>
       </div>
@@ -28,8 +28,8 @@ function Row({ label, pvp, pve }: { label: string; pvp: number; pve: number }) {
 function Chip({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-white/5 rounded-lg px-3 py-2 flex flex-col items-center gap-0.5">
-      <span className="text-[9px] text-slate-500 uppercase tracking-wide">{label}</span>
-      <span className="text-sm font-mono font-bold text-slate-200">{value}</span>
+      <span className="text-[9px] text-ink-4 uppercase tracking-wide">{label}</span>
+      <span className="text-sm font-mono font-bold text-ink">{value}</span>
     </div>
   );
 }
@@ -85,7 +85,7 @@ export function DpsPanel() {
 
   if (!dps) {
     return (
-      <div className="bg-white/3 rounded-xl p-4 text-center text-slate-500 text-sm">
+      <div className="bg-white/3 rounded-xl p-4 text-center text-ink-4 text-sm">
         No timing data available for this archetype.
       </div>
     );
@@ -98,7 +98,7 @@ export function DpsPanel() {
     <div className="bg-white/3 rounded-xl p-4 space-y-4">
       {/* ── Damage per trigger pull ──────────────────────────────────────── */}
       <div>
-        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+        <div className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-2">
           Damage per Trigger Pull
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -110,7 +110,7 @@ export function DpsPanel() {
 
       {/* ── DPS rows ─────────────────────────────────────────────────────── */}
       <div>
-        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+        <div className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-2">
           DPS (All-Crit)
         </div>
         <div className="space-y-2">
@@ -128,10 +128,10 @@ export function DpsPanel() {
         </div>
       </div>
 
-      <p className="text-[9px] text-slate-600 text-center">
+      <p className="text-[9px] text-ink-4 text-center">
         PvE uses per-archetype Major/Elite scalar. Optimal = continuous fire, no reloads.
         <br />
-        <span className="text-slate-700">Timing data: Season 26</span>
+        <span className="text-ink-4">Timing data: Season 26</span>
       </p>
     </div>
   );

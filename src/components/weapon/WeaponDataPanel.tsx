@@ -40,13 +40,13 @@ export function WeaponDataPanel() {
         className="w-full flex items-center justify-between mb-1 md:mb-3 py-2 md:py-0 group"
         aria-expanded={open}
       >
-        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">
+        <span className="text-xs font-bold text-ink-4 uppercase tracking-widest group-hover:text-ink-2 transition-colors">
           Weapon Data
         </span>
         <svg
           viewBox="0 0 20 20"
           fill="currentColor"
-          className={`w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-ink-4 group-hover:text-ink-3 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         >
           <path
             fillRule="evenodd"
@@ -68,7 +68,7 @@ export function WeaponDataPanel() {
                   'text-xs font-semibold px-3 py-2.5 md:py-1.5 rounded-lg border transition-all',
                   active === tab.key
                     ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
-                    : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200',
+                    : 'bg-white/5 text-ink-3 border-white/10 hover:border-white/20 hover:text-ink',
                 ].join(' ')}
               >
                 {tab.label}

@@ -3,6 +3,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
+import { useWeaponDb } from '../../store/useWeaponDb';
+import { groupWeapons } from '../../lib/weaponGroups';
+import { perkNamesFromHashes, perkSelectionFromHashes } from '../../lib/rollHelpers';
 import {
   WishlistDb,
   parseWishlist,
@@ -133,7 +136,8 @@ function usePersonalRolls() {
 const ROLLS_PREVIEW = 4; // number of personal rolls shown before "show all"
 
 export const WishlistPanel: React.FC = () => {
-  const { activeWeapon, selectedPerks } = useWeaponStore();
+  const { activeWeapon, selectedPerks, loadWeapon, selectPerk } = useWeaponStore();
+  const { weapons } = useWeaponDb();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showAllRolls, setShowAllRolls] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -142,6 +146,15 @@ export const WishlistPanel: React.FC = () => {
   const { rolls, save: saveRoll, remove: removeRoll, exportFile } = usePersonalRolls();
 
   if (!activeWeapon) return null;
+
+  /** Open a saved roll in the editor: switch weapon, then re-select its perks. */
+  const loadSavedRoll = (roll: PersonalRoll) => {
+    const target = weapons.find((w) => w.hash === roll.weaponHash);
+    if (!target) return;
+    const group = groupWeapons(weapons).find((g) => g.variants.some((v) => v.hash === target.hash));
+    loadWeapon(target, group?.variants);
+    for (const { column, hash } of perkSelectionFromHashes(target, roll.perkHashes)) selectPerk(column, hash);
+  };
 
   // Selected perk hashes (base + enhanced)
   const selectedHashes = Object.values(selectedPerks);
@@ -206,7 +219,7 @@ export const WishlistPanel: React.FC = () => {
             'text-xs font-bold px-3 py-2.5 md:py-1.5 rounded-lg border transition-all',
             isPersonal
               ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/40'
-              : 'bg-white/5 text-slate-400 border-white/10 hover:bg-cyan-500/10 hover:text-cyan-400 hover:border-cyan-500/30',
+              : 'bg-white/5 text-ink-3 border-white/10 hover:bg-cyan-500/10 hover:text-cyan-400 hover:border-cyan-500/30',
             !hasSelection ? 'opacity-40 pointer-events-none' : '',
           ].join(' ')}
         >
@@ -218,17 +231,17 @@ export const WishlistPanel: React.FC = () => {
       {/* Community wishlist section */}
       <div className="space-y-3">
         <div>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Community Wishlist</p>
+          <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-2">Community Wishlist</p>
 
           {wishlistDb ? (
             <div className="flex items-center justify-between bg-black/30 rounded-lg border border-white/8 px-3 py-2">
               <div>
-                <p className="text-xs text-slate-300 font-medium truncate max-w-[160px]">{wishlistName}</p>
-                <p className="text-[10px] text-slate-600">{entryCount.toLocaleString()} entries</p>
+                <p className="text-xs text-ink-2 font-medium truncate max-w-[160px]">{wishlistName}</p>
+                <p className="text-[10px] text-ink-4">{entryCount.toLocaleString()} entries</p>
               </div>
               <button
                 onClick={clear}
-                className="text-[10px] text-slate-500 hover:text-red-400 transition-colors font-bold"
+                className="text-[10px] text-ink-4 hover:text-red-400 transition-colors font-bold"
               >
                 Remove
               </button>
@@ -250,7 +263,7 @@ export const WishlistPanel: React.FC = () => {
                 'w-full border border-dashed rounded-lg py-3 text-center text-xs transition-all disabled:opacity-50 disabled:cursor-wait',
                 dragging
                   ? 'border-amber-500/60 bg-amber-500/10 text-amber-400 shadow-[0_0_18px_rgba(245,158,11,0.15)]'
-                  : 'border-white/15 text-slate-500 hover:text-slate-300 hover:border-white/30',
+                  : 'border-white/15 text-ink-4 hover:text-ink-2 hover:border-white/30',
               ].join(' ')}
             >
               {isLoading ? 'Parsing…' : dragging ? 'Drop to import…' : 'Drop a DIM wishlist (.txt) here, or click to browse'}
@@ -269,7 +282,7 @@ export const WishlistPanel: React.FC = () => {
           {wishlistDb && hasSelection && (
             <p className={[
               'text-[10px] mt-2 text-center font-bold',
-              isMatch ? 'text-yellow-400' : 'text-slate-600',
+              isMatch ? 'text-yellow-400' : 'text-ink-4',
             ].join(' ')}>
               {isMatch
                 ? '★ Your selected roll matches a community wishlist entry!'
@@ -282,36 +295,54 @@ export const WishlistPanel: React.FC = () => {
         {rolls.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">My God Rolls</p>
+              <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">My Rolls</p>
               <button
                 onClick={() => exportFile(rolls)}
-                className="text-[10px] font-bold text-slate-500 hover:text-amber-400 transition-colors"
+                className="text-[10px] font-bold text-ink-4 hover:text-amber-400 transition-colors"
               >
                 Export ↓
               </button>
             </div>
             <div className="space-y-1.5">
-              {(showAllRolls ? rolls : rolls.slice(0, ROLLS_PREVIEW)).map((roll) => (
-                <div
-                  key={`${roll.weaponHash}-${roll.perkHashes.join('-')}`}
-                  className="flex items-center justify-between bg-black/30 rounded-lg border border-white/8 px-3 py-1.5 gap-2"
-                >
-                  <div className="min-w-0">
-                    <p className="text-xs text-slate-300 font-medium truncate">{roll.weaponName}</p>
-                    <p className="text-[9px] text-slate-600">{roll.perkHashes.length} perks · {new Date(roll.savedAt).toLocaleDateString()}</p>
-                  </div>
-                  <button
-                    onClick={() => removeRoll(roll.weaponHash, roll.perkHashes)}
-                    className="text-[10px] text-slate-600 hover:text-red-400 transition-colors shrink-0"
+              {(showAllRolls ? rolls : rolls.slice(0, ROLLS_PREVIEW)).map((roll) => {
+                const target = weapons.find((w) => w.hash === roll.weaponHash);
+                const names  = target ? perkNamesFromHashes(target, roll.perkHashes) : [];
+                const isCurrent = roll.weaponHash === activeWeapon.hash &&
+                  JSON.stringify([...roll.perkHashes].sort()) === JSON.stringify([...selectedHashes].sort());
+                return (
+                  <div
+                    key={`${roll.weaponHash}-${roll.perkHashes.join('-')}`}
+                    className={[
+                      'flex items-stretch bg-black/30 rounded-lg border',
+                      isCurrent ? 'border-cyan-500/40' : 'border-white/8',
+                    ].join(' ')}
                   >
-                    ×
-                  </button>
-                </div>
-              ))}
+                    <button
+                      onClick={() => loadSavedRoll(roll)}
+                      disabled={!target}
+                      title={target ? 'Load this roll in the editor' : 'Weapon no longer in the database'}
+                      className="flex-1 min-w-0 text-left px-3 py-2 md:py-1.5 active:bg-white/5 hover:bg-white/5 rounded-l-lg disabled:opacity-50"
+                    >
+                      <p className="text-xs text-ink font-medium truncate">{roll.weaponName}</p>
+                      <p className="text-[10px] text-ink-4 truncate">
+                        {names.length ? names.join(' · ') : `${roll.perkHashes.length} perks`}
+                      </p>
+                      <p className="text-[9px] text-ink-4">{new Date(roll.savedAt).toLocaleDateString()}</p>
+                    </button>
+                    <button
+                      onClick={() => removeRoll(roll.weaponHash, roll.perkHashes)}
+                      aria-label={`Delete saved roll for ${roll.weaponName}`}
+                      className="shrink-0 w-11 md:w-9 text-ink-4 hover:text-red-400 active:text-red-400 transition-colors"
+                    >
+                      ×
+                    </button>
+                  </div>
+                );
+              })}
               {rolls.length > ROLLS_PREVIEW && (
                 <button
                   onClick={() => setShowAllRolls((v) => !v)}
-                  className="w-full text-center text-[10px] font-semibold text-slate-500 hover:text-slate-300 transition-colors pt-1"
+                  className="w-full text-center text-[10px] font-semibold text-ink-4 hover:text-ink-2 transition-colors pt-1"
                 >
                   {showAllRolls ? 'Show fewer' : `Show all ${rolls.length} rolls →`}
                 </button>

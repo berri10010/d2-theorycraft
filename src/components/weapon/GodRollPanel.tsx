@@ -13,7 +13,7 @@ const WEAPON_TIER_CONFIG: Record<string, { bg: string; text: string; label: stri
   A: { bg: 'bg-green-400', text: 'text-slate-950', label: 'A-Tier' },
   B: { bg: 'bg-blue-400',  text: 'text-slate-950', label: 'B-Tier' },
   C: { bg: 'bg-slate-500', text: 'text-white', label: 'C-Tier' },
-  D: { bg: 'bg-slate-600', text: 'text-slate-300', label: 'D-Tier' },
+  D: { bg: 'bg-slate-600', text: 'text-ink-2', label: 'D-Tier' },
 };
 
 // ── Small pill for a perk / roll option ──────────
@@ -23,7 +23,7 @@ function PerkPill({ name, index }: { name: string; index: number }) {
     'bg-green-900/60 border-green-700/60 text-green-300',
     'bg-blue-900/60 border-blue-700/60 text-blue-300',
     'bg-purple-900/60 border-purple-700/60 text-purple-300',
-    'bg-slate-800 border-slate-700 text-slate-300',
+    'bg-slate-800 border-slate-700 text-ink-2',
   ];
   return (
     <span className={`inline-block text-xs px-2 py-0.5 rounded border font-medium ${colors[index] ?? colors[4]}`}>
@@ -37,7 +37,7 @@ function RollRow({ label, options }: { label: string; options: string[] }) {
   if (options.length === 0) return null;
   return (
     <div className="flex flex-wrap items-start gap-x-2 gap-y-1.5">
-      <span className="text-xs text-slate-500 uppercase tracking-wide w-16 shrink-0 pt-0.5">{label}</span>
+      <span className="text-xs text-ink-4 uppercase tracking-wide w-16 shrink-0 pt-0.5">{label}</span>
       <div className="flex flex-wrap gap-1.5">
         {options.map((o, i) => <PerkPill key={o} name={o} index={i} />)}
       </div>
@@ -124,7 +124,7 @@ export const GodRollPanel: React.FC = () => {
   if (loading) {
     return (
       <CollapsiblePanel title="God Roll" storageKey="god-roll">
-        <p className="text-slate-600 text-sm text-center py-6 animate-pulse">Loading community analysis…</p>
+        <p className="text-ink-4 text-sm text-center py-6 animate-pulse">Loading community analysis…</p>
       </CollapsiblePanel>
     );
   }
@@ -152,10 +152,10 @@ export const GodRollPanel: React.FC = () => {
       title={
         <div>
           <div>God Roll</div>
-          <p className="text-xs text-slate-500 mt-0.5 font-normal">{subtitleParts}</p>
+          <p className="text-xs text-ink-4 mt-0.5 font-normal">{subtitleParts}</p>
           {entry.source && (
-            <p className="text-xs text-slate-500 mt-0.5 font-normal">
-              <span className="text-slate-600">Drop: </span>{entry.source}
+            <p className="text-xs text-ink-4 mt-0.5 font-normal">
+              <span className="text-ink-4">Drop: </span>{entry.source}
             </p>
           )}
         </div>
@@ -168,7 +168,7 @@ export const GodRollPanel: React.FC = () => {
             </span>
           )}
           {entry.frame && !/^\d+$/.test(entry.frame.trim()) && (
-            <span className="text-xs text-slate-500">{entry.frame}</span>
+            <span className="text-xs text-ink-4">{entry.frame}</span>
           )}
         </div>
       }
@@ -211,7 +211,7 @@ export const GodRollPanel: React.FC = () => {
                 'w-full py-2 text-xs font-semibold rounded-lg border transition-all',
                 applied
                   ? 'bg-green-500/20 border-green-500/40 text-green-400'
-                  : 'bg-white/5 border-white/10 text-slate-400 hover:bg-amber-500/10 hover:border-amber-500/30 hover:text-amber-400',
+                  : 'bg-white/5 border-white/10 text-ink-3 hover:bg-amber-500/10 hover:border-amber-500/30 hover:text-amber-400',
               ].join(' ')}
             >
               {applied ? '✓ Applied' : 'Apply God Roll'}
@@ -219,9 +219,9 @@ export const GodRollPanel: React.FC = () => {
 
             {noteLines.length > 0 && (
               <div className="mt-4 pt-4 border-t border-white/10">
-                <p className="text-xs text-slate-500 uppercase tracking-wide mb-1.5">Analyst Notes</p>
+                <p className="text-xs text-ink-4 uppercase tracking-wide mb-1.5">Analyst Notes</p>
                 {noteLines.map((note, i) => (
-                  <p key={i} className="text-sm text-slate-300 leading-relaxed italic">{note}</p>
+                  <p key={i} className="text-sm text-ink-2 leading-relaxed italic">{note}</p>
                 ))}
               </div>
             )}
@@ -230,7 +230,7 @@ export const GodRollPanel: React.FC = () => {
       })()}
 
       {/* Source attribution */}
-      <p className="text-[10px] text-slate-700 mt-4 text-right">
+      <p className="text-[10px] text-ink-4 mt-4 text-right">
         Source: Destiny 2 Endgame Analysis · @theaegisrelic
       </p>
     </CollapsiblePanel>

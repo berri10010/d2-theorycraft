@@ -29,9 +29,15 @@ export const viewport: Viewport = {
   themeColor: '#09090b',
 };
 
+const THEME_BOOT = `try{var t=JSON.parse(localStorage.getItem('site-settings')||'{}').state;t=t&&t.theme;if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Apply a saved light/dark choice before first paint (avoids a flash). "system" needs no attribute. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT }} />
+      </head>
       <body className={inter.className}>
         <ThemeProvider />
         <ServiceWorkerRegistration />

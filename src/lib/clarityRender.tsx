@@ -38,7 +38,7 @@ export function renderClarityDesc(entry: ClarityEntry): React.ReactNode {
         const cls = seg.classNames[0];
         if (cls === 'link') {
           nodes.push(
-            <span key={key} className="underline decoration-slate-500 text-slate-200">
+            <span key={key} className="underline decoration-slate-500 text-ink">
               {seg.text}
             </span>
           );
