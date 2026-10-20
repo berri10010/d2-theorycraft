@@ -19,6 +19,8 @@
  *   public/data/perks.json            Each distinct perk once (description stripped)
  *   public/data/mods.json             Each distinct weapon mod once
  *   public/data/statgroups.json       Bungie raw → display stat curves, per stat group
+ *   public/data/pvp-wishlist.json     r/CrucibleGuidebook community PvP recommendations, per weapon
+ *   public/data/sources.json          Where each weapon drops (Sax's Monument of Triumph loot sheet)
  *   public/data/clarity.json          Filtered Clarity perk descriptions
  *   public/data/god-rolls.json        God roll recommendations
  *
@@ -31,7 +33,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parseWeapons } from '../src/lib/bungie/parser.js';
-import { packWeapons, type PackedWeapon } from '../src/lib/weaponPack.js';
+import { packWeapons, unpackWeapons, type PackedWeapon } from '../src/lib/weaponPack.js';
+import { PVP_WISHLIST_URL, parseWishlistBlocks, buildPvpEntries } from '../src/lib/pvpWishlist.js';
+import { SAX_SHEET_ID, SAX_TABS, buildSourceTable, type SaxTab } from '../src/lib/weaponSources.js';
 import type { Weapon, Perk } from '../src/types/weapon.js';
 import type { BungieSeasonDefinition, BungieStatGroupDefinition } from '../src/lib/bungie/bungieTypes.js';
 
@@ -461,6 +465,61 @@ async function patchEventWeaponSeasons() {
   console.log(`  Patched ${patchCount} weapon entries (${grSeason.size} god-roll seasons available).`);
 }
 
+// ── Step 5: Third-party community data (PvP wishlist, weapon sources) ────────
+// These come from sources we don't control, so a failure here keeps the previously committed
+// file (with a warning) instead of failing the whole build.
+
+function readJson<T>(name: string): T { return JSON.parse(fs.readFileSync(outPath(name), 'utf8')) as T; }
+
+function loadUnpackedWeapons() {
+  return unpackWeapons({
+    weapons: readJson('weapons.json'),
+    perks: readJson('perks.json'),
+    mods: readJson('mods.json'),
+    statGroups: readJson('statgroups.json'),
+  });
+}
+
+async function fetchText(url: string): Promise<string> {
+  const res = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+  return res.text();
+}
+
+async function buildPvpWishlist() {
+  console.log('\n[pvp-wishlist] Fetching r/CrucibleGuidebook community PvP wishlist...');
+  try {
+    const text = await fetchText(PVP_WISHLIST_URL);
+    const blocks = parseWishlistBlocks(text);
+    const { entries, unmatched } = buildPvpEntries(blocks, loadUnpackedWeapons());
+    if (Object.keys(entries).length === 0) throw new Error('no weapons matched — refusing to overwrite');
+    console.log(`  ${blocks.length} weapon blocks → ${Object.keys(entries).length} weapons`);
+    if (unmatched.length) console.log(`  ⚠ ${unmatched.length} not in the weapon data: ${unmatched.slice(0, 8).join(', ')}`);
+    write('pvp-wishlist.json', entries);
+  } catch (err) {
+    console.warn(`  ⚠ PvP wishlist not updated: ${err instanceof Error ? err.message : err}`);
+    if (!fs.existsSync(outPath('pvp-wishlist.json'))) write('pvp-wishlist.json', {});
+  }
+}
+
+async function buildWeaponSources() {
+  console.log("\n[sources] Fetching Sax's Monument of Triumph loot sources...");
+  try {
+    const tabs: Partial<Record<SaxTab, string>> = {};
+    for (const tab of SAX_TABS) {
+      tabs[tab] = await fetchText(`https://docs.google.com/spreadsheets/d/${SAX_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`);
+    }
+    const { sources, unmatched } = buildSourceTable(tabs, loadUnpackedWeapons());
+    if (Object.keys(sources).length < 100) throw new Error(`only ${Object.keys(sources).length} weapons matched — refusing to overwrite`);
+    console.log(`  ${Object.keys(sources).length} weapons with sources`);
+    if (unmatched.length) console.log(`  ⚠ ${unmatched.length} sheet rows not matched: ${unmatched.slice(0, 8).join('; ')}`);
+    write('sources.json', sources);
+  } catch (err) {
+    console.warn(`  ⚠ Weapon sources not updated: ${err instanceof Error ? err.message : err}`);
+    if (!fs.existsSync(outPath('sources.json'))) write('sources.json', {});
+  }
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -472,6 +531,8 @@ async function main() {
     { name: 'clarity',              fn: buildClarity },
     { name: 'god-rolls',            fn: buildGodRolls },
     { name: 'patch-event-seasons',  fn: patchEventWeaponSeasons },
+    { name: 'pvp-wishlist',         fn: buildPvpWishlist },
+    { name: 'weapon-sources',       fn: buildWeaponSources },
   ];
 
   let failed = 0;

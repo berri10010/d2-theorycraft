@@ -666,3 +666,12 @@ npm run build
 - Perk audit stat values (`perkAudit.json`) mix display and raw units (Sneak Bow's draw time was corrected to raw); other audit magazine entries are unverified.
 - Magazine for burst weapons snaps to multiples of the burst size in game; modifiers are applied as a curve *delta* on the displayed base, so results can be ±1–3 rounds off after perks.
 - LFR charge-time damage penalty and PvP resilience HP table are not modelled / unverified.
+
+---
+
+## Community data sources (PvP wishlist, weapon sources)
+
+- **PvP god rolls** — `public/data/pvp-wishlist.json`, built by `scripts/build-static-data.ts` from the r/CrucibleGuidebook community PvP DIM wishlist (Wunderkammern/CrucibleGuidebook-PVP-DIM-Wishlist, list by u/SirTurnUp). `src/lib/pvpWishlist.ts` collapses the per-combination `dimwishlist:` lines into recommended perks per column (matched to each weapon's own sockets by perk hash). In PvP mode the God Roll panel and the perk stars use it (`pvpGodRoll` in `lib/godRolls.ts`); hand-curated `pvp*` fields on a god-roll entry (admin editor) take priority. The larger blended list (CrucibleGuidebook + Pride Eternal + author favourites, ~14k lines) is not used.
+- **Weapon sources** — `public/data/sources.json` from Sax's "ALL Monument of Triumph Legendary Loot Sources" sheet (tabs Vendors / Destinations / Dungeons / Raids / Craftable Weapon Sources). `src/lib/weaponSources.ts` matches sheet names to weapons (exact → version-stripped → ≤2 edits for the sheet's typos). Shown in the weapon header (`WeaponSources`); Bungie's source text is the fallback.
+- Both are refreshed by the daily `refresh-data` workflow. A failed fetch keeps the previous committed file instead of failing the build.
+- **WeaponStat Chart:** `weaponStats.json` / `archetypes.json` come from huwugo's WeaponStat Chart v2.0 (+ rockstarmatt TTK Breakpoints); the sheet is now at v2.1 (patch 9.7.0.3) and 42 of 124 shared frame rows differ. Not yet updated — the sheet is flagged "currently updating, things may be inaccurate".

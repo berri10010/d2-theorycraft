@@ -9,6 +9,7 @@ import { isLegacyVariant } from '../../lib/weaponGroups';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { ClarityEntry } from '../../lib/clarity';
+import { WeaponSources } from './WeaponSources';
 
 /**
  * Last-resort descriptions for frame intrinsics whose plug items carry no
@@ -274,16 +275,12 @@ export const WeaponHeader: React.FC = () => {
           </div>
 
           {/* Season / Episode label + acquisition source */}
-          {(seasonLabel || activeWeapon.source) && (
-            <div className="space-y-0.5">
-              {seasonLabel && (
-                <p className="text-xs text-ink-4">{seasonLabel}</p>
-              )}
-              {activeWeapon.source && (
-                <p className="text-xs text-ink-4">{activeWeapon.source}</p>
-              )}
-            </div>
-          )}
+          <div className="space-y-0.5">
+            {seasonLabel && (
+              <p className="text-xs text-ink-4">{seasonLabel}</p>
+            )}
+            <WeaponSources weapon={activeWeapon} />
+          </div>
 
           {/* Variant selector + Crafted toggle */}
           <div className="flex flex-wrap items-center gap-2 pt-0.5">

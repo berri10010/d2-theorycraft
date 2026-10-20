@@ -764,6 +764,7 @@ function Dashboard() {
                         )}
                         {mode === 'pvp' && (
                           <>
+                            {settings.showGodRollPanel  && <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>}
                             {settings.showWishlistPanel && <ErrorBoundary label="Wishlists"><WishlistPanel /></ErrorBoundary>}
                             {settings.showEffectsPanel  && <ErrorBoundary label="Effects"><EffectsPanel /></ErrorBoundary>}
                             {settings.showExternalBuffs && <BuffToggle />}

@@ -15,7 +15,9 @@ import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
 import { useGodRolls } from '../../lib/useGodRolls';
-import { lookupGodRoll } from '../../lib/godRolls';
+import { lookupGodRoll, pvpGodRoll } from '../../lib/godRolls';
+import { usePvpWishlist } from '../../lib/useStaticJson';
+import { lookupPvpEntry } from '../../lib/pvpWishlist';
 import { getPerkFamily } from '../../lib/perkFamily';
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -40,6 +42,7 @@ export const RollEditor: React.FC = () => {
 
   const { data: clarityData } = useClarityPerks();
   const { data: godRollDb }   = useGodRolls();
+  const { data: pvpWishlistDb } = usePvpWishlist();
   const [flashHash, setFlashHash] = useState<string | null>(null);
 
   const { getPerkTier, setPerkTier, pveModeList, pvpModeList } = useTierListStore();
@@ -49,7 +52,10 @@ export const RollEditor: React.FC = () => {
   // Build a map of column-type → Set<lowercase perk name> for god roll highlights
   const godRollNames = useMemo(() => {
     if (!activeWeapon || !godRollDb) return null;
-    const entry = lookupGodRoll(godRollDb, activeWeapon);
+    const pveEntry = lookupGodRoll(godRollDb, activeWeapon);
+    const entry = mode === 'pvp'
+      ? pvpGodRoll(pveEntry, pvpWishlistDb ? lookupPvpEntry(pvpWishlistDb, activeWeapon) : null)
+      : pveEntry;
     if (!entry) return null;
 
     const toSet = (arr: string[]) => new Set(arr.map((n) => n.toLowerCase()));
@@ -73,7 +79,7 @@ export const RollEditor: React.FC = () => {
       perk2ColName: perkCols[1]?.name ?? null,
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWeapon, godRollDb]);
+  }, [activeWeapon, godRollDb, pvpWishlistDb, mode]);
 
   const isTieredWeapon = (activeWeapon?.seasonNumber ?? 0) >= 27 && activeWeapon?.rarity !== 'Exotic';
 
@@ -236,7 +242,7 @@ export const RollEditor: React.FC = () => {
 
                     // God roll indicator — amber star on matching perks (PvE only)
                     let isGodRoll = false;
-                    if (mode === 'pve' && godRollNames) {
+                    if (godRollNames) {
                       const n = perk.name.toLowerCase();
                       switch (column.columnType) {
                         case 'barrel': isGodRoll = godRollNames.barrel.has(n); break;

@@ -1,11 +1,13 @@
 // Cache version — bump this string to force all clients to evict the old cache.
-const CACHE = 'd2tc-v4';
+const CACHE = 'd2tc-v5';
 
 const DATA_FILES = [
   '/data/weapons.json',
   '/data/perks.json',
   '/data/mods.json',
   '/data/statgroups.json',
+  '/data/pvp-wishlist.json',
+  '/data/sources.json',
   '/data/clarity.json',
   '/data/god-rolls.json',
 ];

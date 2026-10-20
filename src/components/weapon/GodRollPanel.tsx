@@ -5,7 +5,9 @@ import { useShallow } from 'zustand/react/shallow';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useGodRolls } from '../../lib/useGodRolls';
-import { lookupGodRoll } from '../../lib/godRolls';
+import { usePvpWishlist } from '../../lib/useStaticJson';
+import { lookupPvpEntry } from '../../lib/pvpWishlist';
+import { lookupGodRoll, pvpGodRoll } from '../../lib/godRolls';
 
 // ── Tier colour config ────────────────────────────
 const WEAPON_TIER_CONFIG: Record<string, { bg: string; text: string; label: string }> = {
@@ -116,20 +118,27 @@ function useApplyGodRoll() {
 
 export const GodRollPanel: React.FC = () => {
   const { activeWeapon } = useWeaponStore();
+  const mode = useWeaponStore((s) => s.mode);
   const { data: godRollDb, loading } = useGodRolls();
+  const { data: pvpDb, loading: pvpLoading } = usePvpWishlist();
   const { applyEntry, applied } = useApplyGodRoll();
 
   if (!activeWeapon) return null;
 
-  if (loading) {
+  const isPvp = mode === 'pvp';
+
+  if (loading || (isPvp && pvpLoading)) {
     return (
-      <CollapsiblePanel title="God Roll" storageKey="god-roll">
+      <CollapsiblePanel title={isPvp ? 'PvP God Roll' : 'God Roll'} storageKey="god-roll">
         <p className="text-ink-4 text-sm text-center py-6 animate-pulse">Loading community analysis…</p>
       </CollapsiblePanel>
     );
   }
 
-  const entry = godRollDb ? lookupGodRoll(godRollDb, activeWeapon) : null;
+  const pveEntry = godRollDb ? lookupGodRoll(godRollDb, activeWeapon) : null;
+  const entry = isPvp
+    ? pvpGodRoll(pveEntry, pvpDb ? lookupPvpEntry(pvpDb, activeWeapon) : null)
+    : pveEntry;
 
   if (!entry) return null;
 
@@ -139,7 +148,7 @@ export const GodRollPanel: React.FC = () => {
 
   const weaponTypeLabel = entry.weaponType === 'Other' ? 'other weapons' : `${entry.weaponType}s`;
   const subtitleParts = [
-    'Community analysis',
+    isPvp ? 'Community PvP wishlist' : 'Community analysis',
     entry.season ? `Season ${entry.season}` : null,
     numericRank != null ? `Rank #${numericRank} in ${weaponTypeLabel}` : null,
   ].filter(Boolean).join(' · ');
@@ -151,7 +160,7 @@ export const GodRollPanel: React.FC = () => {
       storageKey="god-roll"
       title={
         <div>
-          <div>God Roll</div>
+          <div>{isPvp ? 'PvP God Roll' : 'God Roll'}</div>
           <p className="text-xs text-ink-4 mt-0.5 font-normal">{subtitleParts}</p>
           {entry.source && (
             <p className="text-xs text-ink-4 mt-0.5 font-normal">
@@ -219,7 +228,7 @@ export const GodRollPanel: React.FC = () => {
 
             {noteLines.length > 0 && (
               <div className="mt-4 pt-4 border-t border-white/10">
-                <p className="text-xs text-ink-4 uppercase tracking-wide mb-1.5">Analyst Notes</p>
+                <p className="text-xs text-ink-4 uppercase tracking-wide mb-1.5">{isPvp ? 'Notes' : 'Analyst Notes'}</p>
                 {noteLines.map((note, i) => (
                   <p key={i} className="text-sm text-ink-2 leading-relaxed italic">{note}</p>
                 ))}
@@ -231,7 +240,21 @@ export const GodRollPanel: React.FC = () => {
 
       {/* Source attribution */}
       <p className="text-[10px] text-ink-4 mt-4 text-right">
-        Source: Destiny 2 Endgame Analysis · @theaegisrelic
+        {isPvp ? (
+          <>
+            Source:{' '}
+            <a
+              href="https://github.com/Wunderkammern/CrucibleGuidebook-PVP-DIM-Wishlist/wiki/CrucibleGuidebook-DIM-Wishlist"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-ink-2"
+            >
+              r/CrucibleGuidebook community PvP wishlist
+            </a>
+          </>
+        ) : (
+          'Source: Destiny 2 Endgame Analysis · @theaegisrelic'
+        )}
       </p>
     </CollapsiblePanel>
   );
