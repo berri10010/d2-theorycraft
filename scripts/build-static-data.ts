@@ -37,7 +37,7 @@ import { packWeapons, unpackWeapons, type PackedWeapon } from '../src/lib/weapon
 import { PVP_WISHLIST_URL, parseWishlistBlocks, buildPvpEntries } from '../src/lib/pvpWishlist.js';
 import { SAX_SHEET_ID, SAX_TABS, buildSourceTable, type SaxTab } from '../src/lib/weaponSources.js';
 import {
-  WEAPON_STAT_SHEET_ID, WEAPON_STAT_TAB_GID, parseWeaponStatSheet, mergeWeaponStats, sheetIsMidUpdate,
+  WEAPON_STAT_SHEET_ID, WEAPON_STAT_CHART_GID, WEAPON_DATA_GID, parseWeaponStatSheet, mergeWeaponStats, sheetIsMidUpdate,
 } from '../src/lib/weaponStatSheet.js';
 import type { WeaponStatEntry } from '../src/lib/weaponStats.js';
 import type { Weapon, Perk } from '../src/types/weapon.js';
@@ -532,8 +532,8 @@ async function buildWeaponStats() {
   const target = path.join(ROOT, 'src', 'data', 'weaponStats.json');
   const metaPath = path.join(ROOT, 'src', 'data', 'weaponStatsMeta.json');
   try {
-    const csv = await fetchText(`https://docs.google.com/spreadsheets/d/${WEAPON_STAT_SHEET_ID}/export?format=csv&gid=${WEAPON_STAT_TAB_GID}`);
-    const parsed = parseWeaponStatSheet(csv);
+    const tab = (gid: string) => fetchText(`https://docs.google.com/spreadsheets/d/${WEAPON_STAT_SHEET_ID}/export?format=csv&gid=${gid}`);
+    const parsed = parseWeaponStatSheet(await tab(WEAPON_STAT_CHART_GID), await tab(WEAPON_DATA_GID));
     if (parsed.entries.length < 100) throw new Error(`only ${parsed.entries.length} usable rows — refusing to overwrite`);
     console.log(`  ${parsed.entries.length} usable rows (${parsed.skipped.length} skipped), ${parsed.version || 'version unknown'}`);
 

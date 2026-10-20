@@ -23,7 +23,7 @@ export interface WeaponStatEntry {
   ammo: string;
   /** Spreadsheet frame name e.g. "Adaptive" */
   frame: string;
-  /** Base body damage per individual projectile (PvP-calibrated) */
+  /** Base body damage per individual projectile — one pellet / bolt / bullet (PvP-calibrated) */
   bodyDamage: number;
   /** Base crit damage per individual projectile (PvP-calibrated) */
   critDamage: number;
@@ -41,10 +41,16 @@ export interface WeaponStatEntry {
   /** Charge / draw time in milliseconds (Fusions, LFRs, Bows). */
   chargeMs: number | null;
   /**
-   * Number of projectiles fired per trigger pull (Pulse Rifles, burst Sidearms,
-   * Fusion bolts, etc.).  Null for single-fire weapons.
+   * Bullets fired per trigger pull (Pulse Rifle bursts, burst Sidearms, Trinity Ghoul's
+   * three arrows, Euphony's three rounds).  Null for single-fire weapons.
    */
   shotsPerBurst: number | null;
+  /**
+   * Projectiles in each bullet: shotgun pellets, fusion bolts, spread-shot pellets.
+   * Damage per trigger pull is bodyDamage * pellets (* shotsPerBurst for multi-bullet pulls).
+   * Null for single-projectile weapons.
+   */
+  pellets: number | null;
   /** Reference RPM used for sorting / display (not used in TTK math). */
   rpm: number | null;
 }

@@ -42,6 +42,7 @@ export function calcDps(
   if (!entry) return null;
 
   const burstSize = entry.shotsPerBurst ?? 1;
+  const pellets   = entry.pellets ?? 1; // projectiles per bullet (shotgun pellets, fusion bolts)
   const reloadMs  = calcReloadTime(itemTypeDisplayName, ammoType, reloadStat);
   const magSize   = Math.max(1, Math.round(magStat));
 
@@ -50,7 +51,8 @@ export function calcDps(
 
   if (isChargeWeapon(entry)) {
     const chargeS   = (entry.chargeMs ?? 500) / 1000;
-    const betweenS  = entry.shotDelay != null ? entry.shotDelay / 30 : chargeS;
+    // Every trigger pull needs a fresh charge/draw, plus the recovery gap (none for bows).
+    const betweenS  = entry.shotDelay != null ? entry.shotDelay / 30 : 0;
     timePerShot_s   = chargeS + betweenS;
   } else if (isBurstWeapon(entry)) {
     const intra  = entry.burstDelay ?? 1;
@@ -65,7 +67,7 @@ export function calcDps(
 
   // ── Optimal DPS (continuous fire, all crits) ───────────────────────────────
   const pveScalar      = getPveScalar(itemSubType, enemyTier);
-  const critPerTrigger = entry.critDamage * burstSize;
+  const critPerTrigger = entry.critDamage * burstSize * pellets;
   const optimalDpsPvp  = critPerTrigger / timePerShot_s;
   const optimalDpsPve  = optimalDpsPvp * pveScalar;
 
@@ -74,7 +76,7 @@ export function calcDps(
 
   if (isChargeWeapon(entry)) {
     const chargeS  = (entry.chargeMs ?? 500) / 1000;
-    const betweenS = entry.shotDelay != null ? entry.shotDelay / 30 : chargeS;
+    const betweenS = entry.shotDelay != null ? entry.shotDelay / 30 : 0; // bows have no recovery gap
     // First shot: just charge. Subsequent shots: charge + gap between shots.
     magDuration_s = chargeS + (magSize - 1) * (chargeS + betweenS);
   } else {
@@ -92,8 +94,8 @@ export function calcDps(
     sustainedDpsPvp: Math.round(sustainedDpsPvp),
     optimalDpsPve:  Math.round(optimalDpsPve),
     sustainedDpsPve: Math.round(sustainedDpsPve),
-    bodyDamage:  Math.round(entry.bodyDamage  * burstSize * 100) / 100,
-    critDamage:  Math.round(entry.critDamage  * burstSize * 100) / 100,
+    bodyDamage:  Math.round(entry.bodyDamage  * burstSize * pellets * 100) / 100,
+    critDamage:  Math.round(entry.critDamage  * burstSize * pellets * 100) / 100,
     burstSize,
     reloadMs,
     magSize,

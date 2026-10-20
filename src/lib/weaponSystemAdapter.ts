@@ -152,7 +152,7 @@ function buildRocketStats(stats: StatMap): RocketLauncherStats {
 function buildShotgunStats(weapon: D2Weapon, stats: StatMap): ShotgunStats {
   // Pellet count from the weapon-stat database; fall back to 8 (common default)
   const entry   = lookupWeaponStat(weapon.itemSubType, weapon.ammoType, weapon.intrinsicTrait?.name ?? null);
-  const pellets = Math.max(1, entry?.shotsPerBurst ?? 8);
+  const pellets = Math.max(1, entry?.pellets ?? entry?.shotsPerBurst ?? 8);
   return new ShotgunStats(
     pellets,
     clamp((1 - st(stats, 'Stability', 50) / 100) * 35, 0, 44),          // 0–44°

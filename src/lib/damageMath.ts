@@ -149,16 +149,19 @@ function ttkStandard(shots: number, shotDelayFrames: number): number {
 /**
  * Charge / draw weapons (Fusions, LFRs, Bows):
  *   chargeMs    = charge/draw time in ms
- *   shotDelay   = inter-trigger gap in 30fps frames (used for shots > 1)
- *   TTK = chargeMs/1000 + (shots - 1) * shotDelay/30
+ *   shotDelay   = recovery gap between triggers in 30fps frames (none for bows)
+ *
+ * Like the WeaponStat Chart (its "pre-charge" setting, on by default) the first shot is assumed
+ * to be charged / drawn before the fight starts, so only the follow-up shots pay for a fresh
+ * charge:  TTK = (shots - 1) * (chargeMs/1000 + shotDelay/30)
  */
 function ttkCharge(
   shots: number,
   chargeMs: number,
   shotDelayFrames: number | null,
 ): number {
-  const interShotSec = shotDelayFrames != null ? shotDelayFrames / 30 : chargeMs / 1000;
-  return (chargeMs / 1000) + (shots - 1) * interShotSec;
+  const gapSec = shotDelayFrames != null ? shotDelayFrames / 30 : 0;
+  return (shots - 1) * (chargeMs / 1000 + gapSec);
 }
 
 /**
@@ -199,9 +202,9 @@ function getTtkCalculator(entry: WeaponStatEntry): TTKCalculator {
     return (targetHp, effectiveMult, mode, pveScalar) => {
       const modeScalar = mode === 'pve' ? pveScalar : 1.0;
       const finalMult = effectiveMult * modeScalar;
-      const spb = entry.shotsPerBurst ?? 1;
-      const body = entry.bodyDamage * spb * finalMult;
-      const crit = entry.critDamage * spb * finalMult;
+      const perTrigger = (entry.shotsPerBurst ?? 1) * (entry.pellets ?? 1);
+      const body = entry.bodyDamage * perTrigger * finalMult;
+      const crit = entry.critDamage * perTrigger * finalMult;
       const found = findOptimalShots(body, crit, targetHp);
       if (!found) return null;
       const [shots, crits, bodies] = found;
@@ -221,8 +224,9 @@ function getTtkCalculator(entry: WeaponStatEntry): TTKCalculator {
       if (entry.burstDelay == null || entry.shotDelay == null) return null;
       const modeScalar = mode === 'pve' ? pveScalar : 1.0;
       const finalMult = effectiveMult * modeScalar;
-      const body = entry.bodyDamage * finalMult;
-      const crit = entry.critDamage * finalMult;
+      const perBullet = entry.pellets ?? 1;
+      const body = entry.bodyDamage * perBullet * finalMult;
+      const crit = entry.critDamage * perBullet * finalMult;
       const found = findOptimalShots(body, crit, targetHp);
       if (!found) return null;
       const [shots, crits, bodies] = found;
@@ -241,9 +245,9 @@ function getTtkCalculator(entry: WeaponStatEntry): TTKCalculator {
     if (entry.shotDelay == null) return null;
     const modeScalar = mode === 'pve' ? pveScalar : 1.0;
     const finalMult = effectiveMult * modeScalar;
-    const spb = entry.shotsPerBurst ?? 1;
-    const body = entry.bodyDamage * spb * finalMult;
-    const crit = entry.critDamage * spb * finalMult;
+    const perTrigger = (entry.shotsPerBurst ?? 1) * (entry.pellets ?? 1);
+    const body = entry.bodyDamage * perTrigger * finalMult;
+    const crit = entry.critDamage * perTrigger * finalMult;
     const found = findOptimalShots(body, crit, targetHp);
     if (!found) return null;
     const [shots, crits, bodies] = found;
