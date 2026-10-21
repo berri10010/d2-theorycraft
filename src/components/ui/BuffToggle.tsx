@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import Image from 'next/image';
+import { localIcon } from '../../lib/localIcons';
 import { CollapsiblePanel } from './CollapsiblePanel';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
@@ -82,6 +84,7 @@ function BuffRow({ buff, isActive, isOverridden, activeStackIndex, onToggle, onS
   const isDebuff    = buff.stackType === 'debuff';
   const isUtility   = buff.multiplier === 1.0;
   const activeColor = isDebuff ? 'red' : 'amber';
+  const icon        = localIcon('buff', buff.name);
 
   const effectiveMult = isActive
     ? getBuffMultiplier(buff, buff.stacks?.length ? activeStackIndex : undefined)
@@ -107,6 +110,16 @@ function BuffRow({ buff, isActive, isOverridden, activeStackIndex, onToggle, onS
             ? isDebuff ? 'bg-red-400' : isUtility ? 'bg-sky-400' : 'bg-amber-400'
             : 'bg-white/15',
         ].join(' ')} />
+        {icon && (
+          <Image
+            src={icon}
+            alt=""
+            width={28}
+            height={28}
+            unoptimized
+            className={['shrink-0 w-7 h-7 rounded-md transition-opacity', isActive ? 'opacity-100' : 'opacity-70'].join(' ')}
+          />
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold truncate">{buff.name}</span>

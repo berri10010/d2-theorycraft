@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
+import { localIcon } from '../../lib/localIcons';
 import {
   useWeaponStore,
   ArmorModTier,
@@ -60,9 +62,13 @@ interface ModRowProps {
 }
 
 function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProps) {
+  const icon = localIcon('mod', label);
   return (
     <div className="flex items-center gap-3">
-      <div className="w-36 shrink-0">
+      <div className="w-8 h-8 shrink-0">
+        {icon && <Image src={icon} alt="" width={32} height={32} unoptimized className="w-8 h-8 rounded-md" />}
+      </div>
+      <div className="w-32 shrink-0">
         <p className="text-xs font-semibold text-ink leading-tight">{label}</p>
         <p className="text-[10px] text-ink-4 leading-tight">{subLabel}</p>
       </div>
@@ -78,6 +84,7 @@ function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProp
 
 export const ArmorModPanel: React.FC = () => {
   const { activeWeapon, armorMods, setArmorMods, surgeStacks, setSurgeStacks, mode } = useWeaponStore();
+  const surgeIcon = localIcon('mod', 'Weapon Surge');
   const { targeting, loader, dexterity, unflinching, inFlight, ammoGeneration } = armorMods;
 
   if (!activeWeapon) return null;
@@ -167,7 +174,8 @@ export const ArmorModPanel: React.FC = () => {
       {/* ── Weapon Surge ──────────────────────────────────────────────── */}
       <div className="pt-3 border-t border-white/5">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-semibold text-ink-3 uppercase tracking-wider">
+          <h3 className="flex items-center gap-2 text-xs font-semibold text-ink-3 uppercase tracking-wider">
+            {surgeIcon && <Image src={surgeIcon} alt="" width={24} height={24} unoptimized className="w-6 h-6 rounded" />}
             Weapon Surge
           </h3>
           {surgeStacks > 0 && (
