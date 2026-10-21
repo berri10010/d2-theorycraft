@@ -41,10 +41,14 @@ const ICONS = {
   'buff:On Your Mark': { item: 3066103999 },
   'buff:Heat Rises': { item: 83039194 },
   'buff:Rally Barricade': { item: 2495523341 }, // Titan, Solar
-  'buff:Judgment': { item: 2625980631 }, // Silence and Squall
-  'buff:Sect of Force': { item: 3268255645 },
-  'buff:Sect of Insight': { item: 3651607301 },
   'buff:Blessing of the Sky': { item: 743139589 },
+  'buff:Helm of Saint-14': { item: 106575079 },
+  "buff:Gyrfalcon's Hauberk": { item: 461841403 },
+  'buff:No Backup Plans': { item: 730200061 },
+  'buff:Hazardous Propulsion': { item: 77153391 },
+  'buff:Prismatic Transfer': { item: 1533272841 },
+  "buff:Felwinter's Helm": { item: 728668916 },
+  'buff:Flash Counter': { item: 2244851822 },
   'buff:Whisper of Hedrons': { item: 3469412970 },
 
   // Not in the manifest

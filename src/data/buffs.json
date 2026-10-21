@@ -6,7 +6,10 @@
     "stackType": "multiplicative",
     "multiplier": 1.25,
     "description": "Reloading after a kill grants +25% damage for a brief window.",
-    "perkNames": ["Kill Clip", "Enhanced Kill Clip"],
+    "perkNames": [
+      "Kill Clip",
+      "Enhanced Kill Clip"
+    ],
     "icon": null
   },
   "frenzy": {
@@ -16,7 +19,10 @@
     "stackType": "multiplicative",
     "multiplier": 1.15,
     "description": "After 12 seconds in continuous combat, +15% damage (also improves handling and reload).",
-    "perkNames": ["Frenzy", "Enhanced Frenzy"],
+    "perkNames": [
+      "Frenzy",
+      "Enhanced Frenzy"
+    ],
     "icon": null
   },
   "surrounded": {
@@ -24,10 +30,16 @@
     "name": "Surrounded",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.40,
-    "description": "+40% damage when 3 or more enemies are nearby.",
-    "perkNames": ["Surrounded", "Enhanced Surrounded"],
-    "icon": null
+    "multiplier": 1.4,
+    "description": "+40% damage when 3 or more enemies are within 15m (swords +35%).",
+    "perkNames": [
+      "Surrounded",
+      "Enhanced Surrounded"
+    ],
+    "icon": null,
+    "weaponTypeMultipliers": {
+      "Sword": 1.35
+    }
   },
   "explosive_light": {
     "hash": "explosive_light",
@@ -35,18 +47,28 @@
     "category": "weapon_perk",
     "stackType": "multiplicative",
     "multiplier": 1.25,
-    "description": "Picking up an Orb of Power grants +25% damage for the next shot or short burst.",
-    "perkNames": ["Explosive Light", "Enhanced Explosive Light"],
-    "icon": null
+    "description": "Orb of Power pickups grant stacks, each shot spends one: grenade launchers +60% explosive damage, rocket launchers +25%.",
+    "perkNames": [
+      "Explosive Light",
+      "Enhanced Explosive Light"
+    ],
+    "icon": null,
+    "weaponTypeMultipliers": {
+      "Grenade Launcher": 1.6,
+      "Rocket Launcher": 1.25
+    }
   },
   "bait_and_switch": {
     "hash": "bait_and_switch",
     "name": "Bait and Switch",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.35,
-    "description": "Deal damage with all three equipped weapons within a short window to activate +35% damage.",
-    "perkNames": ["Bait and Switch", "Enhanced Bait and Switch"],
+    "multiplier": 1.3,
+    "description": "Deal damage with all three equipped weapons within a short window to get +30% damage for 10s.",
+    "perkNames": [
+      "Bait and Switch",
+      "Enhanced Bait and Switch"
+    ],
     "icon": null
   },
   "target_lock": {
@@ -54,24 +76,45 @@
     "name": "Target Lock",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.40,
-    "description": "Damage increases with continuous fire, ramping up to +40% at max stacks.",
-    "perkNames": ["Target Lock", "Enhanced Target Lock"],
-    "icon": null
+    "multiplier": 1.4,
+    "description": "Damage ramps with continuous hits up to +40% at max stacks (PvP: 10.5% up to 25%).",
+    "perkNames": [
+      "Target Lock",
+      "Enhanced Target Lock"
+    ],
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.25
+    }
   },
   "rampage": {
     "hash": "rampage",
     "name": "Rampage",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.66,
-    "description": "Kills grant a stacking damage bonus (PvE: 20/41/66% at ×1/×2/×3). Stacks expire one at a time every 4.5s.",
-    "perkNames": ["Rampage", "Enhanced Rampage"],
+    "multiplier": 1.331,
+    "description": "Kills grant a stacking damage bonus: +10% / +21% / +33.1% at ×1 / ×2 / ×3. Stacks expire one at a time.",
+    "perkNames": [
+      "Rampage",
+      "Enhanced Rampage"
+    ],
     "icon": null,
     "stacks": [
-      { "count": 1, "label": "×1", "multiplier": 1.20 },
-      { "count": 2, "label": "×2", "multiplier": 1.41 },
-      { "count": 3, "label": "×3", "multiplier": 1.66 }
+      {
+        "count": 1,
+        "label": "×1",
+        "multiplier": 1.1
+      },
+      {
+        "count": 2,
+        "label": "×2",
+        "multiplier": 1.21
+      },
+      {
+        "count": 3,
+        "label": "×3",
+        "multiplier": 1.331
+      }
     ]
   },
   "golden_tricorn": {
@@ -79,13 +122,24 @@
     "name": "Golden Tricorn",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.50,
+    "multiplier": 1.5,
     "description": "×2 from a weapon kill of matching element (+15%). ×3 from an ability kill of matching element (+50%).",
-    "perkNames": ["Golden Tricorn", "Enhanced Golden Tricorn"],
+    "perkNames": [
+      "Golden Tricorn",
+      "Enhanced Golden Tricorn"
+    ],
     "icon": null,
     "stacks": [
-      { "count": 2, "label": "×2", "multiplier": 1.15 },
-      { "count": 3, "label": "×3", "multiplier": 1.50 }
+      {
+        "count": 2,
+        "label": "×2",
+        "multiplier": 1.15
+      },
+      {
+        "count": 3,
+        "label": "×3",
+        "multiplier": 1.5
+      }
     ]
   },
   "swashbuckler": {
@@ -93,16 +147,39 @@
     "name": "Swashbuckler",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.33,
-    "description": "Melee kills or rapid weapon kills grant a stacking damage bonus up to ×5.",
-    "perkNames": ["Swashbuckler", "Enhanced Swashbuckler"],
+    "multiplier": 1.333,
+    "description": "Kills grant stacks (up to ×5): +6.7% damage per stack, +33.3% at max.",
+    "perkNames": [
+      "Swashbuckler",
+      "Enhanced Swashbuckler"
+    ],
     "icon": null,
     "stacks": [
-      { "count": 1, "label": "×1", "multiplier": 1.066 },
-      { "count": 2, "label": "×2", "multiplier": 1.132 },
-      { "count": 3, "label": "×3", "multiplier": 1.20 },
-      { "count": 4, "label": "×4", "multiplier": 1.266 },
-      { "count": 5, "label": "×5", "multiplier": 1.33 }
+      {
+        "count": 1,
+        "label": "×1",
+        "multiplier": 1.067
+      },
+      {
+        "count": 2,
+        "label": "×2",
+        "multiplier": 1.133
+      },
+      {
+        "count": 3,
+        "label": "×3",
+        "multiplier": 1.2
+      },
+      {
+        "count": 4,
+        "label": "×4",
+        "multiplier": 1.267
+      },
+      {
+        "count": 5,
+        "label": "×5",
+        "multiplier": 1.333
+      }
     ]
   },
   "adrenaline_junkie": {
@@ -110,16 +187,39 @@
     "name": "Adrenaline Junkie",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.25,
-    "description": "Grenade kills or rapid weapon kills grant a stacking damage bonus up to ×5.",
-    "perkNames": ["Adrenaline Junkie", "Enhanced Adrenaline Junkie"],
+    "multiplier": 1.333,
+    "description": "Kills grant stacks (grenade kills grant all five): +6.7% damage per stack, +33.3% at max, plus 20 Handling.",
+    "perkNames": [
+      "Adrenaline Junkie",
+      "Enhanced Adrenaline Junkie"
+    ],
     "icon": null,
     "stacks": [
-      { "count": 1, "label": "×1", "multiplier": 1.05 },
-      { "count": 2, "label": "×2", "multiplier": 1.10 },
-      { "count": 3, "label": "×3", "multiplier": 1.15 },
-      { "count": 4, "label": "×4", "multiplier": 1.20 },
-      { "count": 5, "label": "×5", "multiplier": 1.25 }
+      {
+        "count": 1,
+        "label": "×1",
+        "multiplier": 1.067
+      },
+      {
+        "count": 2,
+        "label": "×2",
+        "multiplier": 1.133
+      },
+      {
+        "count": 3,
+        "label": "×3",
+        "multiplier": 1.2
+      },
+      {
+        "count": 4,
+        "label": "×4",
+        "multiplier": 1.267
+      },
+      {
+        "count": 5,
+        "label": "×5",
+        "multiplier": 1.333
+      }
     ]
   },
   "successful_warm_up": {
@@ -127,31 +227,38 @@
     "name": "Successful Warm-Up",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.33,
-    "description": "Rapid kills build stacks granting up to +33% damage on linear fusion rifles.",
-    "perkNames": ["Successful Warm-Up", "Enhanced Successful Warm-Up"],
+    "multiplier": 1,
+    "description": "Weapon kills cut charge / draw time by 37.5% for 6s (it is not a damage buff).",
+    "perkNames": [
+      "Successful Warm-Up",
+      "Enhanced Successful Warm-Up"
+    ],
     "icon": null,
-    "stacks": [
-      { "count": 1, "label": "×1", "multiplier": 1.066 },
-      { "count": 2, "label": "×2", "multiplier": 1.132 },
-      { "count": 3, "label": "×3", "multiplier": 1.20 },
-      { "count": 4, "label": "×4", "multiplier": 1.266 },
-      { "count": 5, "label": "×5", "multiplier": 1.33 }
-    ]
+    "chargeMultiplier": 0.625
   },
   "vorpal_weapon": {
     "hash": "vorpal_weapon",
     "name": "Vorpal Weapon",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.20,
-    "description": "Increased damage vs bosses, vehicles, Supered Guardians. Primary: +20%, Special: +15%, Power: +10%.",
-    "perkNames": ["Vorpal Weapon", "Enhanced Vorpal Weapon"],
+    "multiplier": 1.2,
+    "description": "More damage to minibosses, bosses, vehicles and Supered Guardians. PvE: primary +20%, special +15%, power +10%. PvP (vs Supers): +60% / +20% / +20%.",
+    "perkNames": [
+      "Vorpal Weapon",
+      "Enhanced Vorpal Weapon"
+    ],
     "icon": null,
     "ammoTypeMultipliers": {
-      "primary": 1.20,
+      "primary": 1.2,
       "special": 1.15,
-      "power": 1.10
+      "power": 1.1
+    },
+    "pvp": {
+      "ammoTypeMultipliers": {
+        "primary": 1.6,
+        "special": 1.2,
+        "power": 1.2
+      }
     }
   },
   "firing_line": {
@@ -159,9 +266,12 @@
     "name": "Firing Line",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.25,
-    "description": "+25% precision damage when near two or more allies aiming at the same target.",
-    "perkNames": ["Firing Line", "Enhanced Firing Line"],
+    "multiplier": 1.2,
+    "description": "+20% precision damage when within 15m of two or more allies.",
+    "perkNames": [
+      "Firing Line",
+      "Enhanced Firing Line"
+    ],
     "icon": null
   },
   "trench_barrel": {
@@ -169,19 +279,11 @@
     "name": "Trench Barrel",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.50,
+    "multiplier": 1.5,
     "description": "After a melee hit, the next 3 shots deal +50% damage with improved handling. Shotgun only.",
-    "perkNames": ["Trench Barrel"],
-    "icon": null
-  },
-  "one_two_punch": {
-    "hash": "one_two_punch",
-    "name": "One-Two Punch",
-    "category": "weapon_perk",
-    "stackType": "multiplicative",
-    "multiplier": 1.50,
-    "description": "Hitting an enemy with every pellet in a shot briefly grants +50% melee damage. Shotgun only.",
-    "perkNames": ["One-Two Punch", "Enhanced One-Two Punch"],
+    "perkNames": [
+      "Trench Barrel"
+    ],
     "icon": null
   },
   "desperado": {
@@ -189,35 +291,112 @@
     "name": "Desperado",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.40,
-    "description": "After a precision kill that empties the magazine, the next magazine deals +40% damage. Pulse rifles only.",
-    "perkNames": ["Desperado"],
-    "icon": null
+    "multiplier": 1,
+    "description": "Finishing a reload shortly after a precision kill cuts firing delay by 30% for 7s (it is a rate-of-fire buff, not a damage buff).",
+    "perkNames": [
+      "Desperado"
+    ],
+    "icon": null,
+    "shotDelayMultiplier": 0.7
   },
   "high_ground": {
     "hash": "high_ground",
     "name": "High Ground",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.10,
-    "description": "+10% weapon damage when shooting at targets that are below you.",
-    "perkNames": ["High Ground"],
-    "icon": null
+    "multiplier": 1.25,
+    "description": "Kills grant stacks (PvP grants two per kill): +10% / +17.5% / +25% damage in PvE, +5% / +10% / +15% in PvP.",
+    "perkNames": [
+      "High Ground"
+    ],
+    "icon": null,
+    "stacks": [
+      {
+        "count": 1,
+        "label": "×1",
+        "multiplier": 1.1
+      },
+      {
+        "count": 2,
+        "label": "×2",
+        "multiplier": 1.175
+      },
+      {
+        "count": 3,
+        "label": "×3",
+        "multiplier": 1.25
+      }
+    ],
+    "pvp": {
+      "multiplier": 1.15,
+      "stacks": [
+        {
+          "count": 1,
+          "label": "×1",
+          "multiplier": 1.05
+        },
+        {
+          "count": 2,
+          "label": "×2",
+          "multiplier": 1.1
+        },
+        {
+          "count": 3,
+          "label": "×3",
+          "multiplier": 1.15
+        }
+      ]
+    }
   },
   "killing_tally": {
     "hash": "killing_tally",
     "name": "Killing Tally",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.30,
-    "description": "Kills grant stacking damage (PvE: 10/20/30% at ×1/×2/×3). Stow or reload removes all stacks. Passively grants +10 Magazine.",
-    "perkNames": ["Killing Tally", "Enhanced Killing Tally"],
+    "multiplier": 1.3,
+    "description": "Kills grant stacking damage: PvE 10 / 20 / 30%, PvP 5 / 10 / 15% at ×1 / ×2 / ×3. Stow or reload removes all stacks.",
+    "perkNames": [
+      "Killing Tally",
+      "Enhanced Killing Tally"
+    ],
     "icon": null,
     "stacks": [
-      { "count": 1, "label": "×1", "multiplier": 1.10 },
-      { "count": 2, "label": "×2", "multiplier": 1.20 },
-      { "count": 3, "label": "×3", "multiplier": 1.30 }
-    ]
+      {
+        "count": 1,
+        "label": "×1",
+        "multiplier": 1.1
+      },
+      {
+        "count": 2,
+        "label": "×2",
+        "multiplier": 1.2
+      },
+      {
+        "count": 3,
+        "label": "×3",
+        "multiplier": 1.3
+      }
+    ],
+    "pvp": {
+      "multiplier": 1.15,
+      "stacks": [
+        {
+          "count": 1,
+          "label": "×1",
+          "multiplier": 1.05
+        },
+        {
+          "count": 2,
+          "label": "×2",
+          "multiplier": 1.1
+        },
+        {
+          "count": 3,
+          "label": "×3",
+          "multiplier": 1.15
+        }
+      ]
+    }
   },
   "business_time": {
     "hash": "business_time",
@@ -225,9 +404,11 @@
     "category": "weapon_perk",
     "stackType": "multiplicative",
     "multiplier": 1,
-    "shotDelayMultiplier": 0.4,
-    "description": "Sweet Business at max stacks: fire rate rises from 360 to 900 RPM.",
-    "perkNames": ["Business Time"],
+    "shotDelayMultiplier": 0.625,
+    "description": "Sweet Business: holding the trigger raises rate of fire by up to 60%.",
+    "perkNames": [
+      "Business Time"
+    ],
     "icon": null
   },
   "desperation": {
@@ -236,9 +417,11 @@
     "category": "weapon_perk",
     "stackType": "multiplicative",
     "multiplier": 1,
-    "shotDelayMultiplier": 0.8,
-    "description": "Necrochasm after a kill: fire rate rises from 720 to 900 RPM.",
-    "perkNames": ["Desperation"],
+    "shotDelayMultiplier": 0.8333,
+    "description": "Necrochasm after a Cursed Thrall kill or a precision-kill reload: +20% rate of fire for 7s.",
+    "perkNames": [
+      "Desperation"
+    ],
     "icon": null
   },
   "rat_pack": {
@@ -247,53 +430,90 @@
     "category": "weapon_perk",
     "stackType": "multiplicative",
     "multiplier": 1,
-    "shotDelayMultiplier": 0.87,
-    "description": "Rat King with two allies nearby: ~15% faster fire rate (450 to 517 RPM).",
-    "perkNames": ["Rat Pack"],
-    "icon": null
+    "shotDelayMultiplier": 0.714,
+    "description": "Rat King: a stack for each ally within 20m holding Rat King (up to ×5): rate of fire +0 / 13 / 20 / 30 / 40%.",
+    "perkNames": [
+      "Rat Pack"
+    ],
+    "icon": null,
+    "stacks": [
+      {
+        "count": 1,
+        "label": "×1",
+        "multiplier": 1,
+        "shotDelayMultiplier": 1
+      },
+      {
+        "count": 2,
+        "label": "×2",
+        "multiplier": 1,
+        "shotDelayMultiplier": 0.885
+      },
+      {
+        "count": 3,
+        "label": "×3",
+        "multiplier": 1,
+        "shotDelayMultiplier": 0.833
+      },
+      {
+        "count": 4,
+        "label": "×4",
+        "multiplier": 1,
+        "shotDelayMultiplier": 0.769
+      },
+      {
+        "count": 5,
+        "label": "×5",
+        "multiplier": 1,
+        "shotDelayMultiplier": 0.714
+      }
+    ]
   },
   "silkbound_slayer": {
     "hash": "silkbound_slayer",
     "name": "Silkbound Slayer",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.5,
-    "critMultiplier": 0.8,
+    "multiplier": 2.25,
+    "critMultiplier": 0.667,
     "chargeMultiplier": 0.7,
-    "description": "Wish-Keeper: +50% body damage (crits +20%) and a 30% faster draw.",
-    "perkNames": ["Silkbound Slayer"],
-    "icon": null
+    "description": "Wish-Keeper vs Suspended targets: PvE +125% body / +50% precision damage; PvP +44% body / +20% precision. 30% faster draw.",
+    "perkNames": [
+      "Silkbound Slayer"
+    ],
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.44,
+      "critMultiplier": 0.833
+    }
   },
   "ignition_trigger": {
     "hash": "ignition_trigger",
     "name": "Ignition Trigger",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.5,
-    "description": "Tommy's Matchbook: +50% damage (excludes the extra scorch damage).",
-    "perkNames": ["Ignition Trigger"],
-    "icon": null
-  },
-  "all_at_once": {
-    "hash": "all_at_once",
-    "name": "All at Once",
-    "category": "weapon_perk",
-    "stackType": "multiplicative",
-    "multiplier": 1.32,
-    "description": "Final Warning, hip-fire: +32% damage.",
-    "perkNames": ["All at Once"],
-    "icon": null
+    "multiplier": 2,
+    "description": "Tommy's Matchbook after 20 rounds in quick succession: +100% damage in PvE, +50% in PvP.",
+    "perkNames": [
+      "Ignition Trigger"
+    ],
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.5
+    }
   },
   "release_the_wolves": {
     "hash": "release_the_wolves",
     "name": "Release the Wolves",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.9,
-    "critMultiplier": 0.71,
-    "shotDelayMultiplier": 0.4,
-    "description": "Lord of Wolves: +90% body damage (crits +35%) and 2.5x the fire rate.",
-    "perkNames": ["Release the Wolves"],
+    "multiplier": 1.39,
+    "critMultiplier": 0.863,
+    "shotDelayMultiplier": 0.625,
+    "description": "Lord of Wolves hip-fire (automatic): +60% rate of fire, +39% body damage and +20% precision damage (bosses +10% body).",
+    "perkNames": [
+      "Release the Wolves"
+    ],
     "icon": null
   },
   "one_for_all": {
@@ -303,7 +523,10 @@
     "stackType": "multiplicative",
     "multiplier": 1.35,
     "description": "Hitting 3 different targets in quick succession grants +35% damage for 10.5s.",
-    "perkNames": ["One For All", "Enhanced One For All"],
+    "perkNames": [
+      "One For All",
+      "Enhanced One For All"
+    ],
     "icon": null
   },
   "radiant": {
@@ -311,20 +534,26 @@
     "name": "Radiant",
     "category": "subclass",
     "stackType": "empowering",
-    "multiplier": 1.10,
-    "description": "Solar subclass buff. +10% weapon damage against all targets.",
+    "multiplier": 1.25,
+    "description": "Radiant (Solar, Song of Flame, Facet of Dawn, artifact orbs…): +25% weapon damage in PvE, +10% in PvP.",
     "perkNames": [],
-    "icon": "/common/destiny2_content/icons/b64f3e4292e7ea33b41f9cb9f9fc0a3a.png"
+    "icon": "/common/destiny2_content/icons/b64f3e4292e7ea33b41f9cb9f9fc0a3a.png",
+    "pvp": {
+      "multiplier": 1.1
+    }
   },
   "empowering_rift": {
     "hash": "empowering_rift",
     "name": "Empowering Rift",
     "category": "subclass",
     "stackType": "empowering",
-    "multiplier": 1.20,
-    "description": "Warlock empowering rift. +20% weapon damage while active.",
+    "multiplier": 1.2,
+    "description": "Warlock Empowering Rift: +20% weapon damage in PvE, +15% in PvP.",
     "perkNames": [],
-    "icon": "/common/destiny2_content/icons/a5b95ab7a14611ccb09c388fecf33c2c.png"
+    "icon": "/common/destiny2_content/icons/a5b95ab7a14611ccb09c388fecf33c2c.png",
+    "pvp": {
+      "multiplier": 1.15
+    }
   },
   "weapons_of_light": {
     "hash": "weapons_of_light",
@@ -342,7 +571,7 @@
     "category": "subclass",
     "stackType": "empowering",
     "multiplier": 1.25,
-    "description": "Warlock Well of Radiance super. +25% weapon damage while standing in the well.",
+    "description": "Warlock Well of Radiance: +25% weapon damage in PvE and PvP.",
     "perkNames": [],
     "icon": null
   },
@@ -351,10 +580,13 @@
     "name": "Banner Shield",
     "category": "subclass",
     "stackType": "empowering",
-    "multiplier": 1.35,
-    "description": "Titan Banner Shield super. +35% weapon damage for allies near the banner.",
+    "multiplier": 1.4,
+    "description": "Void Titan Sentinel Shield: allies shooting through it deal +40% weapon damage in PvE, +35% in PvP.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.35
+    }
   },
   "lumina_noble_rounds": {
     "hash": "lumina_noble_rounds",
@@ -362,9 +594,12 @@
     "category": "subclass",
     "stackType": "empowering",
     "multiplier": 1.35,
-    "description": "Lumina exotic hand cannon. Allies receiving Noble Rounds gain +35% weapon damage.",
+    "description": "Lumina's Noble Rounds grant Blessing of the Sky: +35% weapon damage in PvE, +15% in PvP, for 11s.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.15
+    }
   },
   "weaken": {
     "hash": "weaken",
@@ -372,19 +607,25 @@
     "category": "debuff",
     "stackType": "debuff",
     "multiplier": 1.15,
-    "description": "Void debuff. Weakened enemies take +15% increased damage from all sources.",
+    "description": "Void debuff: weakened targets take +15% damage in PvE, +7.5% in PvP.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.075
+    }
   },
   "tether": {
     "hash": "tether",
     "name": "Shadowshot Tether",
     "category": "debuff",
     "stackType": "debuff",
-    "multiplier": 1.30,
-    "description": "Void Hunter Shadowshot super. Tethered enemies take +30% increased damage from all sources.",
+    "multiplier": 1.3,
+    "description": "Void Hunter Shadowshot: tethered targets take +30% damage in PvE, +50% in PvP.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.5
+    }
   },
   "divinity": {
     "hash": "divinity",
@@ -392,31 +633,12 @@
     "category": "debuff",
     "stackType": "debuff",
     "multiplier": 1.15,
-    "description": "Divinity exotic trace rifle. Targets caught in the cage take +15% increased damage.",
+    "description": "Divinity: targets in the cage take +15% damage in PvE, +7.5% in PvP.",
     "perkNames": [],
-    "icon": null
-  },
-  "sect_of_force": {
-    "hash": "sect_of_force",
-    "name": "Sect of Force",
-    "category": "subclass",
-    "stackType": "empowering",
-    "classType": "neutral",
-    "multiplier": 1.25,
-    "description": "Prismatic Transcendence benefit. Grants +25% bonus weapon damage while Transcendent.",
-    "perkNames": [],
-    "icon": null
-  },
-  "sect_of_insight": {
-    "hash": "sect_of_insight",
-    "name": "Sect of Insight",
-    "category": "subclass",
-    "stackType": "empowering",
-    "classType": "neutral",
-    "multiplier": 1.10,
-    "description": "Prismatic Transcendence benefit. Powered melee final blows generate additional Transcendence energy.",
-    "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.075
+    }
   },
   "blessing_of_the_sky": {
     "hash": "blessing_of_the_sky",
@@ -424,32 +646,29 @@
     "category": "subclass",
     "stackType": "empowering",
     "classType": "neutral",
-    "multiplier": 1.10,
-    "description": "Arc subclass buff. Empowers allies with enhanced weapon performance and +10% weapon damage.",
+    "multiplier": 1.35,
+    "description": "Noble Rounds (Lumina) or Boots of the Assembler: +35% weapon damage in PvE, +15% in PvP.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.15
+    }
   },
   "disruption_break": {
     "hash": "disruption_break",
     "name": "Disruption Break",
     "category": "debuff",
-    "stackType": "debuff",
+    "stackType": "multiplicative",
     "classType": "neutral",
-    "multiplier": 1.50,
-    "description": "Weapon perk. Breaking an enemy's elemental shield grants a +50% kinetic weapon damage bonus for a short duration.",
-    "perkNames": ["Disruption Break"],
-    "icon": null
-  },
-  "judgment": {
-    "hash": "judgment",
-    "name": "Judgment",
-    "category": "debuff",
-    "stackType": "debuff",
-    "classType": "neutral",
-    "multiplier": 1.25,
-    "description": "Stasis debuff from Silence & Squall. Enemies within the storm take +25% increased damage.",
-    "perkNames": [],
-    "icon": null
+    "multiplier": 1.5,
+    "description": "Breaking a shield with this weapon makes the target take +50% Kinetic damage for 5.5s. Stacks with every other buff and debuff, Kinetic weapons only.",
+    "perkNames": [
+      "Disruption Break"
+    ],
+    "icon": null,
+    "damageTypes": [
+      "kinetic"
+    ]
   },
   "tractor_cannon_debuff": {
     "hash": "tractor_cannon_debuff",
@@ -457,21 +676,27 @@
     "category": "debuff",
     "stackType": "debuff",
     "classType": "neutral",
-    "multiplier": 1.30,
-    "description": "Tractor Cannon exotic shotgun. Enemies hit are suppressed and take +30% increased Void damage.",
+    "multiplier": 1.3,
+    "description": "Tractor Cannon: hit targets take +30% damage in PvE, +50% in PvP, for 10s.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.5
+    }
   },
   "worm_byproduct": {
     "hash": "worm_byproduct",
     "name": "Worm Byproduct",
     "category": "subclass",
-    "stackType": "multiplicative",
+    "stackType": "empowering",
     "classType": "neutral",
-    "multiplier": 1.0,
-    "description": "Wormgod's Caress exotic gauntlets. Powered melee kills stack up bonus melee damage (not weapon damage).",
+    "multiplier": 1.35,
+    "description": "Wormgod Caress (exotic gauntlets), at max stacks (×5): +35% weapon damage in PvE, +25% in PvP.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.25
+    }
   },
   "spark_of_frequency": {
     "hash": "spark_of_frequency",
@@ -479,11 +704,13 @@
     "category": "subclass",
     "stackType": "multiplicative",
     "classType": "neutral",
-    "multiplier": 1.0,
+    "multiplier": 1,
     "description": "Arc fragment. 0.80× Reload Duration Multiplier — Arc weapon hits with Bolt Charge stack reload speed to near-instant.",
     "perkNames": [],
     "icon": null,
-    "statBonuses": { "Reload": 40 }
+    "statBonuses": {
+      "Reload": 40
+    }
   },
   "amplified": {
     "hash": "amplified",
@@ -491,11 +718,14 @@
     "category": "subclass",
     "stackType": "multiplicative",
     "classType": "neutral",
-    "multiplier": 1.0,
+    "multiplier": 1,
     "description": "Arc keyword. +40 Handling, 0.95× Ready/Stow Duration Multiplier, improved airborne effectiveness and sprint speed.",
     "perkNames": [],
     "icon": null,
-    "statBonuses": { "Handling": 40, "Airborne Effectiveness": 20 }
+    "statBonuses": {
+      "Handling": 40,
+      "Airborne Effectiveness": 20
+    }
   },
   "ember_of_tempering": {
     "hash": "ember_of_tempering",
@@ -503,7 +733,7 @@
     "category": "subclass",
     "stackType": "multiplicative",
     "classType": "neutral",
-    "multiplier": 1.0,
+    "multiplier": 1,
     "description": "Solar fragment. Solar weapon final blows grant Radiant to you and nearby allies. (Activate Radiant above for the damage bonus.)",
     "perkNames": [],
     "icon": null
@@ -512,10 +742,10 @@
     "hash": "sever",
     "name": "Sever",
     "category": "debuff",
-    "stackType": "debuff",
+    "stackType": "multiplicative",
     "classType": "neutral",
-    "multiplier": 1.15,
-    "description": "Strand debuff. Severed enemies deal significantly less damage and take +15% increased damage from all sources.",
+    "multiplier": 1,
+    "description": "Strand debuff: severed enemies deal reduced damage. It does not increase the damage they take.",
     "perkNames": [],
     "icon": null
   },
@@ -523,10 +753,10 @@
     "hash": "whisper_of_hedrons",
     "name": "Whisper of Hedrons",
     "category": "subclass",
-    "stackType": "empowering",
+    "stackType": "multiplicative",
     "classType": "neutral",
-    "multiplier": 1.10,
-    "description": "Stasis fragment. Freezing a target grants significantly increased weapon stability, aim assist, and a Weapon Surge.",
+    "multiplier": 1,
+    "description": "Stasis fragment: freezing a target increases weapon handling and grants health (the Weapon Surge is set under Armor Mods).",
     "perkNames": [],
     "icon": null
   },
@@ -536,11 +766,14 @@
     "category": "subclass",
     "stackType": "multiplicative",
     "classType": "neutral",
-    "multiplier": 1.0,
+    "multiplier": 1,
     "description": "Strand fragment. Activating grenade reloads your equipped weapon and grants +30 Airborne Effectiveness and +30 Reload Speed.",
     "perkNames": [],
     "icon": null,
-    "statBonuses": { "Airborne Effectiveness": 30, "Reload": 30 }
+    "statBonuses": {
+      "Airborne Effectiveness": 30,
+      "Reload": 30
+    }
   },
   "flow_state": {
     "hash": "flow_state",
@@ -548,20 +781,23 @@
     "category": "subclass",
     "stackType": "multiplicative",
     "classType": "hunter",
-    "multiplier": 1.0,
+    "multiplier": 1,
     "description": "Arc Hunter keyword. +40 Reload Speed and +20 Handling while active.",
     "perkNames": [],
     "icon": null,
-    "statBonuses": { "Reload": 40, "Handling": 20 }
+    "statBonuses": {
+      "Reload": 40,
+      "Handling": 20
+    }
   },
   "on_your_mark": {
     "hash": "on_your_mark",
     "name": "On Your Mark",
     "category": "subclass",
-    "stackType": "empowering",
+    "stackType": "multiplicative",
     "classType": "hunter",
-    "multiplier": 1.10,
-    "description": "Arc Hunter precision final blows grant On Your Mark, boosting weapon handling and reload speed for you and nearby allies.",
+    "multiplier": 1,
+    "description": "Arc Hunter aspect: class ability or precision hits grant you and nearby allies reload speed and Weapons stat (up to ten stacks).",
     "perkNames": [],
     "icon": null
   },
@@ -571,10 +807,13 @@
     "category": "debuff",
     "stackType": "debuff",
     "classType": "hunter",
-    "multiplier": 1.30,
-    "description": "Shadowshot: Moebius Quiver super. Tethered enemies take +30% increased damage from all sources.",
+    "multiplier": 1.3,
+    "description": "Moebius Quiver tether: tethered targets take +30% damage in PvE, +50% in PvP.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.5
+    }
   },
   "deadfall": {
     "hash": "deadfall",
@@ -582,22 +821,27 @@
     "category": "debuff",
     "stackType": "debuff",
     "classType": "hunter",
-    "multiplier": 1.30,
-    "description": "Shadowshot: Deadfall super. Enemies in the anchor's zone of influence take +30% increased damage.",
+    "multiplier": 1.3,
+    "description": "Deadfall tether: enemies in its zone take +30% damage in PvE, +50% in PvP.",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.5
+    }
   },
   "heat_rises": {
     "hash": "heat_rises",
     "name": "Heat Rises",
     "category": "subclass",
-    "stackType": "empowering",
+    "stackType": "multiplicative",
     "classType": "warlock",
-    "multiplier": 1.10,
-    "description": "Solar Warlock Dawnblade aspect. +10% weapon damage and +30 Airborne Effectiveness while airborne.",
+    "multiplier": 1,
+    "description": "Solar Warlock aspect: lets you fire while gliding; the grenade grants Heat Rises and a healing burst. Not a damage buff.",
     "perkNames": [],
     "icon": null,
-    "statBonuses": { "Airborne Effectiveness": 30 }
+    "statBonuses": {
+      "Airborne Effectiveness": 30
+    }
   },
   "rally_barricade": {
     "hash": "rally_barricade",
@@ -605,11 +849,13 @@
     "category": "subclass",
     "stackType": "multiplicative",
     "classType": "titan",
-    "multiplier": 1.0,
+    "multiplier": 1,
     "description": "Titan class ability. Crouching behind the barricade instantly reloads your weapon and grants +50 Reload Speed.",
     "perkNames": [],
     "icon": null,
-    "statBonuses": { "Reload": 50 }
+    "statBonuses": {
+      "Reload": 50
+    }
   },
   "sentinel_shield": {
     "hash": "sentinel_shield",
@@ -617,9 +863,106 @@
     "category": "subclass",
     "stackType": "empowering",
     "classType": "titan",
-    "multiplier": 1.35,
-    "description": "Void Titan Sentinel super. Activating Sentinel Shield grants allies a Weapons of Light buff (+35% weapon damage).",
+    "multiplier": 1.4,
+    "description": "Void Titan Sentinel Shield: allies behind it deal +40% weapon damage in PvE, +35% in PvP (same effect as Banner Shield).",
     "perkNames": [],
-    "icon": null
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.35
+    }
+  },
+  "helm_of_saint_14": {
+    "hash": "helm_of_saint_14",
+    "category": "subclass",
+    "stackType": "empowering",
+    "perkNames": [],
+    "icon": null,
+    "name": "Helm of Saint-14",
+    "multiplier": 1.25,
+    "pvp": {
+      "multiplier": 1.25
+    },
+    "description": "Helm of Saint-14 (exotic helmet): +25% weapon damage for 15s in PvE and PvP."
+  },
+  "gyrfalcons_hauberk": {
+    "hash": "gyrfalcons_hauberk",
+    "category": "subclass",
+    "stackType": "empowering",
+    "perkNames": [],
+    "icon": null,
+    "name": "Gyrfalcon's Hauberk",
+    "multiplier": 1.35,
+    "pvp": {
+      "multiplier": 1
+    },
+    "description": "Gyrfalcon's Hauberk (exotic chest): +35% weapon damage for 6s in PvE; not usable in PvP."
+  },
+  "no_backup_plans": {
+    "hash": "no_backup_plans",
+    "category": "subclass",
+    "stackType": "empowering",
+    "perkNames": [],
+    "icon": null,
+    "name": "No Backup Plans",
+    "multiplier": 1.35,
+    "pvp": {
+      "multiplier": 1.1
+    },
+    "weaponTypes": [
+      "Shotgun"
+    ],
+    "description": "No Backup Plans (exotic leg armor), shotguns only: +35% damage in PvE, +10% in PvP."
+  },
+  "hazardous_propulsion": {
+    "hash": "hazardous_propulsion",
+    "category": "subclass",
+    "stackType": "empowering",
+    "perkNames": [],
+    "icon": null,
+    "name": "Hazardous Propulsion",
+    "multiplier": 1.35,
+    "pvp": {
+      "multiplier": 1
+    },
+    "description": "Hazardous Propulsion: +35% weapon damage for 10s in PvE (no published PvP value, so none is applied)."
+  },
+  "prismatic_transfer": {
+    "hash": "prismatic_transfer",
+    "category": "subclass",
+    "stackType": "empowering",
+    "perkNames": [],
+    "icon": null,
+    "name": "Prismatic Transfer",
+    "multiplier": 1.2,
+    "pvp": {
+      "multiplier": 1.15
+    },
+    "description": "Prismatic Transfer (artifact): +20% weapon damage in PvE, +15% in PvP."
+  },
+  "felwinters_helm": {
+    "hash": "felwinters_helm",
+    "category": "debuff",
+    "stackType": "debuff",
+    "perkNames": [],
+    "icon": null,
+    "name": "Felwinter's Helm",
+    "multiplier": 1.3,
+    "pvp": {
+      "multiplier": 1.3
+    },
+    "description": "Felwinter's Helm (exotic helmet): enemies hit by its Void blast take +30% damage for 5-20s."
+  },
+  "flash_counter": {
+    "hash": "flash_counter",
+    "category": "debuff",
+    "stackType": "debuff",
+    "perkNames": [],
+    "icon": null,
+    "name": "Flash Counter",
+    "multiplier": 1.2,
+    "pvp": {
+      "multiplier": 1.2
+    },
+    "description": "Flash Counter: enemies take +20% damage for 4s."
   }
 }

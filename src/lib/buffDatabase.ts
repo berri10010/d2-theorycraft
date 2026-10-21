@@ -18,7 +18,13 @@ export interface BuffStack {
   label: string;
   /** Damage multiplier at this stack level */
   multiplier: number;
+  /** Timing / crit changes at this stack level (see WeaponEffects); absent = the buff's own value. */
+  critMultiplier?: number;
+  shotDelayMultiplier?: number;
+  chargeMultiplier?: number;
 }
+
+export type BuffMode = 'pve' | 'pvp';
 
 export type ClassType = 'neutral' | 'hunter' | 'warlock' | 'titan';
 
@@ -69,6 +75,19 @@ export interface DamageBuff {
   shotDelayMultiplier?: number;
   /** Multiplier on charge / draw time; < 1 is faster (see WeaponEffects). */
   chargeMultiplier?: number;
+  /** Damage multiplier by weapon type (itemTypeDisplayName), e.g. Explosive Light on grenade launchers. */
+  weaponTypeMultipliers?: Record<string, number>;
+  /** The buff only applies to these weapon types (itemTypeDisplayName). */
+  weaponTypes?: string[];
+  /** The buff only applies to weapons of these damage types, e.g. Disruption Break is kinetic-only. */
+  damageTypes?: string[];
+  /**
+   * What differs in PvP. Values here replace the PvE ones; anything not listed keeps its PvE value.
+   * Most buffs are weaker in the Crucible (Radiant +25% PvE, +10% PvP).
+   */
+  pvp?: Partial<Pick<DamageBuff,
+    'multiplier' | 'stacks' | 'ammoTypeMultipliers' | 'weaponTypeMultipliers' |
+    'critMultiplier' | 'shotDelayMultiplier' | 'chargeMultiplier' | 'description'>>;
 }
 
 export const BUFF_DATABASE = buffData as Record<string, DamageBuff>;
@@ -90,4 +109,57 @@ export function getBuffMultiplier(buff: DamageBuff, stackIndex?: number): number
   if (!buff.stacks?.length) return buff.multiplier;
   const idx = stackIndex ?? buff.stacks.length - 1;
   return buff.stacks[Math.max(0, Math.min(idx, buff.stacks.length - 1))]?.multiplier ?? buff.multiplier;
+}
+
+/** The buff as it behaves in a game mode: PvP overrides replace the PvE values. */
+export function buffForMode(buff: DamageBuff, mode: BuffMode): DamageBuff {
+  return mode === 'pvp' && buff.pvp ? { ...buff, ...buff.pvp } : buff;
+}
+
+/** The weapon fields a buff can be restricted by. */
+export interface BuffWeapon { itemTypeDisplayName?: string; damageType?: string; ammoType?: number }
+
+/** Whether the buff applies to this weapon at all (weapon-type and damage-type restrictions). */
+export function buffApplies(buff: DamageBuff, weapon: BuffWeapon | null | undefined): boolean {
+  if (!weapon) return true;
+  if (buff.weaponTypes?.length && !buff.weaponTypes.includes(weapon.itemTypeDisplayName ?? '')) return false;
+  if (buff.damageTypes?.length && !buff.damageTypes.includes((weapon.damageType ?? '').toLowerCase())) return false;
+  return true;
+}
+
+const AMMO_SLOT: Record<number, string> = { 1: 'primary', 2: 'special', 3: 'power' };
+
+/**
+ * The damage multiplier a buff gives this weapon in this mode: 1 when it doesn't apply, otherwise the
+ * per-ammo or per-weapon-type value if there is one, else the (stack-aware) general value.
+ */
+export function resolveBuffMultiplier(
+  buff: DamageBuff,
+  mode: BuffMode,
+  weapon: BuffWeapon | null | undefined,
+  stackIndex?: number,
+): number {
+  const b = buffForMode(buff, mode);
+  if (!buffApplies(b, weapon)) return 1;
+  if (b.ammoTypeMultipliers) return b.ammoTypeMultipliers[AMMO_SLOT[weapon?.ammoType ?? 1]] ?? b.multiplier;
+  const byType = weapon?.itemTypeDisplayName ? b.weaponTypeMultipliers?.[weapon.itemTypeDisplayName] : undefined;
+  if (byType !== undefined) return byType;
+  return getBuffMultiplier(b, stackIndex);
+}
+
+/** The timing / crit fields of a buff at a stack level, for combineEffects. */
+export function resolveBuffEffects(
+  buff: DamageBuff,
+  mode: BuffMode,
+  weapon: BuffWeapon | null | undefined,
+  stackIndex?: number,
+): Pick<DamageBuff, 'critMultiplier' | 'shotDelayMultiplier' | 'chargeMultiplier'> {
+  const b = buffForMode(buff, mode);
+  if (!buffApplies(b, weapon)) return {};
+  const st = b.stacks?.length ? b.stacks[Math.max(0, Math.min(stackIndex ?? b.stacks.length - 1, b.stacks.length - 1))] : undefined;
+  return {
+    critMultiplier: st?.critMultiplier ?? b.critMultiplier,
+    shotDelayMultiplier: st?.shotDelayMultiplier ?? b.shotDelayMultiplier,
+    chargeMultiplier: st?.chargeMultiplier ?? b.chargeMultiplier,
+  };
 }

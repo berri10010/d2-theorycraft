@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
-import { BUFF_DATABASE } from '../../lib/buffDatabase';
+import { BUFF_DATABASE, buffForMode } from '../../lib/buffDatabase';
 import { TIER_CONFIG, PerkTier, getOfficialTier } from '../../lib/perkTierDatabase';
 import { useTierListStore } from '../../store/useTierListStore';
 import { useSiteSettings } from '../../store/useSiteSettings';
@@ -93,8 +93,9 @@ export const EffectsPanel: React.FC = () => {
     return activeBuffs
       .filter((hash) => !autoBuff.has(hash))
       .map((hash) => BUFF_DATABASE[hash])
-      .filter(Boolean);
-  }, [activePerkEntries, activeBuffs]);
+      .filter(Boolean)
+      .map((b) => buffForMode(b, mode));
+  }, [activePerkEntries, activeBuffs, mode]);
 
   if (!activeWeapon) return null;
 
@@ -123,7 +124,7 @@ export const EffectsPanel: React.FC = () => {
               {conditionalEntries.map(({ columnName, perkHash, name, icon, description, isEnhanced, buffKey, statModifiers, activation, activation2 }) => {
                 const currentState = activeEffects[perkHash] ?? 0;
                 const isOn = currentState > 0;
-                const buff = buffKey ? BUFF_DATABASE[buffKey] : null;
+                const buff = buffKey && BUFF_DATABASE[buffKey] ? buffForMode(BUFF_DATABASE[buffKey], mode) : null;
                 const isStackable = !!(buff?.stacks?.length);
                 return (
                   <div
@@ -449,7 +450,7 @@ export const EffectsPanel: React.FC = () => {
                       <div className="flex items-center gap-1 mt-1.5">
                         <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
                         <span className="text-xs text-green-500">
-                          Auto-activates {BUFF_DATABASE[buffKey].name} (x{BUFF_DATABASE[buffKey].multiplier.toFixed(2)})
+                          Auto-activates {BUFF_DATABASE[buffKey].name} (x{buffForMode(BUFF_DATABASE[buffKey], mode).multiplier.toFixed(2)})
                         </span>
                       </div>
                     )}

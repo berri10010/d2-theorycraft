@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { BUFF_DATABASE } from '../../lib/buffDatabase';
+import { BUFF_DATABASE, buffForMode } from '../../lib/buffDatabase';
+import { useWeaponStore } from '../../store/useWeaponStore';
 import { Tooltip } from '../ui/Tooltip';
 import type { AuditAnnotation } from '../../lib/perkAudit';
 
@@ -45,7 +46,9 @@ export function EffectStackSelector({
   currentState: number;
   onSet: (v: number) => void;
 }) {
-  const buff = BUFF_DATABASE[buffKey];
+  const mode = useWeaponStore((s) => s.mode);
+  const raw = BUFF_DATABASE[buffKey];
+  const buff = raw ? buffForMode(raw, mode) : undefined;
   if (!buff?.stacks?.length) return null;
 
   return (

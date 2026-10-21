@@ -6,7 +6,7 @@ import { localIcon } from '../../lib/localIcons';
 import { CollapsiblePanel } from './CollapsiblePanel';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
-import { BUFF_DATABASE, DamageBuff, ClassType, getBuffMultiplier } from '../../lib/buffDatabase';
+import { BUFF_DATABASE, DamageBuff, ClassType, getBuffMultiplier, buffForMode, resolveBuffMultiplier } from '../../lib/buffDatabase';
 import { EXOTIC_ARMOR, ExoticClassType } from '../../data/exoticArmor';
 
 // Pre-compute buff groups
@@ -80,7 +80,9 @@ interface BuffRowProps {
   onSelectStack: (idx: number) => void;
 }
 
-function BuffRow({ buff, isActive, isOverridden, activeStackIndex, onToggle, onSelectStack }: BuffRowProps) {
+function BuffRow({ buff: rawBuff, isActive, isOverridden, activeStackIndex, onToggle, onSelectStack }: BuffRowProps) {
+  const mode = useWeaponStore((s) => s.mode);
+  const buff = buffForMode(rawBuff, mode); // PvP values replace the PvE ones
   const isDebuff    = buff.stackType === 'debuff';
   const isUtility   = buff.multiplier === 1.0;
   const activeColor = isDebuff ? 'red' : 'amber';
@@ -197,18 +199,20 @@ function CollapsibleSection({ label, note, activeCount, open, onToggle, children
 // ─── External multiplier breakdown ───────────────────────────────────────────
 
 function ExternalMultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] }) {
+  const mode = useWeaponStore((s) => s.mode);
+  const weapon = useWeaponStore((s) => s.activeWeapon);
   const { empoweringMult, debuffMult, total } = useMemo(() => {
     let empoweringMult = 1;
     let debuffMult     = 1;
     activeBuffs.forEach((hash) => {
       const buff = BUFF_DATABASE[hash];
       if (!buff) return;
-      const mult = buff.multiplier;
+      const mult = resolveBuffMultiplier(buff, mode, weapon);
       if (buff.stackType === 'empowering' && mult > empoweringMult) empoweringMult = mult;
       if (buff.stackType === 'debuff'     && mult > debuffMult)     debuffMult     = mult;
     });
     return { empoweringMult, debuffMult, total: empoweringMult * debuffMult };
-  }, [activeBuffs]);
+  }, [activeBuffs, mode, weapon]);
 
   if (total === 1) return null;
 
@@ -387,7 +391,7 @@ function ClassSection({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export const BuffToggle: React.FC = () => {
-  const { activeBuffs, toggleBuff, buffStacks, setBuffStack, activeExoticArmor, setExoticArmor, activeWeapon } = useWeaponStore(
+  const { activeBuffs, toggleBuff, buffStacks, setBuffStack, activeExoticArmor, setExoticArmor, activeWeapon, mode } = useWeaponStore(
     useShallow((s) => ({
       activeBuffs:       s.activeBuffs,
       toggleBuff:        s.toggleBuff,
@@ -396,6 +400,7 @@ export const BuffToggle: React.FC = () => {
       activeExoticArmor: s.activeExoticArmor,
       setExoticArmor:    s.setExoticArmor,
       activeWeapon:      s.activeWeapon,
+      mode:              s.mode,
     }))
   );
   const activeWeaponType = activeWeapon?.itemTypeDisplayName ?? null;
@@ -412,20 +417,24 @@ export const BuffToggle: React.FC = () => {
     let best = 0;
     activeBuffs.forEach((hash) => {
       const buff = BUFF_DATABASE[hash];
-      if (buff?.stackType === 'empowering' && buff.multiplier > best) { best = buff.multiplier; winner = hash; }
+      if (!buff || buff.stackType !== 'empowering') return;
+      const mult = resolveBuffMultiplier(buff, mode, activeWeapon);
+      if (mult > best) { best = mult; winner = hash; }
     });
     return winner;
-  }, [activeBuffs]);
+  }, [activeBuffs, mode, activeWeapon]);
 
   const winningDebuff = useMemo(() => {
     let winner: string | null = null;
     let best = 0;
     activeBuffs.forEach((hash) => {
       const buff = BUFF_DATABASE[hash];
-      if (buff?.stackType === 'debuff' && buff.multiplier > best) { best = buff.multiplier; winner = hash; }
+      if (!buff || buff.stackType !== 'debuff') return;
+      const mult = resolveBuffMultiplier(buff, mode, activeWeapon);
+      if (mult > best) { best = mult; winner = hash; }
     });
     return winner;
-  }, [activeBuffs]);
+  }, [activeBuffs, mode, activeWeapon]);
 
   const classSectionProps = { activeSet, winningEmpowering, winningDebuff, buffStacks, toggleBuff, setBuffStack };
 

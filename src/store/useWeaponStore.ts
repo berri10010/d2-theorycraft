@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Weapon, StatMap, GameMode, WeaponGroup, Perk, PerkColumn } from '../types/weapon';
-import { BUFF_DATABASE, getBuffMultiplier } from '../lib/buffDatabase';
+import { BUFF_DATABASE, resolveBuffMultiplier, resolveBuffEffects } from '../lib/buffDatabase';
 import { EXOTIC_ARMOR, ExoticClassType } from '../data/exoticArmor';
 import { getCurves } from '../lib/archetypes';
 import { applyStatDeltas } from '../lib/statCalc';
@@ -640,17 +640,25 @@ export const useWeaponStore = create<WeaponState>()(
       },
 
       getWeaponEffects: () => {
-        const { activeWeapon, selectedPerks, activeEffects, activeBuffs } = get();
-        const keys = new Set<string>(activeBuffs);
+        const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, mode } = get();
+        // Same sources and stack levels as getDamageMultiplier: perks with their effect switched on, then manual buffs.
+        const stackByKey: Record<string, number | undefined> = {};
+        const keys = new Set<string>();
         if (activeWeapon) {
           for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
-            if ((activeEffects[perkHash] ?? 0) === 0) continue;
+            const state = activeEffects[perkHash] ?? 0;
+            if (state === 0) continue;
             const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
             const buffKey = resolveBasePerk(column, perkHash)?.buffKey;
-            if (buffKey) keys.add(buffKey);
+            if (buffKey && !keys.has(buffKey)) { keys.add(buffKey); stackByKey[buffKey] = state - 1; }
           }
         }
-        return combineEffects([...keys].map((k) => BUFF_DATABASE[k]).filter(Boolean));
+        for (const hash of activeBuffs) {
+          if (!keys.has(hash)) { keys.add(hash); stackByKey[hash] = buffStacks[hash]; }
+        }
+        return combineEffects([...keys]
+          .map((k) => (BUFF_DATABASE[k] ? resolveBuffEffects(BUFF_DATABASE[k], mode, activeWeapon, stackByKey[k]) : null))
+          .filter((e): e is NonNullable<typeof e> => e !== null));
       },
 
       getDamageMultiplier: () => {
@@ -694,17 +702,12 @@ export const useWeaponStore = create<WeaponState>()(
         let maxEmpowering  = 1;
         let maxDebuff      = 1;
 
-        const ammoSlot = activeWeapon?.ammoType === 1 ? 'primary'
-          : activeWeapon?.ammoType === 2 ? 'special'
-          : 'power';
-
         for (const hash of allActiveBuffs) {
           const buff = BUFF_DATABASE[hash];
           if (!buff) continue;
           const stackIdx = hash in effectStackByKey ? effectStackByKey[hash] : buffStacks[hash];
-          const mult = buff.ammoTypeMultipliers
-            ? (buff.ammoTypeMultipliers[ammoSlot] ?? buff.multiplier)
-            : getBuffMultiplier(buff, stackIdx);
+          // PvP values, weapon-type / damage-type restrictions and per-ammo values are resolved here.
+          const mult = resolveBuffMultiplier(buff, mode, activeWeapon, stackIdx);
           if (buff.stackType === 'multiplicative') {
             multiplicative *= mult;
           } else if (buff.stackType === 'empowering') {

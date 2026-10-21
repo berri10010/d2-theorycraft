@@ -2,15 +2,17 @@ import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import { applyEffects, combineEffects, NO_EFFECTS } from './weaponEffects';
-import { BUFF_DATABASE } from './buffDatabase';
+import { BUFF_DATABASE, buffForMode, resolveBuffEffects } from './buffDatabase';
 import { lookupWeaponStat } from './weaponStats';
 import { calculateTTK } from './damageMath';
 import { calcDps } from './dpsCalc';
 import { loadRealData } from '../test/realData';
 
-const EXOTIC_TRAIT_KEYS = ['business_time', 'desperation', 'rat_pack', 'silkbound_slayer', 'ignition_trigger', 'all_at_once', 'release_the_wolves'];
+const EXOTIC_TRAIT_KEYS = ['business_time', 'desperation', 'rat_pack', 'silkbound_slayer', 'ignition_trigger', 'release_the_wolves'];
 const effectBuffs = EXOTIC_TRAIT_KEYS.map((k) => BUFF_DATABASE[k]);
-const fx = (key: string) => combineEffects([BUFF_DATABASE[key]]);
+/** The timing / crit effects of one buff at a stack level, as the store would fold them. */
+const fx = (key: string, mode: 'pve' | 'pvp' = 'pvp', stack?: number) =>
+  combineEffects([resolveBuffEffects(BUFF_DATABASE[key], mode, null, stack)]);
 const info = (subType: number, ammo: number, frame: string) => ({ itemSubType: subType, ammoType: ammo, intrinsicTrait: { name: frame } });
 
 describe('combineEffects / applyEffects', () => {
@@ -47,30 +49,53 @@ describe('exotic trait buffs', () => {
     }
   });
 
-  it('Business Time takes Sweet Business from 360 to 900 RPM', () => {
+  it('every buff linked to a perk in the shipped data still exists', () => {
+    const perks = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public', 'data', 'perks.json'), 'utf8'));
+    const list = (Array.isArray(perks) ? perks : Object.values(perks)) as Array<{ name: string; buffKey?: string | null }>;
+    for (const p of list) if (p.buffKey) expect(BUFF_DATABASE[p.buffKey], `${p.name} -> ${p.buffKey}`).toBeDefined();
+  });
+
+  it('Business Time raises Sweet Business fire rate by 60% (360 to 576 RPM)', () => {
     const base = calcDps(6, 1, 'Sweet Business', 'Auto Rifle', 50, 50)!;
     const maxed = calcDps(6, 1, 'Sweet Business', 'Auto Rifle', 50, 50, 'Major / Elite', fx('business_time'))!;
     expect(base.rpm).toBe(360);
-    expect(maxed.rpm).toBe(900);
-    expect(maxed.optimalDpsPvp).toBeGreaterThan(base.optimalDpsPvp * 2);
+    expect(maxed.rpm).toBe(576);
+    expect(maxed.optimalDpsPvp).toBeGreaterThan(base.optimalDpsPvp * 1.5);
   });
 
-  it('Rat Pack speeds Rat King up by about 15%', () => {
+  it('Desperation is +20% fire rate', () => {
+    const base = calcDps(6, 1, 'Necrochasm', 'Auto Rifle', 50, 50)!;
+    const up = calcDps(6, 1, 'Necrochasm', 'Auto Rifle', 50, 50, 'Major / Elite', fx('desperation'))!;
+    expect(up.rpm / base.rpm).toBeCloseTo(1.2, 1);
+  });
+
+  it('Rat Pack scales with the number of allies: nothing at x1, +40% at x5', () => {
     const base = calcDps(17, 1, 'Rat King', 'Sidearm', 50, 50)!;
-    const packed = calcDps(17, 1, 'Rat King', 'Sidearm', 50, 50, 'Major / Elite', fx('rat_pack'))!;
-    expect(packed.rpm / base.rpm).toBeCloseTo(1 / 0.87, 1);
+    const x1 = calcDps(17, 1, 'Rat King', 'Sidearm', 50, 50, 'Major / Elite', fx('rat_pack', 'pvp', 0))!;
+    const x2 = calcDps(17, 1, 'Rat King', 'Sidearm', 50, 50, 'Major / Elite', fx('rat_pack', 'pvp', 1))!;
+    const x5 = calcDps(17, 1, 'Rat King', 'Sidearm', 50, 50, 'Major / Elite', fx('rat_pack', 'pvp', 4))!;
+    expect(x1.rpm).toBe(base.rpm);
+    expect(x2.rpm / base.rpm).toBeCloseTo(1.13, 1);
+    expect(x5.rpm / base.rpm).toBeCloseTo(1.4, 1);
   });
 
-  it('Silkbound Slayer draws 30% faster and hits for +50% body / +20% crit', () => {
+  it('Silkbound Slayer: 30% faster draw; +125% body / +50% precision in PvE, +44% / +20% in PvP', () => {
     const e = lookupWeaponStat(31, 1, 'Wish-Keeper')!;
-    const f = fx('silkbound_slayer');
-    const sped = applyEffects(e, f);
-    expect(sped.chargeMs).toBeCloseTo((e.chargeMs as number) * 0.7);
-    // body follows the shared damage multiplier (1.5); crit gets 1.5 * 0.8 = 1.2 in total
-    expect(BUFF_DATABASE.silkbound_slayer.multiplier * f.critMult).toBeCloseTo(1.2);
+    expect(applyEffects(e, fx('silkbound_slayer')).chargeMs).toBeCloseTo((e.chargeMs as number) * 0.7);
+    for (const [mode, body, crit] of [['pve', 2.25, 1.5], ['pvp', 1.44, 1.2]] as const) {
+      const b = buffForMode(BUFF_DATABASE.silkbound_slayer, mode);
+      expect(b.multiplier, `${mode} body`).toBeCloseTo(body, 2);
+      // crit damage = shared multiplier x the extra crit factor
+      expect(b.multiplier * fx('silkbound_slayer', mode).critMult, `${mode} crit`).toBeCloseTo(crit, 2);
+    }
     const without = calculateTTK('pvp', info(31, 1, 'Wish-Keeper'), 1, 230, 'Minor')!;
-    const withEffect = calculateTTK('pvp', info(31, 1, 'Wish-Keeper'), 1.5, 230, 'Minor', undefined, f)!;
+    const withEffect = calculateTTK('pvp', info(31, 1, 'Wish-Keeper'), 1.44, 230, 'Minor', undefined, fx('silkbound_slayer'))!;
     expect(withEffect.ttk).toBeLessThan(without.ttk);
+  });
+
+  it('Ignition Trigger is +100% in PvE and +50% in PvP', () => {
+    expect(buffForMode(BUFF_DATABASE.ignition_trigger, 'pve').multiplier).toBe(2);
+    expect(buffForMode(BUFF_DATABASE.ignition_trigger, 'pvp').multiplier).toBe(1.5);
   });
 });
 
