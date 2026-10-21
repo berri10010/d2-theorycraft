@@ -8,7 +8,6 @@ export const metadata: Metadata = {
 };
 
 const GROUP_ORDER: CreditGroup[] = ['game', 'analysis', 'math', 'built'];
-const ISSUES_URL = 'https://github.com/berri10010/d2-theorycraft/issues';
 const linkClass ='underline underline-offset-2 hover:text-amber-400 transition-colors';
 
 export default function CreditsPage() {
@@ -71,11 +70,6 @@ export default function CreditsPage() {
             Destiny 2, its names, weapons, perks and artwork are the property of Bungie, Inc. This site is a fan project and is not
             affiliated with or endorsed by Bungie. Community sheets are read from their public pages, are the work of their authors,
             and can be wrong or out of date: where a tool and the game disagree, trust the game.
-          </p>
-          <p className="mt-2">
-            If you made one of these and would like a different credit, link or wording, or would rather it weren&apos;t used, please{' '}
-            <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer" className={linkClass}>open an issue on GitHub</a>{' '}
-            and it will be changed. Corrections to any number on the site are welcome there too.
           </p>
         </section>
       </main>
