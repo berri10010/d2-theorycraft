@@ -126,6 +126,9 @@ select option { background: rgb(var(--c-surface)); color: rgb(var(--c-ink)); }
   to   { opacity: 1; transform: none; }
 }
 .tab-in { animation: tab-in 0.24s cubic-bezier(0.16, 1, 0.3, 1) both; }
+/* Short opacity-only fade when a breakpoint reflows the layout (see the editor page). */
+@keyframes layout-fade { from { opacity: 0.55; } to { opacity: 1; } }
+.layout-fade { animation: layout-fade 0.28s ease-out both; }
 @media (prefers-reduced-motion: reduce) {
-  .tab-in { animation: none; }
+  .tab-in, .layout-fade { animation: none; }
 }

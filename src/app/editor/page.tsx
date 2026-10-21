@@ -101,6 +101,21 @@ function Dashboard() {
     activeTabRef.current = next;
     setActiveTab(next);
   }, []);
+  // Panels jump between one and two columns (and the weapon list docks) as the window crosses a breakpoint;
+  // a quick opacity-only fade (GPU, no layout cost) hides the jump.
+  const contentRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const queries = ['(min-width: 720px)', '(min-width: 1024px)', '(min-width: 1280px)'].map((q) => window.matchMedia(q));
+    const fade = () => {
+      const el = contentRef.current;
+      if (!el) return;
+      el.classList.remove('layout-fade');
+      void el.offsetWidth; // restart the animation
+      el.classList.add('layout-fade');
+    };
+    queries.forEach((m) => m.addEventListener('change', fade));
+    return () => queries.forEach((m) => m.removeEventListener('change', fade));
+  }, []);
   useLayoutEffect(() => { mainRef.current?.scrollTo({ top: scrollByTab.current[activeTab] }); }, [activeTab]);
   // Mount the comparison grid on first visit, then keep it mounted (hidden) so its state survives tab switches.
   const [compareMounted,     setCompareMounted]     = useState(false);
@@ -439,7 +454,7 @@ function Dashboard() {
       <div className={[
         'fixed inset-y-0 left-0 z-50 w-[85vw] max-w-72 transform transition-transform duration-300 ease-in-out',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        'min-[720px]:static min-[720px]:translate-x-0 min-[720px]:z-auto min-[720px]:transition-all min-[720px]:duration-300',
+        'min-[720px]:static min-[720px]:translate-x-0 min-[720px]:z-auto min-[720px]:transition-[width] min-[720px]:duration-300',
         sidebarCollapsed ? 'min-[720px]:w-0' : 'min-[720px]:w-72',
         'border-r border-white/10 shrink-0 overflow-hidden',
       ].join(' ')}>
@@ -551,7 +566,7 @@ function Dashboard() {
           onModeChange={setMode}
           onOpenWeapons={() => setSidebarOpen(true)}
         />
-        <div className="max-w-7xl 2xl:max-w-[1500px] mx-auto p-4 pb-28 min-[720px]:p-6 xl:p-8 space-y-6">
+        <div ref={contentRef} className="max-w-7xl 2xl:max-w-[1500px] mx-auto p-4 pb-28 min-[720px]:p-6 xl:p-8 space-y-6">
 
           {/* ── Top action bar ─────────────────────────────────────────── */}
           {/*
