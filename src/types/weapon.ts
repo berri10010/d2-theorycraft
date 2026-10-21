@@ -1,3 +1,4 @@
+import type { WeaponEffects } from '../lib/weaponEffects';
 export type StatMap = Record<string, number>;
 export type GameMode = 'pvp' | 'pve';
 export type DamageType = 'kinetic' | 'arc' | 'solar' | 'void' | 'stasis' | 'strand';
@@ -229,6 +230,8 @@ export interface CompareSnapshot {
   mode: GameMode;
   /** Combined damage multiplier (perks, buffs, mods, surge) at snapshot time. */
   multiplier: number;
+  /** Timing / crit changes from exotic traits at snapshot time (undefined = none). */
+  effects?: WeaponEffects;
   /** Weapon tier (1–5) for S27+ legendaries; undefined for pre-S27 or exotics. */
   weaponTier?: number;
   /** Active masterwork stat at snapshot time, e.g. "Range". */

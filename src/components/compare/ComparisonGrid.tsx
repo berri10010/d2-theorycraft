@@ -79,10 +79,10 @@ function SnapshotCard({
   const liveTtk = useMemo(() => {
     const ammo = ammoFromStats(snapshot.weapon, snapshot.calculatedStats);
     if (snapshot.mode === 'pvp') {
-      return calculateTTK('pvp', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, 'Minor', ammo);
+      return calculateTTK('pvp', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, 'Minor', ammo, snapshot.effects);
     }
-    return calculateTTK('pve', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, enemyTier, ammo);
-  }, [snapshot.weapon, snapshot.calculatedStats, snapshot.mode, multiplier, enemyTier]);
+    return calculateTTK('pve', snapshot.weapon, multiplier, PVP_GUARDIAN_HP, enemyTier, ammo, snapshot.effects);
+  }, [snapshot.weapon, snapshot.calculatedStats, snapshot.mode, snapshot.effects, multiplier, enemyTier]);
 
   // ── Derive falloff distances from snapshot data ───────────────────────────
   const rangeCurve = snapshot.weapon.statCurves?.['Range'];
@@ -446,8 +446,8 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
       if (sortStat === 'TTK') {
         const tierA = a.mode === 'pve' ? enemyTier : 'Minor';
         const tierB = b.mode === 'pve' ? enemyTier : 'Minor';
-        valA = calculateTTK(a.mode, a.weapon, a.multiplier ?? 1.0, PVP_GUARDIAN_HP, tierA, ammoFromStats(a.weapon, a.calculatedStats))?.ttk ?? Infinity;
-        valB = calculateTTK(b.mode, b.weapon, b.multiplier ?? 1.0, PVP_GUARDIAN_HP, tierB, ammoFromStats(b.weapon, b.calculatedStats))?.ttk ?? Infinity;
+        valA = calculateTTK(a.mode, a.weapon, a.multiplier ?? 1.0, PVP_GUARDIAN_HP, tierA, ammoFromStats(a.weapon, a.calculatedStats), a.effects)?.ttk ?? Infinity;
+        valB = calculateTTK(b.mode, b.weapon, b.multiplier ?? 1.0, PVP_GUARDIAN_HP, tierB, ammoFromStats(b.weapon, b.calculatedStats), b.effects)?.ttk ?? Infinity;
       } else {
         valA = a.calculatedStats[sortStat] ?? 0;
         valB = b.calculatedStats[sortStat] ?? 0;

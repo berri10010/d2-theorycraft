@@ -113,6 +113,7 @@ function resolveBaseDamage(
     weapon.itemSubType,
     weapon.ammoType,
     weapon.intrinsicTrait?.name ?? null,
+    weapon.baseName ?? weapon.name,
   );
   if (entry) {
     const pveScalar = mode === 'pve' ? 3.0 : 1.0;
@@ -151,7 +152,7 @@ function buildRocketStats(stats: StatMap): RocketLauncherStats {
 
 function buildShotgunStats(weapon: D2Weapon, stats: StatMap): ShotgunStats {
   // Pellet count from the weapon-stat database; fall back to 8 (common default)
-  const entry   = lookupWeaponStat(weapon.itemSubType, weapon.ammoType, weapon.intrinsicTrait?.name ?? null);
+  const entry   = lookupWeaponStat(weapon.itemSubType, weapon.ammoType, weapon.intrinsicTrait?.name ?? null, weapon.baseName ?? weapon.name);
   const pellets = Math.max(1, entry?.pellets ?? entry?.shotsPerBurst ?? 8);
   return new ShotgunStats(
     pellets,
@@ -164,7 +165,7 @@ function buildShotgunStats(weapon: D2Weapon, stats: StatMap): ShotgunStats {
 }
 
 function buildSniperStats(weapon: D2Weapon, stats: StatMap): SniperRifleStats {
-  const entry       = lookupWeaponStat(weapon.itemSubType, weapon.ammoType, weapon.intrinsicTrait?.name ?? null);
+  const entry       = lookupWeaponStat(weapon.itemSubType, weapon.ammoType, weapon.intrinsicTrait?.name ?? null, weapon.baseName ?? weapon.name);
   const chamberTime = entry?.shotDelay ? clamp(entry.shotDelay / 30, 0.1, 3) : 0.8;
   return new SniperRifleStats(
     clamp(st(stats, 'Zoom', 20) / 10, 1, 8),                            // 1–8×

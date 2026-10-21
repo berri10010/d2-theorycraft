@@ -25,7 +25,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
   const {
     activeWeapon, getCalculatedStats, mode,
     weaponsStat, setWeaponsStat,
-    getDamageMultiplier, activeBuffs, activeMod, surgeStacks,
+    getDamageMultiplier, getWeaponEffects, activeBuffs, activeMod, surgeStacks,
     activeEffects, selectedPerks,
   } = useWeaponStore(
     useShallow((s) => ({
@@ -35,6 +35,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
       weaponsStat:         s.weaponsStat,
       setWeaponsStat:      s.setWeaponsStat,
       getDamageMultiplier: s.getDamageMultiplier,
+      getWeaponEffects:    s.getWeaponEffects,
       activeBuffs:         s.activeBuffs,
       activeMod:           s.activeMod,
       surgeStacks:         s.surgeStacks,
@@ -74,6 +75,11 @@ export const TTKAndFalloffPanel: React.FC = () => {
     activeBuffs, activeMod, surgeStacks, mode, weaponsStat, activeEffects, selectedPerks,
   ]);
 
+  const effects = useMemo(() => getWeaponEffects(), [
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    activeBuffs, activeEffects, selectedPerks,
+  ]);
+
   if (!activeWeapon) return null;
 
   // PL delta multiplier — PvE only, normalised so delta 0 = 1.0
@@ -88,7 +94,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
   // pattern, so we suppress the result until a mod is selected.
   const ttkResult = championModMissing
     ? null
-    : calculateTTK(mode, activeWeapon, effectiveMultiplier, PVP_GUARDIAN_HP, enemyTier, ammo);
+    : calculateTTK(mode, activeWeapon, effectiveMultiplier, PVP_GUARDIAN_HP, enemyTier, ammo, effects);
 
   // ── Falloff curve data ────────────────────────────────────────────────
   const rangeCurve   = activeWeapon.statCurves?.['Range'];
@@ -118,10 +124,10 @@ export const TTKAndFalloffPanel: React.FC = () => {
     if (!hasFalloffData || championModMissing) return [];
     return calculateTTKCurve(
       mode, activeWeapon, effectiveMultiplier, PVP_GUARDIAN_HP, enemyTier,
-      hipFalloffStart!, maxDist, falloffFloor, ammo,
+      hipFalloffStart!, maxDist, falloffFloor, ammo, effects,
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, activeWeapon, effectiveMultiplier, hipFalloffStart, maxDist, enemyTier, hasFalloffData, championModMissing, ammo?.magSize, ammo?.reloadSeconds]);
+  }, [mode, activeWeapon, effectiveMultiplier, hipFalloffStart, maxDist, enemyTier, hasFalloffData, championModMissing, ammo?.magSize, ammo?.reloadSeconds, effects]);
 
   // ── Damage falloff curves ─────────────────────────────────────────────
   function buildDamageCurve(falloffStart: number, maxD: number, critVal: number, bodyVal: number) {

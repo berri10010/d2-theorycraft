@@ -219,6 +219,83 @@
       { "count": 3, "label": "×3", "multiplier": 1.30 }
     ]
   },
+  "business_time": {
+    "hash": "business_time",
+    "name": "Business Time",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1,
+    "shotDelayMultiplier": 0.4,
+    "description": "Sweet Business at max stacks: fire rate rises from 360 to 900 RPM.",
+    "perkNames": ["Business Time"],
+    "icon": null
+  },
+  "desperation": {
+    "hash": "desperation",
+    "name": "Desperation",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1,
+    "shotDelayMultiplier": 0.8,
+    "description": "Necrochasm after a kill: fire rate rises from 720 to 900 RPM.",
+    "perkNames": ["Desperation"],
+    "icon": null
+  },
+  "rat_pack": {
+    "hash": "rat_pack",
+    "name": "Rat Pack",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1,
+    "shotDelayMultiplier": 0.87,
+    "description": "Rat King with two allies nearby: ~15% faster fire rate (450 to 517 RPM).",
+    "perkNames": ["Rat Pack"],
+    "icon": null
+  },
+  "silkbound_slayer": {
+    "hash": "silkbound_slayer",
+    "name": "Silkbound Slayer",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.5,
+    "critMultiplier": 0.8,
+    "chargeMultiplier": 0.7,
+    "description": "Wish-Keeper: +50% body damage (crits +20%) and a 30% faster draw.",
+    "perkNames": ["Silkbound Slayer"],
+    "icon": null
+  },
+  "ignition_trigger": {
+    "hash": "ignition_trigger",
+    "name": "Ignition Trigger",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.5,
+    "description": "Tommy's Matchbook: +50% damage (excludes the extra scorch damage).",
+    "perkNames": ["Ignition Trigger"],
+    "icon": null
+  },
+  "all_at_once": {
+    "hash": "all_at_once",
+    "name": "All at Once",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.32,
+    "description": "Final Warning, hip-fire: +32% damage.",
+    "perkNames": ["All at Once"],
+    "icon": null
+  },
+  "release_the_wolves": {
+    "hash": "release_the_wolves",
+    "name": "Release the Wolves",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.9,
+    "critMultiplier": 0.71,
+    "shotDelayMultiplier": 0.4,
+    "description": "Lord of Wolves: +90% body damage (crits +35%) and 2.5x the fire rate.",
+    "perkNames": ["Release the Wolves"],
+    "icon": null
+  },
   "one_for_all": {
     "hash": "one_for_all",
     "name": "One For All",

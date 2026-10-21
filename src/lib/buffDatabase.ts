@@ -63,6 +63,12 @@ export interface DamageBuff {
    * Used by Vorpal Weapon (+20% primary, +15% special, +10% power).
    */
   ammoTypeMultipliers?: Record<string, number>;
+  /** Extra multiplier on crit damage only, relative to `multiplier` (see WeaponEffects). */
+  critMultiplier?: number;
+  /** Multiplier on the time between shots; < 1 fires faster (see WeaponEffects). */
+  shotDelayMultiplier?: number;
+  /** Multiplier on charge / draw time; < 1 is faster (see WeaponEffects). */
+  chargeMultiplier?: number;
 }
 
 export const BUFF_DATABASE = buffData as Record<string, DamageBuff>;

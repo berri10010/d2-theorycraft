@@ -103,18 +103,35 @@ const entryIndex = new Map<string, WeaponStatEntry>(
 );
 
 /**
+ * Exotics have their own row, named after the weapon ("Sweet Business"), but their intrinsic trait is
+ * something else ("Payday"). Match by weapon name, ignoring case, punctuation and a leading "The",
+ * since the sheet and Bungie disagree on those ("The Huckleberry" / "Huckleberry").
+ */
+// Sheet spelling quirks, by loose name: Bungie's "Tessellation" is the sheet's "Tesselation".
+const LOOSE_ALIASES: Record<string, string> = { tessellation: 'tesselation' };
+const looseName = (s: string) => {
+  const k = s.toLowerCase().replace(/^the /, '').replace(/[^a-z0-9]/g, '');
+  return LOOSE_ALIASES[k] ?? k;
+};
+const nameIndex = new Map<string, WeaponStatEntry>(
+  (rawData as WeaponStatEntry[]).map(e => [`${e.type}_${e.ammo}_${looseName(e.frame)}`, e]),
+);
+
+/**
  * Look up the Massive Breakdowns stat entry for a weapon archetype.
  *
  * @param itemSubType  Bungie itemSubType number (6 = Auto Rifle, 9 = HC, …)
  * @param ammoType     Bungie ammoType (1 = Primary, 2 = Special, 3 = Heavy)
  * @param intrinsicName  The intrinsicTrait perk name, e.g. "Adaptive Frame"
+ * @param weaponName     The weapon's name; an exotic's own row (matched by name) wins over its frame
  */
 export function lookupWeaponStat(
   itemSubType: number,
   ammoType: number,
   intrinsicName: string | null,
+  weaponName?: string | null,
 ): WeaponStatEntry | null {
-  if (!intrinsicName) return null;
+  if (!intrinsicName && !weaponName) return null;
 
   const typeStr  = SUBTYPE_TO_TYPE[sheetSubType(itemSubType)];
   const ammoSlot = AMMO_TO_SLOT[ammoType];
@@ -124,6 +141,10 @@ export function lookupWeaponStat(
     }
     return null;
   }
+
+  const byName = weaponName ? nameIndex.get(`${typeStr}_${ammoSlot}_${looseName(weaponName)}`) : undefined;
+  if (byName) return byName;
+  if (!intrinsicName) return null;
 
   const frame = normalizeFrameName(intrinsicName);
   const key   = `${typeStr}_${ammoSlot}_${frame}`;

@@ -5,6 +5,7 @@ import { BUFF_DATABASE, getBuffMultiplier } from '../lib/buffDatabase';
 import { EXOTIC_ARMOR, ExoticClassType } from '../data/exoticArmor';
 import { getCurves } from '../lib/archetypes';
 import { applyStatDeltas } from '../lib/statCalc';
+import { combineEffects, type WeaponEffects } from '../lib/weaponEffects';
 
 // ─── Weapon Mods ────────────────────────────────────────────────────────────
 
@@ -257,6 +258,8 @@ interface WeaponState {
   // Computed
   getCalculatedStats:  () => StatMap;
   getDamageMultiplier: () => number;
+  /** Timing / crit changes from active exotic-trait effects (Business Time, Silkbound Slayer, ...). */
+  getWeaponEffects:    () => WeaponEffects;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -634,6 +637,20 @@ export const useWeaponStore = create<WeaponState>()(
         // isCrafted is tracked in state; stat impact is via perk slot availability
 
         return applyStatDeltas(baseStats, deltas, activeWeapon);
+      },
+
+      getWeaponEffects: () => {
+        const { activeWeapon, selectedPerks, activeEffects, activeBuffs } = get();
+        const keys = new Set<string>(activeBuffs);
+        if (activeWeapon) {
+          for (const [columnName, perkHash] of Object.entries(selectedPerks)) {
+            if ((activeEffects[perkHash] ?? 0) === 0) continue;
+            const column = activeWeapon.perkSockets.find((c) => c.name === columnName);
+            const buffKey = resolveBasePerk(column, perkHash)?.buffKey;
+            if (buffKey) keys.add(buffKey);
+          }
+        }
+        return combineEffects([...keys].map((k) => BUFF_DATABASE[k]).filter(Boolean));
       },
 
       getDamageMultiplier: () => {

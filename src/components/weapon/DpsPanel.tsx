@@ -40,6 +40,7 @@ export function DpsPanel() {
   const {
     activeWeapon,
     getCalculatedStats,
+    getWeaponEffects,
     selectedPerks,
     masterworkStat,
     isCrafted,
@@ -51,6 +52,7 @@ export function DpsPanel() {
     useShallow((s) => ({
       activeWeapon:       s.activeWeapon,
       getCalculatedStats: s.getCalculatedStats,
+      getWeaponEffects:   s.getWeaponEffects,
       selectedPerks:      s.selectedPerks,
       masterworkStat:     s.masterworkStat,
       isCrafted:          s.isCrafted,
@@ -77,9 +79,12 @@ export function DpsPanel() {
       activeWeapon.itemTypeDisplayName,
       reloadStat,
       magStat,
+      undefined,
+      getWeaponEffects(),
+      activeWeapon.baseName ?? activeWeapon.name,
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWeapon, calcStats]);
+  }, [activeWeapon, calcStats, selectedPerks, activeEffects, activeBuffs]);
 
   if (!activeWeapon) return null;
 

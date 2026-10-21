@@ -92,7 +92,7 @@ function AppSkeleton() {
 function Dashboard() {
   const {
     loadWeapon, activeWeapon, activeWeaponHash, selectedPerks, selectPerk,
-    getCalculatedStats, getDamageMultiplier, mode, setMode,
+    getCalculatedStats, getDamageMultiplier, getWeaponEffects, mode, setMode,
     masterworkStat, activeBuffs, setWeaponsStat, weaponsStat,
     setMasterworkStat, toggleBuff, clearRoll, setWeaponTier, weaponTier,
   } = useWeaponStore();
@@ -355,7 +355,8 @@ function Dashboard() {
     if (!activeWeapon) return;
     const multiplier = getDamageMultiplier();
     const calculatedStats = getCalculatedStats();
-    const ttkResult  = calculateTTK(mode, activeWeapon, multiplier, 230, 'Minor', ammoFromStats(activeWeapon, calculatedStats));
+    const effects    = getWeaponEffects();
+    const ttkResult  = calculateTTK(mode, activeWeapon, multiplier, 230, 'Minor', ammoFromStats(activeWeapon, calculatedStats), effects);
     const isTieredWeapon = (activeWeapon.seasonNumber ?? 0) >= 27 && activeWeapon.rarity !== 'Exotic';
     addSnapshot({
       label: activeWeapon.name,
@@ -365,6 +366,7 @@ function Dashboard() {
       ttk: ttkResult?.ttk ?? null,
       mode,
       multiplier,
+      effects,
       masterworkStat,
       ...(isTieredWeapon ? { weaponTier } : {}),
     });

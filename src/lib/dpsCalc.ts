@@ -4,6 +4,7 @@ import { lookupWeaponStat, isChargeWeapon, isBurstWeapon } from './weaponStats';
 import { calcReloadTime } from './reloadTimes';
 import rawCombatantScalars from '../data/combatantScalars.json';
 import { sheetSubType } from './subtypes';
+import { applyEffects, type WeaponEffects } from './weaponEffects';
 
 export interface DpsResult {
   /** Continuous fire, all-crit (PvP damage). */
@@ -37,9 +38,12 @@ export function calcDps(
   reloadStat: number,
   magStat: number,
   enemyTier = 'Major / Elite',
+  effects?: WeaponEffects,
+  weaponName?: string,
 ): DpsResult | null {
-  const entry = lookupWeaponStat(itemSubType, ammoType, intrinsicName);
-  if (!entry) return null;
+  const base = lookupWeaponStat(itemSubType, ammoType, intrinsicName, weaponName);
+  if (!base) return null;
+  const entry = applyEffects(base, effects);
 
   const burstSize = entry.shotsPerBurst ?? 1;
   const pellets   = entry.pellets ?? 1; // projectiles per bullet (shotgun pellets, fusion bolts)

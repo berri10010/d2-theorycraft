@@ -18,6 +18,7 @@
  *              where "shots" = total individual bullets
  */
 
+import { applyEffects, type WeaponEffects } from './weaponEffects';
 import { GameMode } from '../types/weapon';
 import { lookupWeaponStat, isChargeWeapon, isBurstWeapon, WeaponStatEntry } from './weaponStats';
 import rawCombatantScalars from '../data/combatantScalars.json';
@@ -301,6 +302,9 @@ export interface TTKWeaponInfo {
   itemSubType: number;
   ammoType: number;
   intrinsicTrait: { name: string } | null;
+  /** Used to find an exotic's own stat row; the frame name alone can't. */
+  baseName?: string;
+  name?: string;
 }
 
 /**
@@ -312,6 +316,7 @@ export interface TTKWeaponInfo {
  * @param pvpHp        Guardian HP for PvP (typically 230)
  * @param enemyTier    Key from PVE_HEALTH_TIERS (e.g. 'Minor', 'Boss') — ignored for pvp
  * @param ammo         Magazine + reload speed; when given, reloads needed mid-kill are included
+ * @param effects      Timing / crit changes from active exotic traits
  */
 export function calculateTTK(
   mode: GameMode,
@@ -320,13 +325,16 @@ export function calculateTTK(
   pvpHp: number,
   enemyTier: string,
   ammo?: TTKAmmo,
+  effects?: WeaponEffects,
 ): TTKResult | null {
-  const entry = lookupWeaponStat(
+  const base = lookupWeaponStat(
     weapon.itemSubType,
     weapon.ammoType,
     weapon.intrinsicTrait?.name ?? null,
+    weapon.baseName ?? weapon.name,
   );
-  if (!entry) return null;
+  if (!base) return null;
+  const entry = applyEffects(base, effects);
   const hp        = mode === 'pvp' ? pvpHp : (PVE_HEALTH_TIERS[enemyTier] ?? 336);
   const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
   const result = calcTTKCore(entry, hp, multiplier, mode, pveScalar);
@@ -364,13 +372,16 @@ export function calculateTTKCurve(
   maxDist: number,
   falloffFloor = 0.5,
   ammo?: TTKAmmo,
+  effects?: WeaponEffects,
 ): TTKBreakpoint[] {
-  const entry = lookupWeaponStat(
+  const base = lookupWeaponStat(
     weapon.itemSubType,
     weapon.ammoType,
     weapon.intrinsicTrait?.name ?? null,
+    weapon.baseName ?? weapon.name,
   );
-  if (!entry) return [];
+  if (!base) return [];
+  const entry = applyEffects(base, effects);
 
   const hp        = mode === 'pvp' ? pvpHp : (PVE_HEALTH_TIERS[enemyTier] ?? 336);
   const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
