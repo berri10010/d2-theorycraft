@@ -405,7 +405,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Issue | Notes |
 |-------|-------|
 | Exotic intrinsic effects not modelled in TTK/DPS | huwugo's chart bakes in trait-modified timing/damage (Sweet Business, Rat King, Wish-Keeper charge time, Hard Light, Necrochasm, Turncoat). We use the plain-frame numbers from the WeaponData tab, so these exotics are off. |
-| Sheet corrections (STAT_OVERRIDES) | `src/lib/weaponStatSheet.ts` overrides the sheet where it is wrong, and they survive every refresh: Spread Shot HC = 11 pellets sharing the sheet's 120 damage per shot (matches the chart: 2 shots, 0.6s); Bastion fusion = 3 bullets x 7 pellets. Bastion keeps the sheet's 30.6 damage per pellet, which gives 642 per trigger (a one-shot kill) while the chart says 8 hits / 2.6s: confirm that damage in game. Trespasser burst count (chart tab 6, WeaponData 3) is also unchecked. |
+| Sheet corrections (STAT_OVERRIDES) | `src/lib/weaponStatSheet.ts` overrides the sheet where it is wrong, and they survive every refresh: Spread Shot HC = 11 pellets sharing the sheet's 120 damage per shot (matches the chart: 2 shots, 0.6s); Bastion fusion = 3 bullets x 7 pellets. Bastion keeps the sheet's 30.6 damage per pellet (confirmed by the owner), i.e. 642 per trigger. Trespasser burst count (chart tab 6, WeaponData 3) is also unchecked. |
 | Unused art | Weapons of Light, Amplified, Sever and Deadfall icons are local WebP because the manifest has none. Set-bonus, armor, archetype and silhouette art in `D2Assets/` is not used anywhere yet. |
 | LFR charge-time damage penalty not modelled | oracle_engine applies a proportional damage penalty when perks reduce charge time below base on LFRs: `dmg *= 1.0 - (0.6 * delta) / base_damage`. We don't apply this. |
 
@@ -418,7 +418,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 Everything in Stages 1–11 and 13–16 is done. Remaining priorities, in order:
 
 1. **Exotic intrinsic effects** — model the ~10–15 most-used exotic traits' timing/damage changes (see Known Issues).
-2. **Verify Bastion damage per pellet and the Trespasser burst count** against the game (Spread Shot is fixed).
+2. **Verify the Trespasser burst count** against the game (Spread Shot and Bastion are settled).
 3. **Data-health report in the refresh workflow** — summarise new/changed/dropped weapons and stat rows after each daily refresh.
 4. **12B** — Shareable roll links with Open Graph previews; screenshot-mode weapon card.
 5. **12A** — Per-activity PvE scaling dropdown.
