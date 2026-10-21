@@ -1,5 +1,6 @@
 'use client';
 
+import { SiteFooter } from '../components/layout/SiteFooter';
 import React, { Suspense, useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -639,30 +640,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 px-6 py-6 text-center space-y-1">
-        <p className="text-xs text-ink-4">
-          Weapon data via{' '}
-          <a href="https://bungie.net" target="_blank" rel="noopener noreferrer" className="hover:text-ink-3 transition-colors underline underline-offset-2">
-            Bungie API
-          </a>
-          {' · '}God roll analysis by{' '}
-          <a href="https://twitter.com/theaegisrelic" target="_blank" rel="noopener noreferrer" className="hover:text-ink-3 transition-colors underline underline-offset-2">
-            TheAegisRelic
-          </a>
-        </p>
-        <p className="text-xs text-ink-4">
-          Perk descriptions from{' '}
-          <a href="https://d2clarity.com" target="_blank" rel="noopener noreferrer" className="hover:text-ink-3 transition-colors underline underline-offset-2">
-            Clarity
-          </a>
-          {' · '}Description feedback via{' '}
-          <a href="https://d2clarity.com/discord" target="_blank" rel="noopener noreferrer" className="hover:text-ink-3 transition-colors underline underline-offset-2">
-            Clarity Discord
-          </a>
-        </p>
-        <p className="text-xs text-ink-4">Not affiliated with or endorsed by Bungie, Inc.</p>
-      </footer>
+      <SiteFooter />
 
     </div>
   );

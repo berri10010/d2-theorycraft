@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useState, useRef, useEffect } from 'react';
 import { useSiteSettings, SiteSettings, BadgeStyle, AppTheme } from '../../store/useSiteSettings';
 
@@ -147,6 +148,16 @@ export function SettingsBody() {
       <ToggleRow label="Similar Weapons"value={store.showSimilarWeapons} onChange={(v) => set('showSimilarWeapons', v)} />
       <ToggleRow label="Weapon Data"    value={store.showWeaponData}     onChange={(v) => set('showWeaponData', v)} />
       <ToggleRow label="Tier List"      value={store.showTierListPanel}  onChange={(v) => set('showTierListPanel', v)} />
+
+      {/* About */}
+      <SectionLabel label="About" />
+      <Link
+        href="/credits"
+        className="flex items-center justify-between px-3 py-2 text-sm text-ink-3 hover:text-amber-400 transition-colors"
+      >
+        Sources &amp; credits
+        <span aria-hidden="true">→</span>
+      </Link>
     </div>
   );
 }

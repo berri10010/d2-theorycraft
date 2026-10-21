@@ -1,5 +1,6 @@
 'use client';
 
+import { SourceNote } from '../ui/SourceNote';
 import React, { useState } from 'react';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useTierListStore, DEFAULT_PVE, TIER_CYCLE } from '../../store/useTierListStore';
@@ -195,6 +196,8 @@ export const TierListPanel: React.FC = () => {
           Load a weapon to rate its perks.
         </p>
       )}
+      <SourceNote className="mt-3" label="Default perk tiers" ids={['aegis']} />
+
     </CollapsiblePanel>
   );
 };

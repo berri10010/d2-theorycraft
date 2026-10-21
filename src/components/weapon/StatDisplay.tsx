@@ -1,5 +1,6 @@
 'use client';
 
+import { SourceNote } from '../ui/SourceNote';
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
@@ -388,6 +389,8 @@ export const StatDisplay: React.FC = () => {
           </div>
         </div>
       )}
+      <SourceNote className="mt-3" label="Reload, handling and draw times" ids={['oracle']} detail="formulas" />
+
     </CollapsiblePanel>
   );
 };

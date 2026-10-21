@@ -1,5 +1,7 @@
 'use client';
 
+import { SourceNote } from './SourceNote';
+import statsMeta from '../../data/weaponStatsMeta.json';
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
@@ -569,9 +571,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
       )}
 
       {/* ── Data vintage note ─────────────────────────────────── */}
-      <p className="text-[9px] text-ink-4 text-right">
-        TTK &amp; falloff data: Season 26
-      </p>
+      <SourceNote className="text-right" label="TTK & falloff data" ids={['huwugo', 'rockstarmatt', 'mossymax']} detail={statsMeta.sheetVersion || undefined} />
 
       {/* ── Fullscreen overlay — rendered via portal so no ancestor stacking context can clip it */}
       {expanded !== null && createPortal(

@@ -390,6 +390,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | 17 — Pride Eternal PvP sheet, PvE/PvP tiers | 100% | Complete: Aegis tiers in PvE, Pride in PvP |
 | 18 — External buff audit | 100% | Complete; sources and open questions in Known Issues |
 | 19 — Roll vs meta score | 100% | Complete |
+| 20 — Sources & credits page | 100% | Complete |
 | **Overall** | **~98%** | |
 
 ---
@@ -398,6 +399,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 ### Ongoing
 - [ ] After a balance patch: `FORCE_WEAPON_STATS=1 npm run refresh-data` if huwugo's sheet is still flagged "currently updating"; otherwise the daily `refresh-data` workflow handles it
+- [ ] New data source or data file: add it to `src/data/credits.ts` (a credit and its `DATA_FILE_CREDITS` entry) and, if it shows in a panel, a `SourceNote`
 - [ ] New icon for a buff or armor mod: add a line to `scripts/build-icons.mjs`, run it, commit `src/data/localIcons.json` + `public/icons`
 - [ ] Push: `git push` — GitHub Actions handles build + deploy automatically
 
@@ -680,6 +682,7 @@ npm run build
 - **Exotic effects:** buffs in `src/data/buffs.json` can carry `critMultiplier` (crit only, relative to `multiplier`), `shotDelayMultiplier` and `chargeMultiplier`. `useWeaponStore.getWeaponEffects()` folds the active ones into a `WeaponEffects`, and `calculateTTK`, `calculateTTKCurve`, `calcDps` and compare snapshots take it as an optional last argument (`src/lib/weaponEffects.ts`). A perk gets a toggle in the Effects panel when its name is in a buff's `perkNames` (linked at parse time, so changing buffs.json needs a `DATA_FORMAT_VERSION` bump and `npm run refresh-data`). Numbers are the chart tab's modified value divided by its base value.
 - **Exotic stat lookup:** `lookupWeaponStat(subType, ammo, intrinsic, weaponName)` matches an exotic's own sheet row by weapon name (ignoring case, punctuation and a leading "The"); before this, exotics reported their intrinsic ("Payday") and found no timing data at all.
 - **Data health:** `scripts/data-health.ts` (logic in `src/lib/dataHealth.ts`) compares refreshed data with HEAD, prints a Markdown report into the refresh run summary and commit message, and fails the job if weapons, perks or stat rows vanish or a stat row is non-numeric.
+- **Credits:** `src/data/credits.ts` is the single list of every outside source (data, formulas, art, libraries). The `/credits` page, the home footer (`SiteFooter`) and the in-panel notes (`SourceNote`: TTK/falloff, DPS, Weapon Stats, External Buffs, Tier Lists, God Roll, Ammo, weapon sources) are all built from it, and Settings links to it. `src/data/credits.test.ts` fails if a file is added to `public/data` or `src/data` without an entry in `DATA_FILE_CREDITS`, so a new data source can't ship uncredited. rockstarmatt's and MossyMax's sheets have no public link on file, so they are credited by name only; `perkTiers.json` is credited to Aegis on the assumption that it came from his perk tab.
 - **Known leftover:** `useWeaponStore.loadWeapon` still records each weapon's roll in `weaponRolls` (and persists it) but only restores the mod; perk restore was removed in ed77958.
 
 ---

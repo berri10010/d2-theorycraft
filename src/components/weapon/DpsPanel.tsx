@@ -1,5 +1,7 @@
 'use client';
 
+import { SourceNote } from '../ui/SourceNote';
+import statsMeta from '../../data/weaponStatsMeta.json';
 import React, { useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
@@ -135,9 +137,8 @@ export function DpsPanel() {
 
       <p className="text-[9px] text-ink-4 text-center">
         PvE uses per-archetype Major/Elite scalar. Optimal = continuous fire, no reloads.
-        <br />
-        <span className="text-ink-4">Timing data: Season 26</span>
       </p>
+      <SourceNote className="text-center" label="Timing data" ids={['huwugo']} detail={statsMeta.sheetVersion || undefined} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { SourceNote } from './SourceNote';
 import React, { useMemo, useState } from 'react';
 import Image from 'next/image';
 import { localIcon } from '../../lib/localIcons';
@@ -552,6 +553,8 @@ export const BuffToggle: React.FC = () => {
         </div>
 
       </div>
+      <SourceNote className="mt-4" label="Buff values (PvE / PvP)" ids={['clarity', 'blueberries', 'bungie']} />
+
     </CollapsiblePanel>
   );
 };
