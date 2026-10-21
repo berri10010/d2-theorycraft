@@ -200,12 +200,12 @@ export const RollEditor: React.FC = () => {
                 key={column.name}
                 className={[
                   'flex flex-col items-center min-w-0',
-                  !isLast ? 'border-r border-white/5 pr-1.5 md:pr-4' : '',
+                  !isLast ? 'border-r border-white/5 pr-[clamp(0.375rem,1.2vw,1rem)]' : '',
                 ].join(' ')}
               >
                 {/* Column header */}
                 <div className="w-full flex flex-col items-center gap-1 mb-3">
-                  <span className="text-2xs font-bold text-ink-3 uppercase tracking-wider md:tracking-widest text-center leading-tight md:whitespace-nowrap">
+                  <span className="text-2xs font-bold text-ink-3 uppercase tracking-wider text-center leading-tight">
                     {displayLabel}
                   </span>
                   <div className={`h-0.5 w-8 rounded-full ${accentBar}`} />

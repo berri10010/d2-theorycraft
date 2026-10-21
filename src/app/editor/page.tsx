@@ -572,7 +572,7 @@ function Dashboard() {
           onModeChange={setMode}
           onOpenWeapons={() => setSidebarOpen(true)}
         />
-        <div ref={contentRef} className="editor-shell max-w-7xl 2xl:max-w-[1500px] mx-auto p-4 pb-28 min-[720px]:p-6 xl:p-8 space-y-6">
+        <div ref={contentRef} className="editor-shell editor-pad max-w-7xl 2xl:max-w-[1500px] mx-auto">
 
           {/* ── Top action bar ─────────────────────────────────────────── */}
           {/*
@@ -752,7 +752,7 @@ function Dashboard() {
                 animate={{ opacity: 1, y: 0,  scale: 1     }}
                 exit={{ opacity: 0,    y: -6,  scale: 1.005 }}
                 transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-                className="space-y-6"
+                className="editor-stack"
               >
                 <ErrorBoundary label="Weapon Header"><WeaponHeader /></ErrorBoundary>
 
@@ -763,7 +763,7 @@ function Dashboard() {
                     Desktop left  : Weapon Perks, Perk Effects, External Buffs, God Roll + Wishlists
                     Desktop right : Weapon Stats, Weapon Data, Similar Weapons, Tier Lists
                 */}
-                <div className="editor-grid grid grid-cols-1 gap-6">
+                <div className="editor-grid grid grid-cols-1">
                   <div className="editor-col">
                     <div className="order-1"><ErrorBoundary label="Weapon Perks"><RollEditor /></ErrorBoundary></div>
                     {settings.showEffectsPanel && (
@@ -778,7 +778,7 @@ function Dashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="order-6 space-y-6"
+                        className="order-6 editor-stack"
                       >
                         {settings.showGodRollPanel  && <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>}
                         {settings.showWishlistPanel && <ErrorBoundary label="Wishlists & Saved Rolls"><WishlistPanel /></ErrorBoundary>}

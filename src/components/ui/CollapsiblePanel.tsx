@@ -51,7 +51,7 @@ export function CollapsiblePanel({
       <div className="flex items-center">
         <button
           onClick={toggle}
-          className="flex-1 min-w-0 text-left text-xl font-bold text-white pl-4 md:pl-6 py-4 md:py-6"
+          className="flex-1 min-w-0 text-left text-xl font-bold text-white pl-[var(--pad-panel)] py-[var(--pad-panel)]"
           aria-expanded={open}
         >
           {title}
@@ -65,7 +65,7 @@ export function CollapsiblePanel({
           onClick={toggle}
           aria-label={open ? 'Collapse panel' : 'Expand panel'}
           aria-expanded={open}
-          className="shrink-0 text-ink-4 p-4 md:p-6 pl-3 md:pl-3"
+          className="shrink-0 text-ink-4 p-[var(--pad-panel)] pl-3"
         >
           <motion.svg
             viewBox="0 0 20 20"
@@ -93,8 +93,8 @@ export function CollapsiblePanel({
             className="overflow-hidden"
           >
             <div className={[
-              'pb-4 md:pb-6',
-              !fullWidth ? 'px-4 md:px-6' : '',
+              'pb-[var(--pad-panel)]',
+              !fullWidth ? 'px-[var(--pad-panel)]' : '',
             ].join(' ')}>
               {children}
             </div>

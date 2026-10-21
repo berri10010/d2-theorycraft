@@ -151,7 +151,7 @@ select option { background: rgb(var(--c-surface)); color: rgb(var(--c-ink)); }
   .editor-grid { grid-template-columns: minmax(373px, 1.25fr) minmax(240px, 1fr); }
   .editor-col { display: block; }
   .editor-col > * { order: 0 !important; }
-  .editor-col > * + * { margin-top: 1.5rem; }
+  .editor-col > * + * { margin-top: var(--gap-panel); }
 }
 @container editor (min-width: 900px) {
   .hdr-label   { display: inline; }
@@ -174,3 +174,15 @@ select option { background: rgb(var(--c-surface)); color: rgb(var(--c-ink)); }
   .stat-label   { width: 7rem; }
   .stat-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+/* ── Fluid spacing: grows smoothly with the window instead of stepping at breakpoints ───────────────── */
+:root {
+  --pad-page:  clamp(1rem, 0.45rem + 1.5vw, 2rem);    /* around the editor */
+  --pad-panel: clamp(1rem, 0.6rem + 1.1vw, 1.5rem);   /* inside each panel */
+  --gap-panel: clamp(1rem, 0.5rem + 1vw, 1.5rem);     /* between panels */
+}
+.editor-pad { padding: var(--pad-page); }
+.editor-pad > * + * { margin-top: var(--gap-panel); }
+@media (max-width: 719px) { .editor-pad { padding-bottom: 7rem; } }  /* room for the bottom nav */
+.editor-stack > * + * { margin-top: var(--gap-panel); }
+.editor-grid { gap: var(--gap-panel); }

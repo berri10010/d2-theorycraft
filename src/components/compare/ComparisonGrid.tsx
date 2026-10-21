@@ -486,7 +486,7 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
   }
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+    <div className="bg-white/5 backdrop-blur-sm p-[var(--pad-panel)] rounded-xl border border-white/10">
       <div className="flex flex-wrap justify-between items-center gap-3 mb-5">
         <h2 className="text-xl font-bold text-white">
           Comparison
