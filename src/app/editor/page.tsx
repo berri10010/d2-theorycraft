@@ -391,7 +391,7 @@ function Dashboard() {
         {error && (
           <div className="text-center space-y-3 max-w-md">
             <p className="text-red-400 font-bold text-lg">Failed to load weapons</p>
-            <p className="text-ink-3 text-sm font-mono bg-slate-900 p-3 rounded-lg break-all">{error}</p>
+            <p className="text-ink-3 text-sm font-mono bg-white/5 border border-white/10 p-3 rounded-lg break-all">{error}</p>
             <p className="text-ink-4 text-sm">
               Weapon data is loaded from the static build. Try refreshing — if the problem
               persists the site may need to be redeployed.
@@ -495,7 +495,7 @@ function Dashboard() {
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-ink-4 mt-5 text-center">
+              <p className="text-2xs text-ink-4 mt-5 text-center">
                 Shortcuts are disabled when typing in text fields.
               </p>
             </motion.div>
@@ -530,7 +530,7 @@ function Dashboard() {
         onClick={() => setSidebarCollapsed((v) => !v)}
         aria-label={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
         title={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
-        className="hidden md:flex self-center shrink-0 items-center justify-center w-4 h-10 text-ink-4 hover:text-ink-2 transition-colors"
+        className="hidden md:flex self-center shrink-0 items-center justify-center w-6 h-12 text-ink-4 hover:text-ink-2 transition-colors"
       >
         <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className={`w-3 h-3 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`}>
           <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -677,7 +677,7 @@ function Dashboard() {
                           </svg>
                           <div>
                             <p className="text-xs font-semibold text-ink">Roll Permalink</p>
-                            <p className="text-[10px] text-ink-4 leading-tight mt-0.5">Copies a URL with your full roll state</p>
+                            <p className="text-2xs text-ink-4 leading-tight mt-0.5">Copies a URL with your full roll state</p>
                           </div>
                         </button>
                         <div className="border-t border-white/8" />
@@ -690,7 +690,7 @@ function Dashboard() {
                           </svg>
                           <div>
                             <p className="text-xs font-semibold text-ink">DIM Wishlist Item</p>
-                            <p className="text-[10px] text-ink-4 leading-tight mt-0.5">Copies a wishlist entry to paste into DIM</p>
+                            <p className="text-2xs text-ink-4 leading-tight mt-0.5">Copies a wishlist entry to paste into DIM</p>
                           </div>
                         </button>
                       </motion.div>
@@ -743,19 +743,19 @@ function Dashboard() {
                 <ErrorBoundary label="Weapon Header"><WeaponHeader /></ErrorBoundary>
 
                 {/*
-                  Two columns on desktop. The columns dissolve on mobile (display: contents) so every panel
+                  Two columns on wide desktops (xl, 1280px+); narrower windows get the one-column order below. The columns dissolve on mobile (display: contents) so every panel
                   joins one list, and `order` sets the reading order there: the roll, what it does, how to
                   tweak it, then the community's view.
                     Desktop left  : Weapon Perks, Perk Effects, External Buffs, God Roll + Wishlists
                     Desktop right : Weapon Stats, Weapon Data, Similar Weapons, Tier Lists
                 */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  <div className="contents lg:block lg:col-span-6 lg:space-y-6">
-                    <div className="order-1 lg:order-none"><ErrorBoundary label="Weapon Perks"><RollEditor /></ErrorBoundary></div>
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                  <div className="contents xl:block xl:col-span-6 xl:space-y-6">
+                    <div className="order-1 xl:order-none"><ErrorBoundary label="Weapon Perks"><RollEditor /></ErrorBoundary></div>
                     {settings.showEffectsPanel && (
-                      <div className="order-3 lg:order-none"><ErrorBoundary label="Perk Effects"><EffectsPanel /></ErrorBoundary></div>
+                      <div className="order-3 xl:order-none"><ErrorBoundary label="Perk Effects"><EffectsPanel /></ErrorBoundary></div>
                     )}
-                    {settings.showExternalBuffs && <div className="order-4 lg:order-none"><BuffToggle /></div>}
+                    {settings.showExternalBuffs && <div className="order-4 xl:order-none"><BuffToggle /></div>}
                     {/* Mode-dependent panels — animate on PvE ↔ PvP switch */}
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.div
@@ -764,7 +764,7 @@ function Dashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="order-6 lg:order-none space-y-6"
+                        className="order-6 xl:order-none space-y-6"
                       >
                         {settings.showGodRollPanel  && <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>}
                         {settings.showWishlistPanel && <ErrorBoundary label="Wishlists & Saved Rolls"><WishlistPanel /></ErrorBoundary>}
@@ -772,16 +772,16 @@ function Dashboard() {
                     </AnimatePresence>
                   </div>
 
-                  <div className="contents lg:block lg:col-span-6 lg:space-y-6">
-                    <div className="order-2 lg:order-none"><ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary></div>
+                  <div className="contents xl:block xl:col-span-6 xl:space-y-6">
+                    <div className="order-2 xl:order-none"><ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary></div>
                     {settings.showWeaponData && (
-                      <div className="order-5 lg:order-none"><ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary></div>
+                      <div className="order-5 xl:order-none"><ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary></div>
                     )}
                     {settings.showSimilarWeapons && (
-                      <div className="order-7 lg:order-none"><ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary></div>
+                      <div className="order-7 xl:order-none"><ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary></div>
                     )}
                     {settings.showTierListPanel && (
-                      <div className="order-8 lg:order-none"><ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary></div>
+                      <div className="order-8 xl:order-none"><ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary></div>
                     )}
                   </div>
                 </div>

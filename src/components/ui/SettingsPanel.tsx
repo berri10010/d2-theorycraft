@@ -47,7 +47,7 @@ function SegmentControl<T extends string>({
           key={o.value}
           onClick={() => onChange(o.value)}
           className={[
-            'px-3 py-1.5 md:px-2 md:py-0.5 text-xs md:text-[10px] font-semibold rounded transition-colors',
+            'px-3 py-1.5 md:px-2 md:py-0.5 text-xs md:text-2xs font-semibold rounded transition-colors',
             value === o.value
               ? 'bg-amber-500/25 text-amber-300'
               : 'text-ink-4 hover:text-ink-2',
@@ -62,7 +62,7 @@ function SegmentControl<T extends string>({
 
 function SectionLabel({ label }: { label: string }) {
   return (
-    <p className="px-4 pt-3 md:pt-2 pb-1 text-[10px] md:text-[9px] font-semibold text-ink-4 uppercase tracking-widest">
+    <p className="px-4 pt-3 md:pt-2 pb-1 text-2xs font-semibold text-ink-4 uppercase tracking-widest">
       {label}
     </p>
   );

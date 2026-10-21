@@ -36,14 +36,14 @@ function TierSelector({ value, onChange, color, label }: TierSelectorProps) {
           aria-label={`${label}: ${t === 0 ? 'none' : `tier ${t}`}`}
           aria-pressed={t === value}
           className={[
-            'w-8 h-8 md:w-5 md:h-5 rounded-full border transition-all text-[10px] md:text-[9px] font-bold leading-none flex items-center justify-center',
+            'w-9 h-9 md:w-6 md:h-6 rounded-full border transition-all text-2xs font-bold leading-none flex items-center justify-center',
             t === 0 && value === 0
-              ? 'bg-white/5 border-white/15 text-white/30'
+              ? 'bg-white/5 border-white/15 text-ink-4'
               : t === 0
-              ? 'bg-white/5 border-white/10 text-white/20 hover:border-white/25'
+              ? 'bg-white/5 border-white/10 text-ink-4 hover:border-white/25'
               : t <= value
               ? `${color} border-transparent text-slate-950`
-              : 'bg-white/5 border-white/10 text-white/20 hover:border-white/25',
+              : 'bg-white/5 border-white/10 text-ink-4 hover:border-white/25',
           ].join(' ')}
         >
           {t === 0 ? '×' : t}
@@ -73,11 +73,11 @@ function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProp
       </div>
       <div className="w-32 shrink-0">
         <p className="text-xs font-semibold text-ink leading-tight">{label}</p>
-        <p className="text-[10px] text-ink-4 leading-tight">{subLabel}</p>
+        <p className="text-2xs text-ink-4 leading-tight">{subLabel}</p>
       </div>
       <TierSelector value={value} onChange={onChange} color={color} label={label} />
       {readout && (
-        <span className="text-[10px] text-ink-3 tabular-nums">{readout}</span>
+        <span className="text-2xs text-ink-3 tabular-nums">{readout}</span>
       )}
     </div>
   );
@@ -105,7 +105,7 @@ export const ArmorModPanel: React.FC = () => {
               targeting: 0, loader: 0, dexterity: 0,
               unflinching: 0, inFlight: 0, ammoGeneration: 0,
             })}
-            className="text-[10px] font-bold text-ink-4 hover:text-red-400 transition-colors"
+            className="text-2xs font-bold text-ink-4 hover:text-red-400 transition-colors"
           >
             Reset
           </button>
@@ -182,7 +182,7 @@ export const ArmorModPanel: React.FC = () => {
             Weapon Surge
           </h3>
           {surgeStacks > 0 && (
-            <span className="text-[10px] font-semibold text-amber-400">
+            <span className="text-2xs font-semibold text-amber-400">
               +{+((((mode === 'pve' ? SURGE_PVE : SURGE_PVP)[surgeStacks] ?? 1) - 1) * 100).toFixed(2)}% dmg
             </span>
           )}
@@ -201,7 +201,7 @@ export const ArmorModPanel: React.FC = () => {
                 surgeStacks === stacks
                   ? 'bg-amber-500/20 text-amber-400 border-amber-500/50'
                   : 'bg-white/5 text-ink-4 border-white/10 hover:border-white/20 hover:text-ink-2',
-                stacks === 4 ? 'opacity-60' : '',
+                stacks === 4 ? 'border-dashed' : '',
               ].join(' ')}
             >
               {stacks === 0 ? 'Off' : `${stacks}×`}
@@ -209,7 +209,7 @@ export const ArmorModPanel: React.FC = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-x-3 mt-2 text-[10px] text-ink-4">
+        <div className="grid grid-cols-2 gap-x-3 mt-2 text-2xs text-ink-4">
           <div>
             <span className="text-blue-400 font-bold">PvE:</span>{' '}
             {[1, 2, 3, 4].map((s) => `${((SURGE_PVE[s] - 1) * 100).toFixed(0)}%`).join(' | ')}
@@ -219,15 +219,15 @@ export const ArmorModPanel: React.FC = () => {
             {[1, 2, 3, 4].map((s) => `${((SURGE_PVP[s] - 1) * 100).toFixed(1)}%`).join(' | ')}
           </div>
         </div>
-        <p className="text-[10px] text-ink-4 mt-0.5">×4 via Artifact or Exotic Armor only.</p>
+        <p className="text-2xs text-ink-4 mt-0.5">×4 via Artifact or Exotic Armor only.</p>
       </div>
 
       <div className="mt-4 pt-3 border-t border-white/5 space-y-1">
-        <p className="text-[10px] text-ink-4 leading-relaxed">
+        <p className="text-2xs text-ink-4 leading-relaxed">
           Tier 1 | 2 | 3 = 1, 2, or 3 copies of the mod equipped.
           All mods require element-matching weapon except In-Flight Compensator.
         </p>
-        <p className="text-[10px] text-ink-4 leading-relaxed">
+        <p className="text-2xs text-ink-4 leading-relaxed">
           Targeting, Loader, Dexterity, and In-Flight are reflected in stat bars.
           Unflinching and Ammo Generation have no stat bar.
         </p>

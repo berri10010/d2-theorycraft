@@ -12,7 +12,7 @@ export function SourceNote({
   const credits = ids.map((id) => CREDITS.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => !!c);
   const linkCls = 'underline underline-offset-2 hover:text-ink-2 transition-colors';
   return (
-    <p className={`text-[9px] text-ink-4 leading-relaxed ${className}`}>
+    <p className={`text-2xs text-ink-4 leading-relaxed ${className}`}>
       {label}:{' '}
       {credits.map((c, i) => (
         <React.Fragment key={c.id}>

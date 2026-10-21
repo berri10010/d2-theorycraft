@@ -352,7 +352,7 @@ export const SearchSidebar: React.FC = () => {
                   exit={{ opacity: 0,    y: -4, scale: 0.98 }}
                   transition={{ duration: 0.12, ease: 'easeOut' }}
                   className="absolute top-full left-0 right-0 mt-1 bg-surface border border-white/15 rounded-lg shadow-xl z-50 overflow-hidden">
-                  <p className="text-[9px] font-bold text-ink-4 uppercase tracking-widest px-3 pt-2.5 pb-1">Recent</p>
+                  <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest px-3 pt-2.5 pb-1">Recent</p>
                   {recentSearches.map(term => (
                     <div
                       key={term}
@@ -392,7 +392,7 @@ export const SearchSidebar: React.FC = () => {
                 <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
               </svg>
               {activeFilterCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 text-slate-950 text-[8px] font-black rounded-full flex items-center justify-center leading-none">
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 text-slate-950 text-3xs font-black rounded-full flex items-center justify-center leading-none">
                   {activeFilterCount}
                 </span>
               )}
@@ -407,7 +407,7 @@ export const SearchSidebar: React.FC = () => {
                   key={m}
                   onClick={() => handleSortClick(m)}
                   className={[
-                    'text-[10px] font-bold px-3 py-1.5 transition-colors',
+                    'text-2xs font-bold px-3 py-2 md:py-1.5 transition-colors',
                     i > 0 ? 'border-l border-white/10' : '',
                     sortMode === m ? 'bg-white/10 text-ink' : 'text-ink-4 hover:text-ink-2',
                   ].join(' ')}
@@ -419,7 +419,7 @@ export const SearchSidebar: React.FC = () => {
             {anyFilter && (
               <button
                 onClick={() => { setQuery(''); setFilters(DEFAULT_FILTERS); setActiveCat(null); setColSubcat(null); }}
-                className="text-[10px] text-ink-4 hover:text-amber-400 transition-colors ml-auto"
+                className="text-2xs text-ink-4 hover:text-amber-400 transition-colors ml-auto"
               >
                 Clear all
               </button>
@@ -489,7 +489,7 @@ export const SearchSidebar: React.FC = () => {
         {/* Recently viewed section — rendered outside virtualizer (always short) */}
         {!isLoading && !error && recentGroups.length > 0 && (
           <div className="mb-2 space-y-1">
-            <p className="text-[9px] font-bold text-ink-4 uppercase tracking-widest px-2 py-1.5">Recently Viewed</p>
+            <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest px-2 py-1.5">Recently Viewed</p>
             {recentGroups.map((group) => (
               <WeaponListItem
                 key={`recent-${group.baseName}`}
@@ -536,7 +536,7 @@ export const SearchSidebar: React.FC = () => {
 
       {/* ── Footer ──────────────────────────────────────────────────── */}
       {weapons.length > 0 && (
-        <div className="p-2.5 border-t border-white/10 text-[10px] text-ink-4 text-center">
+        <div className="p-2.5 border-t border-white/10 text-2xs text-ink-4 text-center">
           {filteredGroups.length} / {groups.length} weapons
         </div>
       )}

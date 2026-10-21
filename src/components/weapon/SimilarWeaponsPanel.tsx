@@ -187,19 +187,19 @@ function SimilarRow({
         <p className="text-xs font-semibold text-ink truncate leading-tight">
           {weapon.name}
         </p>
-        <p className="text-[10px] text-ink-4 leading-tight">
+        <p className="text-2xs text-ink-4 leading-tight">
           {seasonLabel ?? 'Unknown season'} · {weapon.intrinsicTrait?.name ?? weapon.itemTypeDisplayName}
           {' · '}<span className={ammoMeta.cls}>{ammoMeta.label}</span>
         </p>
       </div>
 
-      <span className={`text-[10px] font-bold tabular-nums shrink-0 ${pctClass}`}>
+      <span className={`text-2xs font-bold tabular-nums shrink-0 ${pctClass}`}>
         {pct}%
       </span>
 
       <button
         onClick={() => onLoad(weapon)}
-        className="text-[10px] font-semibold text-sky-400 hover:text-sky-300 transition-colors shrink-0"
+        className="text-xs md:text-2xs font-semibold text-sky-400 hover:text-sky-300 transition-colors shrink-0 px-2.5 py-2 -my-2 md:px-1.5 md:py-1 md:-my-1"
       >
         Load
       </button>
@@ -270,17 +270,17 @@ export const SimilarWeaponsPanel: React.FC = () => {
       title={
         <div>
           <div>Similar Weapons</div>
-          <p className="text-[11px] text-ink-4 mt-0.5 font-normal">Same archetype · stat &amp; perk match</p>
+          <p className="text-2xs text-ink-4 mt-0.5 font-normal">Same archetype · stat &amp; perk match</p>
         </div>
       }
       headerRight={
-        <span className="text-[10px] text-ink-4">{recommendations.length} found</span>
+        <span className="text-2xs text-ink-4">{recommendations.length} found</span>
       }
     >
       <div className="flex items-center gap-3 pb-1.5 mb-1 border-b border-white/10">
         <span className="w-9 shrink-0" />
-        <span className="flex-1 text-[9px] text-ink-4 uppercase tracking-wider">Weapon</span>
-        <span className="text-[9px] text-ink-4 uppercase tracking-wider shrink-0">Match</span>
+        <span className="flex-1 text-2xs text-ink-4 uppercase tracking-wider">Weapon</span>
+        <span className="text-2xs text-ink-4 uppercase tracking-wider shrink-0">Match</span>
         <span className="w-8 shrink-0" />
       </div>
 
@@ -300,7 +300,7 @@ export const SimilarWeaponsPanel: React.FC = () => {
       {recommendations.length > 5 && (
         <button
           onClick={() => setShowAll((v) => !v)}
-          className="mt-3 w-full text-center text-[10px] font-semibold text-ink-4 hover:text-ink-2 transition-colors"
+          className="mt-2 w-full text-center text-xs md:text-2xs font-semibold py-2.5 md:py-2 text-ink-4 hover:text-ink-2 transition-colors"
         >
           {showAll ? 'Show fewer' : `Show all ${recommendations.length} →`}
         </button>

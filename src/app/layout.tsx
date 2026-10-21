@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import './light-accents.css';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import { ThemeProvider } from '../components/ui/ThemeProvider';
 
@@ -29,7 +30,8 @@ export const viewport: Viewport = {
   themeColor: '#09090b',
 };
 
-const THEME_BOOT = `try{var t=JSON.parse(localStorage.getItem('site-settings')||'{}').state;t=t&&t.theme;if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}`;
+// Sets data-theme for an explicit choice and data-resolved (what is actually shown, "system" included) before first paint.
+const THEME_BOOT = `try{var d=document.documentElement,t=JSON.parse(localStorage.getItem('site-settings')||'{}').state;t=t&&t.theme;if(t==='light'||t==='dark')d.setAttribute('data-theme',t);d.setAttribute('data-resolved',t==='light'||t==='dark'?t:(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'))}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

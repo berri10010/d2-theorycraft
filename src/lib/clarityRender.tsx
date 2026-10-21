@@ -1,18 +1,19 @@
 import React from 'react';
 import { ClarityEntry } from './clarity';
 
+/** Clarity's element / mode colours, as CSS variables so the light theme can use darker shades (globals.css). */
 export const CLASS_COLOURS: Record<string, string> = {
-  arc:     '#7dd3fc',
-  void:    '#c4b5fd',
-  stasis:  '#67e8f9',
-  solar:   '#fdba74',
-  strand:  '#6ee7b7',
-  kinetic: '#cbd5e1',
-  pvp:     '#f472b6',
-  pve:     '#4ade80',
-  primary: '#cbd5e1',
-  special: '#86efac',
-  heavy:   '#c4b5fd',
+  arc     : 'var(--clr-arc)',
+  void    : 'var(--clr-void)',
+  stasis  : 'var(--clr-stasis)',
+  solar   : 'var(--clr-solar)',
+  strand  : 'var(--clr-strand)',
+  kinetic : 'var(--clr-kinetic)',
+  pvp     : 'var(--clr-pvp)',
+  pve     : 'var(--clr-pve)',
+  primary : 'var(--clr-primary)',
+  special : 'var(--clr-special)',
+  heavy   : 'var(--clr-heavy)',
 };
 
 export function renderClarityDesc(entry: ClarityEntry): React.ReactNode {

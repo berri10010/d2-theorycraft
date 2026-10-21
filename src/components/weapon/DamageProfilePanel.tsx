@@ -138,7 +138,7 @@ export function DamageProfilePanel() {
       <div className="grid grid-cols-4 gap-2">
         {keyStats.map(({ label, value }) => (
           <div key={label} className="bg-white/5 rounded-lg p-2.5 text-center border border-white/5">
-            <div className="text-[10px] uppercase tracking-wider text-ink-4 mb-1 leading-none">
+            <div className="text-2xs uppercase tracking-wider text-ink-4 mb-1 leading-none">
               {label}
             </div>
             <div className="text-sm font-bold text-white font-mono leading-tight">
@@ -150,7 +150,7 @@ export function DamageProfilePanel() {
 
       {/* Scenario description */}
       <div className="bg-white/3 rounded-lg px-3 py-2 border border-white/5">
-        <span className="text-[10px] uppercase tracking-wider text-ink-4">Scenario · </span>
+        <span className="text-2xs uppercase tracking-wider text-ink-4">Scenario · </span>
         <span className="text-xs text-ink-3">{scenarioLabel}</span>
       </div>
 
@@ -170,7 +170,7 @@ export function DamageProfilePanel() {
           <div className="flex items-center justify-between">
             <span className="text-sm text-ink-3">
               {splashLabel}
-              <span className="ml-1.5 text-[10px] text-ink-4">
+              <span className="ml-1.5 text-2xs text-ink-4">
                 ({splashPct.toFixed(0)}%)
               </span>
             </span>
@@ -185,7 +185,7 @@ export function DamageProfilePanel() {
           <span className="text-sm font-semibold text-ink-2">
             Total
             {result.affectedIds.length > 1 && (
-              <span className="ml-1.5 text-[10px] font-normal text-ink-4">
+              <span className="ml-1.5 text-2xs font-normal text-ink-4">
                 ({result.affectedIds.length} targets)
               </span>
             )}
@@ -199,7 +199,7 @@ export function DamageProfilePanel() {
       {/* Direct / Splash proportion bar */}
       {hasSplash && (
         <div className="space-y-1">
-          <div className="flex justify-between text-[10px] text-ink-4">
+          <div className="flex justify-between text-2xs text-ink-4">
             <span>Direct</span>
             <span>{splashLabel}</span>
           </div>
@@ -219,11 +219,11 @@ export function DamageProfilePanel() {
       {/* Target IDs — compact list for AoE weapons */}
       {result.affectedIds.length > 1 && (
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[10px] text-ink-4 uppercase tracking-wider">Hit</span>
+          <span className="text-2xs text-ink-4 uppercase tracking-wider">Hit</span>
           {result.affectedIds.map((id) => (
             <span
               key={id}
-              className="text-[10px] font-mono bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-ink-3"
+              className="text-2xs font-mono bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-ink-3"
             >
               {id}
             </span>
@@ -232,7 +232,7 @@ export function DamageProfilePanel() {
       )}
 
       {/* Footer note */}
-      <p className="text-[10px] text-ink-4 leading-relaxed border-t border-white/5 pt-3">
+      <p className="text-2xs text-ink-4 leading-relaxed border-t border-white/5 pt-3">
         Derived from archetype damage data · reflects active perk &amp; buff multipliers ·
         see <span className="text-ink-4">TTK &amp; Falloff</span> for shot timing
       </p>

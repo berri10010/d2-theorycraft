@@ -49,5 +49,5 @@ export const TIER_CONFIG: Record<PerkTier, { border: string; badge: string; labe
   D: { border: 'border-slate-600',  badge: 'bg-slate-600 text-slate-200',  label: 'D' },
   E: { border: 'border-slate-700',  badge: 'bg-slate-700 text-slate-400',  label: 'E' },
   F: { border: 'border-slate-800',  badge: 'bg-slate-800 text-slate-500',  label: 'F' },
-  G: { border: 'border-red-900',    badge: 'bg-red-900 text-red-400',      label: 'G' },
+  G: { border: 'border-red-900',    badge: 'bg-red-900 text-[#f87171]',      label: 'G' },
 };

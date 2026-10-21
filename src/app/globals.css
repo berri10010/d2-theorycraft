@@ -11,12 +11,32 @@
   --c-ink:       226 232 240;  /* text, strongest → weakest */
   --c-ink-2:     203 213 225;
   --c-ink-3:     148 163 184;
-  --c-ink-4:     124 139 161;
+  --c-ink-4:     134 149 171;
   --c-surface:   17 17 17;     /* raised panels, popovers */
   --c-surface-2: 10 10 10;
   --perk-icon-bg: transparent;
+  /* Clarity element / mode text colours (clarityRender.tsx); the light theme darkens them below */
+  --clr-arc: #7dd3fc;
+  --clr-void: #c4b5fd;
+  --clr-stasis: #67e8f9;
+  --clr-solar: #fdba74;
+  --clr-strand: #6ee7b7;
+  --clr-kinetic: #cbd5e1;
+  --clr-pvp: #f472b6;
+  --clr-pve: #4ade80;
+  --clr-primary: #cbd5e1;
+  --clr-special: #86efac;
+  --clr-heavy: #c4b5fd;
+  /* Small-text scale (see tailwind.config.ts) */
+  --fs-2xs: 0.6875rem;
+  --fs-3xs: 0.625rem;
   --scroll-thumb:       rgba(255, 255, 255, 0.12);
   --scroll-thumb-hover: rgba(255, 255, 255, 0.24);
+}
+
+/* Small text gets a point larger on phones. */
+@media (max-width: 767px) {
+  :root { --fs-2xs: 0.75rem; --fs-3xs: 0.6875rem; }
 }
 
 /* Explicit light theme, or "system" (no data-theme attribute) on a light OS. */
@@ -26,8 +46,8 @@
   --c-white:     15 23 42;
   --c-ink:       30 41 59;
   --c-ink-2:     51 65 85;
-  --c-ink-3:     71 85 105;
-  --c-ink-4:     85 100 121;
+  --c-ink-3:     62 76 96;
+  --c-ink-4:     76 90 112;
   --c-surface:   255 255 255;
   --c-surface-2: 248 250 252;
   --perk-icon-bg: #1e2733;
@@ -41,8 +61,8 @@
     --c-white:     15 23 42;
     --c-ink:       30 41 59;
     --c-ink-2:     51 65 85;
-    --c-ink-3:     71 85 105;
-    --c-ink-4:     85 100 121;
+    --c-ink-3:     62 76 96;
+    --c-ink-4:     76 90 112;
     --c-surface:   255 255 255;
     --c-surface-2: 248 250 252;
     --perk-icon-bg: #1e2733;
@@ -83,4 +103,19 @@ select option { background: rgb(var(--c-surface)); color: rgb(var(--c-ink)); }
   padding-right: env(safe-area-inset-right);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
+}
+
+/* Element and mode colours on the light theme (data-resolved is set by ThemeProvider / the boot script). */
+[data-resolved='light'] {
+  --clr-arc: #0369a1;
+  --clr-void: #6d28d9;
+  --clr-stasis: #0e7490;
+  --clr-solar: #c2410c;
+  --clr-strand: #047857;
+  --clr-kinetic: #475569;
+  --clr-pvp: #be185d;
+  --clr-pve: #166534;
+  --clr-primary: #475569;
+  --clr-special: #166534;
+  --clr-heavy: #6d28d9;
 }

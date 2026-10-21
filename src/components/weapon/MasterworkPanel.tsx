@@ -87,7 +87,7 @@ export const MasterworkPanel: React.FC = () => {
               Exotic weapons upgrade via a <span className="text-amber-400 font-semibold">Catalyst</span> instead of a masterwork.
               Equip and complete the catalyst objective in-game to unlock bonus stats and an intrinsic perk upgrade.
             </p>
-            <p className="text-[10px] text-ink-4 mt-2">
+            <p className="text-2xs text-ink-4 mt-2">
               Catalyst bonuses are not reflected in this builder.
             </p>
           </div>
@@ -135,7 +135,7 @@ export const MasterworkPanel: React.FC = () => {
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-bold text-ink-2">Masterwork</h3>
                   {masterworkStat ? (
-                    <span className={`text-[10px] ${labelColor} font-semibold`}>
+                    <span className={`text-2xs ${labelColor} font-semibold`}>
                       {(() => {
                         const rawBonus = activeWeapon.masterworkBonuses?.[masterworkStat] ?? 10;
                         // Curved stats (Draw Time, Charge Time, Impact…) show the change in the displayed value.
@@ -149,7 +149,7 @@ export const MasterworkPanel: React.FC = () => {
                       })()}
                     </span>
                   ) : secondaryBonus > 0 ? (
-                    <span className={`text-[10px] ${labelColor} font-semibold`}>
+                    <span className={`text-2xs ${labelColor} font-semibold`}>
                       +10 chosen · +{secondaryBonus} others
                     </span>
                   ) : null}
@@ -233,22 +233,22 @@ export const MasterworkPanel: React.FC = () => {
               const tooltipContent = isNone ? null : (
                 <div>
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-[11px] font-bold text-white leading-tight">
+                    <span className="text-2xs font-bold text-white leading-tight">
                       {displayMod.name}
                     </span>
                     {isUpgraded && (
-                      <span className="text-[8px] font-black px-1 py-px rounded bg-amber-500/20 text-amber-400 leading-none">
+                      <span className="text-3xs font-black px-1 py-px rounded bg-amber-500/20 text-amber-400 leading-none">
                         ENHANCED
                       </span>
                     )}
                     {mod.adeptOnly && (
-                      <span className="text-[8px] font-black px-1 py-px rounded bg-amber-500/20 text-amber-400 leading-none">
+                      <span className="text-3xs font-black px-1 py-px rounded bg-amber-500/20 text-amber-400 leading-none">
                         ADEPT
                       </span>
                     )}
                   </div>
                   {desc && (
-                    <p className="text-[10px] text-ink-3 leading-relaxed">
+                    <p className="text-2xs text-ink-3 leading-relaxed">
                       {desc}
                     </p>
                   )}
@@ -257,7 +257,7 @@ export const MasterworkPanel: React.FC = () => {
                       {statEntries.map(([stat, val]) => (
                         <span
                           key={stat}
-                          className={`text-[9px] font-bold px-1 py-px rounded leading-none ${
+                          className={`text-2xs font-bold px-1 py-px rounded leading-none ${
                             val > 0
                               ? 'bg-green-500/20 text-green-300'
                               : 'bg-red-500/20 text-red-300'
@@ -267,14 +267,14 @@ export const MasterworkPanel: React.FC = () => {
                         </span>
                       ))}
                       {hasDmg && (
-                        <span className="text-[9px] font-bold px-1 py-px rounded leading-none bg-orange-500/20 text-orange-300">
+                        <span className="text-2xs font-bold px-1 py-px rounded leading-none bg-orange-500/20 text-orange-300">
                           {dmgLabel} PvE dmg
                         </span>
                       )}
                     </div>
                   )}
                   {!isActive && mod.enhancedVersion && (
-                    <p className="text-[9px] text-ink-4 mt-1.5">Click twice to enhance</p>
+                    <p className="text-2xs text-ink-4 mt-1.5">Click twice to enhance</p>
                   )}
                 </div>
               );
@@ -304,7 +304,7 @@ export const MasterworkPanel: React.FC = () => {
                     {!isNone && statEntries.map(([stat, val]) => (
                       <span
                         key={stat}
-                        className={`text-[8px] font-black leading-none ${
+                        className={`text-3xs font-black leading-none ${
                           val > 0 ? 'text-green-400' : 'text-red-400'
                         }`}
                       >
@@ -314,7 +314,7 @@ export const MasterworkPanel: React.FC = () => {
 
                     {/* Damage multiplier badge — only for spec-style mods */}
                     {hasDmg && (
-                      <span className="text-[8px] font-black text-orange-400 leading-none">
+                      <span className="text-3xs font-black text-orange-400 leading-none">
                         {dmgLabel}
                       </span>
                     )}

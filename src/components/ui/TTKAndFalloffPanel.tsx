@@ -283,7 +283,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
                   key={v}
                   onClick={() => { setLocalWeaponsStat(v); setWeaponsStat(v); }}
                   className={[
-                    'text-[10px] font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
+                    'text-2xs font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
                     localWeaponsStat === v
                       ? v > 100
                         ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
@@ -319,7 +319,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
             <div>
               <label className="text-sm text-ink-3 block mb-1">
                 Champion Mod
-                <span className="ml-1.5 text-[10px] text-amber-500/80">required to stagger</span>
+                <span className="ml-1.5 text-2xs text-amber-500/80">required to stagger</span>
               </label>
               <div className="flex gap-1.5 flex-wrap">
                 {([
@@ -332,7 +332,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
                     key={id}
                     onClick={() => setChampionMod(id)}
                     className={[
-                      'text-[11px] font-bold px-2.5 py-2 md:py-1 rounded border transition-colors',
+                      'text-2xs font-bold px-2.5 py-2 md:py-1 rounded border transition-colors',
                       championMod === id
                         ? `bg-white/10 ${color}`
                         : 'bg-white/5 text-ink-4 border-white/10 hover:text-ink-2',
@@ -378,7 +378,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
                   key={v}
                   onClick={() => { setLocalWeaponsStat(v); setWeaponsStat(v); }}
                   className={[
-                    'text-[10px] font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
+                    'text-2xs font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
                     localWeaponsStat === v
                       ? v > 100
                         ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
@@ -390,7 +390,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
                 </button>
               ))}
             </div>
-            <div className="text-[10px] text-ink-4 mt-1 space-y-0.5">
+            <div className="text-2xs text-ink-4 mt-1 space-y-0.5">
               <p><span className="text-green-600">0–100:</span> 0–15% vs minors &amp; majors, 0–10% for Heavy.</p>
               <p><span className="text-amber-600">100–200:</span> additional 0–15% vs bosses.</p>
             </div>
@@ -422,7 +422,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
                   key={v}
                   onClick={() => setPowerDelta(v)}
                   className={[
-                    'text-[10px] font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
+                    'text-2xs font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
                     powerDelta === v
                       ? v < 0
                         ? 'bg-red-500/20 border-red-500/50 text-red-400'
@@ -495,7 +495,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-bold text-ink-2">Shots vs Distance</h3>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] text-ink-4">
+              <span className="text-2xs text-ink-4">
                 {ttkSMin === ttkSMax
                   ? `No breakpoints — always ${ttkSMin} shots`
                   : `${ttkSMin} → ${ttkSMax} shots across range`}
@@ -527,7 +527,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
               <button
                 onClick={() => setShowHip((v) => !v)}
                 className={[
-                  'text-[10px] font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
+                  'text-2xs font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
                   showHip ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40' : 'bg-white/5 text-ink-4 border-white/10',
                 ].join(' ')}
               >
@@ -536,7 +536,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
               <button
                 onClick={() => setShowAds((v) => !v)}
                 className={[
-                  'text-[10px] font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
+                  'text-2xs font-bold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded border transition-colors',
                   showAds ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' : 'bg-white/5 text-ink-4 border-white/10',
                 ].join(' ')}
               >
@@ -556,7 +556,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
             <FalloffChart yTicks={yTicks} yMin={yMin} yMax={yMax} xTicks={xTicks} showHip={showHip} showAds={showAds} adsFillPath={adsFillPath} hipBodyPath={hipBodyPath} hipCritPath={hipCritPath} adsBodyPath={adsBodyPath} adsCritPath={adsCritPath} hipFalloffX={animHipFalloffX} adsFalloffX={animAdsFalloffX} hoverX={hoverX} hoverDist={hoverDist} hoverHipCrit={hoverHipCrit} hoverAdsCrit={hoverAdsCrit} onHover={setHoverX} />
           </div>
 
-          <div className="flex gap-4 mt-2 text-[10px] text-ink-4 flex-wrap">
+          <div className="flex gap-4 mt-2 text-2xs text-ink-4 flex-wrap">
             <span><span className="text-cyan-400 font-bold">─</span> Hip crit</span>
             <span><span className="text-cyan-400/40 font-bold">- -</span> Hip body</span>
             <span><span className="text-amber-400 font-bold">─</span> ADS crit</span>

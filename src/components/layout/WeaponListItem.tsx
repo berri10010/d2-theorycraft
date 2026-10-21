@@ -14,10 +14,10 @@ const TIER_STYLE: Record<string, { bg: string; text: string }> = {
   S: { bg: 'bg-amber-400', text: 'text-slate-950' },
   A: { bg: 'bg-green-400', text: 'text-slate-950' },
   B: { bg: 'bg-blue-400',  text: 'text-slate-950' },
-  C: { bg: 'bg-slate-500', text: 'text-white' },
-  D: { bg: 'bg-slate-700', text: 'text-ink-2' },
-  E: { bg: 'bg-slate-800', text: 'text-ink-3' },
-  F: { bg: 'bg-red-900',   text: 'text-red-300' },
+  C: { bg: 'bg-slate-500', text: 'text-slate-50' },
+  D: { bg: 'bg-slate-700', text: 'text-slate-100' },
+  E: { bg: 'bg-slate-800', text: 'text-slate-200' },
+  F: { bg: 'bg-red-900',   text: 'text-[#fca5a5]' },
 };
 
 
@@ -64,13 +64,13 @@ export function WeaponListItem({
               {group.baseName}
             </p>
             {tier && TIER_STYLE[tier] && (
-              <span className={`shrink-0 text-[9px] font-black px-1.5 py-0.5 rounded leading-none ${TIER_STYLE[tier].bg} ${TIER_STYLE[tier].text}`}>
+              <span className={`shrink-0 text-3xs font-black px-1.5 py-0.5 rounded leading-none ${TIER_STYLE[tier].bg} ${TIER_STYLE[tier].text}`}>
                 {tier}
               </span>
             )}
           </div>
-          <p className="text-[10px] uppercase tracking-wider mt-0.5 flex items-center gap-1">
-            <span className={[DAMAGE_COLORS[d.damageType] ?? 'text-ink-4', 'opacity-70'].join(' ')}>
+          <p className="text-2xs uppercase tracking-wider mt-0.5 flex items-center gap-1">
+            <span className={[DAMAGE_COLORS[d.damageType] ?? 'text-ink-4'].join(' ')}>
               {d.damageType}
             </span>
             {AMMO_LABELS[d.ammoType] && (
@@ -80,7 +80,7 @@ export function WeaponListItem({
               </>
             )}
           </p>
-          <p className="text-[10px] text-ink-4 mt-0.5 truncate">
+          <p className="text-2xs text-ink-4 mt-0.5 truncate">
             {d.itemTypeDisplayName}
             {seasonName && <span className="text-ink-4"> · {seasonName}</span>}
           </p>

@@ -35,11 +35,11 @@ function ReserveBar({ label, value, max, color }: { label: string; value: number
   const pct = Math.min(100, Math.round((value / max) * 100));
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[11px] text-ink-4 w-8 shrink-0">{label}</span>
+      <span className="text-2xs text-ink-4 w-8 shrink-0">{label}</span>
       <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-[11px] font-mono text-ink-2 w-8 text-right shrink-0">{value}</span>
+      <span className="text-2xs font-mono text-ink-2 w-8 text-right shrink-0">{value}</span>
     </div>
   );
 }
@@ -97,7 +97,7 @@ export const AmmoPanel: React.FC = () => {
           <div className="text-xs text-ink-4 mb-1">Magazine</div>
           <div className="text-2xl font-mono font-bold text-white">{magSize ?? '—'}</div>
           {magStatApi != null && (
-            <div className="text-[10px] text-ink-4 mt-0.5">stat {magStatApi}</div>
+            <div className="text-2xs text-ink-4 mt-0.5">stat {magStatApi}</div>
           )}
         </div>
 
@@ -105,7 +105,7 @@ export const AmmoPanel: React.FC = () => {
         <div className="bg-black/40 rounded-lg p-3 border border-white/10 text-center">
           <div className="text-xs text-ink-4 mb-1">Reserves</div>
           <div className="text-2xl font-mono font-bold text-white">{isPrimary ? '∞' : (baseReserves ?? '—')}</div>
-          <div className="text-[10px] text-ink-4 mt-0.5">{isPrimary ? 'infinite' : 'base'}</div>
+          <div className="text-2xs text-ink-4 mt-0.5">{isPrimary ? 'infinite' : 'base'}</div>
         </div>
 
         {/* Total (mag + reserves) */}
@@ -116,7 +116,7 @@ export const AmmoPanel: React.FC = () => {
               ? magSize + baseReserves
               : '—')}
           </div>
-          <div className="text-[10px] text-ink-4 mt-0.5">mag + reserves</div>
+          <div className="text-2xs text-ink-4 mt-0.5">mag + reserves</div>
         </div>
       </div>
 
@@ -145,7 +145,7 @@ export const AmmoPanel: React.FC = () => {
       )}
 
       {/* Source note */}
-      <p className="text-[10px] text-ink-4 mt-3 text-right">
+      <p className="text-2xs text-ink-4 mt-3 text-right">
         {entry
           ? 'Bungie manifest · reserve mods: MossyMax'
           : 'Source: Bungie manifest'}

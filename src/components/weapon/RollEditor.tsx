@@ -178,8 +178,9 @@ export const RollEditor: React.FC = () => {
       storageKey="weapon-perks"
       fullWidth
       headerRight={hasPerkEnhanceable && !isCrafted && !isTieredWeapon && (
-        <span className="text-xs text-ink-4 font-normal tracking-wide">
-          Click twice to enhance
+        <span className="text-2xs md:text-xs text-ink-4 font-normal tracking-wide text-right leading-tight max-w-[6rem] md:max-w-none">
+          <span className="md:hidden">Tap twice to enhance</span>
+          <span className="hidden md:inline">Click twice to enhance</span>
         </span>
       )}
     >
@@ -204,7 +205,7 @@ export const RollEditor: React.FC = () => {
               >
                 {/* Column header */}
                 <div className="w-full flex flex-col items-center gap-1 mb-3">
-                  <span className="text-[9px] md:text-[10px] font-bold text-ink-3 uppercase tracking-wider md:tracking-widest text-center leading-tight md:whitespace-nowrap">
+                  <span className="text-2xs font-bold text-ink-3 uppercase tracking-wider md:tracking-widest text-center leading-tight md:whitespace-nowrap">
                     {displayLabel}
                   </span>
                   <div className={`h-0.5 w-8 rounded-full ${accentBar}`} />
@@ -297,9 +298,9 @@ export const RollEditor: React.FC = () => {
                     const tooltipContent = (
                       <div>
                         <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                          <span className="text-[11px] font-bold text-white leading-tight">{displayPerk.name}</span>
+                          <span className="text-2xs font-bold text-white leading-tight">{displayPerk.name}</span>
                           {activeTier && tierBadgeStyle !== 'dot' && (
-                            <span className={`text-[9px] font-black leading-none ${
+                            <span className={`text-3xs font-black leading-none ${
                               tierBadgeStyle === 'pill' ? 'px-1 py-px rounded' : ''
                             } ${
                               activeTier === 'S' ? (tierBadgeStyle === 'pill' ? 'bg-amber-500/30 text-amber-300' : 'text-amber-400') :
@@ -325,7 +326,7 @@ export const RollEditor: React.FC = () => {
                             }`} title={`${activeTier}-Tier`} />
                           )}
                         </div>
-                        <div className="text-[10px] text-ink-3 leading-relaxed">
+                        <div className="text-2xs text-ink-3 leading-relaxed">
                           {clarityEntry ? renderClarityDesc(clarityEntry) : displayPerk.description}
                         </div>
                         {statMods.length > 0 && (
@@ -333,7 +334,7 @@ export const RollEditor: React.FC = () => {
                             {statMods.map((mod) => (
                               <span
                                 key={mod.statName}
-                                className={`text-[9px] font-bold px-1 py-px rounded leading-none ${
+                                className={`text-2xs font-bold px-1 py-px rounded leading-none ${
                                   mod.value > 0 ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'
                                 }`}
                               >
@@ -342,7 +343,7 @@ export const RollEditor: React.FC = () => {
                             ))}
                           </div>
                         )}
-                        <div className="text-[9px] text-ink-4 mt-1">{nextAction}</div>
+                        <div className="text-2xs text-ink-4 mt-1">{nextAction}</div>
                       </div>
                     );
 
@@ -397,7 +398,7 @@ export const RollEditor: React.FC = () => {
                           tierBadgeStyle === 'dot' ? (
                             <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full z-10 ring-1 ring-black/30 ${tierCfg.badge.replace(/text-\S+/, '')}`} title={tierCfg.label} />
                           ) : (
-                            <span className={`absolute -bottom-1 -right-1 text-[8px] font-black leading-none z-10 ${tierBadgeStyle === 'pill' ? 'px-1 py-px rounded-full' : ''} ${tierCfg.badge}`}>
+                            <span className={`absolute -bottom-1 -right-1 text-3xs font-black leading-none z-10 ${tierBadgeStyle === 'pill' ? 'px-1 py-px rounded-full' : ''} ${tierCfg.badge}`}>
                               {tierCfg.label}
                             </span>
                           )
@@ -408,10 +409,10 @@ export const RollEditor: React.FC = () => {
                             title={tierCfg ? `${tierCfg.label} tier — click to change` : 'Unrated — click to rate'}
                             aria-label={tierCfg ? `${displayPerk.name}: ${tierCfg.label} tier, change` : `Rate ${displayPerk.name}`}
                             className={[
-                              'absolute -bottom-1 -right-1 text-[8px] font-black leading-none px-1 py-px rounded-full z-10 transition-opacity',
+                              'absolute -bottom-1 -right-1 text-3xs font-black leading-none px-1 py-px rounded-full z-10 transition-opacity',
                               tierCfg
                                 ? `${tierCfg.badge} opacity-100`
-                                : 'bg-white/10 text-ink-4 opacity-0 group-hover/perk:opacity-100',
+                                : 'bg-white/10 text-ink-3 md:text-ink-4 md:opacity-0 md:group-hover/perk:opacity-100',
                             ].join(' ')}
                           >
                             {tierCfg ? tierCfg.label : '+'}
@@ -419,7 +420,7 @@ export const RollEditor: React.FC = () => {
                         )}
 
                         {isUpgraded && (
-                          <span className="absolute -bottom-1 -right-1 text-[7px] font-black leading-none px-1 py-px rounded-full z-10 bg-amber-400 text-black">
+                          <span className="absolute -bottom-1 -right-1 text-3xs font-black leading-none px-1 py-px rounded-full z-10 bg-amber-400 text-black">
                             ENH
                           </span>
                         )}

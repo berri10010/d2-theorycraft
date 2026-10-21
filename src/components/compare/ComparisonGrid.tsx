@@ -153,20 +153,20 @@ function SnapshotCard({
             <button
               onClick={() => reorderSnapshot(snapshot.id, 'left')}
               disabled={index === 0}
-              className="w-9 h-9 md:w-5 md:h-5 bg-white/5 text-ink-4 rounded hover:bg-white/10 hover:text-ink transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
+              className="w-9 h-9 md:w-6 md:h-6 bg-white/5 text-ink-4 rounded hover:bg-white/10 hover:text-ink transition-colors flex items-center justify-center text-2xs font-bold disabled:opacity-20 disabled:pointer-events-none"
               aria-label="Move left"
             >‹</button>
             <button
               onClick={() => reorderSnapshot(snapshot.id, 'right')}
               disabled={index === total - 1}
-              className="w-9 h-9 md:w-5 md:h-5 bg-white/5 text-ink-4 rounded hover:bg-white/10 hover:text-ink transition-colors flex items-center justify-center text-[9px] font-bold disabled:opacity-20 disabled:pointer-events-none"
+              className="w-9 h-9 md:w-6 md:h-6 bg-white/5 text-ink-4 rounded hover:bg-white/10 hover:text-ink transition-colors flex items-center justify-center text-2xs font-bold disabled:opacity-20 disabled:pointer-events-none"
               aria-label="Move right"
             >›</button>
           </>
         )}
         <button
           onClick={() => removeSnapshot(snapshot.id)}
-          className="w-9 h-9 md:w-5 md:h-5 bg-white/5 text-ink-3 rounded hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center text-[10px] font-bold"
+          className="w-9 h-9 md:w-6 md:h-6 bg-white/5 text-ink-3 rounded hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center text-2xs font-bold"
           aria-label="Remove"
         >×</button>
       </div>
@@ -174,7 +174,7 @@ function SnapshotCard({
       {/* Restore full build in editor */}
       <button
         onClick={handleRestore}
-        className="absolute top-2 left-2 text-[10px] md:text-[9px] font-semibold px-2.5 py-2 md:px-1.5 md:py-0.5 rounded bg-white/5 border border-white/10 text-ink-4 hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 transition-all"
+        className="absolute top-2 left-2 text-2xs font-semibold px-2.5 py-2 md:px-1.5 md:py-0.5 rounded bg-white/5 border border-white/10 text-ink-4 hover:bg-amber-500/15 hover:border-amber-500/30 hover:text-amber-400 transition-all"
         aria-label="Restore build in editor"
         title="Restore perks, masterwork, and tier in the editor"
       >Restore</button>
@@ -213,20 +213,20 @@ function SnapshotCard({
               title="Click to rename"
             >
               {snapshot.label}
-              <span className="ml-1 text-[9px] text-ink-4 font-normal">✎</span>
+              <span className="ml-1 text-2xs text-ink-4 font-normal">✎</span>
             </button>
           )}
           <p className="text-xs text-ink-3 flex items-center flex-wrap gap-x-1">
             {snapshot.weapon.itemTypeDisplayName} &bull; {snapshot.weapon.rpm} RPM &bull;{' '}
             <span className="uppercase text-ink-4">{snapshot.mode}</span>
             {snapshot.weaponTier !== undefined && (
-              <span className="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/8 border border-white/10 text-ink-2">
+              <span className="ml-1 text-2xs font-bold px-1.5 py-0.5 rounded bg-white/8 border border-white/10 text-ink-2">
                 T{snapshot.weaponTier}
               </span>
             )}
           </p>
           {snapshot.masterworkStat && (
-            <p className="text-[10px] text-ink-4 mt-0.5">
+            <p className="text-2xs text-ink-4 mt-0.5">
               MW: <span className="text-amber-400/80 font-medium">{snapshot.masterworkStat}</span>
             </p>
           )}
@@ -262,19 +262,19 @@ function SnapshotCard({
       {/* ── TTK + falloff row ────────────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-2">
         <div className="px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
-          <span className="text-[10px] text-ink-4">TTK</span>
+          <span className="text-2xs text-ink-4">TTK</span>
           <span className="font-mono text-sm font-bold text-amber-400">
             {liveTtk !== null ? `${liveTtk.ttk.toFixed(2)}s` : '—'}
           </span>
         </div>
         <div className="px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
-          <span className="text-[10px] text-ink-4">Hip</span>
+          <span className="text-2xs text-ink-4">Hip</span>
           <span className="font-mono text-sm font-bold text-cyan-400">
             {hipFalloff !== null ? `${hipFalloff.toFixed(1)}m` : '—'}
           </span>
         </div>
         <div className="px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
-          <span className="text-[10px] text-ink-4">ADS</span>
+          <span className="text-2xs text-ink-4">ADS</span>
           <span className="font-mono text-sm font-bold text-amber-300">
             {adsFalloff !== null ? `${adsFalloff.toFixed(1)}m` : '—'}
           </span>
@@ -286,7 +286,7 @@ function SnapshotCard({
         <div className="grid grid-cols-3 gap-2">
           {([['Ready', handlingTimes.readyMs], ['ADS', handlingTimes.adsMs], ['Stow', handlingTimes.stowMs]] as [string, number][]).map(([label, ms]) => (
             <div key={label} className="px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
-              <span className="text-[10px] text-ink-4">{label}</span>
+              <span className="text-2xs text-ink-4">{label}</span>
               <span className="font-mono text-sm font-bold text-ink">{ms}ms</span>
             </div>
           ))}
@@ -304,7 +304,7 @@ function SnapshotCard({
           <div className="flex gap-2">
             {chips.map(({ label, value }) => (
               <div key={label} className="flex-1 px-2 py-1.5 bg-white/5 rounded border border-white/10 flex flex-col items-center">
-                <span className="text-[10px] text-ink-4">{label}</span>
+                <span className="text-2xs text-ink-4">{label}</span>
                 <span className="font-mono text-sm font-bold text-amber-400">{value}</span>
               </div>
             ))}
@@ -315,7 +315,7 @@ function SnapshotCard({
       {/* ── Bar stats (weapon-specific: only stats present in baseStats) ─── */}
       {sharedBarStatKeys.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Stats</p>
+          <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest">Stats</p>
           {sharedBarStatKeys.map((statName) => {
             const val    = snapshot.calculatedStats[statName] ?? 0;
             const base   = snapshot.weapon.baseStats?.[statName] ?? val;
@@ -338,7 +338,7 @@ function SnapshotCard({
                   {val}
                 </span>
                 {diff !== 0 && (
-                  <span className={['text-[10px] tabular-nums w-7', diff > 0 ? 'text-green-400' : 'text-red-400'].join(' ')}>
+                  <span className={['text-2xs tabular-nums w-7', diff > 0 ? 'text-green-400' : 'text-red-400'].join(' ')}>
                     {diff > 0 ? '+' : ''}{diff}
                   </span>
                 )}
@@ -351,7 +351,7 @@ function SnapshotCard({
       {/* ── Numeric stats (mirrors StatDisplay NUMERIC_STAT_KEYS) ─────────── */}
       {NUMERIC_STAT_KEYS.some((k) => snapshot.calculatedStats[k] !== undefined || snapshot.weapon.baseStats?.[k] !== undefined) && (
         <div className="border-t border-white/10 pt-3">
-          <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-2">Additional</p>
+          <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-2">Additional</p>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
             {NUMERIC_STAT_KEYS.map((statName) => {
               const base    = snapshot.weapon.baseStats?.[statName];
@@ -363,7 +363,7 @@ function SnapshotCard({
                   <span className="text-ink-3">{statName}</span>
                   <span className={['font-mono font-bold', diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : 'text-white'].join(' ')}>
                     {current}
-                    {diff !== 0 && <span className="text-[9px] ml-0.5">({diff > 0 ? '+' : ''}{diff})</span>}
+                    {diff !== 0 && <span className="text-2xs ml-0.5">({diff > 0 ? '+' : ''}{diff})</span>}
                   </span>
                 </div>
               );
@@ -375,7 +375,7 @@ function SnapshotCard({
       {/* ── Selected perks ──────────────────────────────────────────────── */}
       {selectedPerkList.length > 0 && (
         <div className="border-t border-white/10 pt-3">
-          <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-2">Perks</p>
+          <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-2">Perks</p>
           <div className="flex flex-wrap gap-2">
             {selectedPerkList.map((perk, idx) => (
               <div
@@ -399,7 +399,7 @@ function SnapshotCard({
                   />
                 </div>
                 <span className={[
-                  'text-[10px] font-medium max-w-[80px] truncate',
+                  'text-2xs font-medium max-w-[80px] truncate',
                   perk.isEnhanced ? 'text-amber-300' : 'text-ink-2',
                 ].join(' ')}>
                   {perk.name}
@@ -499,7 +499,7 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
           {/* PvE enemy tier selector — only when at least one PvE snapshot exists */}
           {hasPveSnapshot && (
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-ink-4 shrink-0">TTK vs</span>
+              <span className="text-2xs text-ink-4 shrink-0">TTK vs</span>
               <select
                 value={enemyTier}
                 onChange={(e) => setEnemyTier(e.target.value)}
@@ -512,7 +512,7 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-3 text-[10px] text-ink-4">
+          <div className="flex flex-wrap items-center gap-3 text-2xs text-ink-4">
             <span title="Colors show each stat's delta above the lowest value across all snapshots">
               Δ from min: <span className="text-green-300">■</span> +1–5 <span className="text-green-400">■</span> +6–15 <span className="text-green-400 font-bold">■</span> +16+ <span className="text-red-400">■</span> lower
             </span>
@@ -524,7 +524,7 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
           {/* Sort by stat — compact chip row */}
           {sortOptions.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 w-full">
-              <span className="text-[10px] text-ink-4 shrink-0">Sort:</span>
+              <span className="text-2xs text-ink-4 shrink-0">Sort:</span>
               {sortOptions.map((stat) => {
                 const isActive = sortStat === stat;
                 return (
@@ -532,7 +532,7 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
                     key={stat}
                     onClick={() => handleSortClick(stat)}
                     className={[
-                      'text-[10px] font-semibold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded-full border transition-all leading-none',
+                      'text-2xs font-semibold px-2.5 py-1.5 md:px-2 md:py-0.5 rounded-full border transition-all leading-none',
                       isActive
                         ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
                         : 'bg-white/5 border-white/10 text-ink-4 hover:border-white/20 hover:text-ink-2',

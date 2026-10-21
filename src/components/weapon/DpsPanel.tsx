@@ -15,11 +15,11 @@ function Row({ label, pvp, pve }: { label: string; pvp: number; pve: number }) {
       <span className="text-ink-3 w-36">{label}</span>
       <div className="flex gap-4 text-right">
         <div>
-          <div className="text-[9px] text-ink-4 leading-none mb-0.5">PvP</div>
+          <div className="text-2xs text-ink-4 leading-none mb-0.5">PvP</div>
           <div className="font-mono font-bold text-white">{pvp.toLocaleString()}</div>
         </div>
         <div>
-          <div className="text-[9px] text-ink-4 leading-none mb-0.5">PvE</div>
+          <div className="text-2xs text-ink-4 leading-none mb-0.5">PvE</div>
           <div className="font-mono font-bold text-amber-400">{pve.toLocaleString()}</div>
         </div>
       </div>
@@ -30,7 +30,7 @@ function Row({ label, pvp, pve }: { label: string; pvp: number; pve: number }) {
 function Chip({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-white/5 rounded-lg px-3 py-2 flex flex-col items-center gap-0.5">
-      <span className="text-[9px] text-ink-4 uppercase tracking-wide">{label}</span>
+      <span className="text-2xs text-ink-4 uppercase tracking-wide">{label}</span>
       <span className="text-sm font-mono font-bold text-ink">{value}</span>
     </div>
   );
@@ -105,7 +105,7 @@ export function DpsPanel() {
     <div className="bg-white/3 rounded-xl p-4 space-y-4">
       {/* ── Damage per trigger pull ──────────────────────────────────────── */}
       <div>
-        <div className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-2">
+        <div className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-2">
           Damage per Trigger Pull
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -117,7 +117,7 @@ export function DpsPanel() {
 
       {/* ── DPS rows ─────────────────────────────────────────────────────── */}
       <div>
-        <div className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-2">
+        <div className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-2">
           DPS (All-Crit)
         </div>
         <div className="space-y-2">
@@ -135,7 +135,7 @@ export function DpsPanel() {
         </div>
       </div>
 
-      <p className="text-[9px] text-ink-4 text-center">
+      <p className="text-2xs text-ink-4 text-center">
         PvE uses per-archetype Major/Elite scalar. Optimal = continuous fire, no reloads.
       </p>
       <SourceNote className="text-center" label="Timing data" ids={['huwugo']} detail={statsMeta.sheetVersion || undefined} />

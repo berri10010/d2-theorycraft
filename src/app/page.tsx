@@ -134,11 +134,11 @@ const TIER_COLORS: Record<string, string> = {
   S: 'bg-amber-400 text-slate-950',
   A: 'bg-green-400 text-slate-950',
   B: 'bg-blue-400 text-slate-950',
-  C: 'bg-slate-500 text-white',
-  D: 'bg-slate-600 text-ink-2',
-  E: 'bg-slate-700 text-ink-3',
-  F: 'bg-slate-800 text-ink-4',
-  G: 'bg-red-900 text-red-400',
+  C: 'bg-slate-500 text-slate-50',
+  D: 'bg-slate-600 text-slate-100',
+  E: 'bg-slate-700 text-slate-200',
+  F: 'bg-slate-800 text-slate-300',
+  G: 'bg-red-900 text-[#f87171]',
 };
 
 // ── Feature cards ─────────────────────────────────────────────────────────────
@@ -331,13 +331,13 @@ function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps)
                         <button
                           key={v.hash}
                           onMouseDown={e => { e.stopPropagation(); go(v.hash); }}
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded border transition-colors ${VARIANT_COLOURS[v.variantLabel!] ?? 'bg-white/10 text-ink-3 border-white/20 hover:bg-white/20'}`}
+                          className={`text-2xs font-bold px-1.5 py-0.5 rounded border transition-colors ${VARIANT_COLOURS[v.variantLabel!] ?? 'bg-white/10 text-ink-3 border-white/20 hover:bg-white/20'}`}
                         >
                           {v.variantLabel}
                         </button>
                       ))}
                     </div>
-                    <p className="text-[11px] text-ink-4 flex items-center gap-1.5 mt-0.5">
+                    <p className="text-2xs text-ink-4 flex items-center gap-1.5 mt-0.5">
                       <span className={DAMAGE_COLORS[w.damageType] ?? 'text-ink-3'}>
                         {w.damageType.charAt(0).toUpperCase() + w.damageType.slice(1)}
                       </span>
@@ -462,12 +462,12 @@ function FeaturedGodRolls({
                         {name}
                       </p>
                       {roll.tier && TIER_COLORS[roll.tier] && (
-                        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded shrink-0 ${TIER_COLORS[roll.tier]}`}>
+                        <span className={`text-2xs font-black px-1.5 py-0.5 rounded shrink-0 ${TIER_COLORS[roll.tier]}`}>
                           {roll.tier}
                         </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-ink-4 mt-0.5 truncate">
+                    <p className="text-2xs text-ink-4 mt-0.5 truncate">
                       <span className={DAMAGE_COLORS[w.damageType] ?? 'text-ink-3'}>
                         {w.damageType.charAt(0).toUpperCase() + w.damageType.slice(1)}
                       </span>
@@ -484,7 +484,7 @@ function FeaturedGodRolls({
                     {perks.map((p, idx) => (
                       <span
                         key={idx}
-                        className="text-[10px] bg-white/8 border border-white/10 rounded px-2 py-0.5 text-ink-2"
+                        className="text-2xs bg-white/8 border border-white/10 rounded px-2 py-0.5 text-ink-2"
                       >
                         {p}
                       </span>
@@ -496,7 +496,7 @@ function FeaturedGodRolls({
                 <div className="flex justify-end mt-auto">
                   <button
                     onClick={() => router.push(`/editor?w=${w.hash}&godroll=1`)}
-                    className="text-[10px] font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+                    className="text-2xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
                   >
                     View Roll →
                   </button>

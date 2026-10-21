@@ -418,7 +418,7 @@ export const WeaponHeader: React.FC = () => {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Intrinsic</span>
+                  <span className="text-2xs font-bold text-amber-600 uppercase tracking-wider">Intrinsic</span>
                   <span className="font-semibold text-sm text-amber-300">{trait.name}</span>
                 </div>
                 {trait.statModifiers.length > 0 && (
@@ -427,7 +427,7 @@ export const WeaponHeader: React.FC = () => {
                       <span
                         key={mod.statName}
                         className={[
-                          'text-[9px] font-bold font-mono px-1.5 py-0.5 rounded leading-none',
+                          'text-2xs font-bold font-mono px-1.5 py-0.5 rounded leading-none',
                           mod.isConditional
                             ? 'text-amber-400 bg-amber-400/10 border border-amber-400/20'
                             : mod.value > 0

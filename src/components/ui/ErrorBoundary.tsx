@@ -46,14 +46,14 @@ export class ErrorBoundary extends React.Component<Props, State> {
               {this.props.label ? `${this.props.label} failed to render` : 'Panel failed to render'}
             </p>
             {this.state.message && (
-              <p className="text-[10px] text-red-400/70 mt-0.5 font-mono truncate">
+              <p className="text-2xs text-red-400/70 mt-0.5 font-mono truncate">
                 {this.state.message}
               </p>
             )}
           </div>
           <button
             onClick={this.reset}
-            className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors shrink-0 border border-red-500/30 px-2 py-1 rounded"
+            className="text-2xs font-bold text-red-400 hover:text-red-300 transition-colors shrink-0 border border-red-500/30 px-2 py-1 rounded"
           >
             Try again
           </button>

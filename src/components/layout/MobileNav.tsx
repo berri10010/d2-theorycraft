@@ -59,7 +59,7 @@ export function MobileTopBar({ activeTab, weapon, mode, onModeChange, onOpenWeap
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-bold text-white leading-tight">{weapon.name}</span>
-              <span className="block truncate text-[11px] text-ink-4 leading-tight">
+              <span className="block truncate text-2xs text-ink-4 leading-tight">
                 {weapon.itemTypeDisplayName}{weapon.variantLabel ? ` · ${weapon.variantLabel}` : ''}
               </span>
             </span>
@@ -102,7 +102,7 @@ interface BottomNavProps {
 }
 
 export function MobileBottomNav({ activeTab, onTabChange, compareCount, onOpenWeapons, onAddToCompare, onOpenMore, moreOpen }: BottomNavProps) {
-  const item = 'relative flex flex-col items-center justify-center gap-0.5 min-h-[56px] text-[10px] font-semibold transition-colors active:bg-white/5';
+  const item = 'relative flex flex-col items-center justify-center gap-0.5 min-h-[56px] text-2xs font-semibold transition-colors active:bg-white/5';
   const idle = 'text-ink-4';
   const active = 'text-amber-400';
 
@@ -132,7 +132,7 @@ export function MobileBottomNav({ activeTab, onTabChange, compareCount, onOpenWe
         <span className="relative">
           <ColumnsIcon />
           {compareCount > 0 && (
-            <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold leading-4 text-center">
+            <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-amber-500 text-slate-950 text-2xs font-bold leading-4 text-center">
               {compareCount}
             </span>
           )}

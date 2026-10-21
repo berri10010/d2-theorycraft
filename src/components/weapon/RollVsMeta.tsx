@@ -9,7 +9,7 @@ const GRADE_STYLE: Record<Grade, { chip: string; ring: string; text: string }> =
   'God roll': { chip: 'bg-amber-400 text-slate-950', ring: 'border-amber-400', text: 'text-amber-400' },
   Great:      { chip: 'bg-green-400 text-slate-950', ring: 'border-green-400', text: 'text-green-400' },
   Good:       { chip: 'bg-blue-400 text-slate-950',  ring: 'border-blue-400',  text: 'text-blue-400' },
-  Mixed:      { chip: 'bg-slate-500 text-white',     ring: 'border-slate-500', text: 'text-ink-2' },
+  Mixed:      { chip: 'bg-slate-500 text-slate-50',     ring: 'border-slate-500', text: 'text-ink-2' },
   Weak:       { chip: 'bg-red-500/80 text-white',    ring: 'border-red-500',   text: 'text-red-400' },
 };
 
@@ -61,12 +61,12 @@ export function RollVsMeta({
           aria-label={`Score ${score.score} out of 100`}
         >
           <span className={`text-lg font-black leading-none tabular-nums ${style.text}`}>{score.score}</span>
-          <span className="text-[8px] text-ink-4 leading-none mt-0.5">/ 100</span>
+          <span className="text-2xs text-ink-4 leading-none mt-0.5">/ 100</span>
         </div>
         <div className="min-w-0">
-          <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Your roll vs the meta</p>
+          <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest">Your roll vs the meta</p>
           <p className={`text-sm font-bold ${style.text}`}>{score.grade}</p>
-          <p className="text-[10px] text-ink-4 truncate">{source}</p>
+          <p className="text-2xs text-ink-4 truncate">{source}</p>
         </div>
       </div>
 
@@ -99,7 +99,7 @@ export function RollScoreBadge({
   const style = GRADE_STYLE[score.grade];
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-black leading-none ${style.chip} ${className}`}
+      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-2xs font-black leading-none ${style.chip} ${className}`}
       title={`${score.grade}: ${score.score}/100 vs the ${mode === 'pvp' ? 'PvP' : 'PvE'} meta`}
     >
       {score.score}

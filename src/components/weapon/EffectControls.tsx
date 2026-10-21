@@ -57,9 +57,9 @@ export function EffectStackSelector({
       <button
         onClick={() => onSet(0)}
         className={[
-          'text-[10px] font-bold px-2 py-0.5 rounded border transition-colors leading-none',
+          'text-2xs font-bold px-2 py-0.5 rounded border transition-colors leading-none',
           currentState === 0
-            ? 'bg-slate-700 border-slate-500 text-ink'
+            ? 'bg-slate-700 border-slate-500 text-slate-50'
             : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink-2 hover:border-white/20',
         ].join(' ')}
       >
@@ -75,14 +75,14 @@ export function EffectStackSelector({
             key={stack.count}
             onClick={() => onSet(stateVal)}
             className={[
-              'text-[10px] font-bold px-2 py-0.5 rounded border transition-colors leading-none',
+              'text-2xs font-bold px-2 py-0.5 rounded border transition-colors leading-none',
               isActive
                 ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
                 : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink hover:border-white/20',
             ].join(' ')}
           >
             {stack.label}
-            <span className="ml-1 text-[9px] font-normal opacity-70">{pctLabel}</span>
+            <span className="ml-1 text-2xs font-normal opacity-70">{pctLabel}</span>
           </button>
         );
       })}
@@ -133,13 +133,13 @@ export function StatModPills({
         const pill = (
           <span
             key={mod.statName}
-            className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none cursor-default ${pillClass}`}
+            className={`text-2xs font-medium px-1.5 py-0.5 rounded border leading-none cursor-default ${pillClass}`}
           >
             {positive ? '+' : ''}{mod.value} {mod.statName}
           </span>
         );
         const tipContent = (
-          <div className="space-y-1 text-[11px]">
+          <div className="space-y-1 text-2xs">
             <p className="font-semibold text-ink">
               {positive ? '+' : ''}{mod.value} {mod.statName}
             </p>
@@ -147,7 +147,7 @@ export function StatModPills({
               <p className="text-ink-3">Activates with perk</p>
             )}
             {sourceNode && (
-              <div className="border-t border-white/10 pt-1.5 mt-0.5 text-[10px]">{sourceNode}</div>
+              <div className="border-t border-white/10 pt-1.5 mt-0.5 text-2xs">{sourceNode}</div>
             )}
           </div>
         );

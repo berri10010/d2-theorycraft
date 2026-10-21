@@ -54,14 +54,14 @@ function StackSelector({ buff, activeStackIndex, onSelect }: StackSelectorProps)
           key={stack.count}
           onClick={(e) => { e.stopPropagation(); onSelect(idx); }}
           className={[
-            'text-[10px] font-bold px-2 py-0.5 rounded border transition-colors leading-none',
+            'text-2xs font-bold px-2 py-0.5 rounded border transition-colors leading-none',
             idx === activeStackIndex
               ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
               : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink hover:border-white/20',
           ].join(' ')}
         >
           {stack.label}
-          <span className="ml-1 text-[9px] font-normal opacity-70">
+          <span className="ml-1 text-2xs font-normal opacity-70">
             +{(stack.multiplier * 100 - 100).toFixed(0)}%
           </span>
         </button>
@@ -127,12 +127,12 @@ function BuffRow({ buff: rawBuff, isActive, isOverridden, activeStackIndex, onTo
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold truncate">{buff.name}</span>
             {isActive && isOverridden && (
-              <span className="shrink-0 text-[8px] text-ink-4 bg-slate-900 px-1 py-0.5 rounded border border-slate-700 leading-none">
+              <span className="shrink-0 text-2xs text-ink-3 bg-white/10 px-1 py-0.5 rounded border border-white/15 leading-none">
                 overridden
               </span>
             )}
           </div>
-          <p className="text-[10px] text-ink-4 leading-snug mt-0.5 line-clamp-2 pr-1">
+          <p className="text-2xs text-ink-4 leading-snug mt-0.5 line-clamp-2 pr-1">
             {buff.description}
           </p>
         </div>
@@ -166,16 +166,16 @@ interface CollapsibleSectionProps {
 function CollapsibleSection({ label, note, activeCount, open, onToggle, children }: CollapsibleSectionProps) {
   return (
     <div>
-      <button onClick={onToggle} className="w-full flex items-center gap-2 mb-2 group">
-        <span className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">{label}</span>
+      <button onClick={onToggle} className="w-full flex items-center gap-2 py-2 mb-1 group">
+        <span className="text-2xs font-bold text-ink-4 uppercase tracking-widest">{label}</span>
         {activeCount > 0 && (
-          <span className="text-[9px] font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full leading-none">
+          <span className="text-2xs font-bold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full leading-none">
             {activeCount}
           </span>
         )}
         <div className="flex-1 h-px bg-white/5" />
         {note && !open && (
-          <span className="text-[9px] text-ink-4 italic shrink-0">{note}</span>
+          <span className="text-2xs text-ink-4 italic shrink-0">{note}</span>
         )}
         <svg
           className={[
@@ -189,7 +189,7 @@ function CollapsibleSection({ label, note, activeCount, open, onToggle, children
       </button>
       {open && (
         <>
-          {note && <p className="text-[9px] text-ink-4 italic mb-2">{note}</p>}
+          {note && <p className="text-2xs text-ink-4 italic mb-2">{note}</p>}
           <div className="space-y-1.5">{children}</div>
         </>
       )}
@@ -224,7 +224,7 @@ function ExternalMultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] })
   return (
     <div className="mb-5 p-3 bg-black/40 rounded-lg border border-white/10">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">External Multiplier</span>
+        <span className="text-2xs font-bold text-ink-4 uppercase tracking-widest">External Multiplier</span>
         <span className="text-xl font-black text-amber-400 tabular-nums">{multStr(total)}</span>
       </div>
       {parts.length > 1 && (
@@ -234,7 +234,7 @@ function ExternalMultiplierBreakdown({ activeBuffs }: { activeBuffs: string[] })
               {i > 0 && <span className="text-ink-4 text-xs">×</span>}
               <span className={`text-xs font-mono font-bold ${p.color}`}>
                 {multStr(p.value)}
-                <span className="text-[10px] font-normal text-ink-4 ml-0.5">{p.label}</span>
+                <span className="text-2xs font-normal text-ink-4 ml-0.5">{p.label}</span>
               </span>
             </React.Fragment>
           ))}
@@ -289,13 +289,13 @@ function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, se
         {/* Selected exotic details */}
         {selected && (
           <div className="p-2.5 bg-amber-500/5 rounded-lg border border-amber-500/15 space-y-1.5">
-            <p className="text-[10px] text-ink-3 leading-relaxed">{selected.description}</p>
+            <p className="text-2xs text-ink-3 leading-relaxed">{selected.description}</p>
 
             {/* Universal stat bonuses */}
             {universalBonuses && (
               <div className="flex flex-wrap gap-1">
                 {Object.entries(universalBonuses).map(([stat, bonus]) => (
-                  <span key={stat} className="text-[9px] font-bold font-mono px-1.5 py-0.5 rounded bg-green-400/10 border border-green-400/20 text-green-400">
+                  <span key={stat} className="text-2xs font-bold font-mono px-1.5 py-0.5 rounded bg-green-400/10 border border-green-400/20 text-green-400">
                     +{bonus} {stat}
                   </span>
                 ))}
@@ -310,7 +310,7 @@ function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, se
                     <span
                       key={stat}
                       className={[
-                        'text-[9px] font-bold font-mono px-1.5 py-0.5 rounded border',
+                        'text-2xs font-bold font-mono px-1.5 py-0.5 rounded border',
                         typeMatches
                           ? 'bg-green-400/10 border-green-400/20 text-green-400'
                           : 'bg-white/5 border-white/10 text-ink-4',
@@ -321,7 +321,7 @@ function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, se
                   ))}
                 </div>
                 {!typeMatches && (
-                  <p className="text-[9px] text-ink-4 italic">
+                  <p className="text-2xs text-ink-4 italic">
                     Applies to: {typeSpecific.types.join(', ')}
                   </p>
                 )}
@@ -330,7 +330,7 @@ function ExoticArmorSection({ classType, activeWeaponType, activeExoticArmor, se
 
             {/* Effect note for complex mechanics */}
             {selected.effectNote && (
-              <p className="text-[9px] text-ink-4 italic">{selected.effectNote}</p>
+              <p className="text-2xs text-ink-4 italic">{selected.effectNote}</p>
             )}
           </div>
         )}

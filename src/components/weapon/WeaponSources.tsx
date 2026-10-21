@@ -30,16 +30,16 @@ export function WeaponSources({ weapon }: { weapon: Weapon }) {
       ))}
       <p className="flex flex-wrap items-center gap-1.5 pt-0.5">
         {craftable && (
-          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Craftable</span>
+          <span className="text-2xs font-semibold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Craftable</span>
         )}
         {tiered && (
-          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-400 border border-sky-500/30">Tiered</span>
+          <span className="text-2xs font-semibold px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-400 border border-sky-500/30">Tiered</span>
         )}
         <a
           href={SAX_SHEET_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[10px] text-ink-4 underline underline-offset-2 hover:text-ink-2"
+          className="text-2xs text-ink-4 underline underline-offset-2 hover:text-ink-2"
         >
           via Sax&apos;s loot sources
         </a>

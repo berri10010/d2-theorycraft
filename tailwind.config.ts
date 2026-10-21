@@ -9,6 +9,10 @@ const config: Config = {
   content: ['./src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      // One shared scale for small text. Never go below these: they grow by a point on phones.
+      //   2xs: captions, meta lines, chip labels (11px, 12px on phones)
+      //   3xs: single-glyph badges on icons (10px, 11px on phones)
+      fontSize: { '2xs': 'var(--fs-2xs)', '3xs': 'var(--fs-3xs)' },
       colors: {
         // Overlays / page background / primary text: `white` and `black` flip between themes.
         black: themed('black'),

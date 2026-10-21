@@ -120,7 +120,7 @@ function TierPill({ value, onChange }: { value: PerkTier | ''; onChange: (v: Per
         const cfg = t ? TIER_CONFIG[t] : null; const isActive = value === t;
         return (
           <button key={t||'none'} onClick={() => onChange(t)}
-            className={['text-[8px] font-black leading-none w-5 h-5 rounded transition-all',
+            className={['text-3xs font-black leading-none w-5 h-5 rounded transition-all',
               isActive ? cfg ? cfg.badge : 'bg-white/10 text-ink-3' : 'bg-white/5 text-ink-4 hover:text-ink-2 hover:bg-white/10',
             ].join(' ')}>
             {t||'—'}
@@ -137,12 +137,12 @@ function MultiCheck({ label, names, selected, onChange }: {
   const toggle = (n: string) => onChange(selected.includes(n) ? selected.filter((x) => x !== n) : [...selected, n]);
   return (
     <div>
-      <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-1.5">{label}</p>
-      {names.length === 0 ? <p className="text-[10px] text-ink-4 italic">None</p> : (
+      <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-1.5">{label}</p>
+      {names.length === 0 ? <p className="text-2xs text-ink-4 italic">None</p> : (
         <div className="flex flex-wrap gap-1.5">
           {names.map((n) => (
             <button key={n} onClick={() => toggle(n)}
-              className={['text-[10px] font-medium px-2 py-0.5 rounded-md border transition-all',
+              className={['text-2xs font-medium px-2 py-0.5 rounded-md border transition-all',
                 selected.includes(n) ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-white/5 border-white/10 text-ink-3 hover:border-white/20 hover:text-ink',
               ].join(' ')}>
               {n}
@@ -157,11 +157,11 @@ function MultiCheck({ label, names, selected, onChange }: {
 function OriginSelect({ names, value, onChange }: { names: string[]; value: string | null; onChange: (v: string | null) => void }) {
   return (
     <div>
-      <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-1.5">Origin Trait</p>
+      <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-1.5">Origin Trait</p>
       <div className="flex flex-wrap gap-1.5">
         {names.map((n) => (
           <button key={n} onClick={() => onChange(value === n ? null : n)}
-            className={['text-[10px] font-medium px-2 py-0.5 rounded-md border transition-all',
+            className={['text-2xs font-medium px-2 py-0.5 rounded-md border transition-all',
               value === n ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300' : 'bg-white/5 border-white/10 text-ink-3 hover:border-white/20 hover:text-ink',
             ].join(' ')}>
             {n}
@@ -199,13 +199,13 @@ function DiffModal({ diffs, onConfirm, onCancel }: {
 
           {added.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-2">+ Added ({added.length})</p>
+              <p className="text-2xs font-bold text-emerald-500 uppercase tracking-widest mb-2">+ Added ({added.length})</p>
               {added.map((d) => <p key={d.name} className="text-ink-2 py-0.5 truncate">{d.name}</p>)}
             </div>
           )}
           {modified.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-2">~ Modified ({modified.length})</p>
+              <p className="text-2xs font-bold text-amber-500 uppercase tracking-widest mb-2">~ Modified ({modified.length})</p>
               {modified.map((d) => (
                 <div key={d.name} className="mb-2">
                   <p className="text-ink font-semibold">{d.name}</p>
@@ -222,7 +222,7 @@ function DiffModal({ diffs, onConfirm, onCancel }: {
           )}
           {removed.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-2">− Removed ({removed.length})</p>
+              <p className="text-2xs font-bold text-red-500 uppercase tracking-widest mb-2">− Removed ({removed.length})</p>
               {removed.map((d) => <p key={d.name} className="text-ink-3 line-through py-0.5">{d.name}</p>)}
             </div>
           )}
@@ -265,18 +265,18 @@ function GodRollForm({ weapon, slot, onChange }: { weapon: Weapon; slot: RollSlo
       <OriginSelect names={originNames} value={slot.originTrait} onChange={(v) => set('originTrait', v)} />
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-[10px] font-bold text-ink-4 uppercase tracking-widest block mb-1">Masterwork</label>
+          <label className="text-2xs font-bold text-ink-4 uppercase tracking-widest block mb-1">Masterwork</label>
           <input value={slot.mw} onChange={(e) => set('mw', e.target.value)} placeholder="e.g. Range"
             className="w-full text-xs px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-ink focus:outline-none focus:border-amber-500/50 placeholder-ink-4" />
         </div>
         <div>
-          <label className="text-[10px] font-bold text-ink-4 uppercase tracking-widest block mb-1">Rank</label>
+          <label className="text-2xs font-bold text-ink-4 uppercase tracking-widest block mb-1">Rank</label>
           <input type="number" value={slot.rank} onChange={(e) => set('rank', e.target.value)} placeholder="e.g. 3"
             className="w-full text-xs px-2 py-1.5 rounded-lg bg-white/5 border border-white/10 text-ink focus:outline-none focus:border-amber-500/50 placeholder-ink-4" />
         </div>
       </div>
       <div>
-        <label className="text-[10px] font-bold text-ink-4 uppercase tracking-widest block mb-1">Tier</label>
+        <label className="text-2xs font-bold text-ink-4 uppercase tracking-widest block mb-1">Tier</label>
         <div className="flex gap-1.5">
           {['S','A','B','C','D',''].map((t) => (
             <button key={t||'none'} onClick={() => set('tier', t)}
@@ -289,7 +289,7 @@ function GodRollForm({ weapon, slot, onChange }: { weapon: Weapon; slot: RollSlo
         </div>
       </div>
       <div>
-        <label className="text-[10px] font-bold text-ink-4 uppercase tracking-widest block mb-1">Analyst Notes</label>
+        <label className="text-2xs font-bold text-ink-4 uppercase tracking-widest block mb-1">Analyst Notes</label>
         <textarea value={slot.notes} onChange={(e) => set('notes', e.target.value)} rows={3} placeholder="Notes about playstyle, strengths, caveats…"
           className="w-full text-xs px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-ink focus:outline-none focus:border-amber-500/50 placeholder-ink-4 resize-y" />
       </div>
@@ -352,7 +352,7 @@ function CoverageTab({ groups, onEdit }: { groups: WeaponGroup[]; onEdit: (g: We
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-white/3 border border-white/8 rounded-xl px-4 py-3">
             <p className={`text-xl font-black ${color}`}>{value}</p>
-            <p className="text-[10px] text-ink-4 mt-0.5">{label}</p>
+            <p className="text-2xs text-ink-4 mt-0.5">{label}</p>
           </div>
         ))}
       </div>
@@ -363,25 +363,25 @@ function CoverageTab({ groups, onEdit }: { groups: WeaponGroup[]; onEdit: (g: We
           className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-ink focus:outline-none focus:border-amber-500/50 placeholder-ink-4 w-48" />
         {(['all','yes','no'] as const).map((v) => (
           <button key={`pve-${v}`} onClick={() => setPveFil(v)}
-            className={['text-[10px] font-semibold px-2 py-1 rounded border transition-all', pveFil === v ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink-2'].join(' ')}>
+            className={['text-2xs font-semibold px-2 py-1 rounded border transition-all', pveFil === v ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink-2'].join(' ')}>
             PvE: {v}
           </button>
         ))}
         {(['all','yes','no'] as const).map((v) => (
           <button key={`pvp-${v}`} onClick={() => setPvpFil(v)}
-            className={['text-[10px] font-semibold px-2 py-1 rounded border transition-all', pvpFil === v ? 'bg-sky-500/20 border-sky-500/40 text-sky-300' : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink-2'].join(' ')}>
+            className={['text-2xs font-semibold px-2 py-1 rounded border transition-all', pvpFil === v ? 'bg-sky-500/20 border-sky-500/40 text-sky-300' : 'bg-white/5 border-white/10 text-ink-4 hover:text-ink-2'].join(' ')}>
             PvP: {v}
           </button>
         ))}
         <button onClick={() => setSortDir((d) => d === 'asc' ? 'desc' : 'asc')}
-          className="ml-auto text-[10px] text-ink-4 hover:text-ink-2 transition-colors">
+          className="ml-auto text-2xs text-ink-4 hover:text-ink-2 transition-colors">
           Name {sortDir === 'asc' ? '↑' : '↓'}
         </button>
       </div>
 
       {/* Table */}
       <div className="border border-white/8 rounded-xl overflow-hidden">
-        <div className="grid grid-cols-[1fr_auto_60px_60px_80px] gap-0 text-[9px] font-bold text-ink-4 uppercase tracking-widest px-4 py-2 bg-white/3 border-b border-white/8">
+        <div className="grid grid-cols-[1fr_auto_60px_60px_80px] gap-0 text-2xs font-bold text-ink-4 uppercase tracking-widest px-4 py-2 bg-white/3 border-b border-white/8">
           <span>Weapon family</span><span>Versions</span><span className="text-center">PvE</span><span className="text-center">PvP</span><span />
         </div>
         <div className="max-h-[50vh] overflow-y-auto divide-y divide-white/5">
@@ -395,12 +395,12 @@ function CoverageTab({ groups, onEdit }: { groups: WeaponGroup[]; onEdit: (g: We
                 <div className="flex items-center gap-2 min-w-0">
                   {icon && <div className="relative w-6 h-6 shrink-0"><Image src={BUNGIE_URL+icon} alt="" fill sizes="24px" className="object-cover rounded" unoptimized /></div>}
                   <span className="text-xs text-ink truncate">{g.baseName}</span>
-                  {hasOverride && <span className="text-[9px] text-sky-400 border border-sky-500/30 px-1 rounded shrink-0">overrides</span>}
+                  {hasOverride && <span className="text-2xs text-sky-400 border border-sky-500/30 px-1 rounded shrink-0">overrides</span>}
                 </div>
-                <span className="text-[10px] text-ink-4 mr-4">{g.variants.length}v</span>
+                <span className="text-2xs text-ink-4 mr-4">{g.variants.length}v</span>
                 <span className={`text-center text-sm font-bold ${hasPve ? 'text-emerald-400' : 'text-red-900'}`}>{hasPve ? '✓' : '✗'}</span>
                 <span className={`text-center text-sm font-bold ${hasPvp ? 'text-emerald-400' : 'text-red-900'}`}>{hasPvp ? '✓' : '✗'}</span>
-                <button onClick={() => onEdit(g)} className="text-[10px] font-semibold text-amber-500 hover:text-amber-300 transition-colors text-right">Edit →</button>
+                <button onClick={() => onEdit(g)} className="text-2xs font-semibold text-amber-500 hover:text-amber-300 transition-colors text-right">Edit →</button>
               </div>
             );
           })}
@@ -523,11 +523,11 @@ function PerkTiersTab({
 
         {/* Sort */}
         <button onClick={() => { setSortBy('name'); setSortDir((d) => d === 'asc' ? 'desc' : 'asc'); }}
-          className={['text-[10px] px-2 py-1 rounded border transition-all', sortBy==='name' ? 'bg-white/10 border-white/20 text-ink' : 'bg-white/5 border-white/10 text-ink-4'].join(' ')}>
+          className={['text-2xs px-2 py-1 rounded border transition-all', sortBy==='name' ? 'bg-white/10 border-white/20 text-ink' : 'bg-white/5 border-white/10 text-ink-4'].join(' ')}>
           Name {sortBy==='name' ? (sortDir==='asc'?'↑':'↓') : ''}
         </button>
         <button onClick={() => { setSortBy('tier'); setSortDir((d) => d === 'asc' ? 'desc' : 'asc'); }}
-          className={['text-[10px] px-2 py-1 rounded border transition-all', sortBy==='tier' ? 'bg-white/10 border-white/20 text-ink' : 'bg-white/5 border-white/10 text-ink-4'].join(' ')}>
+          className={['text-2xs px-2 py-1 rounded border transition-all', sortBy==='tier' ? 'bg-white/10 border-white/20 text-ink' : 'bg-white/5 border-white/10 text-ink-4'].join(' ')}>
           Tier {sortBy==='tier' ? (sortDir==='asc'?'↑':'↓') : ''}
         </button>
 
@@ -535,27 +535,27 @@ function PerkTiersTab({
         <div className="flex bg-white/5 rounded-lg p-0.5 border border-white/10 ml-2">
           {(['pve','pvp'] as const).map((m) => (
             <button key={m} onClick={() => setTierMode(m)}
-              className={['px-2.5 py-1 text-[10px] rounded-md font-bold uppercase transition-colors', tierMode===m ? 'bg-white/10 text-amber-400' : 'text-ink-4 hover:text-ink-2'].join(' ')}>
+              className={['px-2.5 py-1 text-2xs rounded-md font-bold uppercase transition-colors', tierMode===m ? 'bg-white/10 text-amber-400' : 'text-ink-4 hover:text-ink-2'].join(' ')}>
               {m}
             </button>
           ))}
         </div>
 
-        <span className="text-[10px] text-ink-4 ml-1">{displayRows.length} perks</span>
+        <span className="text-2xs text-ink-4 ml-1">{displayRows.length} perks</span>
 
         {/* Actions */}
         <div className="flex gap-2 ml-auto">
           <button onClick={handleExport}
-            className="text-[10px] font-semibold px-3 py-1.5 rounded-lg border border-white/10 text-ink-3 hover:text-ink hover:border-white/20 transition-colors">
+            className="text-2xs font-semibold px-3 py-1.5 rounded-lg border border-white/10 text-ink-3 hover:text-ink hover:border-white/20 transition-colors">
             Export CSV
           </button>
           <button onClick={() => fileRef.current?.click()}
-            className="text-[10px] font-semibold px-3 py-1.5 rounded-lg border border-white/10 text-ink-3 hover:text-ink hover:border-white/20 transition-colors">
+            className="text-2xs font-semibold px-3 py-1.5 rounded-lg border border-white/10 text-ink-3 hover:text-ink hover:border-white/20 transition-colors">
             Import CSV
           </button>
           <input ref={fileRef} type="file" accept=".csv" onChange={handleImport} className="hidden" />
           <button onClick={onSave}
-            className={['text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors', diffCount > 0 ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-white/5 border border-white/10 text-ink-4 cursor-not-allowed'].join(' ')}>
+            className={['text-2xs font-bold px-3 py-1.5 rounded-lg transition-colors', diffCount > 0 ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-white/5 border border-white/10 text-ink-4 cursor-not-allowed'].join(' ')}>
             Save{diffCount > 0 ? ` (${diffCount})` : ''}
           </button>
         </div>
@@ -568,7 +568,7 @@ function PerkTiersTab({
           placeholder="Add perk by name…"
           className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-ink focus:outline-none focus:border-amber-500/50 placeholder-ink-4 flex-1 max-w-xs" />
         <button onClick={handleAddPerk} disabled={!newPerk.trim() || !!rows[newPerk.trim()]}
-          className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-white/8 border border-white/10 text-ink-3 hover:text-ink disabled:opacity-40 transition-colors">
+          className="text-2xs font-bold px-3 py-1.5 rounded-lg bg-white/8 border border-white/10 text-ink-3 hover:text-ink disabled:opacity-40 transition-colors">
           + Add
         </button>
       </div>
@@ -576,7 +576,7 @@ function PerkTiersTab({
       {/* Table */}
       <div className="border border-white/8 rounded-xl overflow-hidden">
         {/* Column headers */}
-        <div className="flex items-center gap-2 px-3 py-2 bg-white/3 border-b border-white/8 text-[9px] font-bold text-ink-4 uppercase tracking-widest">
+        <div className="flex items-center gap-2 px-3 py-2 bg-white/3 border-b border-white/8 text-2xs font-bold text-ink-4 uppercase tracking-widest">
           <span className="w-48 shrink-0">Perk</span>
           <span className="w-44">Tier</span>
           <span className="w-14">Rank</span>
@@ -596,11 +596,11 @@ function PerkTiersTab({
                   <span className="text-xs text-ink-2 w-48 shrink-0 truncate" title={name}>{name}</span>
                   <div className="w-44 shrink-0"><TierPill value={row.pvpTier} onChange={(v) => set('pvpTier', v)} /></div>
                   <input value={row.pvpRank} onChange={(e) => set('pvpRank', e.target.value)} type="number" placeholder="—"
-                    className="w-14 text-[10px] px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
+                    className="w-14 text-2xs px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
                   <input value={row.pvpTags} onChange={(e) => set('pvpTags', e.target.value)} placeholder="tags"
-                    className="w-36 text-[10px] px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
+                    className="w-36 text-2xs px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
                   <input value={row.pvpNotes} onChange={(e) => set('pvpNotes', e.target.value)} placeholder="Notes…"
-                    className="flex-1 text-[10px] px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
+                    className="flex-1 text-2xs px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
                 </div>
               );
             }
@@ -611,11 +611,11 @@ function PerkTiersTab({
                 <span className="text-xs text-ink-2 w-48 shrink-0 truncate" title={name}>{name}</span>
                 <div className="w-44 shrink-0"><TierPill value={row.pveTier} onChange={(v) => set('pveTier', v)} /></div>
                 <input value={row.pveRank} onChange={(e) => set('pveRank', e.target.value)} type="number" placeholder="—"
-                  className="w-14 text-[10px] px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
+                  className="w-14 text-2xs px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
                 <input value={row.pveTags} onChange={(e) => set('pveTags', e.target.value)} placeholder="tags"
-                  className="w-36 text-[10px] px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
+                  className="w-36 text-2xs px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
                 <input value={row.pveNotes} onChange={(e) => set('pveNotes', e.target.value)} placeholder="Notes…"
-                  className="flex-1 text-[10px] px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
+                  className="flex-1 text-2xs px-1.5 py-1 rounded bg-white/5 border border-white/10 text-ink-2 focus:outline-none focus:border-amber-500/40 placeholder-ink-4" />
               </div>
             );
           })}
@@ -737,7 +737,7 @@ function GodRollTab({ groups, initialGroup, onGroupChange }: {
                 {g.default.icon && <div className="relative w-7 h-7 shrink-0"><Image src={BUNGIE_URL+g.default.icon} alt="" fill sizes="28px" className="object-cover rounded" unoptimized /></div>}
                 <div>
                   <p className="text-xs font-semibold text-ink">{g.baseName}</p>
-                  <p className="text-[10px] text-ink-4">{g.default.itemTypeDisplayName} · {g.variants.length} version{g.variants.length > 1 ? 's' : ''}</p>
+                  <p className="text-2xs text-ink-4">{g.default.itemTypeDisplayName} · {g.variants.length} version{g.variants.length > 1 ? 's' : ''}</p>
                 </div>
               </button>
             ))}
@@ -752,7 +752,7 @@ function GodRollTab({ groups, initialGroup, onGroupChange }: {
               {group.default.icon && <div className="relative w-9 h-9 shrink-0"><Image src={BUNGIE_URL+group.default.icon} alt="" fill sizes="36px" className="object-cover rounded-lg" unoptimized /></div>}
               <div>
                 <p className="text-sm font-bold text-white">{group.baseName}</p>
-                <p className="text-[10px] text-ink-4">
+                <p className="text-2xs text-ink-4">
                   {group.variants.length} version{group.variants.length > 1 ? 's' : ''} · saves as <span className="text-amber-400 font-mono">{saveKey}</span>
                 </p>
               </div>
@@ -915,7 +915,7 @@ export default function AdminPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-white">D2 Theorycraft Admin</h1>
-            <p className="text-[10px] text-amber-500 font-semibold mt-0.5 uppercase tracking-wider">Dev only · writes to source data files</p>
+            <p className="text-2xs text-amber-500 font-semibold mt-0.5 uppercase tracking-wider">Dev only · writes to source data files</p>
           </div>
           <a href="/" className="text-xs text-ink-4 hover:text-ink-2 border border-white/10 px-3 py-1.5 rounded-lg transition-colors">← Editor</a>
         </div>
@@ -934,7 +934,7 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {isLoading && tab === 'coverage' && <p className="text-[10px] text-ink-4">Loading weapon database…</p>}
+        {isLoading && tab === 'coverage' && <p className="text-2xs text-ink-4">Loading weapon database…</p>}
 
         {/* Tab panels */}
         {tab === 'coverage'  && <CoverageTab groups={weaponGroups} onEdit={goToGodRoll} />}

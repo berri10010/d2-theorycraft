@@ -233,17 +233,17 @@ export const WishlistPanel: React.FC = () => {
       {/* Community wishlist section */}
       <div className="space-y-3">
         <div>
-          <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-2">Community Wishlist</p>
+          <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-2">Community Wishlist</p>
 
           {wishlistDb ? (
             <div className="flex items-center justify-between bg-black/30 rounded-lg border border-white/8 px-3 py-2">
               <div>
                 <p className="text-xs text-ink-2 font-medium truncate max-w-[160px]">{wishlistName}</p>
-                <p className="text-[10px] text-ink-4">{entryCount.toLocaleString()} entries</p>
+                <p className="text-2xs text-ink-4">{entryCount.toLocaleString()} entries</p>
               </div>
               <button
                 onClick={clear}
-                className="text-[10px] text-ink-4 hover:text-red-400 transition-colors font-bold"
+                className="text-2xs text-ink-4 hover:text-red-400 transition-colors font-bold"
               >
                 Remove
               </button>
@@ -283,7 +283,7 @@ export const WishlistPanel: React.FC = () => {
           {/* Match callout */}
           {wishlistDb && hasSelection && (
             <p className={[
-              'text-[10px] mt-2 text-center font-bold',
+              'text-2xs mt-2 text-center font-bold',
               isMatch ? 'text-yellow-400' : 'text-ink-4',
             ].join(' ')}>
               {isMatch
@@ -297,10 +297,10 @@ export const WishlistPanel: React.FC = () => {
         {rolls.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Saved Rolls</p>
+              <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest">Saved Rolls</p>
               <button
                 onClick={() => exportFile(rolls)}
-                className="text-[10px] font-bold text-ink-4 hover:text-amber-400 transition-colors"
+                className="text-2xs font-bold text-ink-4 hover:text-amber-400 transition-colors"
               >
                 Export ↓
               </button>
@@ -326,10 +326,10 @@ export const WishlistPanel: React.FC = () => {
                       className="flex-1 min-w-0 text-left px-3 py-2 md:py-1.5 active:bg-white/5 hover:bg-white/5 rounded-l-lg disabled:opacity-50"
                     >
                       <p className="text-xs text-ink font-medium truncate">{roll.weaponName}</p>
-                      <p className="text-[10px] text-ink-4 truncate">
+                      <p className="text-2xs text-ink-4 truncate">
                         {names.length ? names.join(' · ') : `${roll.perkHashes.length} perks`}
                       </p>
-                      <p className="text-[9px] text-ink-4 flex items-center gap-1.5">
+                      <p className="text-2xs text-ink-4 flex items-center gap-1.5">
                         {new Date(roll.savedAt).toLocaleDateString()}
                         <SavedRollScore weapon={target ?? null} hashes={roll.perkHashes} mode={mode} />
                       </p>
@@ -347,7 +347,7 @@ export const WishlistPanel: React.FC = () => {
               {rolls.length > ROLLS_PREVIEW && (
                 <button
                   onClick={() => setShowAllRolls((v) => !v)}
-                  className="w-full text-center text-[10px] font-semibold text-ink-4 hover:text-ink-2 transition-colors pt-1"
+                  className="w-full text-center text-xs md:text-2xs font-semibold text-ink-4 hover:text-ink-2 transition-colors py-2.5 md:py-2"
                 >
                   {showAllRolls ? 'Show fewer' : `Show all ${rolls.length} rolls →`}
                 </button>

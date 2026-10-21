@@ -118,7 +118,7 @@ export const EffectsPanel: React.FC = () => {
           {/* ── Conditional perks (Effects Tab toggles) ── */}
           {conditionalEntries.length > 0 && (
             <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-ink-4">
+              <p className="text-2xs font-semibold uppercase tracking-widest text-ink-4">
                 Conditional Effects
               </p>
               {conditionalEntries.map(({ columnName, perkHash, name, icon, description, isEnhanced, buffKey, statModifiers, activation, activation2 }) => {
@@ -177,14 +177,14 @@ export const EffectsPanel: React.FC = () => {
                                 <span className={`w-2 h-2 rounded-full shrink-0 ${cfg.badge.replace(/text-\S+/, '')}`} title={cfg.label} />
                               );
                               return (
-                                <span className={`text-[10px] font-black leading-none shrink-0 ${tierBadgeStyle === 'pill' ? 'px-1.5 py-0.5 rounded' : ''} ${cfg.badge}`}>
+                                <span className={`text-2xs font-black leading-none shrink-0 ${tierBadgeStyle === 'pill' ? 'px-1.5 py-0.5 rounded' : ''} ${cfg.badge}`}>
                                   {cfg.label}
                                 </span>
                               );
                             })()}
                             {/* Active / inactive badge */}
                             <span className={[
-                              'text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none shrink-0',
+                              'text-2xs font-semibold px-1.5 py-0.5 rounded leading-none shrink-0',
                               isOn
                                 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                                 : 'bg-white/5 text-ink-4 border border-white/10',
@@ -221,7 +221,7 @@ export const EffectsPanel: React.FC = () => {
                                     : act.ttaCategory;
                                   const durLabel = act.duration ? ` · ${act.duration}` : '';
                                   const tipContent = (
-                                    <div className="space-y-1 text-[11px]">
+                                    <div className="space-y-1 text-2xs">
                                       <p className="font-semibold text-ink">{act.ttaCategory}</p>
                                       <p className="text-ink-3">Trigger: <span className="text-ink-2">{act.trigger}</span></p>
                                       {act.duration && <p className="text-ink-3">Duration: <span className="text-ink-2">{act.duration}</span></p>}
@@ -229,7 +229,7 @@ export const EffectsPanel: React.FC = () => {
                                         <p className="text-ink-3">Wind-up: <span className="text-ink-2">~{act.estTtaSeconds}s</span></p>
                                       )}
                                       {auditEntry && (
-                                        <div className="border-t border-white/10 pt-1.5 mt-0.5 text-[10px]">
+                                        <div className="border-t border-white/10 pt-1.5 mt-0.5 text-2xs">
                                           {auditEntry.clarityVerified
                                             ? <span className="text-emerald-400">✓ Clarity DB</span>
                                             : <span className="text-ink-4">{auditEntry.notes}</span>
@@ -240,7 +240,7 @@ export const EffectsPanel: React.FC = () => {
                                   );
                                   return (
                                     <Tooltip key={i} content={tipContent} delay={150}>
-                                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none cursor-default ${color}`}>
+                                      <span className={`text-2xs font-medium px-1.5 py-0.5 rounded border leading-none cursor-default ${color}`}>
                                         {ttaLabel}{durLabel}
                                       </span>
                                     </Tooltip>
@@ -276,7 +276,7 @@ export const EffectsPanel: React.FC = () => {
                               <p className="text-xs text-ink-2 leading-relaxed">
                                 {renderClarityDesc(clarityEntry)}
                               </p>
-                              <span className="text-[10px] text-ink-4 mt-1 flex items-center gap-2">
+                              <span className="text-2xs text-ink-4 mt-1 flex items-center gap-2">
                                 <span>via{' '}
                                   <a href="https://d2clarity.com" target="_blank" rel="noopener noreferrer"
                                     className="text-ink-4 hover:text-ink-2 underline underline-offset-2 transition-colors">
@@ -319,7 +319,7 @@ export const EffectsPanel: React.FC = () => {
                     {/* Dismiss */}
                     <button
                       onClick={() => clearPerk(columnName)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-ink-4 hover:text-red-400 shrink-0 self-start mt-0.5"
+                      className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity text-ink-4 hover:text-red-400 shrink-0 self-start p-2 -m-1 md:p-1.5 md:-m-0.5"
                       aria-label={`Deselect ${name}`}
                       title="Deselect perk"
                     >
@@ -337,7 +337,7 @@ export const EffectsPanel: React.FC = () => {
           {passiveEntries.length > 0 && (
             <div className="space-y-2">
               {conditionalEntries.length > 0 && (
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-ink-4 pt-1">
+                <p className="text-2xs font-semibold uppercase tracking-widest text-ink-4 pt-1">
                   Passive Effects
                 </p>
               )}
@@ -387,7 +387,7 @@ export const EffectsPanel: React.FC = () => {
                               <span className={`w-2 h-2 rounded-full shrink-0 ${cfg.badge.replace(/text-\S+/, '')}`} title={cfg.label} />
                             );
                             return (
-                              <span className={`text-[10px] font-black leading-none shrink-0 ${tierBadgeStyle === 'pill' ? 'px-1.5 py-0.5 rounded' : ''} ${cfg.badge}`}>
+                              <span className={`text-2xs font-black leading-none shrink-0 ${tierBadgeStyle === 'pill' ? 'px-1.5 py-0.5 rounded' : ''} ${cfg.badge}`}>
                                 {cfg.label}
                               </span>
                             );
@@ -411,7 +411,7 @@ export const EffectsPanel: React.FC = () => {
                             <p className="text-xs text-ink-2 leading-relaxed">
                               {renderClarityDesc(clarityEntry)}
                             </p>
-                            <span className="text-[10px] text-ink-4 mt-1 flex items-center gap-2">
+                            <span className="text-2xs text-ink-4 mt-1 flex items-center gap-2">
                               <span>
                                 via{' '}
                                 <a
@@ -459,7 +459,7 @@ export const EffectsPanel: React.FC = () => {
                   {/* Dismiss button */}
                   <button
                     onClick={() => clearPerk(columnName)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-ink-4 hover:text-red-400 shrink-0 self-start mt-0.5"
+                    className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity text-ink-4 hover:text-red-400 shrink-0 self-start p-2 -m-1 md:p-1.5 md:-m-0.5"
                     aria-label={`Deselect ${name}`}
                     title="Deselect perk"
                   >
@@ -499,7 +499,7 @@ export const EffectsPanel: React.FC = () => {
 
               <button
                 onClick={() => toggleBuff(buff.hash)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-ink-4 hover:text-red-400 shrink-0 self-start mt-0.5"
+                className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity text-ink-4 hover:text-red-400 shrink-0 self-start p-2 -m-1 md:p-1.5 md:-m-0.5"
                 aria-label={`Deactivate ${buff.name}`}
                 title="Deactivate buff"
               >

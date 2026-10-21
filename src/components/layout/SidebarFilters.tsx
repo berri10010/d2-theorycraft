@@ -11,14 +11,14 @@ export function ActiveChip({ label, isExclude, onRemove }: { label: string; isEx
     <button
       onClick={onRemove}
       className={[
-        'flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all leading-none',
+        'flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full border transition-all leading-none',
         isExclude
           ? 'bg-red-500/15 text-red-400 border-red-500/30 hover:bg-red-500/25'
           : 'bg-amber-500/15 text-amber-400 border-amber-500/30 hover:bg-amber-500/25',
       ].join(' ')}
     >
       {isExclude ? `≠ ${label}` : label}
-      <span className="opacity-60 text-[9px] leading-none">×</span>
+      <span className="opacity-60 text-2xs leading-none">×</span>
     </button>
   );
 }
@@ -57,14 +57,14 @@ export function OptionsPanel({
             />
           </div>
           {activeCount > 0 && (
-            <button onClick={onClear} className="shrink-0 text-[10px] text-ink-4 hover:text-amber-400 transition-colors whitespace-nowrap">
+            <button onClick={onClear} className="shrink-0 text-2xs text-ink-4 hover:text-amber-400 transition-colors whitespace-nowrap">
               Clear {activeCount}
             </button>
           )}
         </div>
       ) : activeCount > 0 ? (
         <div className="flex justify-end">
-          <button onClick={onClear} className="text-[10px] text-ink-4 hover:text-amber-400 transition-colors whitespace-nowrap">
+          <button onClick={onClear} className="text-2xs text-ink-4 hover:text-amber-400 transition-colors whitespace-nowrap">
             Clear {activeCount}
           </button>
         </div>
@@ -84,7 +84,7 @@ export function OptionsPanel({
               ].join(' ')}
             >
               <span className={[
-                'w-4 h-4 rounded-sm border-2 flex items-center justify-center text-[9px] shrink-0 transition-all',
+                'w-4 h-4 rounded-sm border-2 flex items-center justify-center text-2xs shrink-0 transition-all',
                 mode === 'inc' ? 'bg-amber-500 border-amber-500 text-slate-950' :
                 mode === 'exc' ? 'bg-red-500/20 border-red-500 text-red-400' :
                 'border-white/20 group-hover:border-white/35',
@@ -128,7 +128,7 @@ export function FilterPanel({
 
       {/* ── Toggles ── */}
       <div className="px-3 pt-3 pb-2.5">
-        <p className="text-[9px] font-bold text-ink-4 uppercase tracking-widest mb-2">Quick Filters</p>
+        <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-2">Quick Filters</p>
         <div className="grid grid-cols-2 gap-1">
           {TOGGLE_DEFS.map(({ id, label }) => {
             const on = filters[id];
@@ -144,12 +144,12 @@ export function FilterPanel({
                 ].join(' ')}
               >
                 <span className={[
-                  'w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center text-[8px] shrink-0 transition-all',
+                  'w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center text-2xs shrink-0 transition-all',
                   on ? 'bg-amber-500 border-amber-500 text-slate-950' : 'border-white/25',
                 ].join(' ')}>
                   {on ? '✓' : ''}
                 </span>
-                <span className="text-[10px] font-semibold">{label}</span>
+                <span className="text-2xs font-semibold">{label}</span>
               </button>
             );
           })}
@@ -158,7 +158,7 @@ export function FilterPanel({
 
       {/* ── Category grid ── */}
       <div className="px-3 py-2.5">
-        <p className="text-[9px] font-bold text-ink-4 uppercase tracking-widest mb-2">Filter by</p>
+        <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-2">Filter by</p>
         <div className="grid grid-cols-2 gap-1">
           {CATEGORIES.map((cat) => {
             const count = categoryCount(filters, cat);
@@ -176,9 +176,9 @@ export function FilterPanel({
                     : 'bg-white/[0.03] border-white/10 text-ink-3 hover:text-ink hover:border-white/15',
                 ].join(' ')}
               >
-                <span className="text-[10px] font-semibold truncate">{cat.label}</span>
+                <span className="text-2xs font-semibold truncate">{cat.label}</span>
                 {count > 0 && (
-                  <span className="ml-1.5 shrink-0 min-w-[16px] h-[14px] bg-amber-500 text-slate-950 text-[8px] font-black rounded-full flex items-center justify-center px-1 leading-none">
+                  <span className="ml-1.5 shrink-0 min-w-[16px] h-[14px] bg-amber-500 text-slate-950 text-3xs font-black rounded-full flex items-center justify-center px-1 leading-none">
                     {count}
                   </span>
                 )}
@@ -193,11 +193,11 @@ export function FilterPanel({
         <div className="px-3 pt-2.5 pb-3">
           {/* Header */}
           <div className="flex items-center justify-between mb-2.5">
-            <p className="text-[10px] font-bold text-ink-2 uppercase tracking-wider">
+            <p className="text-2xs font-bold text-ink-2 uppercase tracking-wider">
               {activeCatDef?.label}
             </p>
             {activeCat === 'column' && (
-              <span className="text-[9px] text-ink-4">Click once to include · again to exclude</span>
+              <span className="text-2xs text-ink-4">Click once to include · again to exclude</span>
             )}
           </div>
 
@@ -213,7 +213,7 @@ export function FilterPanel({
                       key={id}
                       onClick={() => onSetColSubcat(isSelected ? null : id)}
                       className={[
-                        'flex-1 py-1.5 text-[9px] font-bold transition-colors relative',
+                        'flex-1 py-1.5 text-2xs font-bold transition-colors relative',
                         i > 0 ? 'border-l border-white/10' : '',
                         isSelected
                           ? 'bg-amber-500/20 text-amber-300'
@@ -244,7 +244,7 @@ export function FilterPanel({
             </div>
           ) : activeCatDef?.filterKey ? (
             <>
-              <p className="text-[9px] text-ink-4 mb-2">Click once to include · again to exclude · again to clear</p>
+              <p className="text-2xs text-ink-4 mb-2">Click once to include · again to exclude · again to clear</p>
               <OptionsPanel
                 filterKey={activeCatDef.filterKey}
                 options={allOptions[activeCatDef.filterKey]}

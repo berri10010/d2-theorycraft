@@ -15,20 +15,20 @@ const WEAPON_TIER_CONFIG: Record<string, { bg: string; text: string; label: stri
   S: { bg: 'bg-amber-400', text: 'text-slate-950', label: 'S-Tier' },
   A: { bg: 'bg-green-400', text: 'text-slate-950', label: 'A-Tier' },
   B: { bg: 'bg-blue-400',  text: 'text-slate-950', label: 'B-Tier' },
-  C: { bg: 'bg-slate-500', text: 'text-white', label: 'C-Tier' },
-  D: { bg: 'bg-slate-600', text: 'text-ink-2', label: 'D-Tier' },
-  E: { bg: 'bg-slate-700', text: 'text-ink-3', label: 'E-Tier' },
-  F: { bg: 'bg-red-900',   text: 'text-red-300', label: 'F-Tier' },
+  C: { bg: 'bg-slate-500', text: 'text-slate-50', label: 'C-Tier' },
+  D: { bg: 'bg-slate-600', text: 'text-slate-100', label: 'D-Tier' },
+  E: { bg: 'bg-slate-700', text: 'text-slate-200', label: 'E-Tier' },
+  F: { bg: 'bg-red-900',   text: 'text-[#fca5a5]', label: 'F-Tier' },
 };
 
 // ── Small pill for a perk / roll option ──────────
 function PerkPill({ name, index }: { name: string; index: number }) {
   const colors = [
-    'bg-amber-900/60 border-amber-700/60 text-amber-300',
-    'bg-green-900/60 border-green-700/60 text-green-300',
-    'bg-blue-900/60 border-blue-700/60 text-blue-300',
-    'bg-purple-900/60 border-purple-700/60 text-purple-300',
-    'bg-slate-800 border-slate-700 text-ink-2',
+    'bg-amber-500/15 border-amber-500/40 text-amber-300',
+    'bg-green-500/15 border-green-500/40 text-green-300',
+    'bg-blue-500/15 border-blue-500/40 text-blue-300',
+    'bg-purple-500/15 border-purple-500/40 text-purple-300',
+    'bg-slate-800 border-slate-700 text-slate-100',
   ];
   return (
     <span className={`inline-block text-xs px-2 py-0.5 rounded border font-medium ${colors[index] ?? colors[4]}`}>
@@ -247,7 +247,7 @@ export const GodRollPanel: React.FC = () => {
       })()}
 
       {/* Source attribution */}
-      <p className="text-[10px] text-ink-4 mt-4 text-right">
+      <p className="text-2xs text-ink-4 mt-4 text-right">
         {isPvp ? (
           <>
             Source:{' '}
