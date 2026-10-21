@@ -112,11 +112,11 @@ function StatBarRow({ label, base, current, highlighted }: {
 
   return (
     <div className={`flex items-center text-sm rounded-md transition-colors duration-150 ${highlighted ? 'bg-amber-500/8' : ''}`}>
-      <div className={`w-24 md:w-28 lg:w-[4.5rem] xl:w-28 font-medium shrink-0 transition-colors duration-150 ${highlighted ? 'text-amber-300' : 'text-ink-2'}`}>
+      <div className={`stat-label font-medium shrink-0 transition-colors duration-150 ${highlighted ? 'text-amber-300' : 'text-ink-2'}`}>
         {label}
       </div>
 
-      <div className="flex-1 h-2.5 bg-black rounded-full overflow-hidden relative mx-3 lg:mx-2 xl:mx-3">
+      <div className="flex-1 h-2.5 bg-black rounded-full overflow-hidden relative stat-bar">
         <motion.div
           className={`absolute top-0 left-0 h-full transition-colors duration-150 ${highlighted ? 'bg-amber-400' : 'bg-slate-300'}`}
           animate={{ width: `${Math.min(base, 100)}%` }}
@@ -138,7 +138,7 @@ function StatBarRow({ label, base, current, highlighted }: {
         )}
       </div>
 
-      <div className="w-16 lg:w-14 xl:w-16 text-right font-mono flex flex-col justify-center items-end">
+      <div className="stat-value text-right font-mono flex flex-col justify-center items-end">
         <span className={
           'font-bold text-sm ' +
           (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : highlighted ? 'text-amber-300' : 'text-white')
@@ -166,7 +166,7 @@ function CompactStatCard({ statName, base, current, label }: {
   const isRecoil = statName === 'Recoil Direction';
 
   return (
-    <div className={`bg-black/30 rounded-lg px-2.5 py-2 border border-white/5 flex items-center gap-2 min-w-0 overflow-hidden ${isRecoil ? "lg:col-span-2 xl:col-span-1" : ""}`}>
+    <div className={`bg-black/30 rounded-lg px-2.5 py-2 border border-white/5 flex items-center gap-2 min-w-0 overflow-hidden ${isRecoil ? "stat-recoil" : ""}`}>
       {isRecoil && <RecoilChart value={current} />}
       <div className="min-w-0">
         <div className="text-2xs text-ink-4 leading-none mb-0.5">{label}</div>
@@ -264,6 +264,7 @@ export const StatDisplay: React.FC = () => {
 
   return (
     <CollapsiblePanel title="Weapon Stats" storageKey="weapon-stats">
+     <div className="stats-cq">
 
       {/* ── Bar stats ────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 mb-4">
@@ -359,7 +360,7 @@ export const StatDisplay: React.FC = () => {
       {/* ── Compact numeric stats grid ───────────────────────────── */}
       {compactStats.length > 0 && (
         <div className="border-t border-white/5 pt-3 mt-1">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+          <div className="stat-compact gap-2">
             {compactStats.map((statName) => {
               const base    = baseStats[statName] ?? 0;
               const current = calcStats[statName] ?? base;
@@ -391,6 +392,7 @@ export const StatDisplay: React.FC = () => {
       )}
       <SourceNote className="mt-3" label="Reload, handling and draw times" ids={['oracle']} detail="formulas" />
 
+     </div>
     </CollapsiblePanel>
   );
 };

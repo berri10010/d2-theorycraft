@@ -132,3 +132,45 @@ select option { background: rgb(var(--c-surface)); color: rgb(var(--c-ink)); }
 @media (prefers-reduced-motion: reduce) {
   .tab-in, .layout-fade { animation: none; }
 }
+
+/* While the window is being resized (see ResizeGuard) nothing transitions, so size changes at breakpoints are instant. */
+.resizing *, .resizing *::before, .resizing *::after { transition: none !important; }
+
+/* ── Panels respond to the width they actually have (container queries), not the window's ──────────────
+   .editor-shell wraps the editor; .stats-cq wraps the Weapon Stats body. The thresholds below are the
+   room each layout needs, so the page reflows smoothly at any window size, with the weapon list docked
+   or collapsed. */
+.editor-shell { container: editor / inline-size; }
+.stats-cq     { container: stats  / inline-size; }
+
+.editor-col { display: contents; }               /* one column: panels join a single list, ordered by `order-N` */
+.hdr-label, .hdr-chevron { display: none; }      /* header buttons are icon-only until there is room */
+
+/* Two columns once the editor is 640px wide: the perks column needs ~373px, stats ~240px, plus the gap. */
+@container editor (min-width: 640px) {
+  .editor-grid { grid-template-columns: minmax(373px, 1.25fr) minmax(240px, 1fr); }
+  .editor-col { display: block; }
+  .editor-col > * { order: 0 !important; }
+  .editor-col > * + * { margin-top: 1.5rem; }
+}
+@container editor (min-width: 900px) {
+  .hdr-label   { display: inline; }
+  .hdr-chevron { display: block; }
+}
+
+/* Stat rows and the compact tiles scale with the panel: narrow, roomy, then three tiles across. */
+.stat-label  { width: 4.5rem; }
+.stat-bar    { margin-inline: 0.5rem; }
+.stat-value  { width: 3.5rem; }
+.stat-compact { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stat-recoil { grid-column: span 2; }
+@container stats (min-width: 280px) {
+  .stat-label  { width: 6rem; }
+  .stat-bar    { margin-inline: 0.75rem; }
+  .stat-value  { width: 4rem; }
+  .stat-recoil { grid-column: span 1; }
+}
+@container stats (min-width: 340px) {
+  .stat-label   { width: 7rem; }
+  .stat-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

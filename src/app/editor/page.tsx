@@ -101,21 +101,27 @@ function Dashboard() {
     activeTabRef.current = next;
     setActiveTab(next);
   }, []);
-  // Panels jump between one and two columns (and the weapon list docks) as the window crosses a breakpoint;
-  // a quick opacity-only fade (GPU, no layout cost) hides the jump.
+  // Panels jump between one and two columns (and the weapon list docks) when the editor area crosses a layout
+  // threshold; a quick opacity-only fade (GPU, no layout cost) hides the jump.
   const contentRef = useRef<HTMLDivElement>(null);
+  const hasWeapon = !!activeWeapon; // the editor area only mounts once a weapon is loaded
   useEffect(() => {
-    const queries = ['(min-width: 720px)', '(min-width: 1024px)', '(min-width: 1280px)'].map((q) => window.matchMedia(q));
+    const el = contentRef.current;
+    if (!el) return;
     const fade = () => {
-      const el = contentRef.current;
-      if (!el) return;
       el.classList.remove('layout-fade');
       void el.offsetWidth; // restart the animation
       el.classList.add('layout-fade');
     };
-    queries.forEach((m) => m.addEventListener('change', fade));
-    return () => queries.forEach((m) => m.removeEventListener('change', fade));
-  }, []);
+    // Same thresholds as the container queries in globals.css (640 and 900px), plus the 720px window width where the weapon list docks.
+    const stage = () => (el.clientWidth >= 900 ? 2 : el.clientWidth >= 640 ? 1 : 0);
+    let last = stage();
+    const ro = new ResizeObserver(() => { const now = stage(); if (now !== last) { last = now; fade(); } });
+    ro.observe(el);
+    const dock = window.matchMedia('(min-width: 720px)');
+    dock.addEventListener('change', fade);
+    return () => { ro.disconnect(); dock.removeEventListener('change', fade); };
+  }, [hasWeapon]);
   useLayoutEffect(() => { mainRef.current?.scrollTo({ top: scrollByTab.current[activeTab] }); }, [activeTab]);
   // Mount the comparison grid on first visit, then keep it mounted (hidden) so its state survives tab switches.
   const [compareMounted,     setCompareMounted]     = useState(false);
@@ -566,7 +572,7 @@ function Dashboard() {
           onModeChange={setMode}
           onOpenWeapons={() => setSidebarOpen(true)}
         />
-        <div ref={contentRef} className="max-w-7xl 2xl:max-w-[1500px] mx-auto p-4 pb-28 min-[720px]:p-6 xl:p-8 space-y-6">
+        <div ref={contentRef} className="editor-shell max-w-7xl 2xl:max-w-[1500px] mx-auto p-4 pb-28 min-[720px]:p-6 xl:p-8 space-y-6">
 
           {/* ── Top action bar ─────────────────────────────────────────── */}
           {/*
@@ -654,11 +660,11 @@ function Dashboard() {
                     ].join(' ')}
                   >
                     <ShareIcon className="w-3.5 h-3.5 shrink-0" />
-                    <span className="hidden xl:inline">
+                    <span className="hdr-label">
                       {copiedType === 'permalink' ? 'Copied!' : copiedType === 'dim' ? 'DIM copied!' : 'Share'}
                     </span>
                     {!copiedType && (
-                      <svg viewBox="0 0 20 20" fill="currentColor" className={`hidden xl:block w-3 h-3 text-ink-4 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
+                      <svg viewBox="0 0 20 20" fill="currentColor" className={`hdr-chevron w-3 h-3 text-ink-4 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
                         <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.937a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                       </svg>
                     )}
@@ -718,7 +724,7 @@ function Dashboard() {
                   ].join(' ')}
                 >
                   <TrashIcon className="w-3.5 h-3.5 shrink-0" />
-                  <span className="hidden xl:inline">
+                  <span className="hdr-label">
                     {clearPending ? 'Confirm?' : 'Clear Roll'}
                   </span>
                 </button>
@@ -731,7 +737,7 @@ function Dashboard() {
                   className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-colors min-h-[44px] min-w-[44px] flex items-center gap-1"
                 >
                   <span>+</span>
-                  <span className="hidden xl:inline">Add to Compare</span>
+                  <span className="hdr-label">Add to Compare</span>
                 </button>
               </div>
             )}
@@ -751,19 +757,19 @@ function Dashboard() {
                 <ErrorBoundary label="Weapon Header"><WeaponHeader /></ErrorBoundary>
 
                 {/*
-                  Two columns from lg (1024px); below that, the one-column order below. The columns dissolve on mobile (display: contents) so every panel
+                  Two columns whenever the editor area itself is 640px wide or more (container query, see .editor-grid in globals.css); narrower, the one-column order below. The columns dissolve on mobile (display: contents) so every panel
                   joins one list, and `order` sets the reading order there: the roll, what it does, how to
                   tweak it, then the community's view.
                     Desktop left  : Weapon Perks, Perk Effects, External Buffs, God Roll + Wishlists
                     Desktop right : Weapon Stats, Weapon Data, Similar Weapons, Tier Lists
                 */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  <div className="contents lg:block lg:col-span-7 xl:col-span-6 lg:space-y-6">
-                    <div className="order-1 lg:order-none"><ErrorBoundary label="Weapon Perks"><RollEditor /></ErrorBoundary></div>
+                <div className="editor-grid grid grid-cols-1 gap-6">
+                  <div className="editor-col">
+                    <div className="order-1"><ErrorBoundary label="Weapon Perks"><RollEditor /></ErrorBoundary></div>
                     {settings.showEffectsPanel && (
-                      <div className="order-3 lg:order-none"><ErrorBoundary label="Perk Effects"><EffectsPanel /></ErrorBoundary></div>
+                      <div className="order-3"><ErrorBoundary label="Perk Effects"><EffectsPanel /></ErrorBoundary></div>
                     )}
-                    {settings.showExternalBuffs && <div className="order-4 lg:order-none"><BuffToggle /></div>}
+                    {settings.showExternalBuffs && <div className="order-4"><BuffToggle /></div>}
                     {/* Mode-dependent panels — animate on PvE ↔ PvP switch */}
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.div
@@ -772,7 +778,7 @@ function Dashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="order-6 lg:order-none space-y-6"
+                        className="order-6 space-y-6"
                       >
                         {settings.showGodRollPanel  && <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>}
                         {settings.showWishlistPanel && <ErrorBoundary label="Wishlists & Saved Rolls"><WishlistPanel /></ErrorBoundary>}
@@ -780,16 +786,16 @@ function Dashboard() {
                     </AnimatePresence>
                   </div>
 
-                  <div className="contents lg:block lg:col-span-5 xl:col-span-6 lg:space-y-6">
-                    <div className="order-2 lg:order-none"><ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary></div>
+                  <div className="editor-col">
+                    <div className="order-2"><ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary></div>
                     {settings.showWeaponData && (
-                      <div className="order-5 lg:order-none"><ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary></div>
+                      <div className="order-5"><ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary></div>
                     )}
                     {settings.showSimilarWeapons && (
-                      <div className="order-7 lg:order-none"><ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary></div>
+                      <div className="order-7"><ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary></div>
                     )}
                     {settings.showTierListPanel && (
-                      <div className="order-8 lg:order-none"><ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary></div>
+                      <div className="order-8"><ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary></div>
                     )}
                   </div>
                 </div>
