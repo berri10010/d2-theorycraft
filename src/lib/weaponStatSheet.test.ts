@@ -77,6 +77,28 @@ describe('parseWeaponStatSheet', () => {
   });
 });
 
+describe('corrections to the sheet', () => {
+  const parsed = parseWeaponStatSheet(
+    chart(),
+    data(
+      dataRow('Hand Cannon_p_Spread Shot', { body: 120.015, crit: 144.724, shot: 18, perSub: 12, rpm: 100 }),
+      dataRow('Fusion_s_Bastion', { body: 30.5955, crit: 30.5955, shot: 15, charge: 800, perBurst: 3, perSub: 12, rpm: 360 }),
+    ),
+  );
+  const by = (k: string) => parsed.entries.find((e) => e.lookup === k)!;
+
+  it('Spread Shot has 11 pellets and keeps its 120 damage per shot', () => {
+    const e = by('Hand Cannon_p_Spread Shot');
+    expect(e.pellets).toBe(11);
+    expect(e.bodyDamage * 11).toBeCloseTo(120.015, 3);
+    expect(e.critDamage * 11).toBeCloseTo(144.724, 3);
+  });
+
+  it('Bastion fires 3 bullets of 7 pellets', () => {
+    expect(by('Fusion_s_Bastion')).toMatchObject({ shotsPerBurst: 3, pellets: 7, bodyDamage: 30.5955 });
+  });
+});
+
 describe('mergeWeaponStats', () => {
   const old = (lookup: string, p: Partial<WeaponStatEntry> = {}): WeaponStatEntry => ({
     lookup, type: 'T', ammo: 'p', frame: 'F', bodyDamage: 1, critDamage: 2, shotDelay: 3, burstDelay: null,
@@ -125,6 +147,13 @@ describe('shipped weaponStats.json', () => {
     for (const k of ['Shotgun_s_Aggressive', 'Shotgun_s_Lightweight', 'Fusion_s_Adaptive', 'Fusion_s_Rapid Fire']) {
       expect(file.find((e) => e.lookup === k)?.pellets, k).toBeGreaterThan(4);
     }
+  });
+
+  it('applies the corrections: Spread Shot 11 pellets, Bastion 3 x 7', () => {
+    const spread = file.find((e) => e.lookup === 'Hand Cannon_p_Spread Shot')!;
+    expect(spread.pellets).toBe(11);
+    expect(spread.bodyDamage * 11).toBeCloseTo(120.015, 2);
+    expect(file.find((e) => e.lookup === 'Fusion_s_Bastion')).toMatchObject({ shotsPerBurst: 3, pellets: 7 });
   });
 
   it('includes frames added in the 9.7 chart and the merged Lightweight frames', () => {

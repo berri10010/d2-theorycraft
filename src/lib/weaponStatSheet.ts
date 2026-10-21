@@ -24,6 +24,35 @@ const AMMO_SLOT: Record<string, string> = { Primary: 'p', Special: 's', Heavy: '
 /** Frame names the chart abbreviates in combined rows; our weapon data uses the full intrinsic name. */
 const FRAME_ALIASES: Record<string, string> = { 'PR-55': 'Legacy PR-55 Frame' };
 
+/**
+ * Corrections to the sheet's WeaponData, keyed by lookup. They survive every refresh, so the sheet
+ * can keep its mistakes without them leaking back into the site.
+ *  - pellets / shotsPerBurst: the real in-game counts when the sheet's differ.
+ *  - totalDamage: the sheet's damage is for the whole shot, not per pellet, so it is divided among the
+ *    pellets (the engine multiplies damage by pellet count).
+ */
+export interface StatOverride { pellets?: number; shotsPerBurst?: number; totalDamage?: boolean }
+export const STAT_OVERRIDES: Record<string, StatOverride> = {
+  // Sheet says 12 pellets and gives 120 damage for the whole shot (~2 body shots, like the chart's StK 2).
+  'Hand Cannon_p_Spread Shot': { pellets: 11, totalDamage: true },
+  // Sheet says 3 x 12; in game it is 3 bullets of 7 pellets.
+  'Fusion_s_Bastion': { shotsPerBurst: 3, pellets: 7 },
+};
+
+function applyOverride(e: WeaponStatEntry): WeaponStatEntry {
+  const o = STAT_OVERRIDES[e.lookup];
+  if (!o) return e;
+  const pellets = o.pellets ?? e.pellets;
+  const split = o.totalDamage && pellets ? pellets : 1;
+  return {
+    ...e,
+    pellets,
+    shotsPerBurst: o.shotsPerBurst ?? e.shotsPerBurst,
+    bodyDamage: e.bodyDamage / split,
+    critDamage: e.critDamage / split,
+  };
+}
+
 const norm = (h: string) => h.replace(/\s+/g, ' ').trim().toLowerCase();
 
 const num = (s: string | undefined): number | null => {
@@ -100,6 +129,7 @@ function parseWeaponData(csv: string, skipped: string[]): Map<string, WeaponStat
 export function parseWeaponStatSheet(chartCsv: string, dataCsv: string): ParsedSheet {
   const skipped: string[] = [];
   const data = parseWeaponData(dataCsv, skipped);
+  for (const [k, e] of data) data.set(k, applyOverride(e));
   const entries = [...data.values()];
 
   const rows = parseCSV(chartCsv);
