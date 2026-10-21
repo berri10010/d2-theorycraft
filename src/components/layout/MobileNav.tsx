@@ -46,7 +46,7 @@ interface TopBarProps {
 
 export function MobileTopBar({ activeTab, weapon, mode, onModeChange, onOpenWeapons }: TopBarProps) {
   return (
-    <div className="md:hidden sticky top-0 z-30 flex items-center gap-2 h-14 px-3 bg-black/85 backdrop-blur-md border-b border-white/10">
+    <div className="min-[720px]:hidden sticky top-0 z-30 flex items-center gap-2 h-14 px-3 bg-black/85 backdrop-blur-md border-b border-white/10">
       {activeTab === 'editor' ? (
         <>
           <button
@@ -109,7 +109,7 @@ export function MobileBottomNav({ activeTab, onTabChange, compareCount, onOpenWe
   return (
     <nav
       aria-label="Primary"
-      className="md:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-5 bg-surface-2/95 backdrop-blur-md border-t border-white/10 pb-[env(safe-area-inset-bottom)]"
+      className="min-[720px]:hidden fixed bottom-0 inset-x-0 z-30 grid grid-cols-5 bg-surface-2/95 backdrop-blur-md border-t border-white/10 pb-[env(safe-area-inset-bottom)]"
     >
       <button onClick={onOpenWeapons} className={`${item} ${idle}`}>
         <ListIcon />
@@ -161,7 +161,7 @@ export function MobileToast({ message }: { message: string | null }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
           transition={{ duration: 0.18 }}
-          className="md:hidden fixed left-1/2 -translate-x-1/2 bottom-[calc(76px+env(safe-area-inset-bottom))] z-30 px-4 py-2.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-sm font-semibold backdrop-blur-md shadow-lg"
+          className="min-[720px]:hidden fixed left-1/2 -translate-x-1/2 bottom-[calc(76px+env(safe-area-inset-bottom))] z-30 px-4 py-2.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-sm font-semibold backdrop-blur-md shadow-lg"
         >
           {message}
         </motion.div>
@@ -218,7 +218,7 @@ export function MobileMoreSheet({ open, onClose, onSharePermalink, onShareDim, o
   return (
     <AnimatePresence>
       {open && (
-        <div className="md:hidden fixed inset-0 z-[60]">
+        <div className="min-[720px]:hidden fixed inset-0 z-[60]">
           <motion.div
             key="sheet-backdrop"
             aria-hidden="true"
