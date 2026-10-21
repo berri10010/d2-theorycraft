@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useRef, Suspense } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useMemo, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -103,6 +103,17 @@ function Dashboard() {
   const searchParams = useSearchParams();
 
   const [activeTab,          setActiveTab]          = useState<'editor' | 'compare'>('editor');
+  // Each tab keeps its own scroll position, so flipping between them never lands mid-page in the other one.
+  const mainRef      = useRef<HTMLElement>(null);
+  const scrollByTab  = useRef<Record<'editor' | 'compare', number>>({ editor: 0, compare: 0 });
+  const activeTabRef = useRef(activeTab);
+  const switchTab = useCallback((next: 'editor' | 'compare') => {
+    if (next === activeTabRef.current) return;
+    scrollByTab.current[activeTabRef.current] = mainRef.current?.scrollTop ?? 0;
+    activeTabRef.current = next;
+    setActiveTab(next);
+  }, []);
+  useLayoutEffect(() => { mainRef.current?.scrollTo({ top: scrollByTab.current[activeTab] }); }, [activeTab]);
   // Mount the comparison grid on first visit, then keep it mounted (hidden) so its state survives tab switches.
   const [compareMounted,     setCompareMounted]     = useState(false);
   useEffect(() => { if (activeTab === 'compare') setCompareMounted(true); }, [activeTab]);
@@ -130,7 +141,7 @@ function Dashboard() {
     onEscape:         () => { if (showShortcuts) { setShowShortcuts(false); return; } if (sidebarOpen) setSidebarOpen(false); },
     onPve:            () => setMode('pve'),
     onPvp:            () => setMode('pvp'),
-    onCompare:        () => setActiveTab((t) => (t === 'editor' ? 'compare' : 'editor')),
+    onCompare:        () => switchTab(activeTabRef.current === 'editor' ? 'compare' : 'editor'),
     onShortcutLegend: () => setShowShortcuts((v) => !v),
   });
 
@@ -506,7 +517,7 @@ function Dashboard() {
       {/* Mobile chrome (md:hidden inside each component) */}
       <MobileBottomNav
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={switchTab}
         compareCount={snapshots.length}
         onOpenWeapons={() => setSidebarOpen(true)}
         onAddToCompare={handleAddToCompare}
@@ -540,6 +551,7 @@ function Dashboard() {
       {/* Main content */}
       <main
         id="main-content"
+        ref={mainRef}
         tabIndex={-1}
         aria-label="Weapon theorycrafting editor"
         className="flex-1 overflow-y-auto overscroll-y-contain min-w-0 focus:outline-none"
@@ -551,7 +563,7 @@ function Dashboard() {
           onModeChange={setMode}
           onOpenWeapons={() => setSidebarOpen(true)}
         />
-        <div className="max-w-7xl mx-auto p-4 pb-28 md:p-8 space-y-6">
+        <div className="max-w-7xl 2xl:max-w-[1500px] mx-auto p-4 pb-28 md:p-8 space-y-6">
 
           {/* ── Top action bar ─────────────────────────────────────────── */}
           {/*
@@ -582,15 +594,16 @@ function Dashboard() {
                     key={tab}
                     role="tab"
                     aria-selected={activeTab === tab}
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => switchTab(tab)}
                     className={
-                      'px-3 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] flex items-center gap-1.5 capitalize ' +
-                      (activeTab === tab ? 'bg-white/10 text-amber-400' : 'text-ink-3 hover:text-ink')
+                      'relative px-3 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] flex items-center gap-1.5 capitalize ' +
+                      (activeTab === tab ? 'text-amber-400' : 'text-ink-3 hover:text-ink')
                     }
                   >
-                    {tab}
+                    {activeTab === tab && <motion.span layoutId="view-pill" className="absolute inset-0 rounded-md bg-white/10" transition={{ type: 'spring', stiffness: 500, damping: 40 }} />}
+                    <span className="relative">{tab}</span>
                     {tab === 'compare' && snapshots.length > 0 && (
-                      <span className="bg-amber-500 text-slate-950 text-xs px-1.5 py-0.5 rounded-full font-bold leading-none">
+                      <span className="relative bg-amber-500 text-slate-950 text-xs px-1.5 py-0.5 rounded-full font-bold leading-none">
                         {snapshots.length}
                       </span>
                     )}
@@ -608,11 +621,12 @@ function Dashboard() {
                     onClick={() => setMode(m)}
                     aria-pressed={mode === m}
                     className={[
-                      'px-3 sm:px-4 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] uppercase',
-                      mode === m ? 'bg-white/10 text-amber-400' : 'text-ink-3 hover:text-ink',
+                      'relative px-3 sm:px-4 py-1.5 text-sm rounded-md font-medium transition-colors min-h-[44px] uppercase',
+                      mode === m ? 'text-amber-400' : 'text-ink-3 hover:text-ink',
                     ].join(' ')}
                   >
-                    {m}
+                    {mode === m && <motion.span layoutId="mode-pill" className="absolute inset-0 rounded-md bg-white/10" transition={{ type: 'spring', stiffness: 500, damping: 40 }} />}
+                    <span className="relative">{m}</span>
                   </button>
                 ))}
               </div>
@@ -620,7 +634,7 @@ function Dashboard() {
 
             {/* Action buttons — full-width on mobile (forces new row, centered); auto+right on desktop */}
             {activeTab === 'editor' && (
-              <div className="flex items-center gap-2 w-full justify-center sm:w-auto sm:ml-auto sm:justify-end">
+              <div className="flex items-center gap-2 ml-auto justify-end">
                 {/* Keyboard shortcut legend */}
                 <button
                   onClick={() => setShowShortcuts(true)}
@@ -648,11 +662,11 @@ function Dashboard() {
                     ].join(' ')}
                   >
                     <ShareIcon className="w-3.5 h-3.5 shrink-0" />
-                    <span className="hidden sm:inline">
+                    <span className="hidden lg:inline">
                       {copiedType === 'permalink' ? 'Copied!' : copiedType === 'dim' ? 'DIM copied!' : 'Share'}
                     </span>
                     {!copiedType && (
-                      <svg viewBox="0 0 20 20" fill="currentColor" className={`hidden sm:block w-3 h-3 text-ink-4 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
+                      <svg viewBox="0 0 20 20" fill="currentColor" className={`hidden lg:block w-3 h-3 text-ink-4 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
                         <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.937a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                       </svg>
                     )}
@@ -712,7 +726,7 @@ function Dashboard() {
                   ].join(' ')}
                 >
                   <TrashIcon className="w-3.5 h-3.5 shrink-0" />
-                  <span className="hidden sm:inline">
+                  <span className="hidden lg:inline">
                     {clearPending ? 'Confirm?' : 'Clear Roll'}
                   </span>
                 </button>
@@ -721,17 +735,18 @@ function Dashboard() {
                 <button
                   onClick={handleAddToCompare}
                   aria-label={`Add ${activeWeapon.name} to Compare`}
+                  title="Add to Compare"
                   className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-colors min-h-[44px] min-w-[44px] flex items-center gap-1"
                 >
                   <span>+</span>
-                  <span className="hidden sm:inline">Add to Compare</span>
+                  <span className="hidden lg:inline">Add to Compare</span>
                 </button>
               </div>
             )}
           </header>
 
           {/* ── Editor tab ──────────────────────────────────────────────── */}
-          <div role="tabpanel" aria-label="Roll editor" hidden={activeTab !== 'editor'}>
+          <div role="tabpanel" aria-label="Roll editor" hidden={activeTab !== 'editor'} className="tab-in">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.div
                 key={activeWeapon.hash}
@@ -791,8 +806,8 @@ function Dashboard() {
           </div>
 
           {/* ── Compare tab ─────────────────────────────────────────────── */}
-          <div role="tabpanel" aria-label="Comparison grid" hidden={activeTab !== 'compare'}>
-            {compareMounted && <ErrorBoundary label="Comparison"><ComparisonGrid onLoadToEditor={() => setActiveTab('editor')} /></ErrorBoundary>}
+          <div role="tabpanel" aria-label="Comparison grid" hidden={activeTab !== 'compare'} className="tab-in">
+            {compareMounted && <ErrorBoundary label="Comparison"><ComparisonGrid onLoadToEditor={() => { scrollByTab.current.editor = 0; switchTab('editor'); }} /></ErrorBoundary>}
           </div>
 
         </div>
