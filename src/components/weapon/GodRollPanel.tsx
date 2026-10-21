@@ -5,9 +5,10 @@ import { useShallow } from 'zustand/react/shallow';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { useGodRolls } from '../../lib/useGodRolls';
-import { usePvpWishlist } from '../../lib/useStaticJson';
+import { usePvpWishlist, usePride } from '../../lib/useStaticJson';
 import { lookupPvpEntry } from '../../lib/pvpWishlist';
-import { lookupGodRoll, pvpGodRoll } from '../../lib/godRolls';
+import { lookupGodRoll, pvpGodRoll, PRIDE_SHEET_URL } from '../../lib/godRolls';
+import { RollVsMeta } from './RollVsMeta';
 
 // ── Tier colour config ────────────────────────────
 const WEAPON_TIER_CONFIG: Record<string, { bg: string; text: string; label: string }> = {
@@ -16,6 +17,8 @@ const WEAPON_TIER_CONFIG: Record<string, { bg: string; text: string; label: stri
   B: { bg: 'bg-blue-400',  text: 'text-slate-950', label: 'B-Tier' },
   C: { bg: 'bg-slate-500', text: 'text-white', label: 'C-Tier' },
   D: { bg: 'bg-slate-600', text: 'text-ink-2', label: 'D-Tier' },
+  E: { bg: 'bg-slate-700', text: 'text-ink-3', label: 'E-Tier' },
+  F: { bg: 'bg-red-900',   text: 'text-red-300', label: 'F-Tier' },
 };
 
 // ── Small pill for a perk / roll option ──────────
@@ -119,15 +122,18 @@ function useApplyGodRoll() {
 export const GodRollPanel: React.FC = () => {
   const { activeWeapon } = useWeaponStore();
   const mode = useWeaponStore((s) => s.mode);
+  const selectedPerks = useWeaponStore((s) => s.selectedPerks);
+  const masterworkStat = useWeaponStore((s) => s.masterworkStat);
   const { data: godRollDb, loading } = useGodRolls();
   const { data: pvpDb, loading: pvpLoading } = usePvpWishlist();
+  const { data: prideDb, loading: prideLoading } = usePride();
   const { applyEntry, applied } = useApplyGodRoll();
 
   if (!activeWeapon) return null;
 
   const isPvp = mode === 'pvp';
 
-  if (loading || (isPvp && pvpLoading)) {
+  if (loading || (isPvp && (pvpLoading || prideLoading))) {
     return (
       <CollapsiblePanel title={isPvp ? 'PvP God Roll' : 'God Roll'} storageKey="god-roll">
         <p className="text-ink-4 text-sm text-center py-6 animate-pulse">Loading community analysis…</p>
@@ -136,8 +142,9 @@ export const GodRollPanel: React.FC = () => {
   }
 
   const pveEntry = godRollDb ? lookupGodRoll(godRollDb, activeWeapon) : null;
+  const prideEntry = prideDb ? lookupGodRoll(prideDb, activeWeapon) : null;
   const entry = isPvp
-    ? pvpGodRoll(pveEntry, pvpDb ? lookupPvpEntry(pvpDb, activeWeapon) : null)
+    ? pvpGodRoll(pveEntry, pvpDb ? lookupPvpEntry(pvpDb, activeWeapon) : null, prideEntry)
     : pveEntry;
 
   if (!entry) return null;
@@ -148,7 +155,7 @@ export const GodRollPanel: React.FC = () => {
 
   const weaponTypeLabel = entry.weaponType === 'Other' ? 'other weapons' : `${entry.weaponType}s`;
   const subtitleParts = [
-    isPvp ? 'Community PvP wishlist' : 'Community analysis',
+    isPvp ? (prideEntry ? "Pride Eternal's PvP sheet" : 'Community PvP wishlist') : "Aegis's PvE analysis",
     entry.season ? `Season ${entry.season}` : null,
     numericRank != null ? `Rank #${numericRank} in ${weaponTypeLabel}` : null,
   ].filter(Boolean).join(' · ');
@@ -204,6 +211,7 @@ export const GodRollPanel: React.FC = () => {
 
         return (
           <>
+            <RollVsMeta weapon={activeWeapon} mode={mode} selected={selectedPerks} masterwork={masterworkStat} />
             <div className="space-y-3 mb-4">
               <RollRow label="Barrel" options={entry.barrel} />
               <RollRow label="Mag"    options={entry.mag} />
@@ -230,7 +238,7 @@ export const GodRollPanel: React.FC = () => {
               <div className="mt-4 pt-4 border-t border-white/10">
                 <p className="text-xs text-ink-4 uppercase tracking-wide mb-1.5">{isPvp ? 'Notes' : 'Analyst Notes'}</p>
                 {noteLines.map((note, i) => (
-                  <p key={i} className="text-sm text-ink-2 leading-relaxed italic">{note}</p>
+                  <p key={i} className="text-sm text-ink-2 leading-relaxed italic whitespace-pre-line">{note}</p>
                 ))}
               </div>
             )}
@@ -243,6 +251,19 @@ export const GodRollPanel: React.FC = () => {
         {isPvp ? (
           <>
             Source:{' '}
+            {prideEntry && (
+              <>
+                <a
+                  href={PRIDE_SHEET_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:text-ink-2"
+                >
+                  Pride Eternal&apos;s PvP spreadsheet
+                </a>
+                {' · '}
+              </>
+            )}
             <a
               href="https://github.com/Wunderkammern/CrucibleGuidebook-PVP-DIM-Wishlist/wiki/CrucibleGuidebook-DIM-Wishlist"
               target="_blank"

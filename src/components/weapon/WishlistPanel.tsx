@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
+import { SavedRollScore } from './RollVsMeta';
 import { useWeaponDb } from '../../store/useWeaponDb';
 import { groupWeapons } from '../../lib/weaponGroups';
 import { perkNamesFromHashes, perkSelectionFromHashes } from '../../lib/rollHelpers';
@@ -137,6 +138,7 @@ const ROLLS_PREVIEW = 4; // number of personal rolls shown before "show all"
 
 export const WishlistPanel: React.FC = () => {
   const { activeWeapon, selectedPerks, loadWeapon, selectPerk } = useWeaponStore();
+  const mode = useWeaponStore((s) => s.mode);
   const { weapons } = useWeaponDb();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showAllRolls, setShowAllRolls] = useState(false);
@@ -327,7 +329,10 @@ export const WishlistPanel: React.FC = () => {
                       <p className="text-[10px] text-ink-4 truncate">
                         {names.length ? names.join(' · ') : `${roll.perkHashes.length} perks`}
                       </p>
-                      <p className="text-[9px] text-ink-4">{new Date(roll.savedAt).toLocaleDateString()}</p>
+                      <p className="text-[9px] text-ink-4 flex items-center gap-1.5">
+                        {new Date(roll.savedAt).toLocaleDateString()}
+                        <SavedRollScore weapon={target ?? null} hashes={roll.perkHashes} mode={mode} />
+                      </p>
                     </button>
                     <button
                       onClick={() => removeRoll(roll.weaponHash, roll.perkHashes)}

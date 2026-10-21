@@ -8,6 +8,7 @@ import { CompareSnapshot, StatCurveNode } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
 import { ammoFromStats } from '../../lib/ttkAmmo';
+import { RollScoreBadge } from '../weapon/RollVsMeta';
 import { interpolateStat, adsMultiplier } from '../../lib/math';
 import { calcHandlingTimes } from '../../lib/handlingTimes';
 import { calcReloadTime } from '../../lib/reloadTimes';
@@ -229,6 +230,13 @@ function SnapshotCard({
               MW: <span className="text-amber-400/80 font-medium">{snapshot.masterworkStat}</span>
             </p>
           )}
+          <RollScoreBadge
+            weapon={snapshot.weapon}
+            mode={snapshot.mode}
+            selected={snapshot.selectedPerks}
+            masterwork={snapshot.masterworkStat}
+            className="mt-1"
+          />
         </div>
       </div>
 
