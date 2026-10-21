@@ -404,8 +404,8 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Issue | Notes |
 |-------|-------|
-| Exotic intrinsic effects not modelled in TTK/DPS | huwugo's chart bakes in trait-modified timing/damage (Sweet Business, Rat King, Wish-Keeper charge time, Hard Light, Necrochasm, Turncoat). We use the plain-frame numbers from the WeaponData tab, so these exotics are off. |
-| Sheet corrections (STAT_OVERRIDES) | `src/lib/weaponStatSheet.ts` overrides the sheet where it is wrong, and they survive every refresh: Spread Shot HC = 11 pellets sharing the sheet's 120 damage per shot (matches the chart: 2 shots, 0.6s); Bastion fusion = 3 bullets x 7 pellets. Bastion keeps the sheet's 30.6 damage per pellet (confirmed by the owner), i.e. 642 per trigger. Trespasser burst count (chart tab 6, WeaponData 3) is also unchecked. |
+| Exotic effects: partly modelled | Seven exotic traits are toggles (Business Time, Desperation, Rat Pack, Silkbound Slayer, Ignition Trigger, All at Once, Release the Wolves; numbers from the sheet's chart tab). Not modelled: Hard Light, Monte Carlo (stack semantics unclear), Turncoat, Chaperone (perk not in our data), Slayer's Fang, Ice Breaker, Duality's slug mode, Trespasser's trait. 78 of 146 exotics still have no stat row at all (Gjallarhorn and other rockets, exotics the sheet omits). |
+| Sheet corrections (STAT_OVERRIDES) | `src/lib/weaponStatSheet.ts` overrides the sheet where it is wrong, and they survive every refresh: Spread Shot HC = 11 pellets sharing the sheet's 120 damage per shot (matches the chart: 2 shots, 0.6s); Bastion fusion = 3 bullets x 7 pellets. Bastion keeps the sheet's 30.6 damage per pellet (confirmed by the owner), i.e. 642 per trigger. Trespasser stays a 3-round burst: Bungie's own RPM stat (491) equals 3 bullets x 164 bursts/min, WeaponData agrees, and the chart tab's 6 is its Unrepentant trait state. |
 | Unused art | Weapons of Light, Amplified, Sever and Deadfall icons are local WebP because the manifest has none. Set-bonus, armor, archetype and silhouette art in `D2Assets/` is not used anywhere yet. |
 | LFR charge-time damage penalty not modelled | oracle_engine applies a proportional damage penalty when perks reduce charge time below base on LFRs: `dmg *= 1.0 - (0.6 * delta) / base_damage`. We don't apply this. |
 
@@ -417,13 +417,16 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 Everything in Stages 1–11 and 13–16 is done. Remaining priorities, in order:
 
-1. **Exotic intrinsic effects** — model the ~10–15 most-used exotic traits' timing/damage changes (see Known Issues).
-2. **Verify the Trespasser burst count** against the game (Spread Shot and Bastion are settled).
-3. **Data-health report in the refresh workflow** — summarise new/changed/dropped weapons and stat rows after each daily refresh.
-4. **12B** — Shareable roll links with Open Graph previews; screenshot-mode weapon card.
-5. **12A** — Per-activity PvE scaling dropdown.
-6. **Use the unused D2Assets** — set bonuses, archetype images (Similar Weapons), weapon-type silhouettes (filter chips).
-7. **Accessibility** — dim-text contrast, focus rings and labels on icon-only buttons (a first pass is in Engineering notes).
+1. **More exotic effects** — Hard Light, Monte Carlo, Turncoat, Slayer's Fang, Ice Breaker, Duality (see Known Issues); needs in-game confirmation of what each trait does.
+2. **Exotics with no stat row** — 78 of 146; ask huwugo's sheet to cover them or add rows by hand.
+3. **12B** — Shareable roll links with Open Graph previews; screenshot-mode weapon card.
+4. **12A** — Per-activity PvE scaling dropdown.
+5. **Use the unused D2Assets** — set bonuses, archetype images (Similar Weapons), weapon-type silhouettes (filter chips).
+6. **Accessibility** — dim-text contrast, focus rings and labels on icon-only buttons (a first pass is in Engineering notes).
+
+---
+
+*Last updated: 2026-10-21 (later) — exotic trait effects (7 toggles), exotic stat lookup by weapon name (0 → 68 exotics with timing data), Trespasser verified, data-health report in the refresh workflow, Spread Shot/Bastion corrections.*
 
 ---
 
@@ -665,6 +668,9 @@ npm run build
 - **URL sync:** the editor keeps `?w&p&m&mw&ws&b&tier` current via `history.replaceState` (see `lastWrittenRef` in `editor/page.tsx` for the loop guard). Saved rolls ("My Rolls" in the Wishlist panel) can be loaded back with one tap.
 - **Icons:** the buff toggles and armor-mod rows have no icon data of their own. `src/data/localIcons.json` maps `buff:<name>` / `mod:<label>` to either a Bungie CDN path (resolved from the manifest by `scripts/build-icons.mjs`) or a local `/icons/*.webp`; `localIcon()` in `src/lib/localIcons.ts` returns a loadable URL. `D2Assets/` (hand-collected art) is gitignored; only the four icons the manifest lacks are converted into `public/icons`. `localIcons.test.ts` fails if a non-perk buff has no icon or a file is unused.
 - **Accessibility:** contrast checked (dim text `ink-4` is 5.6:1 dark / 6.0:1 light, AA needs 4.5:1) and a global `:focus-visible` ring exists in `globals.css`. Icon-only buttons (✓/✕, tier badge, tier selector dots, surge stacks) now have `aria-label`; buff and armor-mod toggles expose `aria-pressed`. Still to do: a screen-reader pass on the perk grid and charts, and a touch-target size audit.
+- **Exotic effects:** buffs in `src/data/buffs.json` can carry `critMultiplier` (crit only, relative to `multiplier`), `shotDelayMultiplier` and `chargeMultiplier`. `useWeaponStore.getWeaponEffects()` folds the active ones into a `WeaponEffects`, and `calculateTTK`, `calculateTTKCurve`, `calcDps` and compare snapshots take it as an optional last argument (`src/lib/weaponEffects.ts`). A perk gets a toggle in the Effects panel when its name is in a buff's `perkNames` (linked at parse time, so changing buffs.json needs a `DATA_FORMAT_VERSION` bump and `npm run refresh-data`). Numbers are the chart tab's modified value divided by its base value.
+- **Exotic stat lookup:** `lookupWeaponStat(subType, ammo, intrinsic, weaponName)` matches an exotic's own sheet row by weapon name (ignoring case, punctuation and a leading "The"); before this, exotics reported their intrinsic ("Payday") and found no timing data at all.
+- **Data health:** `scripts/data-health.ts` (logic in `src/lib/dataHealth.ts`) compares refreshed data with HEAD, prints a Markdown report into the refresh run summary and commit message, and fails the job if weapons, perks or stat rows vanish or a stat row is non-numeric.
 - **Known leftover:** `useWeaponStore.loadWeapon` still records each weapon's roll in `weaponRolls` (and persists it) but only restores the mod; perk restore was removed in ed77958.
 
 ---
