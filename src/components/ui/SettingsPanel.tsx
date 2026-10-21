@@ -142,12 +142,12 @@ export function SettingsBody() {
       {/* Panels */}
       <SectionLabel label="Panels" />
       <ToggleRow label="God Roll"       value={store.showGodRollPanel}   onChange={(v) => set('showGodRollPanel', v)} />
-      <ToggleRow label="Wishlist"       value={store.showWishlistPanel}  onChange={(v) => set('showWishlistPanel', v)} />
-      <ToggleRow label="Effects"        value={store.showEffectsPanel}   onChange={(v) => set('showEffectsPanel', v)} />
+      <ToggleRow label="Wishlists & Saved Rolls" value={store.showWishlistPanel}  onChange={(v) => set('showWishlistPanel', v)} />
+      <ToggleRow label="Perk Effects"   value={store.showEffectsPanel}   onChange={(v) => set('showEffectsPanel', v)} />
       <ToggleRow label="External Buffs" value={store.showExternalBuffs}  onChange={(v) => set('showExternalBuffs', v)} />
       <ToggleRow label="Similar Weapons"value={store.showSimilarWeapons} onChange={(v) => set('showSimilarWeapons', v)} />
       <ToggleRow label="Weapon Data"    value={store.showWeaponData}     onChange={(v) => set('showWeaponData', v)} />
-      <ToggleRow label="Tier List"      value={store.showTierListPanel}  onChange={(v) => set('showTierListPanel', v)} />
+      <ToggleRow label="Tier Lists"     value={store.showTierListPanel}  onChange={(v) => set('showTierListPanel', v)} />
 
       {/* About */}
       <SectionLabel label="About" />

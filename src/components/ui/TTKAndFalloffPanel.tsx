@@ -240,7 +240,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 space-y-6">
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">TTK & Falloff</h2>
+        <h3 className="text-sm font-bold text-ink-2">TTK & Falloff</h3>
         {effectiveMultiplier > 1 && (
           <span className="text-xs font-bold bg-amber-500 text-slate-950 px-2 py-1 rounded">
             ×{effectiveMultiplier.toFixed(2)} dmg

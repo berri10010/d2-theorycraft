@@ -108,7 +108,7 @@ export function RollScoreBadge({
   );
 }
 
-/** Score a saved roll (a flat list of perk hashes) for the list of My Rolls. */
+/** Score a saved roll (a flat list of perk hashes) for the list of Saved Rolls. */
 export function SavedRollScore({ weapon, hashes, mode }: { weapon: Weapon | null; hashes: string[]; mode: GameMode }) {
   const selected = useMemo(() => (weapon ? selectionFromHashes(weapon, hashes) : {}), [weapon, hashes]);
   return <RollScoreBadge weapon={weapon} mode={mode} selected={selected} />;

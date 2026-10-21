@@ -131,7 +131,7 @@ export const SubclassVerbPanel: React.FC = () => {
   return (
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white">Subclass Verb Math</h2>
+        <h3 className="text-sm font-bold text-ink-2">Subclass Verb Math</h3>
         {activeVerbKey && (
           <button
             onClick={() => setActiveVerbKey(null)}

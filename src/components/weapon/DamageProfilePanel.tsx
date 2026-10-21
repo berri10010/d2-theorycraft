@@ -128,7 +128,7 @@ export function DamageProfilePanel() {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">Damage Profile</h2>
+        <h3 className="text-sm font-bold text-ink-2">Damage Profile</h3>
         <span className={`text-xs font-bold px-2 py-1 rounded-lg border ${badgeClass}`}>
           {archetypeLabel}
         </span>

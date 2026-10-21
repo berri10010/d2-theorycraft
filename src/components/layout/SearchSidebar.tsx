@@ -328,7 +328,7 @@ export const SearchSidebar: React.FC = () => {
         {/* Header controls */}
         <div className="p-3 border-b border-white/10 space-y-2.5">
 
-          <h2 className="font-bold text-base text-white">Database</h2>
+          <h2 className="font-bold text-base text-white">Weapons</h2>
 
           {/* Search + filter button */}
           <div className="flex gap-2">

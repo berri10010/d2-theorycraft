@@ -83,7 +83,7 @@ export const AmmoPanel: React.FC = () => {
     <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
       {/* Header row */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white">Ammo</h2>
+        <h3 className="text-sm font-bold text-ink-2">Ammo</h3>
         <span className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-lg border border-white/10 ${ammoStyle.bg} ${ammoStyle.text}`}>
           <span className={`w-2 h-2 rounded-full ${ammoStyle.dot}`} />
           {ammoTypeStr}

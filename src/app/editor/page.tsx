@@ -514,7 +514,7 @@ function Dashboard() {
         moreOpen={moreOpen}
       />
       <MobileToast
-        message={savedToast ? 'Saved to Compare' : copiedType === 'permalink' ? 'Roll link copied' : copiedType === 'dim' ? 'DIM entry copied' : null}
+        message={savedToast ? 'Added to Compare' : copiedType === 'permalink' ? 'Roll link copied' : copiedType === 'dim' ? 'DIM entry copied' : null}
       />
       <MobileMoreSheet
         open={moreOpen}
@@ -719,11 +719,11 @@ function Dashboard() {
                 {/* Add to Compare */}
                 <button
                   onClick={handleAddToCompare}
-                  aria-label={`Save current ${activeWeapon.name} roll to comparison`}
+                  aria-label={`Add ${activeWeapon.name} to Compare`}
                   className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-colors min-h-[44px] min-w-[44px] flex items-center gap-1"
                 >
                   <span>+</span>
-                  <span className="hidden sm:inline">Compare</span>
+                  <span className="hidden sm:inline">Add to Compare</span>
                 </button>
               </div>
             )}
@@ -742,10 +742,20 @@ function Dashboard() {
               >
                 <ErrorBoundary label="Weapon Header"><WeaponHeader /></ErrorBoundary>
 
+                {/*
+                  Two columns on desktop. The columns dissolve on mobile (display: contents) so every panel
+                  joins one list, and `order` sets the reading order there: the roll, what it does, how to
+                  tweak it, then the community's view.
+                    Desktop left  : Weapon Perks, Perk Effects, External Buffs, God Roll + Wishlists
+                    Desktop right : Weapon Stats, Weapon Data, Similar Weapons, Tier Lists
+                */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  {/* Left column */}
-                  <div className="lg:col-span-6 space-y-6">
-                    <ErrorBoundary label="Weapon Perks"><RollEditor /></ErrorBoundary>
+                  <div className="contents lg:block lg:col-span-6 lg:space-y-6">
+                    <div className="order-1 lg:order-none"><ErrorBoundary label="Weapon Perks"><RollEditor /></ErrorBoundary></div>
+                    {settings.showEffectsPanel && (
+                      <div className="order-3 lg:order-none"><ErrorBoundary label="Perk Effects"><EffectsPanel /></ErrorBoundary></div>
+                    )}
+                    {settings.showExternalBuffs && <div className="order-4 lg:order-none"><BuffToggle /></div>}
                     {/* Mode-dependent panels — animate on PvE ↔ PvP switch */}
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.div
@@ -754,34 +764,25 @@ function Dashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="space-y-6"
+                        className="order-6 lg:order-none space-y-6"
                       >
-                        {mode === 'pve' && (
-                          <>
-                            {settings.showGodRollPanel  && <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>}
-                            {settings.showWishlistPanel && <ErrorBoundary label="Wishlists"><WishlistPanel /></ErrorBoundary>}
-                            {settings.showEffectsPanel  && <ErrorBoundary label="Effects"><EffectsPanel /></ErrorBoundary>}
-                            {settings.showExternalBuffs && <BuffToggle />}
-                          </>
-                        )}
-                        {mode === 'pvp' && (
-                          <>
-                            {settings.showGodRollPanel  && <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>}
-                            {settings.showWishlistPanel && <ErrorBoundary label="Wishlists"><WishlistPanel /></ErrorBoundary>}
-                            {settings.showEffectsPanel  && <ErrorBoundary label="Effects"><EffectsPanel /></ErrorBoundary>}
-                            {settings.showExternalBuffs && <BuffToggle />}
-                          </>
-                        )}
+                        {settings.showGodRollPanel  && <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>}
+                        {settings.showWishlistPanel && <ErrorBoundary label="Wishlists & Saved Rolls"><WishlistPanel /></ErrorBoundary>}
                       </motion.div>
                     </AnimatePresence>
                   </div>
 
-                  {/* Right column */}
-                  <div className="lg:col-span-6 space-y-6">
-                    <ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary>
-                    {settings.showWeaponData    && <ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary>}
-                    {settings.showSimilarWeapons && <ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary>}
-                    {settings.showTierListPanel  && <ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary>}
+                  <div className="contents lg:block lg:col-span-6 lg:space-y-6">
+                    <div className="order-2 lg:order-none"><ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary></div>
+                    {settings.showWeaponData && (
+                      <div className="order-5 lg:order-none"><ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary></div>
+                    )}
+                    {settings.showSimilarWeapons && (
+                      <div className="order-7 lg:order-none"><ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary></div>
+                    )}
+                    {settings.showTierListPanel && (
+                      <div className="order-8 lg:order-none"><ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary></div>
+                    )}
                   </div>
                 </div>
               </motion.div>

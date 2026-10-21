@@ -82,7 +82,7 @@ export const MasterworkPanel: React.FC = () => {
         <div className="flex items-start gap-3">
           <span className="text-amber-400 text-xl leading-none mt-0.5">⬡</span>
           <div>
-            <h2 className="text-xl font-bold text-white mb-1">Catalyst</h2>
+            <h3 className="text-sm font-bold text-ink-2 mb-1">Catalyst</h3>
             <p className="text-sm text-ink-3 leading-relaxed">
               Exotic weapons upgrade via a <span className="text-amber-400 font-semibold">Catalyst</span> instead of a masterwork.
               Equip and complete the catalyst objective in-game to unlock bonus stats and an intrinsic perk upgrade.
@@ -133,7 +133,7 @@ export const MasterworkPanel: React.FC = () => {
             return (
               <>
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-xl font-bold text-white">Masterwork</h2>
+                  <h3 className="text-sm font-bold text-ink-2">Masterwork</h3>
                   {masterworkStat ? (
                     <span className={`text-[10px] ${labelColor} font-semibold`}>
                       {(() => {
@@ -189,7 +189,7 @@ export const MasterworkPanel: React.FC = () => {
       {hasMods && (
         <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-bold text-white">Weapon Mod</h2>
+            <h3 className="text-sm font-bold text-ink-2">Weapon Mod</h3>
             {availableMods.some((m) => m.enhancedVersion) && canEnhanceMod && (
               <span className="text-xs text-ink-4 font-normal tracking-wide">Click twice to enhance</span>
             )}

@@ -199,7 +199,7 @@ export const WishlistPanel: React.FC = () => {
       }
       title={
         <span className="flex items-center gap-2 flex-wrap">
-          Wishlists
+          Wishlists &amp; Saved Rolls
           {isMatch && (
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/40">
               ★ Wishlist Match
@@ -297,7 +297,7 @@ export const WishlistPanel: React.FC = () => {
         {rolls.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">My Rolls</p>
+              <p className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Saved Rolls</p>
               <button
                 onClick={() => exportFile(rolls)}
                 className="text-[10px] font-bold text-ink-4 hover:text-amber-400 transition-colors"

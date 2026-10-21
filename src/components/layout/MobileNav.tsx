@@ -121,11 +121,11 @@ export function MobileBottomNav({ activeTab, onTabChange, compareCount, onOpenWe
         Editor
       </button>
 
-      <button onClick={onAddToCompare} aria-label="Save current roll to comparison" className={`${item} text-slate-950`}>
+      <button onClick={onAddToCompare} aria-label="Add this roll to Compare" className={`${item} text-slate-950`}>
         <span className="flex items-center justify-center w-12 h-12 -mt-5 rounded-full bg-amber-500 shadow-lg shadow-amber-500/25 ring-4 ring-surface-2 active:scale-95 transition-transform">
           <PlusIcon />
         </span>
-        <span className="text-amber-400 -mt-0.5">Save</span>
+        <span className="text-amber-400 -mt-0.5">Add</span>
       </button>
 
       <button onClick={() => onTabChange('compare')} aria-current={activeTab === 'compare' ? 'page' : undefined} className={`${item} ${activeTab === 'compare' ? active : idle}`}>
