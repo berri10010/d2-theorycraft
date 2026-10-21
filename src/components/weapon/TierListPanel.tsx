@@ -131,8 +131,8 @@ export const TierListPanel: React.FC = () => {
                 placeholder="List name…"
                 className="text-xs px-2 py-1 rounded-md bg-black/40 border border-amber-500/50 text-white focus:outline-none w-28"
               />
-              <button onClick={handleCreate} className="text-emerald-400 text-xs font-bold px-1">✓</button>
-              <button onClick={() => setShowNew(false)} className="text-ink-4 text-xs font-bold px-1">✕</button>
+              <button onClick={handleCreate} aria-label="Create list" className="text-emerald-400 text-xs font-bold px-1">✓</button>
+              <button onClick={() => setShowNew(false)} aria-label="Cancel" className="text-ink-4 text-xs font-bold px-1">✕</button>
             </div>
           ) : (
             <button

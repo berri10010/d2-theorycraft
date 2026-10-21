@@ -383,6 +383,10 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | 10 — Weapon List Polish | 100% | Complete |
 | 11 — PvE Damage Model Accuracy | 100% | Complete |
 | 12 — Feature Backlog | ~97% | Active |
+| 13 — Mobile-first redesign, tests + CI, theming | 100% | Complete (see Engineering notes) |
+| 14 — Formula accuracy audit | 100% | Complete; remaining estimates listed below |
+| 15 — Community data (PvP wishlist, sources, WeaponStat Chart) | 100% | Complete; refreshed daily |
+| 16 — Icons for buffs and armor mods | 100% | Complete |
 | **Overall** | **~98%** | |
 
 ---
@@ -390,7 +394,8 @@ A broad set of UI, data, and UX improvements requested for the next development 
 ## Checklist (Quick Reference)
 
 ### Ongoing
-- [ ] Run `python3 build_perk_audit_json.py` after any override additions to `perkAudit.json`
+- [ ] After a balance patch: `FORCE_WEAPON_STATS=1 npm run refresh-data` if huwugo's sheet is still flagged "currently updating"; otherwise the daily `refresh-data` workflow handles it
+- [ ] New icon for a buff or armor mod: add a line to `scripts/build-icons.mjs`, run it, commit `src/data/localIcons.json` + `public/icons`
 - [ ] Push: `git push` — GitHub Actions handles build + deploy automatically
 
 ---
@@ -399,7 +404,9 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Issue | Notes |
 |-------|-------|
-| DPS panel magazine size is wrong | `calcStats['Magazine']` is a 0–100 investmentStat, not round count. oracle_engine uses a per-archetype quadratic formula (same evpp/vpp/offset pattern as reload) to convert it to actual rounds. DPS panel currently uses raw stat value. |
+| Exotic intrinsic effects not modelled in TTK/DPS | huwugo's chart bakes in trait-modified timing/damage (Sweet Business, Rat King, Wish-Keeper charge time, Hard Light, Necrochasm, Turncoat). We use the plain-frame numbers from the WeaponData tab, so these exotics are off. |
+| Suspicious WeaponData rows | Spread Shot hand cannons (12 pellets on a 120-damage hit), Fusion Bastion (3 bullets x 12 pellets) and Trespasser burst count (chart tab says 6, WeaponData 3). Check in game. |
+| Unused art | Weapons of Light, Amplified, Sever and Deadfall icons are local WebP because the manifest has none. Set-bonus, armor, archetype and silhouette art in `D2Assets/` is not used anywhere yet. |
 | LFR charge-time damage penalty not modelled | oracle_engine applies a proportional damage penalty when perks reduce charge time below base on LFRs: `dmg *= 1.0 - (0.6 * delta) / base_damage`. We don't apply this. |
 
 ---
@@ -408,10 +415,19 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 > These are ordered by priority. Claude should start from the top.
 
-Stage 12 is the active work. 12A (partial), 12B (partial), 12C, 12D, 12E, 12F, 12G, and 12H are complete. Remaining priorities:
+Everything in Stages 1–11 and 13–16 is done. Remaining priorities, in order:
 
-1. **12A remaining** — Damage vs Distance chart; flinch resistance; per-activity PvE scaling dropdown
-2. **12B remaining** — Screenshot mode (Destiny-style weapon card renderer for social sharing)
+1. **Exotic intrinsic effects** — model the ~10–15 most-used exotic traits' timing/damage changes (see Known Issues).
+2. **Verify odd WeaponData rows** (Spread Shot, Fusion Bastion, Trespasser) against the game.
+3. **Data-health report in the refresh workflow** — summarise new/changed/dropped weapons and stat rows after each daily refresh.
+4. **12B** — Shareable roll links with Open Graph previews; screenshot-mode weapon card.
+5. **12A** — Per-activity PvE scaling dropdown.
+6. **Use the unused D2Assets** — set bonuses, archetype images (Similar Weapons), weapon-type silhouettes (filter chips).
+7. **Accessibility** — dim-text contrast, focus rings and labels on icon-only buttons (a first pass is in Engineering notes).
+
+---
+
+*Last updated: 2026-10-21 — Session summary: WeaponStat Chart v2.1 ingest rebuilt on the WeaponData tab (pellets/bolts per bullet, pre-charged fusion/bow TTK, no recovery gap for bow DPS; commit ad017bd); buff and armor-mod icons from the manifest with four local fallbacks (981bc29, 9d01d7b); plan.md refreshed.*
 
 ---
 
@@ -647,6 +663,8 @@ npm run build
 - **Compendium removed:** the Google "Gear Perks" tab now returns an HTMLView placeholder, so the Data Compendium integration was deleted. Perk text = manifest → Clarity → frame fallback.
 - **Theming:** colours are CSS variables (`globals.css`); Tailwind maps `black`/`white` plus `ink`/`ink-2..4` (text) and `surface`/`surface-2`. Light mode and "System" (OS) are just variable sets. Use `text-ink-*` for text; `perk-icon` gives Bungie glyphs a dark disc in light mode.
 - **URL sync:** the editor keeps `?w&p&m&mw&ws&b&tier` current via `history.replaceState` (see `lastWrittenRef` in `editor/page.tsx` for the loop guard). Saved rolls ("My Rolls" in the Wishlist panel) can be loaded back with one tap.
+- **Icons:** the buff toggles and armor-mod rows have no icon data of their own. `src/data/localIcons.json` maps `buff:<name>` / `mod:<label>` to either a Bungie CDN path (resolved from the manifest by `scripts/build-icons.mjs`) or a local `/icons/*.webp`; `localIcon()` in `src/lib/localIcons.ts` returns a loadable URL. `D2Assets/` (hand-collected art) is gitignored; only the four icons the manifest lacks are converted into `public/icons`. `localIcons.test.ts` fails if a non-perk buff has no icon or a file is unused.
+- **Accessibility:** contrast checked (dim text `ink-4` is 5.6:1 dark / 6.0:1 light, AA needs 4.5:1) and a global `:focus-visible` ring exists in `globals.css`. Icon-only buttons (✓/✕, tier badge, tier selector dots, surge stacks) now have `aria-label`; buff and armor-mod toggles expose `aria-pressed`. Still to do: a screen-reader pass on the perk grid and charts, and a touch-target size audit.
 - **Known leftover:** `useWeaponStore.loadWeapon` still records each weapon's roll in `weaponRolls` (and persists it) but only restores the mod; perk restore was removed in ed77958.
 
 ---

@@ -202,8 +202,8 @@ function SnapshotCard({
                 onKeyDown={(e) => { if (e.key === 'Enter') handleRename(); if (e.key === 'Escape') setEditing(false); }}
                 className="flex-1 min-w-0 bg-white/5 text-white text-sm font-bold px-2 py-1 rounded border border-amber-500 focus:outline-none"
               />
-              <button onClick={handleRename} className="text-emerald-400 hover:text-emerald-300 text-xs font-bold px-1" title="Save (Enter)">✓</button>
-              <button onClick={() => setEditing(false)} className="text-ink-4 hover:text-ink-2 text-xs font-bold px-1" title="Cancel (Esc)">✕</button>
+              <button onClick={handleRename} className="text-emerald-400 hover:text-emerald-300 text-xs font-bold px-1" title="Save (Enter)" aria-label="Save name">✓</button>
+              <button onClick={() => setEditing(false)} className="text-ink-4 hover:text-ink-2 text-xs font-bold px-1" title="Cancel (Esc)" aria-label="Cancel rename">✕</button>
             </div>
           ) : (
             <button

@@ -582,6 +582,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
               onClick={closeExpanded}
               className="text-ink-3 hover:text-white text-2xl leading-none px-2 transition-colors"
               title="Close (Esc)"
+              aria-label="Close chart"
             >✕</button>
           </div>
 

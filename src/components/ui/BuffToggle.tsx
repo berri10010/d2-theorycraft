@@ -103,7 +103,7 @@ function BuffRow({ buff, isActive, isOverridden, activeStackIndex, onToggle, onS
 
   return (
     <div>
-      <button onClick={onToggle} title={buff.description} className={buttonClass}>
+      <button onClick={onToggle} title={buff.description} aria-pressed={isActive} className={buttonClass}>
         <span className={[
           'shrink-0 w-1.5 h-1.5 rounded-full mt-1.5',
           isActive

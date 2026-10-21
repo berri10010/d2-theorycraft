@@ -22,9 +22,10 @@ interface TierSelectorProps {
   value: ArmorModTier;
   onChange: (t: ArmorModTier) => void;
   color: string; // tailwind bg-* class for filled dots
+  label: string; // mod name, for screen readers
 }
 
-function TierSelector({ value, onChange, color }: TierSelectorProps) {
+function TierSelector({ value, onChange, color, label }: TierSelectorProps) {
   return (
     <div className="flex items-center gap-1.5">
       {([0, 1, 2, 3] as ArmorModTier[]).map((t) => (
@@ -32,6 +33,8 @@ function TierSelector({ value, onChange, color }: TierSelectorProps) {
           key={t}
           onClick={() => onChange(t === value ? 0 : t)}
           title={t === 0 ? 'None' : `Tier ${t}`}
+          aria-label={`${label}: ${t === 0 ? 'none' : `tier ${t}`}`}
+          aria-pressed={t === value}
           className={[
             'w-8 h-8 md:w-5 md:h-5 rounded-full border transition-all text-[10px] md:text-[9px] font-bold leading-none flex items-center justify-center',
             t === 0 && value === 0
@@ -72,7 +75,7 @@ function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProp
         <p className="text-xs font-semibold text-ink leading-tight">{label}</p>
         <p className="text-[10px] text-ink-4 leading-tight">{subLabel}</p>
       </div>
-      <TierSelector value={value} onChange={onChange} color={color} />
+      <TierSelector value={value} onChange={onChange} color={color} label={label} />
       {readout && (
         <span className="text-[10px] text-ink-3 tabular-nums">{readout}</span>
       )}
@@ -191,6 +194,8 @@ export const ArmorModPanel: React.FC = () => {
               key={stacks}
               onClick={() => setSurgeStacks(stacks)}
               title={stacks === 4 ? 'Stack 4 — Artifact or Exotic Armor only' : undefined}
+              aria-label={stacks === 0 ? 'Weapon surge off' : `Weapon surge ${stacks} stacks`}
+              aria-pressed={surgeStacks === stacks}
               className={[
                 'flex-1 text-xs font-bold py-2 rounded-md border transition-all',
                 surgeStacks === stacks

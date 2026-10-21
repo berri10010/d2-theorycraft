@@ -405,6 +405,7 @@ export const RollEditor: React.FC = () => {
                           <button
                             onClick={handleTierClick}
                             title={tierCfg ? `${tierCfg.label} tier — click to change` : 'Unrated — click to rate'}
+                            aria-label={tierCfg ? `${displayPerk.name}: ${tierCfg.label} tier, change` : `Rate ${displayPerk.name}`}
                             className={[
                               'absolute -bottom-1 -right-1 text-[8px] font-black leading-none px-1 py-px rounded-full z-10 transition-opacity',
                               tierCfg
