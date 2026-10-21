@@ -90,7 +90,7 @@ export function DamageProfilePanel() {
 
   if (!detectArchetype(activeWeapon.itemSubType)) {
     return (
-      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 text-center">
+      <div className="p-3 md:p-4 rounded-xl border border-white/10 text-center">
         <p className="text-ink-3 text-sm">
           Damage profile not available for {activeWeapon.itemTypeDisplayName}.
         </p>
@@ -105,7 +105,7 @@ export function DamageProfilePanel() {
 
   if (!profile) {
     return (
-      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 text-center">
+      <div className="p-3 md:p-4 rounded-xl border border-white/10 text-center">
         <p className="text-ink-3 text-sm">Could not build damage profile for this weapon.</p>
       </div>
     );
@@ -124,7 +124,7 @@ export function DamageProfilePanel() {
   const hasSplash   = result.splash > 0;
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 space-y-4">
+    <div className="p-3 md:p-4 rounded-xl border border-white/10 space-y-4">
 
       {/* Header */}
       <div className="flex items-center justify-between">

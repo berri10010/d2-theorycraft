@@ -237,7 +237,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
   const yTicks = [0, 0.25, 0.5, 0.75, 1.0].map((f) => Math.round(animYMax * f));
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10 space-y-6">
+    <div className="p-3 md:p-4 rounded-xl border border-white/10 space-y-6">
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-ink-2">TTK & Falloff</h3>

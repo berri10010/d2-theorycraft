@@ -80,7 +80,7 @@ export const AmmoPanel: React.FC = () => {
   );
 
   return (
-    <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+    <div className="p-3 md:p-4 rounded-xl border border-white/10">
       {/* Header row */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-bold text-ink-2">Ammo</h3>

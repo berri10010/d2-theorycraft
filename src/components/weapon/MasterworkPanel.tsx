@@ -78,7 +78,7 @@ export const MasterworkPanel: React.FC = () => {
   // Show an informational card so the user knows why no masterwork options appear.
   if (activeWeapon.rarity === 'Exotic') {
     return (
-      <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-amber-500/20">
+      <div className="p-3 md:p-4 rounded-xl border border-amber-500/20">
         <div className="flex items-start gap-3">
           <span className="text-amber-400 text-xl leading-none mt-0.5">⬡</span>
           <div>
@@ -116,7 +116,7 @@ export const MasterworkPanel: React.FC = () => {
     <>
       {/* ── Masterwork card ─────────────────────────────────────────────── */}
       {hasMw && (
-        <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+        <div className="p-3 md:p-4 rounded-xl border border-white/10">
           {(() => {
             const isTiered = (activeWeapon.seasonNumber ?? 0) >= 27;
             const secondaryBonus = isTiered ? weaponTier : (
@@ -187,7 +187,7 @@ export const MasterworkPanel: React.FC = () => {
 
       {/* ── Weapon Mod card ─────────────────────────────────────────────── */}
       {hasMods && (
-        <div className="bg-white/5 backdrop-blur-sm p-4 md:p-6 rounded-xl border border-white/10">
+        <div className="p-3 md:p-4 rounded-xl border border-white/10">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-bold text-ink-2">Weapon Mod</h3>
             {availableMods.some((m) => m.enhancedVersion) && canEnhanceMod && (

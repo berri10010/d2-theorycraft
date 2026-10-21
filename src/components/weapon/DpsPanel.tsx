@@ -29,7 +29,7 @@ function Row({ label, pvp, pve }: { label: string; pvp: number; pve: number }) {
 
 function Chip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-white/5 rounded-lg px-3 py-2 flex flex-col items-center gap-0.5">
+    <div className="rounded-lg border border-white/10 px-3 py-2 flex flex-col items-center gap-0.5">
       <span className="text-2xs text-ink-4 uppercase tracking-wide">{label}</span>
       <span className="text-sm font-mono font-bold text-ink">{value}</span>
     </div>
