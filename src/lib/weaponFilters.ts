@@ -165,7 +165,6 @@ const SUGGEST_CATEGORIES: { key: MultiKey; category: string; label?: (v: string)
   { key: 'perk',       category: 'Perk' },
   { key: 'foundry',    category: 'Foundry' },
   { key: 'season',     category: 'Season' },
-  { key: 'source',     category: 'Source' },
 ];
 
 /** 0 = starts with the text, 1 = a word starts with it, 2 = contains it, null = no match. */

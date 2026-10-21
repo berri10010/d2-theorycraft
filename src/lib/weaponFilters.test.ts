@@ -43,6 +43,12 @@ describe('filterSuggestions', () => {
     expect(filterSuggestions('zzzz', options, DEFAULT_FILTERS)).toEqual([]);
   });
 
+  it('never suggests sources (those stay in the filter panel only)', () => {
+    const withSource = { ...options, source: ['Spread Shot Raid', 'Vault of Glass'] };
+    expect(filterSuggestions('spread shot', withSource, DEFAULT_FILTERS).some(x => x.key === 'source')).toBe(false);
+    expect(filterSuggestions('vault', withSource, DEFAULT_FILTERS)).toEqual([]);
+  });
+
   it('caps the list', () => {
     const many = { ...none(), perk: Array.from({ length: 30 }, (_, i) => `Perk ${i}`) };
     expect(filterSuggestions('perk', many, DEFAULT_FILTERS, 6)).toHaveLength(6);

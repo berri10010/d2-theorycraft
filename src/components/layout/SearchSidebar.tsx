@@ -378,7 +378,6 @@ export const SearchSidebar: React.FC = () => {
                       onMouseEnter={() => setSuggestIdx(i)}
                       className={`w-full flex items-center gap-2 px-3 py-2 md:py-1.5 text-left transition-colors ${i === suggestIdx ? 'bg-white/8' : 'hover:bg-white/6'}`}
                     >
-                      <span className="shrink-0 w-4 h-4 rounded bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-black leading-none flex items-center justify-center" aria-hidden="true">+</span>
                       <span className="flex-1 min-w-0 text-xs text-ink truncate">{s.label}</span>
                       <span className="shrink-0 text-2xs text-ink-4 uppercase tracking-wider">{s.category}</span>
                     </button>
