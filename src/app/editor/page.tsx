@@ -113,6 +113,18 @@ function Dashboard() {
     activeTabRef.current = next;
     setActiveTab(next);
   }, []);
+  // Two columns need room: decide from the main area's own width, not the window's.
+  const [wide, setWide] = useState(false);
+  const hasWeapon = !!activeWeapon;
+  useLayoutEffect(() => {
+    const el = mainRef.current;
+    if (!el) return;
+    const measure = () => setWide(el.clientWidth >= 900);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [hasWeapon]);
   useLayoutEffect(() => { mainRef.current?.scrollTo({ top: scrollByTab.current[activeTab] }); }, [activeTab]);
   // Mount the comparison grid on first visit, then keep it mounted (hidden) so its state survives tab switches.
   const [compareMounted,     setCompareMounted]     = useState(false);
@@ -441,7 +453,7 @@ function Dashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 z-40 xl:hidden"
+            className="fixed inset-0 bg-black/60 z-40 min-[900px]:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -451,8 +463,8 @@ function Dashboard() {
       <div className={[
         'fixed inset-y-0 left-0 z-50 w-[85vw] max-w-72 transform transition-transform duration-300 ease-in-out',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        'xl:static xl:translate-x-0 xl:z-auto xl:transition-all xl:duration-300',
-        sidebarCollapsed ? 'xl:w-0' : 'xl:w-72',
+        'min-[900px]:static min-[900px]:translate-x-0 min-[900px]:z-auto min-[900px]:transition-all min-[900px]:duration-300',
+        sidebarCollapsed ? 'min-[900px]:w-0' : 'min-[900px]:w-72',
         'border-r border-white/10 shrink-0 overflow-hidden',
       ].join(' ')}>
         <SearchSidebar />
@@ -541,7 +553,7 @@ function Dashboard() {
         onClick={() => setSidebarCollapsed((v) => !v)}
         aria-label={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
         title={sidebarCollapsed ? 'Expand weapon list' : 'Collapse weapon list'}
-        className="hidden xl:flex self-center shrink-0 items-center justify-center w-6 h-12 text-ink-4 hover:text-ink-2 transition-colors"
+        className="hidden min-[900px]:flex self-center shrink-0 items-center justify-center w-6 h-12 text-ink-4 hover:text-ink-2 transition-colors"
       >
         <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className={`w-3 h-3 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`}>
           <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -563,7 +575,7 @@ function Dashboard() {
           onModeChange={setMode}
           onOpenWeapons={() => setSidebarOpen(true)}
         />
-        <div className="max-w-7xl 2xl:max-w-[1500px] mx-auto p-4 pb-28 md:p-8 space-y-6">
+        <div data-wide={wide} className="group/page max-w-7xl 2xl:max-w-[1500px] mx-auto p-4 pb-28 md:p-6 xl:p-8 space-y-6">
 
           {/* ── Top action bar ─────────────────────────────────────────── */}
           {/*
@@ -581,7 +593,7 @@ function Dashboard() {
                 aria-label={sidebarOpen ? 'Close weapon database' : 'Open weapon database'}
                 aria-expanded={sidebarOpen}
                 onClick={() => setSidebarOpen((o) => !o)}
-                className="xl:hidden min-h-[44px] flex items-center justify-center gap-2 px-3 text-sm font-medium text-ink-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors shrink-0 border border-white/10"
+                className="min-[900px]:hidden min-h-[44px] flex items-center justify-center gap-2 px-3 text-sm font-medium text-ink-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors shrink-0 border border-white/10"
               >
                 <MenuIcon open={sidebarOpen} />
                 <span>Weapons</span>
@@ -662,11 +674,11 @@ function Dashboard() {
                     ].join(' ')}
                   >
                     <ShareIcon className="w-3.5 h-3.5 shrink-0" />
-                    <span className="hidden lg:inline">
+                    <span className="hidden group-data-[wide=true]/page:inline">
                       {copiedType === 'permalink' ? 'Copied!' : copiedType === 'dim' ? 'DIM copied!' : 'Share'}
                     </span>
                     {!copiedType && (
-                      <svg viewBox="0 0 20 20" fill="currentColor" className={`hidden lg:block w-3 h-3 text-ink-4 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
+                      <svg viewBox="0 0 20 20" fill="currentColor" className={`hidden group-data-[wide=true]/page:block w-3 h-3 text-ink-4 transition-transform ${shareOpen ? 'rotate-180' : ''}`}>
                         <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.937a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                       </svg>
                     )}
@@ -726,7 +738,7 @@ function Dashboard() {
                   ].join(' ')}
                 >
                   <TrashIcon className="w-3.5 h-3.5 shrink-0" />
-                  <span className="hidden lg:inline">
+                  <span className="hidden group-data-[wide=true]/page:inline">
                     {clearPending ? 'Confirm?' : 'Clear Roll'}
                   </span>
                 </button>
@@ -739,7 +751,7 @@ function Dashboard() {
                   className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-colors min-h-[44px] min-w-[44px] flex items-center gap-1"
                 >
                   <span>+</span>
-                  <span className="hidden lg:inline">Add to Compare</span>
+                  <span className="hidden group-data-[wide=true]/page:inline">Add to Compare</span>
                 </button>
               </div>
             )}
@@ -759,19 +771,19 @@ function Dashboard() {
                 <ErrorBoundary label="Weapon Header"><WeaponHeader /></ErrorBoundary>
 
                 {/*
-                  Two columns from lg (1024px), including half-width windows; below that, the one-column order below. The columns dissolve on mobile (display: contents) so every panel
+                  Two columns whenever the main area is 900px or wider (measured, not a viewport breakpoint, so it holds with the weapon list docked or collapsed); narrower, the one-column order below. The columns dissolve on mobile (display: contents) so every panel
                   joins one list, and `order` sets the reading order there: the roll, what it does, how to
                   tweak it, then the community's view.
                     Desktop left  : Weapon Perks, Perk Effects, External Buffs, God Roll + Wishlists
                     Desktop right : Weapon Stats, Weapon Data, Similar Weapons, Tier Lists
                 */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  <div className="contents lg:block lg:col-span-6 lg:space-y-6">
-                    <div className="order-1 lg:order-none"><ErrorBoundary label="Weapon Perks"><RollEditor /></ErrorBoundary></div>
+                <div className="grid grid-cols-1 group-data-[wide=true]/page:grid-cols-12 gap-6">
+                  <div className="contents group-data-[wide=true]/page:block group-data-[wide=true]/page:col-span-6 group-data-[wide=true]/page:space-y-6">
+                    <div className="order-1 group-data-[wide=true]/page:order-none"><ErrorBoundary label="Weapon Perks"><RollEditor /></ErrorBoundary></div>
                     {settings.showEffectsPanel && (
-                      <div className="order-3 lg:order-none"><ErrorBoundary label="Perk Effects"><EffectsPanel /></ErrorBoundary></div>
+                      <div className="order-3 group-data-[wide=true]/page:order-none"><ErrorBoundary label="Perk Effects"><EffectsPanel /></ErrorBoundary></div>
                     )}
-                    {settings.showExternalBuffs && <div className="order-4 lg:order-none"><BuffToggle /></div>}
+                    {settings.showExternalBuffs && <div className="order-4 group-data-[wide=true]/page:order-none"><BuffToggle /></div>}
                     {/* Mode-dependent panels — animate on PvE ↔ PvP switch */}
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.div
@@ -780,7 +792,7 @@ function Dashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="order-6 lg:order-none space-y-6"
+                        className="order-6 group-data-[wide=true]/page:order-none space-y-6"
                       >
                         {settings.showGodRollPanel  && <ErrorBoundary label="God Roll"><GodRollPanel /></ErrorBoundary>}
                         {settings.showWishlistPanel && <ErrorBoundary label="Wishlists & Saved Rolls"><WishlistPanel /></ErrorBoundary>}
@@ -788,16 +800,16 @@ function Dashboard() {
                     </AnimatePresence>
                   </div>
 
-                  <div className="contents lg:block lg:col-span-6 lg:space-y-6">
-                    <div className="order-2 lg:order-none"><ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary></div>
+                  <div className="contents group-data-[wide=true]/page:block group-data-[wide=true]/page:col-span-6 group-data-[wide=true]/page:space-y-6">
+                    <div className="order-2 group-data-[wide=true]/page:order-none"><ErrorBoundary label="Stats"><StatDisplay /></ErrorBoundary></div>
                     {settings.showWeaponData && (
-                      <div className="order-5 lg:order-none"><ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary></div>
+                      <div className="order-5 group-data-[wide=true]/page:order-none"><ErrorBoundary label="Weapon Data"><WeaponDataPanel /></ErrorBoundary></div>
                     )}
                     {settings.showSimilarWeapons && (
-                      <div className="order-7 lg:order-none"><ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary></div>
+                      <div className="order-7 group-data-[wide=true]/page:order-none"><ErrorBoundary label="Similar Weapons"><SimilarWeaponsPanel /></ErrorBoundary></div>
                     )}
                     {settings.showTierListPanel && (
-                      <div className="order-8 lg:order-none"><ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary></div>
+                      <div className="order-8 group-data-[wide=true]/page:order-none"><ErrorBoundary label="Tier Lists"><TierListPanel /></ErrorBoundary></div>
                     )}
                   </div>
                 </div>
