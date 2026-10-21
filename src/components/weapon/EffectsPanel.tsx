@@ -12,6 +12,7 @@ import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
+import { localIcon } from '../../lib/localIcons';
 import { Tooltip } from '../ui/Tooltip';
 import { PERK_AUDIT } from '../../lib/perkAudit';
 import { EffectToggle, EffectStackSelector, StatModPills } from './EffectControls';
@@ -473,15 +474,21 @@ export const EffectsPanel: React.FC = () => {
           )}
 
           {/* Manual buffs */}
-          {manualBuffEntries.map((buff) => (
+          {manualBuffEntries.map((buff) => {
+            const buffIcon = localIcon('buff', buff.name);
+            return (
             <div
               key={buff.hash}
               className="flex gap-3 p-3 bg-black/40 rounded-lg border border-white/10 group"
             >
-              <div className="w-10 h-10 rounded-full bg-slate-800 border-2 border-blue-400 flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-blue-400">
-                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-                </svg>
+              <div className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-800 border-2 border-blue-400 flex items-center justify-center shrink-0">
+                {buffIcon ? (
+                  <Image src={buffIcon} alt="" fill sizes="40px" className="object-cover" unoptimized />
+                ) : (
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-blue-400" aria-hidden="true">
+                    <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                  </svg>
+                )}
               </div>
 
               <div className="flex-1 min-w-0">
@@ -508,7 +515,8 @@ export const EffectsPanel: React.FC = () => {
                 </svg>
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </CollapsiblePanel>

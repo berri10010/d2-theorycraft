@@ -147,6 +147,67 @@ export function totalFilterCount(f: FilterState): number {
   );
 }
 
+// ─── Filter suggestions while typing ──────────────────────────────────────────
+
+/** A filter the search box offers to add for what the user has typed. */
+export type FilterSuggestion =
+  | { kind: 'multi';  key: MultiKey;  value: string;  label: string; category: string }
+  | { kind: 'toggle'; key: ToggleKey; value: '';      label: string; category: string };
+
+/** Categories offered as suggestions, in tie-break order. Perk matches any column. */
+const SUGGEST_CATEGORIES: { key: MultiKey; category: string; label?: (v: string) => string }[] = [
+  { key: 'weaponType', category: 'Weapon type' },
+  { key: 'frame',      category: 'Frame', label: v => v.replace(/ Frame$/, '') },
+  { key: 'energy',     category: 'Energy', label: v => v.charAt(0).toUpperCase() + v.slice(1) },
+  { key: 'ammo',       category: 'Ammo' },
+  { key: 'slot',       category: 'Slot' },
+  { key: 'rarity',     category: 'Rarity' },
+  { key: 'perk',       category: 'Perk' },
+  { key: 'foundry',    category: 'Foundry' },
+  { key: 'season',     category: 'Season' },
+  { key: 'source',     category: 'Source' },
+];
+
+/** 0 = starts with the text, 1 = a word starts with it, 2 = contains it, null = no match. */
+function matchRank(text: string, q: string): number | null {
+  const t = text.toLowerCase();
+  if (t.startsWith(q)) return 0;
+  if (t.split(/[\s\-–:/]+/).some(w => w.startsWith(q))) return 1;
+  return t.includes(q) ? 2 : null;
+}
+
+/**
+ * Filters worth offering for the typed text: frames, perks, weapon types, elements and so on whose name
+ * matches, best matches first. Values already included are left out.
+ */
+export function filterSuggestions(
+  query: string,
+  options: Record<MultiKey, string[]>,
+  filters: FilterState,
+  limit = 8,
+): FilterSuggestion[] {
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) return [];
+
+  const found: Array<{ rank: number; order: number; s: FilterSuggestion }> = [];
+  SUGGEST_CATEGORIES.forEach(({ key, category, label }, order) => {
+    for (const value of options[key] ?? []) {
+      if (filters[key].inc.includes(value)) continue;
+      const shown = label ? label(value) : value;
+      const rank = matchRank(shown, q);
+      if (rank !== null) found.push({ rank, order, s: { kind: 'multi', key, value, label: shown, category } });
+    }
+  });
+  for (const t of TOGGLE_DEFS) {
+    if (filters[t.id]) continue;
+    const rank = matchRank(t.label, q);
+    if (rank !== null) found.push({ rank, order: -1, s: { kind: 'toggle', key: t.id, value: '', label: t.label, category: 'Filter' } });
+  }
+
+  found.sort((a, b) => a.rank - b.rank || a.order - b.order || a.s.label.length - b.s.label.length || a.s.label.localeCompare(b.s.label));
+  return found.slice(0, limit).map(f => f.s);
+}
+
 // ─── Season / event helpers ───────────────────────────────────────────────────
 
 export const UNLABELLED_SEASON_NAMES: Record<number, string> = { 1: 'The Red War' };

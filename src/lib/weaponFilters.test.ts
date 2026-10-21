@@ -2,9 +2,52 @@ import { describe, it, expect } from 'vitest';
 import {
   DEFAULT_FILTERS, emptyMF, cycleFilter, matchesMF, matchesMFAny, chipMode, countMF,
   totalFilterCount, categoryCount, CATEGORIES, eventLabelFor, weaponSeasonLabel,
-  bestSeasonName, bestSeasonNumber, getPerkValues,
+  bestSeasonName, bestSeasonNumber, getPerkValues, filterSuggestions, type MultiKey,
 } from './weaponFilters';
 import type { Weapon, WeaponGroup } from '../types/weapon';
+
+describe('filterSuggestions', () => {
+  const none = (): Record<MultiKey, string[]> => ({
+    weaponType: [], frame: [], trait: [], perkTier: [], energy: [], ammo: [], slot: [], rarity: [],
+    perk: [], col1: [], col2: [], col3: [], col4: [], col5: [], source: [], season: [], foundry: [], weaponTier: [],
+  });
+  const options = {
+    ...none(),
+    weaponType: ['Hand Cannon', 'Shotgun'],
+    frame: ['Spread Shot Frame', 'Aggressive Frame', 'Adaptive Frame'],
+    perk: ['Spread Shot', 'Kill Clip', 'Outlaw'],
+    energy: ['solar', 'arc'],
+  };
+
+  it('offers the frame for what was typed', () => {
+    const s = filterSuggestions('spread shot', options, DEFAULT_FILTERS);
+    expect(s[0]).toMatchObject({ kind: 'multi', key: 'frame', value: 'Spread Shot Frame', label: 'Spread Shot', category: 'Frame' });
+    expect(s.map(x => x.category)).toContain('Perk');
+  });
+
+  it('ranks names that start with the text above ones that merely contain it', () => {
+    const s = filterSuggestions('clip', options, DEFAULT_FILTERS);
+    expect(s[0]).toMatchObject({ key: 'perk', value: 'Kill Clip' });
+    expect(filterSuggestions('hand', options, DEFAULT_FILTERS)[0]).toMatchObject({ key: 'weaponType', value: 'Hand Cannon' });
+  });
+
+  it('offers elements capitalised and the on/off filters', () => {
+    expect(filterSuggestions('sol', options, DEFAULT_FILTERS)[0]).toMatchObject({ key: 'energy', value: 'solar', label: 'Solar' });
+    expect(filterSuggestions('craft', options, DEFAULT_FILTERS)[0]).toMatchObject({ kind: 'toggle', key: 'craftableOnly' });
+  });
+
+  it('skips filters already on, one-letter input, and non-matches', () => {
+    const on = cycleFilter(DEFAULT_FILTERS, 'frame', 'Spread Shot Frame');
+    expect(filterSuggestions('spread shot', options, on).some(x => x.key === 'frame')).toBe(false);
+    expect(filterSuggestions('s', options, DEFAULT_FILTERS)).toEqual([]);
+    expect(filterSuggestions('zzzz', options, DEFAULT_FILTERS)).toEqual([]);
+  });
+
+  it('caps the list', () => {
+    const many = { ...none(), perk: Array.from({ length: 30 }, (_, i) => `Perk ${i}`) };
+    expect(filterSuggestions('perk', many, DEFAULT_FILTERS, 6)).toHaveLength(6);
+  });
+});
 
 describe('cycleFilter', () => {
   it('cycles none → include → exclude → none', () => {

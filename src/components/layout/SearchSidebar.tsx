@@ -18,7 +18,7 @@ import {
   type SortMode, type SortDir, type FilterState, type CategoryId, type MultiKey, type ToggleKey,
   AMMO_LABELS, SLOT_LABELS, TIER_ORDER, DEFAULT_DIR, DEFAULT_FILTERS, emptyMF,
   cycleFilter, matchesMF, matchesMFAny, totalFilterCount, getPerkValues,
-  weaponSeasonLabel, bestSeasonNumber, bestSeasonName,
+  weaponSeasonLabel, bestSeasonNumber, bestSeasonName, filterSuggestions, type FilterSuggestion,
 } from '../../lib/weaponFilters';
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -163,6 +163,24 @@ export const SearchSidebar: React.FC = () => {
   };
 
   const activeFilterCount = useMemo(() => totalFilterCount(filters), [filters]);
+
+  // Filters offered for what is typed ("spread shot" -> the Spread Shot frame). Adding one clears the text.
+  const suggestions = useMemo(() => filterSuggestions(query, allOptions, filters), [query, allOptions, filters]);
+  const [suggestIdx, setSuggestIdx] = useState(-1);
+  useEffect(() => { setSuggestIdx(-1); }, [query]);
+
+  const addSuggestion = useCallback((s: FilterSuggestion) => {
+    if (s.kind === 'toggle') setFilters(f => ({ ...f, [s.key]: true }));
+    else setFilters(f => ({ ...f, [s.key]: { inc: [...f[s.key].inc, s.value], exc: f[s.key].exc.filter(x => x !== s.value) } }));
+    setQuery('');
+  }, []);
+
+  const handleSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!suggestions.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setSuggestIdx(i => (i + 1) % suggestions.length); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setSuggestIdx(i => (i <= 0 ? suggestions.length - 1 : i - 1)); }
+    else if (e.key === 'Enter' && suggestIdx >= 0) { e.preventDefault(); addSuggestion(suggestions[suggestIdx]); }
+  };
 
   const groups = useMemo(() => groupWeapons(weapons), [weapons]);
 
@@ -339,8 +357,34 @@ export const SearchSidebar: React.FC = () => {
                 onChange={e => setQuery(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
+                onKeyDown={handleSearchKey}
+                role="combobox" aria-expanded={searchFocused && suggestions.length > 0} aria-controls="filter-suggestions" aria-autocomplete="list"
+                aria-activedescendant={suggestIdx >= 0 ? `filter-suggestion-${suggestIdx}` : undefined}
                 className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-1.5 text-sm text-ink placeholder-ink-4 focus:outline-none focus:border-amber-500 transition-colors"
               />
+
+              {/* Filters matching the typed text, one click to add */}
+              {searchFocused && suggestions.length > 0 && (
+                <div
+                  id="filter-suggestions" role="listbox" aria-label="Add a filter"
+                  className="absolute top-full left-0 right-0 mt-1 bg-surface border border-white/15 rounded-lg shadow-xl z-50 overflow-hidden"
+                >
+                  <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest px-3 pt-2.5 pb-1">Add filter</p>
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={`${s.key}:${s.value}`}
+                      id={`filter-suggestion-${i}`} role="option" aria-selected={i === suggestIdx}
+                      onMouseDown={e => { e.preventDefault(); addSuggestion(s); }}
+                      onMouseEnter={() => setSuggestIdx(i)}
+                      className={`w-full flex items-center gap-2 px-3 py-2 md:py-1.5 text-left transition-colors ${i === suggestIdx ? 'bg-white/8' : 'hover:bg-white/6'}`}
+                    >
+                      <span className="shrink-0 w-4 h-4 rounded bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-black leading-none flex items-center justify-center" aria-hidden="true">+</span>
+                      <span className="flex-1 min-w-0 text-xs text-ink truncate">{s.label}</span>
+                      <span className="shrink-0 text-2xs text-ink-4 uppercase tracking-wider">{s.category}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Recent searches dropdown */}
               <AnimatePresence>
