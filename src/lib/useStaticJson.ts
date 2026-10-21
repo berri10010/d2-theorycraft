@@ -42,5 +42,9 @@ export function useStaticJson<T>(url: string): { data: T | null; loading: boolea
 export const usePvpWishlist = () =>
   useStaticJson<import('./pvpWishlist').PvpWishlistDatabase>('/data/pvp-wishlist.json');
 
+/** Pride Eternal's PvP tiers and perks, in the same shape as the Aegis god-roll database. */
+export const usePride = () =>
+  useStaticJson<import('./godRolls').GodRollDatabase>('/data/pride.json');
+
 export const useWeaponSources = () =>
   useStaticJson<import('./weaponSources').WeaponSourceDatabase>('/data/sources.json');

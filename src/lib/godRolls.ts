@@ -1,5 +1,9 @@
 import type { PvpWishlistEntry } from './pvpWishlist';
 
+/** Pride Eternal's PvP spreadsheet (kept here so the UI can link it without loading the sheet parser). */
+export const PRIDE_SHEET_ID = '1TVgtTRWNGEPi6OMlTLxXFSKUTi_ycwykhwuw8EW_jJ0';
+export const PRIDE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${PRIDE_SHEET_ID}`;
+
 export interface GodRollEntry {
   weaponType: string;
   season: string | null;
@@ -60,17 +64,48 @@ export function lookupGodRoll(
 const hasList = (a?: string[]) => !!a && a.length > 0;
 
 /**
+ * The tier to show for a weapon. PvE tiers are Aegis's (the god-roll database); PvP tiers are Pride
+ * Eternal's, unless a PvP tier was curated by hand on the Aegis entry.
+ */
+export function weaponTier(
+  mode: 'pve' | 'pvp',
+  pve: GodRollEntry | null,
+  pride: GodRollEntry | null,
+): string | null {
+  return mode === 'pvp' ? (pve?.pvpTier ?? pride?.tier ?? null) : (pve?.tier ?? null);
+}
+
+/**
  * The PvP recommendation for a weapon, shaped like a PvE entry so the god-roll UI can render it
- * unchanged. Hand-curated PvP fields on a god-roll entry (the admin editor writes these) win;
- * otherwise the r/CrucibleGuidebook community wishlist is used. Returns null when neither exists.
+ * unchanged. In order of priority:
+ *   1. hand-curated PvP fields on the Aegis entry (the admin editor writes these),
+ *   2. Pride Eternal's PvP sheet (tier, notes, perks per column), with any column it leaves empty
+ *      filled from the wishlist,
+ *   3. the r/CrucibleGuidebook community wishlist.
+ * Returns null when none exists.
  */
 export function pvpGodRoll(
   pve: GodRollEntry | null,
   wishlist: PvpWishlistEntry | null,
+  pride: GodRollEntry | null = null,
 ): GodRollEntry | null {
   const curated = !!pve && (hasList(pve.pvpBarrel) || hasList(pve.pvpMag) || hasList(pve.pvpPerk1) || hasList(pve.pvpPerk2));
 
-  if (!curated && !wishlist) return null;
+  if (!curated && !wishlist && !pride) return null;
+
+  if (!curated && pride) {
+    const fill = (mine: string[], theirs?: string[]) => (hasList(mine) ? mine : theirs ?? mine);
+    return {
+      ...pride,
+      season: pride.season ?? pve?.season ?? null,
+      barrel: fill(pride.barrel, wishlist?.barrel),
+      mag: fill(pride.mag, wishlist?.mag),
+      perk1: fill(pride.perk1, wishlist?.perk1),
+      perk2: fill(pride.perk2, wishlist?.perk2),
+      originTrait: pride.originTrait ?? wishlist?.originTrait ?? null,
+      mw: pride.mw ?? wishlist?.mw ?? null,
+    };
+  }
 
   const base: GodRollEntry = {
     weaponType: pve?.weaponType ?? 'Other',

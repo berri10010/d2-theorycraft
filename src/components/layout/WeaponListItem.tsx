@@ -16,6 +16,8 @@ const TIER_STYLE: Record<string, { bg: string; text: string }> = {
   B: { bg: 'bg-blue-400',  text: 'text-slate-950' },
   C: { bg: 'bg-slate-500', text: 'text-white' },
   D: { bg: 'bg-slate-700', text: 'text-ink-2' },
+  E: { bg: 'bg-slate-800', text: 'text-ink-3' },
+  F: { bg: 'bg-red-900',   text: 'text-red-300' },
 };
 
 

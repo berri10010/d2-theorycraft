@@ -7,6 +7,7 @@ const DATA_FILES = [
   '/data/mods.json',
   '/data/statgroups.json',
   '/data/pvp-wishlist.json',
+  '/data/pride.json',
   '/data/sources.json',
   '/data/clarity.json',
   '/data/god-rolls.json',

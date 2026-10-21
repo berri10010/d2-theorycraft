@@ -40,6 +40,7 @@ import {
   WEAPON_STAT_SHEET_ID, WEAPON_STAT_CHART_GID, WEAPON_DATA_GID, parseWeaponStatSheet, mergeWeaponStats, sheetIsMidUpdate,
 } from '../src/lib/weaponStatSheet.js';
 import type { WeaponStatEntry } from '../src/lib/weaponStats.js';
+import { PRIDE_SHEET_ID, PRIDE_LEGENDARY_GID, PRIDE_EXOTIC_GID, PRIDE_STATUS_GID, parsePrideSheet, rekeyToWeapons, snapPerkNames } from '../src/lib/prideSheet.js';
 import type { Weapon, Perk } from '../src/types/weapon.js';
 import type { BungieSeasonDefinition, BungieStatGroupDefinition } from '../src/lib/bungie/bungieTypes.js';
 
@@ -97,7 +98,7 @@ function write(name: string, data: unknown) {
 // DATA_FORMAT_VERSION: bump this whenever parser logic changes in a way that
 // would produce different weapon data output from the same manifest.
 // This forces a re-parse even when the Bungie manifest version is unchanged.
-const DATA_FORMAT_VERSION = '19';
+const DATA_FORMAT_VERSION = '20';
 
 const NEXT_CACHE_DIR     = path.join(ROOT, '.next', 'cache');
 const MANIFEST_VER_CACHE = path.join(NEXT_CACHE_DIR, 'bungie-manifest-version');
@@ -506,6 +507,26 @@ async function buildPvpWishlist() {
   }
 }
 
+// Pride Eternal's PvP spreadsheet -> public/data/pride.json (PvP tiers, preferred perks and notes).
+// Only the gviz endpoint is readable for this sheet (the CSV export returns 401).
+async function buildPride() {
+  console.log("\n[pride] Fetching Pride Eternal's PvP spreadsheet...");
+  try {
+    const tab = (gid: string) => fetchText(`https://docs.google.com/spreadsheets/d/${PRIDE_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`);
+    const parsed = parsePrideSheet(await tab(PRIDE_LEGENDARY_GID), await tab(PRIDE_EXOTIC_GID), await tab(PRIDE_STATUS_GID));
+    if (parsed.legendary < 400 || parsed.exotic < 80) throw new Error(`only ${parsed.legendary} legendary / ${parsed.exotic} exotic rows — refusing to overwrite`);
+    console.log(`  ${parsed.legendary} legendary + ${parsed.exotic} exotic rows → ${Object.keys(parsed.entries).length} lookup keys`);
+    const unmatched = rekeyToWeapons(parsed.entries, loadUnpackedWeapons().flatMap((w) => [w.name, w.baseName]));
+    if (unmatched.length) console.log(`  ⚠ ${unmatched.length} not in the weapon data: ${unmatched.slice(0, 8).join(', ')}`);
+    const fixed = snapPerkNames(parsed.entries, Object.values(readJson('perks.json') as Record<string, { name: string }>).map((p) => p.name));
+    if (fixed) console.log(`  ${fixed} misspelled perk names corrected`);
+    write('pride.json', parsed.entries);
+  } catch (err) {
+    console.warn(`  ⚠ Pride's sheet not updated: ${err instanceof Error ? err.message : err}`);
+    if (!fs.existsSync(outPath('pride.json'))) write('pride.json', {});
+  }
+}
+
 async function buildWeaponSources() {
   console.log("\n[sources] Fetching Sax's Monument of Triumph loot sources...");
   try {
@@ -570,6 +591,7 @@ async function main() {
     { name: 'god-rolls',            fn: buildGodRolls },
     { name: 'patch-event-seasons',  fn: patchEventWeaponSeasons },
     { name: 'pvp-wishlist',         fn: buildPvpWishlist },
+    { name: 'pride',                fn: buildPride },
     { name: 'weapon-sources',       fn: buildWeaponSources },
     { name: 'weapon-stats',         fn: buildWeaponStats },
   ];

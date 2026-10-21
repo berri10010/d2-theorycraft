@@ -9,6 +9,8 @@ import { WeaponGroup } from '../../types/weapon';
 import { groupWeapons } from '../../lib/weaponGroups';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useGodRolls } from '../../lib/useGodRolls';
+import { usePride } from '../../lib/useStaticJson';
+import { weaponTier } from '../../lib/godRolls';
 import { WeaponListItem } from './WeaponListItem';
 import { ActiveChip, FilterPanel } from './SidebarFilters';
 import { MAX_RECENT, loadRecentWeaponHashes, pushRecentWeaponHash, loadRecentSearches, saveRecentSearches } from '../../lib/recents';
@@ -25,6 +27,8 @@ export const SearchSidebar: React.FC = () => {
   const { loadWeapon, activeWeapon } = useWeaponStore();
   const { weapons, isLoading, error } = useWeaponDb();
   const { data: godRollDb } = useGodRolls();
+  const { data: prideDb } = usePride();
+  const mode = useWeaponStore((s) => s.mode);
 
   const [query,         setQuery]         = useState('');
   const [sortMode,      setSortMode]      = useState<SortMode>('alpha');
@@ -162,16 +166,16 @@ export const SearchSidebar: React.FC = () => {
 
   const groups = useMemo(() => groupWeapons(weapons), [weapons]);
 
-  // Map baseName → tier string from god-rolls DB
+  // Map baseName → tier: Aegis's tiers in PvE, Pride Eternal's in PvP.
   const tierMap = useMemo(() => {
     const m = new Map<string, string>();
-    if (godRollDb) {
-      for (const [name, e] of Object.entries(godRollDb)) {
-        if (e.tier) m.set(name, e.tier);
-      }
+    const names = new Set([...Object.keys(godRollDb ?? {}), ...(mode === 'pvp' ? Object.keys(prideDb ?? {}) : [])]);
+    for (const name of names) {
+      const tier = weaponTier(mode, godRollDb?.[name] ?? null, prideDb?.[name] ?? null);
+      if (tier) m.set(name, tier);
     }
     return m;
-  }, [godRollDb]);
+  }, [godRollDb, prideDb, mode]);
 
   const makeRankFn = useCallback((q: string) => (name: string): number => {
     if (!q) return 0;

@@ -16,7 +16,7 @@ import { useClarityPerks } from '../../lib/useClarityPerks';
 import { renderClarityDesc } from '../../lib/clarityRender';
 import { useGodRolls } from '../../lib/useGodRolls';
 import { lookupGodRoll, pvpGodRoll } from '../../lib/godRolls';
-import { usePvpWishlist } from '../../lib/useStaticJson';
+import { usePvpWishlist, usePride } from '../../lib/useStaticJson';
 import { lookupPvpEntry } from '../../lib/pvpWishlist';
 import { getPerkFamily } from '../../lib/perkFamily';
 
@@ -43,6 +43,7 @@ export const RollEditor: React.FC = () => {
   const { data: clarityData } = useClarityPerks();
   const { data: godRollDb }   = useGodRolls();
   const { data: pvpWishlistDb } = usePvpWishlist();
+  const { data: prideDb } = usePride();
   const [flashHash, setFlashHash] = useState<string | null>(null);
 
   const { getPerkTier, setPerkTier, pveModeList, pvpModeList } = useTierListStore();
@@ -54,7 +55,7 @@ export const RollEditor: React.FC = () => {
     if (!activeWeapon || !godRollDb) return null;
     const pveEntry = lookupGodRoll(godRollDb, activeWeapon);
     const entry = mode === 'pvp'
-      ? pvpGodRoll(pveEntry, pvpWishlistDb ? lookupPvpEntry(pvpWishlistDb, activeWeapon) : null)
+      ? pvpGodRoll(pveEntry, pvpWishlistDb ? lookupPvpEntry(pvpWishlistDb, activeWeapon) : null, prideDb ? lookupGodRoll(prideDb, activeWeapon) : null)
       : pveEntry;
     if (!entry) return null;
 
@@ -79,7 +80,7 @@ export const RollEditor: React.FC = () => {
       perk2ColName: perkCols[1]?.name ?? null,
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWeapon, godRollDb, pvpWishlistDb, mode]);
+  }, [activeWeapon, godRollDb, pvpWishlistDb, prideDb, mode]);
 
   const isTieredWeapon = (activeWeapon?.seasonNumber ?? 0) >= 27 && activeWeapon?.rarity !== 'Exotic';
 

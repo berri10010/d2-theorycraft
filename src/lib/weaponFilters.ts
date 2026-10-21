@@ -12,7 +12,7 @@ export type SortMode = 'alpha' | 'season' | 'tier';
 export type SortDir  = 'asc'   | 'desc';
 export const DEFAULT_DIR: Record<SortMode, SortDir> = { alpha: 'asc', season: 'asc', tier: 'asc' };
 
-export const TIER_ORDER: Record<string, number> = { S: 0, A: 1, B: 2, C: 3, D: 4 };
+export const TIER_ORDER: Record<string, number> = { S: 0, A: 1, B: 2, C: 3, D: 4, E: 5, F: 6 };
 // ─── Filter types ─────────────────────────────────────────────────────────────
 
 export interface MultiFilter { inc: string[]; exc: string[] }
