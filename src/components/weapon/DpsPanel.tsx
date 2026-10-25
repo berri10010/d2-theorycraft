@@ -51,6 +51,7 @@ export function DpsPanel() {
     armorMods,
     activeEffects,
     activeBuffs,
+    catalystActive,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:       s.activeWeapon,
@@ -63,12 +64,13 @@ export function DpsPanel() {
       armorMods:          s.armorMods,
       activeEffects:      s.activeEffects,
       activeBuffs:        s.activeBuffs,
+      catalystActive:     s.catalystActive,
     }))
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const calcStats = useMemo(() => getCalculatedStats(), [
-    activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods, activeEffects, activeBuffs,
+    activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods, activeEffects, activeBuffs, catalystActive,
   ]);
 
   const dps = useMemo<DpsResult | null>(() => {

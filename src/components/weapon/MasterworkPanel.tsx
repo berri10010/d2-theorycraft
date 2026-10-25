@@ -10,6 +10,7 @@ import { Tooltip } from '../ui/Tooltip';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { ClarityEntry } from '../../lib/clarity';
 import { displayedDelta } from '../../lib/statCalc';
+import { CatalystCard } from './CatalystCard';
 
 /** Flatten a Clarity entry's English description into plain text. */
 function clarityPlainText(entry: ClarityEntry): string | null {
@@ -75,26 +76,7 @@ export const MasterworkPanel: React.FC = () => {
   if (!activeWeapon) return null;
 
   // Exotic weapons use Catalysts instead of masterworks.
-  // Show an informational card so the user knows why no masterwork options appear.
-  if (activeWeapon.rarity === 'Exotic') {
-    return (
-      <div className="p-3 md:p-4 rounded-xl border border-amber-500/20">
-        <div className="flex items-start gap-3">
-          <span className="text-amber-400 text-xl leading-none mt-0.5">⬡</span>
-          <div>
-            <h3 className="text-sm font-bold text-ink-2 mb-1">Catalyst</h3>
-            <p className="text-sm text-ink-3 leading-relaxed">
-              Exotic weapons upgrade via a <span className="text-amber-400 font-semibold">Catalyst</span> instead of a masterwork.
-              Equip and complete the catalyst objective in-game to unlock bonus stats and an intrinsic perk upgrade.
-            </p>
-            <p className="text-2xs text-ink-4 mt-2">
-              Catalyst bonuses are not reflected in this builder.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (activeWeapon.rarity === 'Exotic') return <CatalystCard />;
 
   const isAdept = activeWeapon.isAdept;
 

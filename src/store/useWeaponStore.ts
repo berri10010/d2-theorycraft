@@ -194,6 +194,7 @@ interface WeaponRoll {
   activeModId:    string;           // id field from WEAPON_MODS
   armorMods:      ArmorModState;
   activeEffects:  Record<string, number>;
+  catalystActive?: boolean;
 }
 
 // ─── Store interface ─────────────────────────────────────────────────────────
@@ -220,6 +221,8 @@ interface WeaponState {
   isCrafted:             boolean;
   /** Enhanced Legendary state — enhanced perks active without crafted pattern. +2 secondary MW bonus. */
   isEnhanced:            boolean;
+  /** An exotic's catalyst is complete: its stat bonuses apply. */
+  catalystActive:        boolean;
   /** Weapon tier for Season 27+ tiered weapons (1–5). Drives the secondary MW bonus (+1 to +5). */
   weaponTier:            number;
   activeMod:             WeaponMod;
@@ -249,6 +252,7 @@ interface WeaponState {
   setCrafted:        (val: boolean) => void;
   toggleEnhanced:    () => void;
   setEnhanced:       (val: boolean) => void;
+  setCatalystActive: (on: boolean) => void;
   setWeaponTier:     (tier: number) => void;
   setActiveMod:      (mod: WeaponMod) => void;
   setSurgeStacks:    (stacks: 0 | 1 | 2 | 3 | 4) => void;
@@ -297,6 +301,7 @@ function captureRoll(state: WeaponState): WeaponRoll {
     activeModId:    state.activeMod.id,
     armorMods:      state.armorMods,
     activeEffects:  state.activeEffects,
+    catalystActive: state.catalystActive,
   };
 }
 
@@ -317,7 +322,8 @@ function isDefaultRoll(roll: WeaponRoll, weapon: Weapon): boolean {
     !roll.isEnhanced &&
     roll.activeModId === 'none' &&
     Object.values(roll.armorMods).every((v) => v === 0) &&
-    Object.keys(roll.activeEffects).length === 0
+    Object.keys(roll.activeEffects).length === 0 &&
+    !roll.catalystActive
   );
 }
 
@@ -338,6 +344,7 @@ export const useWeaponStore = create<WeaponState>()(
       hoveredMasterworkStat: null,
       isCrafted:             false,
       isEnhanced:        false,
+      catalystActive:    false,
       weaponTier:        1,
       activeMod:         NONE_MOD,
       surgeStacks:       0,
@@ -394,6 +401,7 @@ export const useWeaponStore = create<WeaponState>()(
           masterworkStat:   null,
           isCrafted:        false,
           isEnhanced:       false,
+          catalystActive:   false,
           weaponTier:       1,
           activeMod:        newMod,
           armorMods:        DEFAULT_ARMOR_MODS,
@@ -414,6 +422,7 @@ export const useWeaponStore = create<WeaponState>()(
           masterworkStat: null,
           isCrafted:      false,
           isEnhanced:     false,
+          catalystActive: false,
           weaponTier:     1,
           activeMod:      NONE_MOD,
           armorMods:      DEFAULT_ARMOR_MODS,
@@ -509,6 +518,7 @@ export const useWeaponStore = create<WeaponState>()(
         ? { isEnhanced: false }
         : { isEnhanced: true, isCrafted: false }),
       setEnhanced:       (val)    => set(val ? { isEnhanced: true, isCrafted: false } : { isEnhanced: false }),
+      setCatalystActive: (on)     => set({ catalystActive: on }),
       setWeaponTier:     (tier)   => set({ weaponTier: Math.max(1, Math.min(5, tier)) }),
       setActiveMod:      (mod)    => set({ activeMod: mod }),
       setSurgeStacks:    (stacks) => set({ surgeStacks: stacks }),
@@ -517,7 +527,7 @@ export const useWeaponStore = create<WeaponState>()(
       setExoticArmor:    (cls, id) => set((s) => ({ activeExoticArmor: { ...s.activeExoticArmor, [cls]: id } })),
 
       getCalculatedStats: () => {
-        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, isEnhanced, weaponTier, activeMod, armorMods, activeBuffs, activeExoticArmor } = get();
+        const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, isEnhanced, catalystActive, weaponTier, activeMod, armorMods, activeBuffs, activeExoticArmor } = get();
         if (!activeWeapon) return {};
 
         const baseStats: StatMap = { ...activeWeapon.baseStats };
@@ -592,6 +602,11 @@ export const useWeaponStore = create<WeaponState>()(
             ]);
             for (const stat of secondaryStats) add(stat, secondaryBonus);
           }
+        }
+
+        // A completed exotic catalyst: its flat stat bonuses (replaces the masterwork on exotics).
+        if (catalystActive && activeWeapon.catalyst) {
+          for (const [stat, value] of Object.entries(activeWeapon.catalyst.stats)) add(stat, value);
         }
 
         // Weapon mod stat changes

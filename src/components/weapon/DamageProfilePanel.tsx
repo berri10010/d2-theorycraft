@@ -59,6 +59,7 @@ export function DamageProfilePanel() {
     surgeStacks,
     activeEffects,
     selectedPerks,
+    catalystActive,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:        s.activeWeapon,
@@ -70,6 +71,7 @@ export function DamageProfilePanel() {
       surgeStacks:         s.surgeStacks,
       activeEffects:       s.activeEffects,
       selectedPerks:       s.selectedPerks,
+      catalystActive:      s.catalystActive,
     }))
   );
 
@@ -82,7 +84,7 @@ export function DamageProfilePanel() {
       getDamageMultiplier(),
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWeapon, mode, activeBuffs, activeMod, surgeStacks, activeEffects, selectedPerks]);
+  }, [activeWeapon, mode, activeBuffs, activeMod, surgeStacks, activeEffects, selectedPerks, catalystActive]);
 
   if (!activeWeapon) return null;
 

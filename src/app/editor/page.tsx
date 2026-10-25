@@ -81,7 +81,7 @@ function Dashboard() {
   const {
     loadWeapon, activeWeapon, activeWeaponHash, selectedPerks, selectPerk,
     getCalculatedStats, getDamageMultiplier, getWeaponEffects, mode, setMode,
-    masterworkStat, activeBuffs, setWeaponsStat, weaponsStat,
+    masterworkStat, activeBuffs, setWeaponsStat, weaponsStat, catalystActive, setCatalystActive,
     setMasterworkStat, toggleBuff, clearRoll, setWeaponTier, weaponTier,
   } = useWeaponStore();
   const { addSnapshot, snapshots } = useCompareStore();
@@ -218,6 +218,7 @@ function Dashboard() {
       setMasterworkStat(mwParam as MasterworkStat);
     if (wsParam) setWeaponsStat(Number(wsParam));
     if (tierParam) { const t = Number(tierParam); if (t >= 1 && t <= 5) setWeaponTier(t); }
+    if (searchParams.get('cat') === '1' && found.catalyst) setCatalystActive(true);
     if (buffsParam) {
       const toActivate = buffsParam.split(',').filter(Boolean);
       const currentBuffs = useWeaponStore.getState().activeBuffs;
@@ -303,7 +304,7 @@ function Dashboard() {
 
   const buildRollParams = (): URLSearchParams | null =>
     activeWeapon
-      ? buildRollParamsFor({ weapon: activeWeapon, selectedPerks, mode, masterworkStat, weaponsStat, activeBuffs, weaponTier })
+      ? buildRollParamsFor({ weapon: activeWeapon, selectedPerks, mode, masterworkStat, weaponsStat, activeBuffs, weaponTier, catalystActive })
       : null;
 
   const buildPermalink = () => {
@@ -324,7 +325,7 @@ function Dashboard() {
     }, 250);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlSyncReady, activeWeapon?.hash, selectedPerks, mode, masterworkStat, weaponsStat, activeBuffs, weaponTier]);
+  }, [urlSyncReady, activeWeapon?.hash, selectedPerks, mode, masterworkStat, weaponsStat, activeBuffs, weaponTier, catalystActive]);
 
   const handleSharePermalink = () => {
     const url = buildPermalink();

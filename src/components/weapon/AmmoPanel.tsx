@@ -45,6 +45,7 @@ function ReserveBar({ label, value, max, color }: { label: string; value: number
 }
 
 export const AmmoPanel: React.FC = () => {
+  useWeaponStore((s) => s.catalystActive); // re-render when the catalyst is switched, since the stats below include it
   const { activeWeapon, getCalculatedStats } = useWeaponStore(
     useShallow((s) => ({ activeWeapon: s.activeWeapon, getCalculatedStats: s.getCalculatedStats }))
   );

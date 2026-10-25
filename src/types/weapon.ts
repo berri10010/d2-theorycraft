@@ -102,6 +102,16 @@ export interface PerkColumn {
   perks: Perk[];
 }
 
+/** An exotic weapon's catalyst: its Bungie plug and the stat bonuses a completed catalyst gives. */
+export interface WeaponCatalyst {
+  /** Plug item hash; also the key of its description in the Clarity data. */
+  hash: string;
+  name: string;
+  icon: string | null;
+  /** Unconditional stat bonuses (stat name -> raw points), from the manifest or, when it has none, Clarity's text. */
+  stats: Record<string, number>;
+}
+
 export interface Weapon {
   hash: string;
   name: string;
@@ -199,6 +209,8 @@ export interface Weapon {
    * Optional for backward-compatibility with cached data built before this field.
    */
   masterworkSecondaryStats?: string[];
+  /** The exotic's catalyst (the upgrade that replaces a masterwork), when it has one. */
+  catalyst?: WeaponCatalyst | null;
   /**
    * Weapon mod options available for this weapon, extracted from the mod
    * socket plug set in the Bungie manifest. Empty for exotic weapons.

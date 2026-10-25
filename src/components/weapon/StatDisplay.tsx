@@ -202,6 +202,7 @@ export const StatDisplay: React.FC = () => {
     armorMods,
     activeEffects,
     activeBuffs,
+    catalystActive,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:          s.activeWeapon,
@@ -216,12 +217,13 @@ export const StatDisplay: React.FC = () => {
       armorMods:             s.armorMods,
       activeEffects:         s.activeEffects,
       activeBuffs:           s.activeBuffs,
+      catalystActive:        s.catalystActive,
     }))
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const calcStats = useMemo(() => getCalculatedStats(), [
-    activeWeapon, selectedPerks, masterworkStat, isCrafted, isEnhanced, weaponTier, activeMod, armorMods, activeEffects, activeBuffs,
+    activeWeapon, selectedPerks, masterworkStat, isCrafted, isEnhanced, weaponTier, activeMod, armorMods, activeEffects, activeBuffs, catalystActive,
   ]);
 
   if (!activeWeapon) return null;

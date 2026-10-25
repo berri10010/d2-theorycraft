@@ -9,14 +9,16 @@ export interface RollState {
   weaponsStat: number;
   activeBuffs: string[];
   weaponTier: number;
+  /** An exotic's catalyst is marked complete. */
+  catalystActive?: boolean;
 }
 
 /**
  * Query params that fully describe a roll. Used for permalinks and for keeping the
- * address bar in sync. The editor reads these back (w, p, m, mw, ws, b, tier).
+ * address bar in sync. The editor reads these back (w, p, m, mw, ws, b, tier, cat).
  */
 export function buildRollParams(roll: RollState): URLSearchParams {
-  const { weapon, selectedPerks, mode, masterworkStat, weaponsStat, activeBuffs, weaponTier } = roll;
+  const { weapon, selectedPerks, mode, masterworkStat, weaponsStat, activeBuffs, weaponTier, catalystActive } = roll;
   const params = new URLSearchParams({ w: weapon.hash });
   // Human-readable slug makes shared URLs legible (e.g. ?w=123&name=the-messenger).
   // The slug is decorative — the editor always resolves via the hash.
@@ -28,6 +30,7 @@ export function buildRollParams(roll: RollState): URLSearchParams {
   if (weaponsStat !== 0) params.set('ws', String(weaponsStat));
   if (activeBuffs.length) params.set('b', activeBuffs.join(','));
   if (weaponTier !== 1) params.set('tier', String(weaponTier));
+  if (catalystActive && weapon.catalyst) params.set('cat', '1');
   return params;
 }
 

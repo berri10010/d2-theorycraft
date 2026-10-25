@@ -242,6 +242,30 @@ const DISPLAY_STATS = new Set([
   'Persistence',
 ]);
 
+/**
+ * The exotic's catalyst: the plug sitting in its (initially empty) catalyst socket. Only a few catalysts list stat
+ * bonuses in the manifest; the rest are described in Clarity's text, which the data build reads afterwards.
+ */
+function extractCatalyst(item: any, items: Record<string, any>): Weapon['catalyst'] {
+  if (item.inventory?.tierTypeName !== 'Exotic') return null;
+  for (const socket of item.sockets?.socketEntries ?? []) {
+    for (const entry of socket.reusablePlugItems ?? []) {
+      if (entry.plugItemHash === socket.singleInitialItemHash) continue;
+      const plug = items[String(entry.plugItemHash)];
+      const name = plug?.displayProperties?.name?.trim();
+      if (!name || !/Catalyst$/i.test(name)) continue;
+      const stats: Record<string, number> = {};
+      for (const s of plug.investmentStats ?? []) {
+        if (!s.value || s.isConditionallyActive) continue;
+        const stat = STAT_HASH_MAP[s.statTypeHash];
+        if (stat && DISPLAY_STATS.has(stat)) stats[stat] = (stats[stat] ?? 0) + s.value;
+      }
+      return { hash: String(plug.hash), name, icon: plug.displayProperties.icon ?? null, stats };
+    }
+  }
+  return null;
+}
+
 const DAMAGE_TYPE_MAP: Record<number, Weapon['damageType']> = {
   3373582085: 'kinetic',
   1847026933: 'solar',
@@ -1125,6 +1149,7 @@ export function parseWeapons(
         (s) => !finalMwOptions.includes(s) && baseStats[s] !== undefined && s !== 'Ammo Generation'
       ),
       weaponMods,
+      catalyst: extractCatalyst(item, items),
       foundry: extractFoundry(item.traitIds),
     });
   }

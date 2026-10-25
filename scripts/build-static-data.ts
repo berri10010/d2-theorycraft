@@ -33,6 +33,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parseWeapons } from '../src/lib/bungie/parser.js';
+import { catalystStatsFromText, findCatalystEntry, firstLine } from '../src/lib/catalystStats.js';
 import { packWeapons, unpackWeapons, type PackedWeapon } from '../src/lib/weaponPack.js';
 import { PVP_WISHLIST_URL, parseWishlistBlocks, buildPvpEntries } from '../src/lib/pvpWishlist.js';
 import { SAX_SHEET_ID, SAX_TABS, buildSourceTable, type SaxTab } from '../src/lib/weaponSources.js';
@@ -98,7 +99,7 @@ function write(name: string, data: unknown) {
 // DATA_FORMAT_VERSION: bump this whenever parser logic changes in a way that
 // would produce different weapon data output from the same manifest.
 // This forces a re-parse even when the Bungie manifest version is unchanged.
-const DATA_FORMAT_VERSION = '21';
+const DATA_FORMAT_VERSION = '22';
 
 const NEXT_CACHE_DIR     = path.join(ROOT, '.next', 'cache');
 const MANIFEST_VER_CACHE = path.join(NEXT_CACHE_DIR, 'bungie-manifest-version');
@@ -435,6 +436,38 @@ async function buildGodRolls() {
 // TheAegisRelic's god-rolls database records the correct season for these, so
 // we patch weapons.json after both files are written.
 
+/**
+ * Catalysts: the manifest lists stat bonuses for only a few, so for the rest read the flat bonuses ("Grants 30 Range
+ * and 20 Stability.") from the start of Clarity's description of the catalyst, keeping only stats the weapon has.
+ */
+async function patchCatalystStats() {
+  console.log('\n[catalysts] Filling catalyst stat bonuses from Clarity...');
+  const wPath = outPath('weapons.json');
+  const cPath = outPath('clarity.json');
+  if (!fs.existsSync(wPath) || !fs.existsSync(cPath)) { console.log('  Skipping — required files not present.'); return; }
+
+  const clarity = JSON.parse(fs.readFileSync(cPath, 'utf8')) as Parameters<typeof findCatalystEntry>[0];
+  const weapons = JSON.parse(fs.readFileSync(wPath, 'utf8')) as PackedWeapon[];
+  let withCatalyst = 0, fromManifest = 0, fromText = 0;
+  for (const w of weapons) {
+    const cat = w.catalyst;
+    if (!cat) continue;
+    withCatalyst++;
+    const own = Object.keys(w.baseStats);
+    const keep = (stats: Record<string, number>) => Object.fromEntries(Object.entries(stats).filter(([stat]) => own.includes(stat)));
+    let stats = keep(cat.stats);
+    if (Object.keys(stats).length > 0) fromManifest++;
+    else {
+      const entry = findCatalystEntry(clarity, w);
+      stats = entry ? keep(catalystStatsFromText(firstLine(entry))) : {};
+      if (Object.keys(stats).length > 0) fromText++;
+    }
+    cat.stats = stats;
+  }
+  write('weapons.json', weapons);
+  console.log(`  ${withCatalyst} weapon entries have a catalyst: stats from the manifest for ${fromManifest}, from Clarity for ${fromText}.`);
+}
+
 async function patchEventWeaponSeasons() {
   console.log('\n[patch-seasons] Back-filling null seasonNumbers from god-rolls...');
 
@@ -590,14 +623,19 @@ async function main() {
     { name: 'clarity',              fn: buildClarity },
     { name: 'god-rolls',            fn: buildGodRolls },
     { name: 'patch-event-seasons',  fn: patchEventWeaponSeasons },
+    { name: 'catalysts',            fn: patchCatalystStats },
     { name: 'pvp-wishlist',         fn: buildPvpWishlist },
     { name: 'pride',                fn: buildPride },
     { name: 'weapon-sources',       fn: buildWeaponSources },
     { name: 'weapon-stats',         fn: buildWeaponStats },
   ];
 
+  // --only weapons,clarity,catalysts runs just those steps (in the order above).
+  const onlyArg = process.argv.find((a) => a.startsWith('--only='))?.slice('--only='.length);
+  const only = onlyArg ? new Set(onlyArg.split(',')) : null;
   let failed = 0;
   for (const { name, fn } of steps) {
+    if (only && !only.has(name)) continue;
     try {
       await fn();
     } catch (err) {

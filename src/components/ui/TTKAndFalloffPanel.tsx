@@ -25,6 +25,7 @@ const PVE_TIERS_KEYS = Object.keys(PVE_HEALTH_TIERS);
 // ── Main component ────────────────────────────────────────────────────────────
 
 export const TTKAndFalloffPanel: React.FC = () => {
+  useWeaponStore((s) => s.catalystActive); // re-render when the catalyst is switched, since the stats below include it
   const {
     activeWeapon, getCalculatedStats, mode,
     weaponsStat, setWeaponsStat,
