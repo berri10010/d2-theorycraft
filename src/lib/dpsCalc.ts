@@ -1,6 +1,6 @@
 // DPS calculation using weaponStats timing data and reloadTimes formulas.
 
-import { lookupWeaponStat, isChargeWeapon, isBurstWeapon } from './weaponStats';
+import { lookupWeaponStat, isChargeWeapon, isBurstWeapon, pveMultiplier } from './weaponStats';
 import { calcReloadTime } from './reloadTimes';
 import rawCombatantScalars from '../data/combatantScalars.json';
 import { sheetSubType } from './subtypes';
@@ -70,7 +70,7 @@ export function calcDps(
   const rpm = Math.round(60 / timePerShot_s);
 
   // ── Optimal DPS (continuous fire, all crits) ───────────────────────────────
-  const pveScalar      = getPveScalar(itemSubType, enemyTier);
+  const pveScalar      = getPveScalar(itemSubType, enemyTier) * pveMultiplier(base, enemyTier);
   const critPerTrigger = entry.critDamage * burstSize * pellets;
   const optimalDpsPvp  = critPerTrigger / timePerShot_s;
   const optimalDpsPve  = optimalDpsPvp * pveScalar;

@@ -158,9 +158,10 @@ describe('exotic perk buffs', () => {
   const dmg = (key: string, mode: 'pve' | 'pvp', stack?: number) => resolveBuffMultiplier(b(key), mode, null, stack);
   const fx = (key: string, mode: 'pve' | 'pvp', stack?: number) => resolveBuffEffects(b(key), mode, null, stack);
 
-  it("Hawkmoon's Paracausal Charge is 21% to 66% against combatants and nothing against Guardians", () => {
+  it("Hawkmoon's Paracausal Charge is 21% to 66.3% against combatants and nothing against Guardians", () => {
     expect(dmg('paracausal_charge', 'pve', 0)).toBeCloseTo(1.21, 3);
-    expect(dmg('paracausal_charge', 'pve', 6)).toBeCloseTo(1.66, 3);
+    expect(dmg('paracausal_charge', 'pve', 6)).toBeCloseTo(1.663, 3);
+    expect(dmg('paracausal_charge', 'pve', 2)).toBeCloseTo(1.476, 3);
     expect(dmg('paracausal_charge', 'pvp', 6)).toBe(1);
   });
 
@@ -189,17 +190,17 @@ describe('exotic perk buffs', () => {
     expect(dmg('cranial_spike', 'pvp', 4)).toBe(1);
   });
 
-  it('rate-of-fire perks shorten the shot delay: Thunderlord +25% then +40%, New Land Beyond +5%', () => {
-    expect(fx('lightning_rounds', 'pve', 0).shotDelayMultiplier).toBeCloseTo(1 / 1.25, 3);
-    expect(fx('lightning_rounds', 'pve', 1).shotDelayMultiplier).toBeCloseTo(1 / 1.4, 3);
+  it('rate-of-fire perks shorten the shot delay: Thunderlord 0.75x then 0.6x, New Land Beyond +5%', () => {
+    expect(fx('lightning_rounds', 'pve', 0).shotDelayMultiplier).toBeCloseTo(0.75, 3);
+    expect(fx('lightning_rounds', 'pve', 1).shotDelayMultiplier).toBeCloseTo(0.6, 3);
     expect(fx('bullseye_bolster', 'pve').shotDelayMultiplier).toBeCloseTo(1 / 1.05, 3);
   });
 
-  it('Tarrabah unleashed: +187% body / +99% precision in PvE (+120% / +52.7% in PvP), +20% rate of fire', () => {
+  it('Tarrabah unleashed: +187% body / +99% precision in PvE (+120% / +52.7% in PvP), 0.8x fire recovery delay', () => {
     const body = dmg('ravenous_beast', 'pve');
     expect(body).toBeCloseTo(2.87, 3);
     expect(body * fx('ravenous_beast', 'pve').critMultiplier!).toBeCloseTo(1.99, 2);
-    expect(fx('ravenous_beast', 'pve').shotDelayMultiplier).toBeCloseTo(1 / 1.2, 3);
+    expect(fx('ravenous_beast', 'pve').shotDelayMultiplier).toBeCloseTo(0.8, 3);
     const pvp = dmg('ravenous_beast', 'pvp');
     expect(pvp).toBeCloseTo(2.2, 3);
     expect(pvp * fx('ravenous_beast', 'pvp').critMultiplier!).toBeCloseTo(1.527, 2);

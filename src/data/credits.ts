@@ -135,6 +135,12 @@ export const CREDITS: Credit[] = [
     where: 'External Buffs panel, Armor Mods weapon surge.',
   },
   {
+    id: 'compendium', short: 'Data Compendium', name: 'Destiny Data Compendium', url: 'https://docs.google.com/spreadsheets/d/1WaxvbLx7UoSZaBqdFr1u32F2uWVLo-CJunJB4nlGUE4',
+    group: 'math',
+    what: "In-game values written up per exotic, perk and mechanic; Clarity's descriptions are built from it. The site takes each exotic's PvE damage (its own PvE bonus over a legendary of its type), the rocket launcher damage the stat sheet lacks, and precise perk numbers.",
+    where: 'DPS and TTK for exotics, exotic perk effects, External Buffs.',
+  },
+  {
     id: 'destinypedia', name: 'Destinypedia', url: 'https://www.destinypedia.com/Ward_of_Dawn',
     group: 'math',
     what: "Ward of Dawn's Weapons of Light (+25% weapon damage for 10 seconds). Bungie publishes no number for it.",
@@ -184,7 +190,8 @@ export const DATA_FILE_CREDITS: Record<string, string[]> = {
   'public/data/sources.json': ['sax'],
   'src/data/ammoData.json': ['mossymax', 'bungie'],
   'src/data/archetypes.json': ['huwugo', 'rockstarmatt'],
-  'src/data/buffs.json': ['clarity', 'blueberries', 'bungie', 'destinypedia', 'thegamer'],
+  'src/data/buffs.json': ['clarity', 'blueberries', 'bungie', 'destinypedia', 'thegamer', 'compendium'],
+  'src/data/compendium.ts': ['compendium'],
   'src/data/combatantScalars.json': ['mossymax'],
   'src/data/credits.ts': [],
   'src/data/exoticArmor.ts': ['bungie'],

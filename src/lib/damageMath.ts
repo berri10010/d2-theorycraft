@@ -20,7 +20,7 @@
 
 import { applyEffects, type WeaponEffects } from './weaponEffects';
 import { GameMode } from '../types/weapon';
-import { lookupWeaponStat, isChargeWeapon, isBurstWeapon, WeaponStatEntry } from './weaponStats';
+import { lookupWeaponStat, isChargeWeapon, isBurstWeapon, pveMultiplier, WeaponStatEntry } from './weaponStats';
 import rawCombatantScalars from '../data/combatantScalars.json';
 import { sheetSubType } from './subtypes';
 import { roundTo3 } from './math';
@@ -336,7 +336,7 @@ export function calculateTTK(
   if (!base) return null;
   const entry = applyEffects(base, effects);
   const hp        = mode === 'pvp' ? pvpHp : (PVE_HEALTH_TIERS[enemyTier] ?? 336);
-  const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
+  const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) * pveMultiplier(base, enemyTier) : 1.0;
   const result = calcTTKCore(entry, hp, multiplier, mode, pveScalar);
   return result ? withReloads(result, ammo) : null;
 }
@@ -384,7 +384,7 @@ export function calculateTTKCurve(
   const entry = applyEffects(base, effects);
 
   const hp        = mode === 'pvp' ? pvpHp : (PVE_HEALTH_TIERS[enemyTier] ?? 336);
-  const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) : 1.0;
+  const pveScalar = mode === 'pve' ? getCombatantScalar(weapon.itemSubType, enemyTier) * pveMultiplier(base, enemyTier) : 1.0;
   const steps = 40;
   const result: TTKBreakpoint[] = [];
   const calc = getTtkCalculator(entry);

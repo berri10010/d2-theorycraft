@@ -112,10 +112,10 @@ describe('catalyst damage effects', () => {
     expect(store().getDamageMultiplier()).toBe(1);
   });
 
-  it("Whisper of the Worm: +35% precision, and +10.77% to everything against PvE combatants only", () => {
+  it("Whisper of the Worm: +35% precision, and +10.777% to everything against PvE combatants only", () => {
     setup('Whisper of the Worm');
     store().setEffectState(catalystEffectId('catalyst_whispered_breathing'), 1);
-    expect(store().getDamageMultiplier()).toBeCloseTo(1.1077, 4);
+    expect(store().getDamageMultiplier()).toBeCloseTo(1.10777, 4);
     expect(store().getWeaponEffects().critMult).toBeCloseTo(1.35, 3);
     useWeaponStore.setState({ mode: 'pvp' });
     expect(store().getDamageMultiplier()).toBe(1);
@@ -130,7 +130,7 @@ describe('catalyst damage effects', () => {
     }
   });
 
-  it("Hawkmoon's last round: Paracausal Shot at 7 stacks is +1736% in PvE and +509% in PvP, replacing the charge bonus", () => {
+  it("Hawkmoon's last round: Paracausal Shot at 7 stacks is +1736% in PvE and +508.6% in PvP, replacing the charge bonus", () => {
     useWeaponStore.setState({ activeEffects: {}, activeBuffs: [], buffStacks: {}, mode: 'pve' });
     const w = exotic('Hawkmoon');
     store().loadWeapon(w);
@@ -140,7 +140,7 @@ describe('catalyst damage effects', () => {
     expect(store().getDamageMultiplier()).toBeCloseTo(3.92, 2);
     useWeaponStore.setState({ mode: 'pvp' });
     store().setEffectState(w.intrinsicTrait!.hash, 14);
-    expect(store().getDamageMultiplier()).toBeCloseTo(6.09, 2);
+    expect(store().getDamageMultiplier()).toBeCloseTo(6.086, 2);
     store().setEffectState(w.intrinsicTrait!.hash, 8);
     expect(store().getDamageMultiplier()).toBeCloseTo(1.3, 3);
   });

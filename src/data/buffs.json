@@ -1038,7 +1038,7 @@
     "category": "weapon_perk",
     "stackType": "multiplicative",
     "multiplier": 18.36,
-    "description": "Hawkmoon: each kill or precision hit adds a charge (max 7): +21 / 36.5 / 48 / 55 / 60 / 63 / 66% damage against combatants, none against Guardians. \"Last ×N\" is the final round of the magazine, Paracausal Shot, whose bonus replaces the charge bonus (PvE +292% up to +1736%, PvP +30% up to +509%). Pick it to see that one shot; DPS still assumes every shot gets the bonus.",
+    "description": "Hawkmoon: each kill or precision hit adds a charge (max 7): +21 / 36.5 / 47.6 / 55.3 / 59.8 / 63.2 / 66.3% damage against combatants, none against Guardians. \"Last ×N\" is the final round of the magazine, Paracausal Shot, whose bonus replaces the charge bonus (PvE +292% up to +1736%, PvP +30% up to +508.6%). Pick it to see that one shot; DPS still assumes every shot gets the bonus.",
     "perkNames": [
       "Paracausal Shot"
     ],
@@ -1057,27 +1057,27 @@
       {
         "count": 3,
         "label": "×3",
-        "multiplier": 1.48
+        "multiplier": 1.476
       },
       {
         "count": 4,
         "label": "×4",
-        "multiplier": 1.55
+        "multiplier": 1.553
       },
       {
         "count": 5,
         "label": "×5",
-        "multiplier": 1.6
+        "multiplier": 1.598
       },
       {
         "count": 6,
         "label": "×6",
-        "multiplier": 1.63
+        "multiplier": 1.632
       },
       {
         "count": 7,
         "label": "×7",
-        "multiplier": 1.66
+        "multiplier": 1.663
       },
       {
         "count": 8,
@@ -1116,7 +1116,7 @@
       }
     ],
     "pvp": {
-      "multiplier": 6.09,
+      "multiplier": 6.086,
       "stacks": [
         {
           "count": 1,
@@ -1166,7 +1166,7 @@
         {
           "count": 10,
           "label": "Last ×3",
-          "multiplier": 1.46
+          "multiplier": 1.457
         },
         {
           "count": 11,
@@ -1176,7 +1176,7 @@
         {
           "count": 12,
           "label": "Last ×5",
-          "multiplier": 2.54
+          "multiplier": 2.543
         },
         {
           "count": 13,
@@ -1186,7 +1186,7 @@
         {
           "count": 14,
           "label": "Last ×7",
-          "multiplier": 6.09
+          "multiplier": 6.086
         }
       ]
     }
@@ -1209,24 +1209,24 @@
     "category": "weapon_perk",
     "stackType": "multiplicative",
     "multiplier": 1,
-    "description": "Thunderlord: holding the trigger raises rate of fire by 25% after 13 shots and 40% after 26.",
+    "description": "Thunderlord: holding the trigger gives 0.75× fire recovery delay after 13 shots and 0.6× after 26.",
     "perkNames": [
       "Lightning Rounds"
     ],
     "icon": null,
-    "shotDelayMultiplier": 0.7143,
+    "shotDelayMultiplier": 0.6,
     "stacks": [
       {
         "count": 1,
         "label": "13 shots",
         "multiplier": 1,
-        "shotDelayMultiplier": 0.8
+        "shotDelayMultiplier": 0.75
       },
       {
         "count": 2,
         "label": "26 shots",
         "multiplier": 1,
-        "shotDelayMultiplier": 0.7143
+        "shotDelayMultiplier": 0.6
       }
     ]
   },
@@ -1461,13 +1461,13 @@
     "category": "weapon_perk",
     "stackType": "multiplicative",
     "multiplier": 2.87,
-    "description": "Tarrabah, while unleashed (8 seconds): +187% body-shot and +99% precision damage in PvE (+120% / +52.7% in PvP), +20% rate of fire.",
+    "description": "Tarrabah, while unleashed (8 seconds): +187% body-shot and +99% precision damage in PvE (+120% / +52.7% in PvP), and 0.8× fire recovery delay.",
     "perkNames": [
       "Ravenous Beast"
     ],
     "icon": null,
     "critMultiplier": 0.6934,
-    "shotDelayMultiplier": 0.8333,
+    "shotDelayMultiplier": 0.8,
     "pvp": {
       "multiplier": 2.2,
       "critMultiplier": 0.6941
@@ -1495,7 +1495,7 @@
     "category": "weapon_perk",
     "stackType": "multiplicative",
     "multiplier": 1.17,
-    "description": "Dead Man's Tale: each precision hit adds a stack for 4 seconds (max 5): +3.5 / 7 / 10 / 14 / 17% damage against combatants. No effect on Guardians.",
+    "description": "Dead Man's Tale: each precision hit adds a stack for 4 seconds (max 5): +3.4 / 6.8 / 10.2 / 13.6 / 17% damage against combatants. No effect on Guardians.",
     "perkNames": [
       "Cranial Spike"
     ],
@@ -1504,22 +1504,22 @@
       {
         "count": 1,
         "label": "×1",
-        "multiplier": 1.035
+        "multiplier": 1.034
       },
       {
         "count": 2,
         "label": "×2",
-        "multiplier": 1.07
+        "multiplier": 1.068
       },
       {
         "count": 3,
         "label": "×3",
-        "multiplier": 1.1
+        "multiplier": 1.102
       },
       {
         "count": 4,
         "label": "×4",
-        "multiplier": 1.14
+        "multiplier": 1.136
       },
       {
         "count": 5,
@@ -1701,8 +1701,8 @@
     "name": "Whispered Breathing",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.1077,
-    "description": "Whisper of the Worm catalyst: after 1.2 seconds aiming without firing, +35% precision damage and, in PvE, +10.77% damage against combatants.",
+    "multiplier": 1.10777,
+    "description": "Whisper of the Worm catalyst: after 1.2 seconds aiming without firing, +35% precision damage and, in PvE, +10.777% damage against combatants.",
     "perkNames": [],
     "icon": null,
     "critMultiplier": 1.35,

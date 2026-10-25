@@ -48,7 +48,7 @@ describe('exotic frame fallback', () => {
     expect(e.approxFrom ?? null).toBeNull();
   });
 
-  it('gives no numbers for exotics it cannot back up (rockets, swords, Ruinous Effigy)', () => {
-    for (const name of ['Gjallarhorn', 'Worldline Zero', 'Ruinous Effigy']) expect(statFor(name), name).toBeNull();
+  it('gives no numbers for exotics it cannot back up (rockets, swords, Xenophage)', () => {
+    for (const name of ['Gjallarhorn', 'Worldline Zero', 'Xenophage']) expect(statFor(name), name).toBeNull();
   });
 });

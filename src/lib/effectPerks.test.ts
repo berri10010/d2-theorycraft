@@ -20,12 +20,12 @@ describe('intrinsic effects (exotic frames)', () => {
   describe('in the damage maths', () => {
     beforeEach(() => { useWeaponStore.setState({ activeEffects: {}, activeBuffs: [], buffStacks: {}, mode: 'pve' }); });
 
-    it('Hawkmoon: switching Paracausal Charge on at 7 stacks multiplies PvE damage by 1.66; PvP is unchanged', () => {
+    it('Hawkmoon: switching Paracausal Charge on at 7 stacks multiplies PvE damage by 1.663; PvP is unchanged', () => {
       const w = exotic('Hawkmoon');
       useWeaponStore.setState({ activeWeapon: w, selectedPerks: {} });
       expect(useWeaponStore.getState().getDamageMultiplier()).toBe(1);
       useWeaponStore.getState().setEffectState(w.intrinsicTrait!.hash, 7);
-      expect(useWeaponStore.getState().getDamageMultiplier()).toBeCloseTo(1.66, 3);
+      expect(useWeaponStore.getState().getDamageMultiplier()).toBeCloseTo(1.663, 3);
       useWeaponStore.setState({ mode: 'pvp' });
       expect(useWeaponStore.getState().getDamageMultiplier()).toBe(1);
     });
@@ -36,7 +36,7 @@ describe('intrinsic effects (exotic frames)', () => {
       useWeaponStore.getState().setEffectState(w.intrinsicTrait!.hash, 1);
       expect(useWeaponStore.getState().getDamageMultiplier()).toBeCloseTo(2.87, 3);
       const fx = useWeaponStore.getState().getWeaponEffects();
-      expect(fx.shotDelayMult).toBeCloseTo(1 / 1.2, 3);
+      expect(fx.shotDelayMult).toBeCloseTo(0.8, 3);
       expect(2.87 * fx.critMult).toBeCloseTo(1.99, 2);
     });
   });

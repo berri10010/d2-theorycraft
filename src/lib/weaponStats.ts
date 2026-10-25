@@ -10,6 +10,7 @@
  */
 
 import rawData from '../data/weaponStats.json';
+import { EXOTIC_PVE, COMPENDIUM_ROWS, EXOTIC_ROW_ALIASES } from '../data/compendium';
 import { sheetSubType } from './subtypes';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -58,6 +59,15 @@ export interface WeaponStatEntry {
    * (see EXOTIC_FRAME_FALLBACK). Absent for exact rows.
    */
   approxFrom?: string | null;
+  /**
+   * PvE damage relative to a legendary of this type, on top of the type's PvE scalar (the weapon's own PvE bonus,
+   * from the Destiny Data Compendium). Absent = 1.
+   */
+  pveFactor?: number | null;
+  /** Extra PvE multiplier at particular enemy tiers (see pveMultiplier). */
+  pveTierMult?: Partial<Record<string, number>>;
+  /** 'compendium' when the damage comes from the Data Compendium itself, not the stat sheet. */
+  source?: 'compendium' | null;
 }
 
 // ── Subtype → spreadsheet type string ────────────────────────────────────────
@@ -132,19 +142,24 @@ const nameIndex = new Map<string, WeaponStatEntry>(
  * from their frame, and Ruinous Effigy / Divinity are scaled against legendary traces.
  */
 export const EXOTIC_FRAME_FALLBACK: Record<string, string> = {
+  'Barrow-Dyad': 'Aggressive',
   'Centrifuse': 'Precision',
   'Cloudstrike': 'Rapid Fire',
   'Coldheart': 'Adaptive',
   'Collective Obligation': 'Adaptive',
   'Cryosthesia 77K': 'Precision',
   'Deterministic Chaos': 'High-Impact',
+  "Finality's Auger": 'Precision',
+  'Heir Apparent': 'Rapid Fire',
   'Hawkmoon': 'Adaptive',
+  'Khvostov 7G-0X': 'Adaptive',
   'Lumina': 'Adaptive',
   'Malfeasance': 'Precision',
   'MIDA Multi-Tool': 'Lightweight',
   'No Time to Explain': 'High-Impact',
   'Outbreak Perfected': 'Lightweight',
   'Prometheus Lens': 'Adaptive',
+  'Ruinous Effigy': 'Adaptive',
   'Polaris Lance': 'High-Impact',
   'Quicksilver Storm': 'Rapid Fire',
   'SUROS Regime': 'Adaptive',
@@ -152,9 +167,45 @@ export const EXOTIC_FRAME_FALLBACK: Record<string, string> = {
   'Tessellation': 'Adaptive',
   'The Jade Rabbit': 'High-Impact',
   'Thunderlord': 'Adaptive',
+  "Ticuu's Divination": 'Lightweight',
   "Traveler's Chosen": 'Adaptive',
+  'Wicked Implement': 'Rapid Fire',
 };
 const fallbackByName = new Map(Object.entries(EXOTIC_FRAME_FALLBACK).map(([n, f]) => [looseName(n), f]));
+const pveBonusByName = new Map(Object.entries(EXOTIC_PVE).map(([n, b]) => [looseName(n), b]));
+const compendiumRowByName = new Map(Object.entries(COMPENDIUM_ROWS).map(([n, r]) => [looseName(n), { name: n, row: r }]));
+const aliasByName = new Map(Object.entries(EXOTIC_ROW_ALIASES).map(([n, lookup]) => [looseName(n), lookup]));
+const entryByLookup = new Map((rawData as WeaponStatEntry[]).map((e) => [e.lookup, e]));
+
+/** An entry with the weapon's own PvE bonus attached (the same object when it has none). Cached per weapon. */
+const bonusCache = new Map<string, WeaponStatEntry>();
+function withPveBonus(entry: WeaponStatEntry, weaponName: string | null | undefined): WeaponStatEntry {
+  const bonus = weaponName ? pveBonusByName.get(looseName(weaponName)) : undefined;
+  if (!bonus) return entry;
+  const key = entry.lookup + '|' + entry.approxFrom + '|' + weaponName;
+  let out = bonusCache.get(key);
+  if (!out) { out = { ...entry, pveFactor: bonus.factor, ...(bonus.tierMult ? { pveTierMult: bonus.tierMult } : {}) }; bonusCache.set(key, out); }
+  return out;
+}
+
+/**
+ * The multiplier an entry adds to the PvE damage scalar at an enemy tier: the weapon's own PvE bonus and any tier
+ * penalty. 1 for weapons with neither, so legendary maths are unchanged.
+ */
+export function pveMultiplier(entry: WeaponStatEntry | null | undefined, tier: string): number {
+  return (entry?.pveFactor ?? 1) * (entry?.pveTierMult?.[tier] ?? 1);
+}
+
+function compendiumEntry(name: string, row: (typeof COMPENDIUM_ROWS)[string]): WeaponStatEntry {
+  return {
+    lookup: row.type + '_' + row.ammo + '_' + name,
+    type: row.type, ammo: row.ammo, frame: name,
+    bodyDamage: row.bodyDamage, critDamage: row.critDamage,
+    shotDelay: row.shotDelay, burstDelay: null, chargeMs: null, shotsPerBurst: null, pellets: row.pellets, rpm: row.rpm,
+    pveFactor: row.pveFactor, ...(row.pveTierMult ? { pveTierMult: row.pveTierMult } : {}), source: 'compendium',
+  };
+}
+const compendiumEntries = new Map([...compendiumRowByName].map(([k, { name, row }]) => [k, compendiumEntry(name, row)]));
 
 /**
  * Look up the Massive Breakdowns stat entry for a weapon archetype.
@@ -181,8 +232,14 @@ export function lookupWeaponStat(
     return null;
   }
 
+  const own = weaponName ? compendiumEntries.get(looseName(weaponName)) : undefined;
+  if (own && own.type === typeStr && own.ammo === ammoSlot) return own;
+
   const byName = weaponName ? nameIndex.get(`${typeStr}_${ammoSlot}_${looseName(weaponName)}`) : undefined;
-  if (byName) return byName;
+  if (byName) return withPveBonus(byName, weaponName);
+
+  const aliased = weaponName ? aliasByName.get(looseName(weaponName)) : undefined;
+  if (aliased && entryByLookup.has(aliased)) return withPveBonus(entryByLookup.get(aliased)!, weaponName);
 
   const exact = intrinsicName ? entryIndex.get(`${typeStr}_${ammoSlot}_${normalizeFrameName(intrinsicName)}`) : undefined;
   if (exact) return exact;
@@ -190,7 +247,7 @@ export function lookupWeaponStat(
   // No row of its own: an exotic built on a standard frame borrows that frame's numbers, marked as approximate.
   const fallbackFrame = weaponName ? fallbackByName.get(looseName(weaponName)) : undefined;
   const borrowed = fallbackFrame ? entryIndex.get(`${typeStr}_${ammoSlot}_${fallbackFrame}`) : undefined;
-  return borrowed ? { ...borrowed, approxFrom: fallbackFrame } : null;
+  return borrowed ? withPveBonus({ ...borrowed, approxFrom: fallbackFrame }, weaponName) : null;
 }
 
 /** The frame an exotic's timing was borrowed from, or null when its numbers are exact (or missing). */
