@@ -112,8 +112,8 @@ const entryIndex = new Map<string, WeaponStatEntry>(
  * something else ("Payday"). Match by weapon name, ignoring case, punctuation and a leading "The",
  * since the sheet and Bungie disagree on those ("The Huckleberry" / "Huckleberry").
  */
-// Sheet spelling quirks, by loose name: Bungie's "Tessellation" is the sheet's "Tesselation".
-const LOOSE_ALIASES: Record<string, string> = { tessellation: 'tesselation' };
+// Sheet spelling quirks, by loose name: Bungie's "Tessellation" is the sheet's "Tesselation", "Ager's Scepter" is "Ager's Sceptre".
+const LOOSE_ALIASES: Record<string, string> = { tessellation: 'tesselation', agersscepter: 'agerssceptre' };
 const looseName = (s: string) => {
   const k = s.toLowerCase().replace(/^the /, '').replace(/[^a-z0-9]/g, '');
   return LOOSE_ALIASES[k] ?? k;
@@ -125,14 +125,16 @@ const nameIndex = new Map<string, WeaponStatEntry>(
 /**
  * Exotics the sheet has no row for, but whose damage and timing are those of a standard frame: Hawkmoon is an
  * Adaptive hand cannon, Centrifuse a Precision auto rifle. Keyed by loose weapon name. Every entry was checked
- * against the weapon's own rpm (within 4% of the frame row) when it was added, and weaponStats.test.ts keeps
- * checking it, so a patch that changes a weapon's rate of fire drops the guess instead of showing a wrong number.
- * Anything not listed (rockets, swords, heavy grenade launchers, trace rifles, glaives...) shows no timing data
- * rather than a guess.
+ * against Bungie's own rpm for legendary weapons of that frame (the exotic's rate of fire must be theirs), and
+ * weaponStats.test.ts keeps checking it, so a patch that changes a weapon's rate of fire drops the guess instead
+ * of showing a wrong number. Anything not listed shows no timing data rather than a guess: rockets, swords and
+ * heavy grenade launchers have no usable sheet rows (blank damage), glaives and bows time themselves differently
+ * from their frame, and Ruinous Effigy / Divinity are scaled against legendary traces.
  */
 export const EXOTIC_FRAME_FALLBACK: Record<string, string> = {
   'Centrifuse': 'Precision',
   'Cloudstrike': 'Rapid Fire',
+  'Coldheart': 'Adaptive',
   'Collective Obligation': 'Adaptive',
   'Cryosthesia 77K': 'Precision',
   'Deterministic Chaos': 'High-Impact',
@@ -142,10 +144,12 @@ export const EXOTIC_FRAME_FALLBACK: Record<string, string> = {
   'MIDA Multi-Tool': 'Lightweight',
   'No Time to Explain': 'High-Impact',
   'Outbreak Perfected': 'Lightweight',
+  'Prometheus Lens': 'Adaptive',
   'Polaris Lance': 'High-Impact',
   'Quicksilver Storm': 'Rapid Fire',
   'SUROS Regime': 'Adaptive',
   'Symmetry': 'Rapid Fire',
+  'Tessellation': 'Adaptive',
   'The Jade Rabbit': 'High-Impact',
   'Thunderlord': 'Adaptive',
   "Traveler's Chosen": 'Adaptive',
