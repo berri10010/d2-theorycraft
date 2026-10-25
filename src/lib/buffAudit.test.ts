@@ -221,3 +221,33 @@ describe('exotic perk buffs', () => {
     expect(missing).toEqual([]);
   });
 });
+
+/** Re-checked against Clarity's full database, Blueberries.gg and community guides (October 2026). */
+describe('subclass and ability buffs were re-verified', () => {
+  it('stat bonuses match Clarity', () => {
+    expect(b('spark_of_frequency').statBonuses).toEqual({ Reload: 50, Stability: 15 });
+    expect(b('thread_of_ascent').statBonuses).toEqual({ Reload: 40, 'Airborne Effectiveness': 30 });
+    expect(b('flow_state').statBonuses).toEqual({ Reload: 50 });
+    expect(b('heat_rises').statBonuses).toEqual({ 'Airborne Effectiveness': 20 });
+    expect(b('rally_barricade').statBonuses).toEqual({ Reload: 100, Stability: 30 });
+  });
+
+  it('Amplified is +40 Handling and nothing for airborne effectiveness', () => {
+    expect(b('amplified').statBonuses).toEqual({ Handling: 40 });
+  });
+
+  it('Hazardous Propulsion only buffs rocket launchers, +10% to +35% over six stacks, and nothing in the Crucible', () => {
+    const hp = b('hazardous_propulsion');
+    expect(hp.stacks!.map((s) => s.multiplier)).toEqual([1.1, 1.17, 1.24, 1.3, 1.33, 1.35]);
+    const rocket = { itemTypeDisplayName: 'Rocket Launcher' };
+    expect(resolveBuffMultiplier(hp, 'pve', rocket, 5)).toBe(1.35);
+    expect(resolveBuffMultiplier(hp, 'pve', rocket, 0)).toBe(1.1);
+    expect(resolveBuffMultiplier(hp, 'pve', { itemTypeDisplayName: 'Hand Cannon' }, 5)).toBe(1);
+    expect(resolveBuffMultiplier(hp, 'pvp', rocket, 5)).toBe(1);
+  });
+
+  it('Weapons of Light is 25% in PvE and, from the Helm of Saint-14 listing, in PvP', () => {
+    expect(resolveBuffMultiplier(b('weapons_of_light'), 'pve', null)).toBe(1.25);
+    expect(resolveBuffMultiplier(b('weapons_of_light'), 'pvp', null)).toBe(1.25);
+  });
+});

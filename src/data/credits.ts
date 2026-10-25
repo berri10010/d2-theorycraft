@@ -135,6 +135,18 @@ export const CREDITS: Credit[] = [
     where: 'External Buffs panel, Armor Mods weapon surge.',
   },
   {
+    id: 'destinypedia', name: 'Destinypedia', url: 'https://www.destinypedia.com/Ward_of_Dawn',
+    group: 'math',
+    what: "Ward of Dawn's Weapons of Light (+25% weapon damage for 10 seconds). Bungie publishes no number for it.",
+    where: 'External Buffs panel.',
+  },
+  {
+    id: 'thegamer', name: 'Arc 3.0 Keywords, Aspects, And Fragments Explained', by: 'TheGamer', url: 'https://www.thegamer.com/destiny-2-arc-rework-aspects-fragments-keywords/',
+    group: 'math',
+    what: "Amplified's +40 Handling and Flow State's reload bonus, which Bungie does not publish as numbers.",
+    where: 'External Buffs panel.',
+  },
+  {
     id: 'community-testing', name: 'Community testing and spreadsheets',
     group: 'math',
     what: 'Subclass verb and ignition damage estimates, which come from in-game testing by the community rather than any published table.',
@@ -172,7 +184,7 @@ export const DATA_FILE_CREDITS: Record<string, string[]> = {
   'public/data/sources.json': ['sax'],
   'src/data/ammoData.json': ['mossymax', 'bungie'],
   'src/data/archetypes.json': ['huwugo', 'rockstarmatt'],
-  'src/data/buffs.json': ['clarity', 'blueberries', 'bungie'],
+  'src/data/buffs.json': ['clarity', 'blueberries', 'bungie', 'destinypedia', 'thegamer'],
   'src/data/combatantScalars.json': ['mossymax'],
   'src/data/credits.ts': [],
   'src/data/exoticArmor.ts': ['bungie'],

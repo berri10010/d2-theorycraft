@@ -561,7 +561,7 @@
     "category": "subclass",
     "stackType": "empowering",
     "multiplier": 1.25,
-    "description": "Titan Ward of Dawn. +25% weapon damage for all Guardians inside the bubble.",
+    "description": "Titan Ward of Dawn: passing through grants +25% weapon damage for 10 seconds (Destinypedia). Bungie publishes no separate Crucible value; Blueberries.gg lists the Helm of Saint-14 version at 25% in both modes, so 25% is used in PvP too.",
     "perkNames": [],
     "icon": "/common/destiny2_content/icons/0e9a7c1e83ec40d4bf2f8699c0f89f9b.png"
   },
@@ -705,11 +705,12 @@
     "stackType": "multiplicative",
     "classType": "neutral",
     "multiplier": 1,
-    "description": "Arc fragment. 0.80× Reload Duration Multiplier — Arc weapon hits with Bolt Charge stack reload speed to near-instant.",
+    "description": "Arc fragment (Clarity): a powered melee hit gives +50 Reload Speed, +15 Stability and a 0.8× reload duration for 5.25 seconds.",
     "perkNames": [],
     "icon": null,
     "statBonuses": {
-      "Reload": 40
+      "Reload": 50,
+      "Stability": 15
     }
   },
   "amplified": {
@@ -719,12 +720,11 @@
     "stackType": "multiplicative",
     "classType": "neutral",
     "multiplier": 1,
-    "description": "Arc keyword. +40 Handling, 0.95× Ready/Stow Duration Multiplier, improved airborne effectiveness and sprint speed.",
+    "description": "Arc keyword: +40 Handling and a 0.96× animation scalar to all weapons for 15 seconds (community guides; Bungie does not publish the number). It has no airborne effectiveness bonus.",
     "perkNames": [],
     "icon": null,
     "statBonuses": {
-      "Handling": 40,
-      "Airborne Effectiveness": 20
+      "Handling": 40
     }
   },
   "ember_of_tempering": {
@@ -767,12 +767,12 @@
     "stackType": "multiplicative",
     "classType": "neutral",
     "multiplier": 1,
-    "description": "Strand fragment. Activating grenade reloads your equipped weapon and grants +30 Airborne Effectiveness and +30 Reload Speed.",
+    "description": "Strand fragment (Clarity): using your grenade ability refills your readied weapon and gives +40 Reload Speed (0.925× reload duration) and +30 Airborne Effectiveness for 15 seconds. A Handling bonus of about +40 is listed but unconfirmed, so it is not applied.",
     "perkNames": [],
     "icon": null,
     "statBonuses": {
-      "Airborne Effectiveness": 30,
-      "Reload": 30
+      "Reload": 40,
+      "Airborne Effectiveness": 30
     }
   },
   "flow_state": {
@@ -782,12 +782,11 @@
     "stackType": "multiplicative",
     "classType": "hunter",
     "multiplier": 1,
-    "description": "Arc Hunter keyword. +40 Reload Speed and +20 Handling while active.",
+    "description": "Arc Hunter aspect (Clarity): while Amplified from killing a Jolted enemy, +50 Reload Speed and a 0.8× reload duration. Amplified itself adds +40 Handling.",
     "perkNames": [],
     "icon": null,
     "statBonuses": {
-      "Reload": 40,
-      "Handling": 20
+      "Reload": 50
     }
   },
   "on_your_mark": {
@@ -836,11 +835,11 @@
     "stackType": "multiplicative",
     "classType": "warlock",
     "multiplier": 1,
-    "description": "Solar Warlock aspect: lets you fire while gliding; the grenade grants Heat Rises and a healing burst. Not a damage buff.",
+    "description": "Solar Warlock aspect (Clarity): passively +20 Airborne Effectiveness, and you can fire while gliding. Not a damage buff.",
     "perkNames": [],
     "icon": null,
     "statBonuses": {
-      "Airborne Effectiveness": 30
+      "Airborne Effectiveness": 20
     }
   },
   "rally_barricade": {
@@ -850,11 +849,12 @@
     "stackType": "multiplicative",
     "classType": "titan",
     "multiplier": 1,
-    "description": "Titan class ability. Crouching behind the barricade instantly reloads your weapon and grants +50 Reload Speed.",
+    "description": "Titan class ability (Clarity): while standing behind the barricade, +100 Reload Speed (0.9× reload duration), +30 Stability, +10% damage falloff distance and 50% flinch resistance.",
     "perkNames": [],
     "icon": null,
     "statBonuses": {
-      "Reload": 50
+      "Reload": 100,
+      "Stability": 30
     }
   },
   "sentinel_shield": {
@@ -922,9 +922,76 @@
     "name": "Hazardous Propulsion",
     "multiplier": 1.35,
     "pvp": {
-      "multiplier": 1
+      "multiplier": 1,
+      "stacks": [
+        {
+          "count": 1,
+          "label": "×1",
+          "multiplier": 1
+        },
+        {
+          "count": 2,
+          "label": "×2",
+          "multiplier": 1
+        },
+        {
+          "count": 3,
+          "label": "×3",
+          "multiplier": 1
+        },
+        {
+          "count": 4,
+          "label": "×4",
+          "multiplier": 1
+        },
+        {
+          "count": 5,
+          "label": "×5",
+          "multiplier": 1
+        },
+        {
+          "count": 6,
+          "label": "×6",
+          "multiplier": 1
+        }
+      ]
     },
-    "description": "Hazardous Propulsion: +35% weapon damage for 10s in PvE (no published PvP value, so none is applied)."
+    "description": "Hazardous Propulsion (Clarity): Enhanced Rockets raise rocket-type damage (rocket launchers and Wolfpack Rounds) for 10 seconds: +10 / 17 / 24 / 30 / 33 / 35% at 1 to 6 stacks. Only rocket launchers are affected here, and there is no published PvP value, so none is applied in the Crucible.",
+    "weaponTypes": [
+      "Rocket Launcher"
+    ],
+    "stacks": [
+      {
+        "count": 1,
+        "label": "×1",
+        "multiplier": 1.1
+      },
+      {
+        "count": 2,
+        "label": "×2",
+        "multiplier": 1.17
+      },
+      {
+        "count": 3,
+        "label": "×3",
+        "multiplier": 1.24
+      },
+      {
+        "count": 4,
+        "label": "×4",
+        "multiplier": 1.3
+      },
+      {
+        "count": 5,
+        "label": "×5",
+        "multiplier": 1.33
+      },
+      {
+        "count": 6,
+        "label": "×6",
+        "multiplier": 1.35
+      }
+    ]
   },
   "prismatic_transfer": {
     "hash": "prismatic_transfer",
