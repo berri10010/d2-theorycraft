@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { describe, it, expect } from 'vitest';
 import { BUFF_DATABASE, buffForMode, buffApplies, resolveBuffMultiplier, resolveBuffEffects, type DamageBuff } from './buffDatabase';
 
@@ -148,5 +150,74 @@ describe('data integrity', () => {
 
   it('buff keys match their hash field', () => {
     for (const [key, buff] of Object.entries(BUFF_DATABASE)) expect(buff.hash, key).toBe(key);
+  });
+});
+
+/** Exotic perk effects, from Clarity's perk text (October 2026). */
+describe('exotic perk buffs', () => {
+  const dmg = (key: string, mode: 'pve' | 'pvp', stack?: number) => resolveBuffMultiplier(b(key), mode, null, stack);
+  const fx = (key: string, mode: 'pve' | 'pvp', stack?: number) => resolveBuffEffects(b(key), mode, null, stack);
+
+  it("Hawkmoon's Paracausal Charge is 21% to 66% against combatants and nothing against Guardians", () => {
+    expect(dmg('paracausal_charge', 'pve', 0)).toBeCloseTo(1.21, 3);
+    expect(dmg('paracausal_charge', 'pve', 6)).toBeCloseTo(1.66, 3);
+    expect(dmg('paracausal_charge', 'pvp', 6)).toBe(1);
+  });
+
+  it('flat damage perks', () => {
+    expect(dmg('death_at_first_glance', 'pve')).toBeCloseTo(1.325, 3);
+    expect(dmg('impetus', 'pve')).toBe(1.5);
+    expect(dmg('superconductor', 'pve')).toBeCloseTo(1.1, 3);
+  });
+
+  it("Bad Juju's String of Curses is 20% a stack in PvE and 10% in PvP", () => {
+    expect(dmg('string_of_curses', 'pve', 4)).toBeCloseTo(2, 3);
+    expect(dmg('string_of_curses', 'pvp', 4)).toBeCloseTo(1.5, 3);
+    expect(dmg('string_of_curses', 'pvp', 0)).toBeCloseTo(1.1, 3);
+  });
+
+  it("The Manticore's Swooping Talons is 10% a hit (2% in PvP), up to 10 hits", () => {
+    expect(b('swooping_talons').stacks).toHaveLength(10);
+    expect(dmg('swooping_talons', 'pve', 9)).toBeCloseTo(2, 3);
+    expect(dmg('swooping_talons', 'pvp', 9)).toBeCloseTo(1.2, 3);
+  });
+
+  it('Outbreak Perfected and Dead Man\'s Tale', () => {
+    expect(dmg('parasitism', 'pve', 4)).toBeCloseTo(2.5, 3);
+    expect(dmg('parasitism', 'pvp', 4)).toBeCloseTo(1.75, 3);
+    expect(dmg('cranial_spike', 'pve', 4)).toBeCloseTo(1.17, 3);
+    expect(dmg('cranial_spike', 'pvp', 4)).toBe(1);
+  });
+
+  it('rate-of-fire perks shorten the shot delay: Thunderlord +25% then +40%, New Land Beyond +5%', () => {
+    expect(fx('lightning_rounds', 'pve', 0).shotDelayMultiplier).toBeCloseTo(1 / 1.25, 3);
+    expect(fx('lightning_rounds', 'pve', 1).shotDelayMultiplier).toBeCloseTo(1 / 1.4, 3);
+    expect(fx('bullseye_bolster', 'pve').shotDelayMultiplier).toBeCloseTo(1 / 1.05, 3);
+  });
+
+  it('Tarrabah unleashed: +187% body / +99% precision in PvE (+120% / +52.7% in PvP), +20% rate of fire', () => {
+    const body = dmg('ravenous_beast', 'pve');
+    expect(body).toBeCloseTo(2.87, 3);
+    expect(body * fx('ravenous_beast', 'pve').critMultiplier!).toBeCloseTo(1.99, 2);
+    expect(fx('ravenous_beast', 'pve').shotDelayMultiplier).toBeCloseTo(1 / 1.2, 3);
+    const pvp = dmg('ravenous_beast', 'pvp');
+    expect(pvp).toBeCloseTo(2.2, 3);
+    expect(pvp * fx('ravenous_beast', 'pvp').critMultiplier!).toBeCloseTo(1.527, 2);
+  });
+
+  it('The Last Word: +88% precision damage in PvE only (PvP value unpublished)', () => {
+    expect(fx('fan_fire', 'pve').critMultiplier).toBe(1.88);
+    expect(fx('fan_fire', 'pvp').critMultiplier).toBe(1);
+    expect(dmg('fan_fire', 'pve')).toBe(1);
+  });
+
+  it('every perk with a buff is linked to it in the shipped perk data (rerun the data refresh if this fails)', () => {
+    const perks = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public', 'data', 'perks.json'), 'utf8')) as Record<string, { name: string; isEnhanced: boolean; buffKey: string | null; isConditional: boolean }>;
+    const missing: string[] = [];
+    for (const [key, buff] of Object.entries(BUFF_DATABASE)) for (const p of Object.values(perks)) {
+      if (p.isEnhanced || !buff.perkNames.includes(p.name)) continue;
+      if (p.buffKey !== key || !p.isConditional) missing.push(`${p.name} -> ${key}`);
+    }
+    expect(missing).toEqual([]);
   });
 });

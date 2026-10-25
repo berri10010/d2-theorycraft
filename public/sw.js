@@ -1,5 +1,5 @@
 // Cache version — bump this string to force all clients to evict the old cache.
-const CACHE = 'd2tc-v5';
+const CACHE = 'd2tc-v6';
 
 const DATA_FILES = [
   '/data/weapons.json',

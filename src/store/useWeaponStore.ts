@@ -6,6 +6,7 @@ import { EXOTIC_ARMOR, ExoticClassType } from '../data/exoticArmor';
 import { getCurves } from '../lib/archetypes';
 import { applyStatDeltas } from '../lib/statCalc';
 import { combineEffects, type WeaponEffects } from '../lib/weaponEffects';
+import { intrinsicEffectPerk } from '../lib/effectPerks';
 
 // ─── Weapon Mods ────────────────────────────────────────────────────────────
 
@@ -652,6 +653,9 @@ export const useWeaponStore = create<WeaponState>()(
             const buffKey = resolveBasePerk(column, perkHash)?.buffKey;
             if (buffKey && !keys.has(buffKey)) { keys.add(buffKey); stackByKey[buffKey] = state - 1; }
           }
+          const intrinsic = intrinsicEffectPerk(activeWeapon);
+          const intrinsicState = intrinsic ? activeEffects[intrinsic.hash] ?? 0 : 0;
+          if (intrinsic?.buffKey && intrinsicState > 0 && !keys.has(intrinsic.buffKey)) { keys.add(intrinsic.buffKey); stackByKey[intrinsic.buffKey] = intrinsicState - 1; }
         }
         for (const hash of activeBuffs) {
           if (!keys.has(hash)) { keys.add(hash); stackByKey[hash] = buffStacks[hash]; }
@@ -677,6 +681,9 @@ export const useWeaponStore = create<WeaponState>()(
 
              effectBuffEntries.push({ key: buffKey, stackIndex: effectState - 1 });
            }
+           const intrinsic = intrinsicEffectPerk(activeWeapon);
+           const intrinsicState = intrinsic ? activeEffects[intrinsic.hash] ?? 0 : 0;
+           if (intrinsic?.buffKey && intrinsicState > 0) effectBuffEntries.push({ key: intrinsic.buffKey, stackIndex: intrinsicState - 1 });
          }
 
          const seenBuffKeys     = new Set<string>();

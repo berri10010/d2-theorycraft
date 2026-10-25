@@ -1,6 +1,7 @@
 'use client';
 
 import { SourceNote } from '../ui/SourceNote';
+import { EstimateNote } from '../ui/EstimateNote';
 import statsMeta from '../../data/weaponStatsMeta.json';
 import React, { useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
@@ -93,7 +94,7 @@ export function DpsPanel() {
   if (!dps) {
     return (
       <div className="bg-white/3 rounded-xl p-4 text-center text-ink-4 text-sm">
-        No timing data available for this archetype.
+        {activeWeapon.rarity === 'Exotic' ? 'No exact timing data for this exotic yet.' : 'No timing data available for this archetype.'}
       </div>
     );
   }
@@ -138,6 +139,7 @@ export function DpsPanel() {
       <p className="text-2xs text-ink-4 text-center">
         PvE uses per-archetype Major/Elite scalar. Optimal = continuous fire, no reloads.
       </p>
+      <EstimateNote weapon={activeWeapon} className="text-center" />
       <SourceNote className="text-center" label="Timing data" ids={['huwugo']} detail={statsMeta.sheetVersion || undefined} />
     </div>
   );

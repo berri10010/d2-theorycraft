@@ -13,6 +13,7 @@ import { renderClarityDesc } from '../../lib/clarityRender';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { localIcon } from '../../lib/localIcons';
+import { INTRINSIC_COLUMN, intrinsicEffectPerk } from '../../lib/effectPerks';
 import { Tooltip } from '../ui/Tooltip';
 import { PERK_AUDIT } from '../../lib/perkAudit';
 import { EffectToggle, EffectStackSelector, StatModPills } from './EffectControls';
@@ -85,6 +86,15 @@ export const EffectsPanel: React.FC = () => {
         activation2: perk.activation2 ?? null,
       });
     }
+    // An exotic's intrinsic can carry the effect (Hawkmoon, Tarrabah); it is never selected, so add it here.
+    const intrinsic = intrinsicEffectPerk(activeWeapon);
+    if (intrinsic) entries.unshift({
+      columnName: INTRINSIC_COLUMN,
+      perkHash: intrinsic.hash,
+      ...intrinsic,
+      activation:  intrinsic.activation  ?? null,
+      activation2: intrinsic.activation2 ?? null,
+    });
     return entries;
   }, [activeWeapon, selectedPerks]);
 
@@ -317,8 +327,8 @@ export const EffectsPanel: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Dismiss */}
-                    <button
+                    {/* Dismiss (the intrinsic is part of the weapon, not a choice) */}
+                    {columnName !== INTRINSIC_COLUMN && <button
                       onClick={() => clearPerk(columnName)}
                       className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity text-ink-4 hover:text-red-400 shrink-0 self-start p-2 -m-1 md:p-1.5 md:-m-0.5"
                       aria-label={`Deselect ${name}`}
@@ -327,7 +337,7 @@ export const EffectsPanel: React.FC = () => {
                       <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                         <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
-                    </button>
+                    </button>}
                   </div>
                 );
               })}

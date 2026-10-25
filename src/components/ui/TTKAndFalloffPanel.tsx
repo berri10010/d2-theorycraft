@@ -1,6 +1,7 @@
 'use client';
 
 import { SourceNote } from './SourceNote';
+import { EstimateNote } from './EstimateNote';
 import statsMeta from '../../data/weaponStatsMeta.json';
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
@@ -247,6 +248,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
           </span>
         )}
       </div>
+      <EstimateNote weapon={activeWeapon} className="-mt-3" />
 
       {/* ── Mode controls ──────────────────────────────────────── */}
       {mode === 'pvp' && (

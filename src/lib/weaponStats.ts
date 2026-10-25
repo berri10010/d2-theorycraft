@@ -53,6 +53,11 @@ export interface WeaponStatEntry {
   pellets: number | null;
   /** Reference RPM used for sorting / display (not used in TTK math). */
   rpm: number | null;
+  /**
+   * Set when this exotic has no row of its own and the numbers are those of the frame it is built on
+   * (see EXOTIC_FRAME_FALLBACK). Absent for exact rows.
+   */
+  approxFrom?: string | null;
 }
 
 // ── Subtype → spreadsheet type string ────────────────────────────────────────
@@ -118,6 +123,36 @@ const nameIndex = new Map<string, WeaponStatEntry>(
 );
 
 /**
+ * Exotics the sheet has no row for, but whose damage and timing are those of a standard frame: Hawkmoon is an
+ * Adaptive hand cannon, Centrifuse a Precision auto rifle. Keyed by loose weapon name. Every entry was checked
+ * against the weapon's own rpm (within 4% of the frame row) when it was added, and weaponStats.test.ts keeps
+ * checking it, so a patch that changes a weapon's rate of fire drops the guess instead of showing a wrong number.
+ * Anything not listed (rockets, swords, heavy grenade launchers, trace rifles, glaives...) shows no timing data
+ * rather than a guess.
+ */
+export const EXOTIC_FRAME_FALLBACK: Record<string, string> = {
+  'Centrifuse': 'Precision',
+  'Cloudstrike': 'Rapid Fire',
+  'Collective Obligation': 'Adaptive',
+  'Cryosthesia 77K': 'Precision',
+  'Deterministic Chaos': 'High-Impact',
+  'Hawkmoon': 'Adaptive',
+  'Lumina': 'Adaptive',
+  'Malfeasance': 'Precision',
+  'MIDA Multi-Tool': 'Lightweight',
+  'No Time to Explain': 'High-Impact',
+  'Outbreak Perfected': 'Lightweight',
+  'Polaris Lance': 'High-Impact',
+  'Quicksilver Storm': 'Rapid Fire',
+  'SUROS Regime': 'Adaptive',
+  'Symmetry': 'Rapid Fire',
+  'The Jade Rabbit': 'High-Impact',
+  'Thunderlord': 'Adaptive',
+  "Traveler's Chosen": 'Adaptive',
+};
+const fallbackByName = new Map(Object.entries(EXOTIC_FRAME_FALLBACK).map(([n, f]) => [looseName(n), f]));
+
+/**
  * Look up the Massive Breakdowns stat entry for a weapon archetype.
  *
  * @param itemSubType  Bungie itemSubType number (6 = Auto Rifle, 9 = HC, …)
@@ -144,12 +179,24 @@ export function lookupWeaponStat(
 
   const byName = weaponName ? nameIndex.get(`${typeStr}_${ammoSlot}_${looseName(weaponName)}`) : undefined;
   if (byName) return byName;
-  if (!intrinsicName) return null;
 
-  const frame = normalizeFrameName(intrinsicName);
-  const key   = `${typeStr}_${ammoSlot}_${frame}`;
+  const exact = intrinsicName ? entryIndex.get(`${typeStr}_${ammoSlot}_${normalizeFrameName(intrinsicName)}`) : undefined;
+  if (exact) return exact;
 
-  return entryIndex.get(key) ?? null;
+  // No row of its own: an exotic built on a standard frame borrows that frame's numbers, marked as approximate.
+  const fallbackFrame = weaponName ? fallbackByName.get(looseName(weaponName)) : undefined;
+  const borrowed = fallbackFrame ? entryIndex.get(`${typeStr}_${ammoSlot}_${fallbackFrame}`) : undefined;
+  return borrowed ? { ...borrowed, approxFrom: fallbackFrame } : null;
+}
+
+/** The frame an exotic's timing was borrowed from, or null when its numbers are exact (or missing). */
+export function statBasis(
+  itemSubType: number,
+  ammoType: number,
+  intrinsicName: string | null,
+  weaponName?: string | null,
+): string | null {
+  return lookupWeaponStat(itemSubType, ammoType, intrinsicName, weaponName)?.approxFrom ?? null;
 }
 
 // ── Weapon category helpers ───────────────────────────────────────────────────
