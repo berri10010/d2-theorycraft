@@ -5,6 +5,7 @@ import './light-accents.css';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import { ThemeProvider } from '../components/ui/ThemeProvider';
 import { ResizeGuard } from '../components/ui/ResizeGuard';
+import { MotionProvider } from '../components/ui/MotionProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -45,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider />
         <ResizeGuard />
         <ServiceWorkerRegistration />
-        {children}
+        <MotionProvider>{children}</MotionProvider>
       </body>
     </html>
   );

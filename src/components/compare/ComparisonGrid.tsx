@@ -477,7 +477,7 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
   if (snapshots.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-ink-4 bg-white/5 rounded-xl border border-dashed border-white/10">
-        <p className="font-medium">Comparison queue is empty.</p>
+        <h1 className="font-medium">Comparison queue is empty.</h1>
         <p className="text-sm mt-2">
           Click <span className="text-amber-500">+ Compare</span> in the Editor to add a snapshot.
         </p>
@@ -488,12 +488,12 @@ export const ComparisonGrid: React.FC<{ onLoadToEditor?: () => void }> = ({ onLo
   return (
     <div className="bg-white/5 backdrop-blur-sm p-[var(--pad-panel)] rounded-xl border border-white/10">
       <div className="flex flex-wrap justify-between items-center gap-3 mb-5">
-        <h2 className="text-xl font-bold text-white">
+        <h1 className="text-xl font-bold text-white">
           Comparison
           <span className="text-ink-4 text-base font-normal ml-2">
             ({snapshots.length} roll{snapshots.length !== 1 ? 's' : ''})
           </span>
-        </h2>
+        </h1>
 
         <div className="flex items-center gap-3 flex-wrap">
           {/* PvE enemy tier selector — only when at least one PvE snapshot exists */}

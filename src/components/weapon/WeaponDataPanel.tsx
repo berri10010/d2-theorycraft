@@ -9,6 +9,7 @@ import { TTKAndFalloffPanel } from '../ui/TTKAndFalloffPanel';
 import { SubclassVerbPanel } from './SubclassVerbPanel';
 import { DpsPanel } from './DpsPanel';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
+import { onTablistKeyDown } from '../../hooks/useTabKeys';
 
 // ── Panel options ─────────────────────────────────────────────────────────────
 
@@ -44,11 +45,14 @@ export function WeaponDataPanel() {
     >
       <div className="space-y-3">
         {/* Tab strip */}
-        <div className="flex gap-1 flex-wrap" role="tablist" aria-label="Weapon data">
+        <div className="flex gap-1 flex-wrap" role="tablist" aria-label="Weapon data" onKeyDown={onTablistKeyDown}>
           {TABS.map((tab) => (
             <button
               key={tab.key}
               role="tab"
+              id={`wd-tab-${tab.key}`}
+              aria-controls="wd-panel"
+              tabIndex={active === tab.key ? 0 : -1}
               aria-selected={active === tab.key}
               onClick={() => setActive(tab.key)}
               className={[
@@ -67,6 +71,9 @@ export function WeaponDataPanel() {
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={active}
+            id="wd-panel"
+            role="tabpanel"
+            aria-labelledby={`wd-tab-${active}`}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}

@@ -20,6 +20,8 @@ import { calculateTTK } from '../../lib/damageMath';
 import { ammoFromStats } from '../../lib/ttkAmmo';
 import { MasterworkStat } from '../../store/useWeaponStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
+import { onTablistKeyDown } from '../../hooks/useTabKeys';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 import { useGodRolls } from '../../lib/useGodRolls';
 import { SettingsButton } from '../../components/ui/SettingsPanel';
@@ -30,11 +32,15 @@ import { buildRollParams as buildRollParamsFor, buildDimWishlistEntry } from '..
 
 // Below-the-fold / secondary panels are split into their own chunks so the
 // first paint only ships the roll editor, stats and effects.
-const ComparisonGrid     = dynamic(() => import('../../components/compare/ComparisonGrid').then((m) => m.ComparisonGrid));
-const WishlistPanel      = dynamic(() => import('../../components/weapon/WishlistPanel').then((m) => m.WishlistPanel));
-const SimilarWeaponsPanel = dynamic(() => import('../../components/weapon/SimilarWeaponsPanel').then((m) => m.SimilarWeaponsPanel));
-const TierListPanel      = dynamic(() => import('../../components/weapon/TierListPanel').then((m) => m.TierListPanel));
-const WeaponDataPanel    = dynamic(() => import('../../components/weapon/WeaponDataPanel').then((m) => m.WeaponDataPanel));
+// Each lazy panel has its own placeholder. Without one, loading a chunk re-suspends the page's single top-level
+// boundary and React hides the whole app (display: none) behind the skeleton, which drops focus and scroll.
+const PanelLoading = () => <div aria-hidden="true" className="h-40 rounded-xl border border-white/10 bg-white/5 animate-pulse" />;
+
+const ComparisonGrid     = dynamic(() => import('../../components/compare/ComparisonGrid').then((m) => m.ComparisonGrid), { loading: PanelLoading });
+const WishlistPanel      = dynamic(() => import('../../components/weapon/WishlistPanel').then((m) => m.WishlistPanel), { loading: PanelLoading });
+const SimilarWeaponsPanel = dynamic(() => import('../../components/weapon/SimilarWeaponsPanel').then((m) => m.SimilarWeaponsPanel), { loading: PanelLoading });
+const TierListPanel      = dynamic(() => import('../../components/weapon/TierListPanel').then((m) => m.TierListPanel), { loading: PanelLoading });
+const WeaponDataPanel    = dynamic(() => import('../../components/weapon/WeaponDataPanel').then((m) => m.WeaponDataPanel), { loading: PanelLoading });
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -142,6 +148,9 @@ function Dashboard() {
   const lastWrittenRef = useRef<string | null>(null);
 
   const shareRef    = useRef<HTMLDivElement>(null);
+  const shortcutsRef = useRef<HTMLDivElement>(null);
+  const closeShortcuts = useCallback(() => setShowShortcuts(false), []);
+  useDialogFocus(showShortcuts, shortcutsRef, closeShortcuts);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Keyboard shortcuts ───────────────────────────────────────────────────────
@@ -481,6 +490,11 @@ function Dashboard() {
             onClick={() => setShowShortcuts(false)}
           >
             <motion.div
+              ref={shortcutsRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Keyboard shortcuts"
+              tabIndex={-1}
               initial={{ scale: 0.94, y: 12 }}
               animate={{ scale: 1,    y: 0  }}
               exit={{ scale: 0.94,    y: 12 }}
@@ -546,6 +560,11 @@ function Dashboard() {
         clearPending={clearPending}
       />
 
+      {/* Spoken feedback for actions that only change a button label or flash a toast */}
+      <div role="status" aria-live="polite" className="sr-only">
+        {savedToast ? 'Added to Compare' : copiedType === 'permalink' ? 'Roll link copied' : copiedType === 'dim' ? 'DIM entry copied' : clearPending ? 'Press Clear Roll again to confirm' : ''}
+      </div>
+
       {/* Desktop sidebar collapse toggle */}
       <button
         onClick={() => setSidebarCollapsed((v) => !v)}
@@ -587,11 +606,14 @@ function Dashboard() {
             {/* Nav group: hamburger + tabs */}
             <div className="flex items-center gap-2 sm:gap-3">
               {/* Editor / Compare tabs */}
-              <div role="tablist" aria-label="View mode" className="flex bg-white/5 rounded-lg p-1 border border-white/10">
+              <div role="tablist" aria-label="View mode" onKeyDown={onTablistKeyDown} className="flex bg-white/5 rounded-lg p-1 border border-white/10">
                 {(['editor', 'compare'] as const).map((tab) => (
                   <button
                     key={tab}
                     role="tab"
+                    id={`view-tab-${tab}`}
+                    aria-controls={`view-panel-${tab}`}
+                    tabIndex={activeTab === tab ? 0 : -1}
                     aria-selected={activeTab === tab}
                     onClick={() => switchTab(tab)}
                     className={
@@ -715,7 +737,7 @@ function Dashboard() {
                 {/* Clear Roll — 2-step inline confirm */}
                 <button
                   onClick={handleClearClick}
-                  aria-label={clearPending ? 'Confirm clear roll' : 'Clear all perks and mods for this weapon'}
+                  aria-label={clearPending ? 'Confirm? Click again to clear the roll' : 'Clear Roll: reset perks, mods and masterwork for this weapon'}
                   title={clearPending ? 'Click again to confirm' : 'Reset perks, mods, and masterwork for this weapon'}
                   className={[
                     'flex items-center gap-1.5 font-medium px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-all border min-h-[44px] min-w-[44px]',
@@ -733,11 +755,11 @@ function Dashboard() {
                 {/* Add to Compare */}
                 <button
                   onClick={handleAddToCompare}
-                  aria-label={`Add ${activeWeapon.name} to Compare`}
+                  aria-label={`Add to Compare: ${activeWeapon.name}`}
                   title="Add to Compare"
                   className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-2.5 sm:px-3 py-1.5 rounded-lg text-sm transition-colors min-h-[44px] min-w-[44px] flex items-center gap-1"
                 >
-                  <span>+</span>
+                  <span aria-hidden="true">+</span>
                   <span className="hdr-label">Add to Compare</span>
                 </button>
               </div>
@@ -745,7 +767,7 @@ function Dashboard() {
           </header>
 
           {/* ── Editor tab ──────────────────────────────────────────────── */}
-          <div role="tabpanel" aria-label="Roll editor" hidden={activeTab !== 'editor'} className="tab-in">
+          <div role="tabpanel" id="view-panel-editor" aria-labelledby="view-tab-editor" hidden={activeTab !== 'editor'} className="tab-in">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.div
                 key={activeWeapon.hash}
@@ -805,7 +827,7 @@ function Dashboard() {
           </div>
 
           {/* ── Compare tab ─────────────────────────────────────────────── */}
-          <div role="tabpanel" aria-label="Comparison grid" hidden={activeTab !== 'compare'} className="tab-in">
+          <div role="tabpanel" id="view-panel-compare" aria-labelledby="view-tab-compare" hidden={activeTab !== 'compare'} className="tab-in">
             {compareMounted && <ErrorBoundary label="Comparison"><ComparisonGrid onLoadToEditor={() => { scrollByTab.current.editor = 0; switchTab('editor'); }} /></ErrorBoundary>}
           </div>
 

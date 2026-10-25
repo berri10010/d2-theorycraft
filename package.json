@@ -13,7 +13,9 @@
     "validate": "npx tsx scripts/validate-data.ts",
     "refresh-god-rolls": "npx tsx scripts/refresh-god-rolls.ts",
     "start": "next start",
-    "audit:widths": "node scripts/audit-widths.mjs"
+    "audit:widths": "node scripts/audit-widths.mjs",
+    "audit:a11y": "node scripts/audit-a11y.mjs",
+    "audit:keyboard": "node scripts/audit-keyboard.mjs"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.13.24",
@@ -29,6 +31,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
+    "axe-core": "^4.14.0",
     "playwright-core": "^1.64.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",

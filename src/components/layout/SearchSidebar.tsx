@@ -579,7 +579,7 @@ export const SearchSidebar: React.FC = () => {
 
       {/* ── Footer ──────────────────────────────────────────────────── */}
       {weapons.length > 0 && (
-        <div className="p-2.5 border-t border-white/10 text-2xs text-ink-4 text-center">
+        <div role="status" aria-live="polite" className="p-2.5 border-t border-white/10 text-2xs text-ink-4 text-center">
           {filteredGroups.length} / {groups.length} weapons
         </div>
       )}

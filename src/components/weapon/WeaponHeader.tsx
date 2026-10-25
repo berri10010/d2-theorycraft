@@ -227,9 +227,9 @@ export const WeaponHeader: React.FC = () => {
             </div>
 
             <div className="min-w-0">
-              <h2 className={`text-xl md:text-2xl font-bold leading-tight truncate ${nameColor}`}>
+              <h1 className={`text-xl md:text-2xl font-bold leading-tight truncate ${nameColor}`}>
                 {activeWeapon.baseName}
-              </h2>
+              </h1>
               <p className="text-ink-3 text-xs mt-0.5 truncate">
                 {activeWeapon.itemTypeDisplayName}
               </p>

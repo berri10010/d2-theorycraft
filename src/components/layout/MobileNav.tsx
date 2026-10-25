@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { SettingsBody } from '../ui/SettingsPanel';
+import { useDialogFocus } from '../../hooks/useDialogFocus';
 
 /**
  * Phone-first chrome for the editor (hidden at md+, where the desktop header
@@ -51,13 +52,13 @@ export function MobileTopBar({ activeTab, weapon, mode, onModeChange, onOpenWeap
         <>
           <button
             onClick={onOpenWeapons}
-            aria-label={`Change weapon — currently ${weapon.name}`}
             className="flex-1 min-w-0 flex items-center gap-2.5 h-11 rounded-xl pl-1 pr-2 text-left active:bg-white/5"
           >
             <span className="relative w-9 h-9 shrink-0 rounded-lg overflow-hidden border border-white/15 bg-white/5">
               <Image src={BUNGIE_URL + weapon.icon} alt="" fill sizes="36px" className="object-cover" unoptimized />
             </span>
             <span className="min-w-0 flex-1">
+              <span className="sr-only">Change weapon: </span>
               <span className="block truncate text-sm font-bold text-white leading-tight">{weapon.name}</span>
               <span className="block truncate text-2xs text-ink-4 leading-tight">
                 {weapon.itemTypeDisplayName}{weapon.variantLabel ? ` · ${weapon.variantLabel}` : ''}
@@ -156,7 +157,7 @@ export function MobileToast({ message }: { message: string | null }) {
       {message && (
         <motion.div
           key="toast"
-          role="status"
+          aria-hidden="true" /* announced by the live region in the editor page */
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
@@ -206,14 +207,10 @@ export function MobileMoreSheet({ open, onClose, onSharePermalink, onShareDim, o
   const [view, setView] = useState<'menu' | 'settings'>('menu');
   const controls = useDragControls();
 
-  // Always reopen on the main menu; close on Escape.
+  // Always reopen on the main menu; focus moves into the sheet, Tab stays inside it, Escape closes it.
   useEffect(() => { if (open) setView('menu'); }, [open]);
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(open, sheetRef, onClose);
 
   return (
     <AnimatePresence>
@@ -231,6 +228,8 @@ export function MobileMoreSheet({ open, onClose, onSharePermalink, onShareDim, o
           />
           <motion.div
             key="sheet"
+            ref={sheetRef}
+            tabIndex={-1}
             role="dialog"
             aria-modal="true"
             aria-label={view === 'menu' ? 'More actions' : 'Settings'}

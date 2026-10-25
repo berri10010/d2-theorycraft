@@ -567,9 +567,11 @@ export default function HomePage() {
       />
 
       {/* Nav */}
-      <nav className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/5">
+      <header className="relative z-10 flex items-center justify-between px-6 py-4 border-b border-white/5">
         <span className="font-bold text-base tracking-tight text-white">D2 Theorycraft</span>
-      </nav>
+      </header>
+
+      <main id="main-content">
 
       {/* Hero + search */}
       <section className="relative z-20 flex flex-col items-center justify-center text-center px-6 pt-12 pb-10">
@@ -605,12 +607,14 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto">
           <button
             onClick={() => setFeaturesOpen(o => !o)}
+            aria-expanded={featuresOpen}
             className="w-full flex items-center justify-between gap-3 py-3 border-t border-white/5 group"
           >
             <span className="text-xs font-bold text-ink-4 uppercase tracking-wider">
               Tools &amp; Features
             </span>
             <svg
+              aria-hidden="true"
               viewBox="0 0 20 20" fill="currentColor"
               className={[
                 'w-4 h-4 text-ink-4 group-hover:text-ink-3 transition-all',
@@ -639,6 +643,8 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      </main>
 
       <SiteFooter />
 

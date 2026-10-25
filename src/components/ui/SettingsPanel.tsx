@@ -165,6 +165,14 @@ export function SettingsBody() {
 export function SettingsButton() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { setOpen(false); buttonRef.current?.focus(); } };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -178,6 +186,7 @@ export function SettingsButton() {
   return (
     <div className="relative" ref={ref}>
       <button
+        ref={buttonRef}
         onClick={() => setOpen((v) => !v)}
         aria-label="Site settings"
         aria-expanded={open}

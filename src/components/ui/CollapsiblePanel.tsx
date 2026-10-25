@@ -49,13 +49,15 @@ export function CollapsiblePanel({
     <div className={`bg-white/5 backdrop-blur-sm rounded-xl border ${className}`}>
       {/* The header row is not a <button> itself: headerRight may contain buttons, which can't nest. */}
       <div className="flex items-center">
-        <button
-          onClick={toggle}
-          className="flex-1 min-w-0 text-left text-xl font-bold text-white pl-[var(--pad-panel)] py-[var(--pad-panel)]"
-          aria-expanded={open}
-        >
-          {title}
-        </button>
+        <h2 className="flex-1 min-w-0 text-xl font-bold">
+          <button
+            onClick={toggle}
+            className="block w-full text-left text-white pl-[var(--pad-panel)] py-[var(--pad-panel)]"
+            aria-expanded={open}
+          >
+            {title}
+          </button>
+        </h2>
         {headerRight && (
           <div className="shrink-0 flex items-center gap-2 px-2">
             {headerRight}
