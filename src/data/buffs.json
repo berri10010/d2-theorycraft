@@ -970,8 +970,8 @@
     "name": "Paracausal Charge",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.66,
-    "description": "Hawkmoon: each kill or precision hit adds a stack (max 7): +21 / 36.5 / 48 / 55 / 60 / 63 / 66% damage against combatants. No effect on Guardians. The last-round Paracausal Shot bonus is not modelled.",
+    "multiplier": 18.36,
+    "description": "Hawkmoon: each kill or precision hit adds a charge (max 7): +21 / 36.5 / 48 / 55 / 60 / 63 / 66% damage against combatants, none against Guardians. \"Last ×N\" is the final round of the magazine, Paracausal Shot, whose bonus replaces the charge bonus (PvE +292% up to +1736%, PvP +30% up to +509%). Pick it to see that one shot; DPS still assumes every shot gets the bonus.",
     "perkNames": [
       "Paracausal Shot"
     ],
@@ -1011,10 +1011,45 @@
         "count": 7,
         "label": "×7",
         "multiplier": 1.66
+      },
+      {
+        "count": 8,
+        "label": "Last ×1",
+        "multiplier": 3.92
+      },
+      {
+        "count": 9,
+        "label": "Last ×2",
+        "multiplier": 4
+      },
+      {
+        "count": 10,
+        "label": "Last ×3",
+        "multiplier": 4.4
+      },
+      {
+        "count": 11,
+        "label": "Last ×4",
+        "multiplier": 5.25
+      },
+      {
+        "count": 12,
+        "label": "Last ×5",
+        "multiplier": 7.67
+      },
+      {
+        "count": 13,
+        "label": "Last ×6",
+        "multiplier": 11.71
+      },
+      {
+        "count": 14,
+        "label": "Last ×7",
+        "multiplier": 18.36
       }
     ],
     "pvp": {
-      "multiplier": 1,
+      "multiplier": 6.09,
       "stacks": [
         {
           "count": 1,
@@ -1050,6 +1085,41 @@
           "count": 7,
           "label": "×7",
           "multiplier": 1
+        },
+        {
+          "count": 8,
+          "label": "Last ×1",
+          "multiplier": 1.3
+        },
+        {
+          "count": 9,
+          "label": "Last ×2",
+          "multiplier": 1.33
+        },
+        {
+          "count": 10,
+          "label": "Last ×3",
+          "multiplier": 1.46
+        },
+        {
+          "count": 11,
+          "label": "Last ×4",
+          "multiplier": 1.805
+        },
+        {
+          "count": 12,
+          "label": "Last ×5",
+          "multiplier": 2.54
+        },
+        {
+          "count": 13,
+          "label": "Last ×6",
+          "multiplier": 3.88
+        },
+        {
+          "count": 14,
+          "label": "Last ×7",
+          "multiplier": 6.09
         }
       ]
     }
@@ -1488,6 +1558,90 @@
           "multiplier": 1.75
         }
       ]
+    }
+  },
+  "catalyst_mythoclast_surge": {
+    "hash": "catalyst_mythoclast_surge",
+    "name": "Mythoclast Surge",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.2,
+    "description": "Vex Mythoclast catalyst, Auto Rifle mode: landing 15 hits within 3 seconds, or a kill, gives +20% damage for 5 seconds.",
+    "perkNames": [],
+    "icon": null
+  },
+  "catalyst_will_given_form": {
+    "hash": "catalyst_will_given_form",
+    "name": "Will Given Form",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.8,
+    "description": "Ager's Scepter catalyst: +80% damage while the super-energy drain lasts. The Crucible value isn't published, so none is applied there.",
+    "perkNames": [],
+    "icon": null,
+    "pvp": {
+      "multiplier": 1
+    }
+  },
+  "catalyst_cerberus_kill": {
+    "hash": "catalyst_cerberus_kill",
+    "name": "Cerberus Kill Boost",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.5,
+    "description": "Cerberus+1 catalyst: holding reload within 7 seconds of a kill gives +50% damage for 7 seconds (+10% in PvP).",
+    "perkNames": [],
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.1
+    }
+  },
+  "catalyst_divinity_precision": {
+    "hash": "catalyst_divinity_precision",
+    "name": "Divinity Precision Buff",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.25,
+    "description": "Divinity catalyst: 68 precision hits give +25% damage for 11 seconds.",
+    "perkNames": [],
+    "icon": null
+  },
+  "catalyst_necrochasm_triple": {
+    "hash": "catalyst_necrochasm_triple",
+    "name": "Necrochasm Triple Hit",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.35,
+    "description": "Necrochasm catalyst: damaging 3 enemies within 3 seconds gives +35% damage for 10 seconds.",
+    "perkNames": [],
+    "icon": null
+  },
+  "catalyst_devils_ruin_pickup": {
+    "hash": "catalyst_devils_ruin_pickup",
+    "name": "Devil's Ruin Pickup",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.3,
+    "description": "Devil's Ruin catalyst: elemental pickups give +30% damage (+10% in PvP) for 4 to 8 seconds.",
+    "perkNames": [],
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.1
+    }
+  },
+  "catalyst_whispered_breathing": {
+    "hash": "catalyst_whispered_breathing",
+    "name": "Whispered Breathing",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.1077,
+    "description": "Whisper of the Worm catalyst: after 1.2 seconds aiming without firing, +35% precision damage and, in PvE, +10.77% damage against combatants.",
+    "perkNames": [],
+    "icon": null,
+    "critMultiplier": 1.35,
+    "pvp": {
+      "multiplier": 1,
+      "critMultiplier": 1.35
     }
   }
 }

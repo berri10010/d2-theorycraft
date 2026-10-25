@@ -1,3 +1,4 @@
+import { CATALYST_EFFECTS } from '../data/catalystEffects';
 import type { Perk, Weapon } from '../types/weapon';
 
 /** Column name the Effects panel shows for a weapon's intrinsic trait. */
@@ -12,3 +13,11 @@ export function intrinsicEffectPerk(weapon: Weapon | null | undefined): Perk | n
   const perk = weapon?.intrinsicTrait;
   return perk && perk.buffKey ? perk : null;
 }
+
+/** Buff keys of the damage effects a completed catalyst adds to this weapon (see data/catalystEffects.ts). */
+export function catalystEffectKeys(weapon: Weapon | null | undefined): string[] {
+  return weapon?.catalyst ? CATALYST_EFFECTS[weapon.name] ?? [] : [];
+}
+
+/** Where a catalyst effect's on/off (or stack) state lives in the store's activeEffects map. */
+export const catalystEffectId = (buffKey: string): string => `catalyst:${buffKey}`;

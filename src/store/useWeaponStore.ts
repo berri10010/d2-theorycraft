@@ -6,7 +6,7 @@ import { EXOTIC_ARMOR, ExoticClassType } from '../data/exoticArmor';
 import { getCurves } from '../lib/archetypes';
 import { applyStatDeltas } from '../lib/statCalc';
 import { combineEffects, type WeaponEffects } from '../lib/weaponEffects';
-import { intrinsicEffectPerk } from '../lib/effectPerks';
+import { intrinsicEffectPerk, catalystEffectKeys, catalystEffectId } from '../lib/effectPerks';
 
 // ─── Weapon Mods ────────────────────────────────────────────────────────────
 
@@ -656,7 +656,7 @@ export const useWeaponStore = create<WeaponState>()(
       },
 
       getWeaponEffects: () => {
-        const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, mode } = get();
+        const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, mode, catalystActive } = get();
         // Same sources and stack levels as getDamageMultiplier: perks with their effect switched on, then manual buffs.
         const stackByKey: Record<string, number | undefined> = {};
         const keys = new Set<string>();
@@ -671,6 +671,10 @@ export const useWeaponStore = create<WeaponState>()(
           const intrinsic = intrinsicEffectPerk(activeWeapon);
           const intrinsicState = intrinsic ? activeEffects[intrinsic.hash] ?? 0 : 0;
           if (intrinsic?.buffKey && intrinsicState > 0 && !keys.has(intrinsic.buffKey)) { keys.add(intrinsic.buffKey); stackByKey[intrinsic.buffKey] = intrinsicState - 1; }
+          if (catalystActive) for (const key of catalystEffectKeys(activeWeapon)) {
+            const state = activeEffects[catalystEffectId(key)] ?? 0;
+            if (state > 0 && !keys.has(key)) { keys.add(key); stackByKey[key] = state - 1; }
+          }
         }
         for (const hash of activeBuffs) {
           if (!keys.has(hash)) { keys.add(hash); stackByKey[hash] = buffStacks[hash]; }
@@ -681,7 +685,7 @@ export const useWeaponStore = create<WeaponState>()(
       },
 
       getDamageMultiplier: () => {
-        const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, activeMod, surgeStacks, mode, weaponsStat } = get();
+        const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, activeMod, surgeStacks, mode, weaponsStat, catalystActive } = get();
 
         const effectBuffEntries: Array<{ key: string; stackIndex: number }> = [];
          if (activeWeapon) {
@@ -699,6 +703,10 @@ export const useWeaponStore = create<WeaponState>()(
            const intrinsic = intrinsicEffectPerk(activeWeapon);
            const intrinsicState = intrinsic ? activeEffects[intrinsic.hash] ?? 0 : 0;
            if (intrinsic?.buffKey && intrinsicState > 0) effectBuffEntries.push({ key: intrinsic.buffKey, stackIndex: intrinsicState - 1 });
+           if (catalystActive) for (const key of catalystEffectKeys(activeWeapon)) {
+             const state = activeEffects[catalystEffectId(key)] ?? 0;
+             if (state > 0) effectBuffEntries.push({ key, stackIndex: state - 1 });
+           }
          }
 
          const seenBuffKeys     = new Set<string>();

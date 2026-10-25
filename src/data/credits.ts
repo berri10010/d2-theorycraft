@@ -162,6 +162,7 @@ export const creditById = (id: string): Credit | undefined => CREDITS.find((c) =
 export const DATA_FILE_CREDITS: Record<string, string[]> = {
   'public/data/weapons.json': ['bungie', 'dim'],
   'public/data/perks.json': ['bungie', 'clarity'],
+  'src/data/catalystEffects.ts': ['clarity'],
   'public/data/mods.json': ['bungie'],
   'public/data/statgroups.json': ['bungie'],
   'public/data/clarity.json': ['clarity'],

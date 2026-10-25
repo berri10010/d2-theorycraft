@@ -246,10 +246,12 @@ const DISPLAY_STATS = new Set([
  * The exotic's catalyst: the plug sitting in its (initially empty) catalyst socket. Only a few catalysts list stat
  * bonuses in the manifest; the rest are described in Clarity's text, which the data build reads afterwards.
  */
-function extractCatalyst(item: any, items: Record<string, any>): Weapon['catalyst'] {
+function extractCatalyst(item: any, items: Record<string, any>, plugSetDefs: Record<string, any>): Weapon['catalyst'] {
   if (item.inventory?.tierTypeName !== 'Exotic') return null;
   for (const socket of item.sockets?.socketEntries ?? []) {
-    for (const entry of socket.reusablePlugItems ?? []) {
+    // The catalyst is usually listed on the socket itself; for some exotics only in its plug set.
+    const plugSet = socket.reusablePlugSetHash ? plugSetDefs[String(socket.reusablePlugSetHash)] : null;
+    for (const entry of [...(socket.reusablePlugItems ?? []), ...(plugSet?.reusablePlugItems ?? [])]) {
       if (entry.plugItemHash === socket.singleInitialItemHash) continue;
       const plug = items[String(entry.plugItemHash)];
       const name = plug?.displayProperties?.name?.trim();
@@ -1149,7 +1151,7 @@ export function parseWeapons(
         (s) => !finalMwOptions.includes(s) && baseStats[s] !== undefined && s !== 'Ammo Generation'
       ),
       weaponMods,
-      catalyst: extractCatalyst(item, items),
+      catalyst: extractCatalyst(item, items, plugSetDefs),
       foundry: extractFoundry(item.traitIds),
     });
   }
