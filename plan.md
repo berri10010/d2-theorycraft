@@ -16,7 +16,7 @@
 
 ## General Work Plan
 
-**Project:** D2 Theorycraft — `www.d2theorycraft.com`  
+**Project:** D2 Theorycraft — `d2theorycraft.com` (`www` redirects to it)  
 **Repo:** `https://github.com/berri10010/d2-theorycraft`  
 **Stack:** Next.js static export → GitHub → Cloudflare Worker (static assets via `env.ASSETS.fetch`). No SSR, no API routes. Builds run on GitHub Actions; deploys triggered by push to `main`.  
 **Workspace (local):** `C:\Users\husse\Documents\d2-theorycraft`
