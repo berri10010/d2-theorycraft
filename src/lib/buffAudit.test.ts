@@ -216,6 +216,7 @@ describe('exotic perk buffs', () => {
     const perks = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public', 'data', 'perks.json'), 'utf8')) as Record<string, { name: string; isEnhanced: boolean; buffKey: string | null; isConditional: boolean }>;
     const missing: string[] = [];
     for (const [key, buff] of Object.entries(BUFF_DATABASE)) for (const p of Object.values(perks)) {
+      if (buff.weaponNames) continue; // linked per weapon, checked below
       if (p.isEnhanced || !buff.perkNames.includes(p.name)) continue;
       if (p.buffKey !== key || !p.isConditional) missing.push(`${p.name} -> ${key}`);
     }
@@ -250,5 +251,86 @@ describe('subclass and ability buffs were re-verified', () => {
   it('Weapons of Light is 25% in PvE and, from the Helm of Saint-14 listing, in PvP', () => {
     expect(resolveBuffMultiplier(b('weapons_of_light'), 'pve', null)).toBe(1.25);
     expect(resolveBuffMultiplier(b('weapons_of_light'), 'pvp', null)).toBe(1.25);
+  });
+});
+
+/** Exotic traits added from Clarity's text and the Destiny Data Compendium (October 2026). */
+describe('more exotic trait buffs', () => {
+  const dmg = (key: string, mode: 'pve' | 'pvp', stack?: number) => resolveBuffMultiplier(b(key), mode, { itemTypeDisplayName: 'Sniper Rifle' }, stack);
+  const fx = (key: string, mode: 'pve' | 'pvp', stack?: number) => resolveBuffEffects(b(key), mode, { itemTypeDisplayName: 'Sniper Rifle' }, stack);
+
+  it("Izanagi's Burden: Honed Edge x2/x3/x4 body and precision bonuses, PvE and PvP", () => {
+    const cases: Array<[number, number, number, 'pve' | 'pvp']> = [
+      [0, 12, 79, 'pve'], [1, 25, 131, 'pve'], [2, 112, 291, 'pve'],
+      [0, 20, 91, 'pvp'], [1, 45, 167, 'pvp'], [2, 165, 389, 'pvp'],
+    ];
+    for (const [stack, body, crit, mode] of cases) {
+      const m = dmg('honed_edge', mode, stack);
+      expect(m, `${mode} x${stack + 2} body`).toBeCloseTo(1 + body / 100, 3);
+      expect(m * fx('honed_edge', mode, stack).critMultiplier!, `${mode} x${stack + 2} crit`).toBeCloseTo(1 + crit / 100, 2);
+    }
+  });
+
+  it('Honed Edge only applies to sniper rifles', () => {
+    expect(resolveBuffMultiplier(b('honed_edge'), 'pve', { itemTypeDisplayName: 'Sword' }, 2)).toBe(1);
+  });
+
+  it('Ace of Spades Memento Mori is +68% in PvE and +29% in PvP', () => {
+    expect(dmg('memento_mori', 'pve')).toBeCloseTo(1.68, 3);
+    expect(dmg('memento_mori', 'pvp')).toBeCloseTo(1.29, 3);
+  });
+
+  it('Monte Carlo Markov Chain is 13% a stack in PvE (6.6% in PvP) up to five', () => {
+    expect(b('markov_chain').stacks).toHaveLength(5);
+    expect(dmg('markov_chain', 'pve', 4)).toBeCloseTo(1.65, 3);
+    expect(dmg('markov_chain', 'pvp', 4)).toBeCloseTo(1.33, 3);
+    expect(dmg('markov_chain', 'pve', 0)).toBeCloseTo(1.13, 3);
+  });
+
+  it('Wavesplitter Harmonic Laser: Medium +32.2% and High +68.7% in PvE, +3% and +6.25% in PvP', () => {
+    expect(dmg('harmonic_laser', 'pve', 0)).toBeCloseTo(1.322, 3);
+    expect(dmg('harmonic_laser', 'pve', 1)).toBeCloseTo(1.687, 3);
+    expect(dmg('harmonic_laser', 'pvp', 0)).toBeCloseTo(1.03, 3);
+    expect(dmg('harmonic_laser', 'pvp', 1)).toBeCloseTo(1.0625, 4);
+  });
+
+  it('flat damage traits', () => {
+    expect(dmg('cold_fusion', 'pve')).toBeCloseTo(1.8, 3);
+    expect(dmg('the_fundamentals', 'pve')).toBeCloseTo(1.3, 3);
+    expect(dmg('the_fundamentals', 'pvp')).toBeCloseTo(1.1, 3);
+    expect(dmg('volatile_light', 'pve')).toBe(2);
+    expect(dmg('volatile_light', 'pvp')).toBeCloseTo(1.35, 3);
+    expect(dmg('paracausal_imbuement', 'pve')).toBeCloseTo(1.2, 3);
+    expect(dmg('hail_storm', 'pve')).toBeCloseTo(1.5, 3);
+    expect(dmg('phase_converter', 'pve')).toBeCloseTo(1.3, 3);
+  });
+
+  it('Borealis Ionic Return: +15% body and +37% precision', () => {
+    const m = dmg('ionic_return', 'pve');
+    expect(m).toBeCloseTo(1.15, 3);
+    expect(m * fx('ionic_return', 'pve').critMultiplier!).toBeCloseTo(1.37, 2);
+  });
+
+  it("Bastion's Saint's Fury: +35% damage and 15% shorter charge time", () => {
+    expect(dmg('saints_fury', 'pve')).toBeCloseTo(1.35, 3);
+    expect(fx('saints_fury', 'pve').chargeMultiplier).toBeCloseTo(0.85, 3);
+  });
+
+  it('Red Death Reformed: +10/20/40% in PvE as the shield goes, +2/4/6% in PvP', () => {
+    expect([0, 1, 2].map((i) => dmg('inverse_relationship', 'pve', i))).toEqual([1.1, 1.2, 1.4]);
+    expect([0, 1, 2].map((i) => dmg('inverse_relationship', 'pvp', i))).toEqual([1.02, 1.04, 1.06]);
+  });
+
+  it('The Chaperone Roadborn: +22% precision damage and +42% rate of fire', () => {
+    expect(dmg('the_roadborn', 'pve')).toBe(1);
+    expect(fx('the_roadborn', 'pve').critMultiplier).toBeCloseTo(1.22, 3);
+    expect(1 / fx('the_roadborn', 'pve').shotDelayMultiplier!).toBeCloseTo(1.42, 2);
+  });
+
+  it("the sword perk called Honed Edge is not linked to Izanagi's buff", () => {
+    const perks = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public', 'data', 'perks.json'), 'utf8')) as Record<string, { name: string; buffKey: string | null }>;
+    const named = Object.values(perks).filter((p) => p.name === 'Honed Edge');
+    expect(named.length).toBeGreaterThan(1);
+    expect(named.filter((p) => p.buffKey === 'honed_edge')).toHaveLength(1);
   });
 });

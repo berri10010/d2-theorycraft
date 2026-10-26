@@ -1710,5 +1710,370 @@
       "multiplier": 1,
       "critMultiplier": 1.35
     }
+  },
+  "honed_edge": {
+    "hash": "honed_edge",
+    "name": "Honed Edge",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 2.12,
+    "description": "Izanagi's Burden: hold reload to spend ammo for one boosted shot. 2 / 3 / 4 stacks give +12 / 25 / 112% body-shot and +79 / 131 / 291% precision damage in PvE (+20 / 45 / 165% and +91 / 167 / 389% in PvP). Only that one shot is boosted; the calculator applies it to every shot.",
+    "perkNames": [
+      "Honed Edge"
+    ],
+    "icon": null,
+    "critMultiplier": 1.8443,
+    "stacks": [
+      {
+        "count": 1,
+        "label": "×2",
+        "multiplier": 1.12,
+        "critMultiplier": 1.5982
+      },
+      {
+        "count": 2,
+        "label": "×3",
+        "multiplier": 1.25,
+        "critMultiplier": 1.848
+      },
+      {
+        "count": 3,
+        "label": "×4",
+        "multiplier": 2.12,
+        "critMultiplier": 1.8443
+      }
+    ],
+    "weaponNames": [
+      "Izanagi's Burden"
+    ],
+    "weaponTypes": [
+      "Sniper Rifle"
+    ],
+    "pvp": {
+      "multiplier": 2.65,
+      "critMultiplier": 1.8453,
+      "stacks": [
+        {
+          "count": 1,
+          "label": "×2",
+          "multiplier": 1.2,
+          "critMultiplier": 1.5917
+        },
+        {
+          "count": 2,
+          "label": "×3",
+          "multiplier": 1.45,
+          "critMultiplier": 1.8414
+        },
+        {
+          "count": 3,
+          "label": "×4",
+          "multiplier": 2.65,
+          "critMultiplier": 1.8453
+        }
+      ]
+    }
+  },
+  "memento_mori": {
+    "hash": "memento_mori",
+    "name": "Memento Mori",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.68,
+    "description": "Ace of Spades: finishing a reload within 3.6 seconds of a kill gives the next 6 shots +68% damage in PvE (+29% in PvP).",
+    "perkNames": [
+      "Memento Mori"
+    ],
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.29
+    }
+  },
+  "markov_chain": {
+    "hash": "markov_chain",
+    "name": "Markov Chain",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.65,
+    "description": "Monte Carlo: each weapon kill adds a stack for 4.5 seconds (max 5): +13 / 26 / 39 / 52 / 65% damage in PvE (+6.6 / 13.2 / 19.8 / 26.4 / 33% in PvP). Melee kills while holding it grant all five.",
+    "perkNames": [
+      "Markov Chain"
+    ],
+    "icon": null,
+    "stacks": [
+      {
+        "count": 1,
+        "label": "×1",
+        "multiplier": 1.13
+      },
+      {
+        "count": 2,
+        "label": "×2",
+        "multiplier": 1.26
+      },
+      {
+        "count": 3,
+        "label": "×3",
+        "multiplier": 1.39
+      },
+      {
+        "count": 4,
+        "label": "×4",
+        "multiplier": 1.52
+      },
+      {
+        "count": 5,
+        "label": "×5",
+        "multiplier": 1.65
+      }
+    ],
+    "pvp": {
+      "multiplier": 1.33,
+      "stacks": [
+        {
+          "count": 1,
+          "label": "×1",
+          "multiplier": 1.066
+        },
+        {
+          "count": 2,
+          "label": "×2",
+          "multiplier": 1.132
+        },
+        {
+          "count": 3,
+          "label": "×3",
+          "multiplier": 1.198
+        },
+        {
+          "count": 4,
+          "label": "×4",
+          "multiplier": 1.264
+        },
+        {
+          "count": 5,
+          "label": "×5",
+          "multiplier": 1.33
+        }
+      ]
+    }
+  },
+  "harmonic_laser": {
+    "hash": "harmonic_laser",
+    "name": "Harmonic Laser",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.687,
+    "description": "Wavesplitter: holding the trigger cycles the beam through Low, Medium and High power. Medium adds 32.2% damage and High 68.7% in PvE (3% and 6.25% in PvP).",
+    "perkNames": [
+      "Harmonic Laser"
+    ],
+    "icon": null,
+    "stacks": [
+      {
+        "count": 1,
+        "label": "Medium",
+        "multiplier": 1.322
+      },
+      {
+        "count": 2,
+        "label": "High",
+        "multiplier": 1.687
+      }
+    ],
+    "pvp": {
+      "multiplier": 1.0625,
+      "stacks": [
+        {
+          "count": 1,
+          "label": "Medium",
+          "multiplier": 1.03
+        },
+        {
+          "count": 2,
+          "label": "High",
+          "multiplier": 1.0625
+        }
+      ]
+    }
+  },
+  "cold_fusion": {
+    "hash": "cold_fusion",
+    "name": "Cold Fusion",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.8,
+    "description": "Coldheart: damage rises linearly up to +80% as the beam charges to full power (dealing damage and collecting Ionic Traces charge it).",
+    "perkNames": [
+      "Cold Fusion"
+    ],
+    "icon": null,
+    "stacks": [
+      {
+        "count": 1,
+        "label": "Half beam",
+        "multiplier": 1.4
+      },
+      {
+        "count": 2,
+        "label": "Full beam",
+        "multiplier": 1.8
+      }
+    ]
+  },
+  "the_fundamentals": {
+    "hash": "the_fundamentals",
+    "name": "The Fundamentals",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.3,
+    "description": "Borealis and Hard Light: +30% damage for 10 seconds after receiving or applying an elemental buff or debuff that matches the selected element (+10% in PvP).",
+    "perkNames": [
+      "The Fundamentals"
+    ],
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.1
+    }
+  },
+  "ionic_return": {
+    "hash": "ionic_return",
+    "name": "Ionic Return",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.15,
+    "description": "Borealis: breaking a matching elemental shield grants 5 shots with +15% body-shot and +37% critical damage.",
+    "perkNames": [
+      "Ionic Return"
+    ],
+    "icon": null,
+    "critMultiplier": 1.1913
+  },
+  "volatile_light": {
+    "hash": "volatile_light",
+    "name": "Volatile Light",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 2,
+    "description": "Hard Light: bullets that have ricocheted deal +100% damage in PvE (+35% in PvP).",
+    "perkNames": [
+      "Volatile Light"
+    ],
+    "icon": null,
+    "pvp": {
+      "multiplier": 1.35
+    }
+  },
+  "paracausal_imbuement": {
+    "hash": "paracausal_imbuement",
+    "name": "Paracausal Imbuement",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.2,
+    "description": "Microcosm: +20% damage for 20 seconds once your Super energy reaches 0%.",
+    "perkNames": [
+      "Paracausal Imbuement"
+    ],
+    "icon": null
+  },
+  "saints_fury": {
+    "hash": "saints_fury",
+    "name": "Saint's Fury",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.35,
+    "description": "Bastion: melee damage grants 8.5 seconds of +35% weapon damage and 15% shorter charge time.",
+    "perkNames": [
+      "Saint's Fists"
+    ],
+    "icon": null,
+    "chargeMultiplier": 0.85
+  },
+  "inverse_relationship": {
+    "hash": "inverse_relationship",
+    "name": "Inverse Relationship",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.4,
+    "description": "Red Death Reformed: damage rises as your shield is depleted, +10 / 20 / 40% in PvE (+2 / 4 / 6% in PvP) below 114 / 60 / 0 shield HP.",
+    "perkNames": [
+      "Inverse Relationship"
+    ],
+    "icon": null,
+    "stacks": [
+      {
+        "count": 1,
+        "label": "Shield <114",
+        "multiplier": 1.1
+      },
+      {
+        "count": 2,
+        "label": "Shield <60",
+        "multiplier": 1.2
+      },
+      {
+        "count": 3,
+        "label": "No shield",
+        "multiplier": 1.4
+      }
+    ],
+    "pvp": {
+      "multiplier": 1.06,
+      "stacks": [
+        {
+          "count": 1,
+          "label": "Shield <114",
+          "multiplier": 1.02
+        },
+        {
+          "count": 2,
+          "label": "Shield <60",
+          "multiplier": 1.04
+        },
+        {
+          "count": 3,
+          "label": "No shield",
+          "multiplier": 1.06
+        }
+      ]
+    }
+  },
+  "the_roadborn": {
+    "hash": "the_roadborn",
+    "name": "Roadborn",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1,
+    "description": "The Chaperone: a precision kill (or two precision hits) gives 10 seconds of +22% precision damage and +42% rate of fire.",
+    "perkNames": [
+      "The Roadborn"
+    ],
+    "icon": null,
+    "critMultiplier": 1.22,
+    "shotDelayMultiplier": 0.7042
+  },
+  "hail_storm": {
+    "hash": "hail_storm",
+    "name": "Hail Storm",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.5,
+    "description": "Verglas Curve: +50% damage against Frozen enemies and Stasis Crystals.",
+    "perkNames": [
+      "Hail Storm"
+    ],
+    "icon": null
+  },
+  "phase_converter": {
+    "hash": "phase_converter",
+    "name": "Phase Converter",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.3,
+    "description": "Lodestar: while aiming down sights, +30% damage to Arc-debuffed targets.",
+    "perkNames": [
+      "Phase Converter"
+    ],
+    "icon": null
   }
 }

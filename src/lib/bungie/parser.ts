@@ -906,7 +906,7 @@ export function parseWeapons(
             if (seenPerkNames.has(nameKey)) continue;
             seenPerkNames.add(nameKey);
 
-            const derivedBuffKey = enhanced ? null : getBuffKeyForPerk(perkName);
+            const derivedBuffKey = enhanced ? null : getBuffKeyForPerk(perkName, item.displayProperties.name);
             const tierEntry = getPerkTier(perkName);
             const { act, act2 } = auditActivationFor(perkName);
             rawPerks.push({

@@ -79,6 +79,11 @@ export interface DamageBuff {
   weaponTypeMultipliers?: Record<string, number>;
   /** The buff only applies to these weapon types (itemTypeDisplayName). */
   weaponTypes?: string[];
+  /**
+   * The perk only links to this buff on these weapons (by name). For exotic traits that share a name with a
+   * legendary perk, e.g. Izanagi's Burden's "Honed Edge" and the sword perk of the same name.
+   */
+  weaponNames?: string[];
   /** The buff only applies to weapons of these damage types, e.g. Disruption Break is kinetic-only. */
   damageTypes?: string[];
   /**
@@ -92,10 +97,12 @@ export interface DamageBuff {
 
 export const BUFF_DATABASE = buffData as Record<string, DamageBuff>;
 
-/** Returns the buff key for a given perk name, or null if none. */
-export function getBuffKeyForPerk(perkName: string): string | null {
+/** Returns the buff key for a given perk name (on the named weapon, for buffs limited by `weaponNames`), or null. */
+export function getBuffKeyForPerk(perkName: string, weaponName?: string): string | null {
   for (const [key, buff] of Object.entries(BUFF_DATABASE)) {
-    if (buff.perkNames.includes(perkName)) return key;
+    if (!buff.perkNames.includes(perkName)) continue;
+    if (buff.weaponNames && !(weaponName && buff.weaponNames.includes(weaponName))) continue;
+    return key;
   }
   return null;
 }
