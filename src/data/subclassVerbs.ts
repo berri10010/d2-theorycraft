@@ -83,7 +83,7 @@ export const SUBCLASS_VERBS: VerbDef[] = [
     perkName: 'Voltshot',
     element: 'arc',
     tagline: 'On reload after kill: Jolt the target. Jolt chains lightning to nearby enemies.',
-    calcBonus(baseImpact, rps, tier, _magSize) {
+    calcBonus(baseImpact, _rps, tier, _magSize) {
       const bulletDmg = impactToDamage(baseImpact);
       // Jolt: 6 procs over 5s, each ~15% of bullet damage
       const joltProcs = 6;
@@ -124,7 +124,7 @@ export const SUBCLASS_VERBS: VerbDef[] = [
     perkName: 'Incandescent',
     element: 'solar',
     tagline: 'On kill: spreads 30 Scorch to nearby enemies. At 100 Scorch → Ignition.',
-    calcBonus(baseImpact, rps, tier, _magSize) {
+    calcBonus(_baseImpact, _rps, tier, _magSize) {
       const ignDmg = Math.round(IGNITION_BASE * IGNITION_TIER_MULT[tier]);
       // Incandescent spreads 30 stacks → 4 kills of anything with 25 stacks already to chain
       // Scorch DoT: each tick = (stacks / 100) * ~40 dmg
@@ -213,7 +213,7 @@ export const SUBCLASS_VERBS: VerbDef[] = [
     perkName: 'Cold Steel / Headstone',
     element: 'stasis',
     tagline: 'Freeze targets. Shattering a frozen enemy multiplies all incoming damage.',
-    calcBonus(baseImpact, rps, tier, _magSize) {
+    calcBonus(baseImpact, _rps, tier, _magSize) {
       const bulletDmg = impactToDamage(baseImpact);
       const shatterDmg = Math.round(bulletDmg * SHATTER_MULT);
       const bonusDmg = shatterDmg - bulletDmg;

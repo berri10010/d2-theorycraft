@@ -13,7 +13,6 @@ const weapons = unpackWeapons({ weapons: rd('weapons.json'), perks: rd('perks.js
 const exotic = (name: string) => weapons.find((w) => w.rarity === 'Exotic' && w.name === name)!;
 const statFor = (name: string) => { const w = exotic(name); return lookupWeaponStat(w.itemSubType, w.ammoType, w.intrinsicTrait?.name ?? null, w.name); };
 const minorScalar = (name: string) => (scalars as Record<string, Record<string, number>>)[String(sheetSubType(exotic(name).itemSubType))].Minor;
-const fmt = (n: number) => n.toLocaleString('en-US');
 
 describe('exotic PvE bonuses from the Destiny Data Compendium', () => {
   const derived = Object.entries(EXOTIC_PVE).filter(([, b]) => b.pve !== undefined);

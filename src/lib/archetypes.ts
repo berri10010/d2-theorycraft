@@ -19,8 +19,6 @@ export interface ArchetypeCurves {
   Reload?: StatCurveNode[];
 }
 
-export const RESILIENCE_HP = data.resilienceHp as Record<string, number>;
-
 function snapRpm(rpm: number, buckets: number[]): number {
   return buckets.reduce((closest, b) =>
     Math.abs(b - rpm) < Math.abs(closest - rpm) ? b : closest

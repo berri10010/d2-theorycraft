@@ -1,20 +1,3 @@
-export interface BungieManifestResponse {
-  Response: {
-    version: string;
-    jsonWorldComponentContentPaths: {
-      en: {
-        DestinyInventoryItemDefinition: string;
-        DestinyStatDefinition: string;
-        DestinyStatGroupDefinition: string;
-        DestinySocketCategoryDefinition: string;
-        DestinyPlugSetDefinition: string;
-        DestinySeasonDefinition: string;
-        DestinyCollectibleDefinition: string;
-      };
-    };
-  };
-}
-
 export interface BungieSeasonDefinition {
   hash: number;
   seasonNumber: number;
@@ -31,12 +14,6 @@ export interface BungieDisplayProperties {
   description: string;
   icon: string;
   hasIcon: boolean;
-}
-
-export interface BungieCollectibleDefinition {
-  hash: number;
-  sourceString?: string;
-  displayProperties: { name: string; description: string };
 }
 
 export interface BungieInventoryItem {
@@ -93,10 +70,6 @@ export interface BungiePlugSetDefinition {
   }>;
 }
 
-export interface BungieStatDefinition {
-  hash: number;
-  displayProperties: { name: string; description: string };
-}
 /** DestinyStatGroupDefinition: how raw investment maps to the displayed stat value. */
 export interface BungieStatGroupDefinition {
   hash: number;

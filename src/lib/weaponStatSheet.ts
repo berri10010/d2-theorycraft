@@ -14,7 +14,6 @@ import type { WeaponStatEntry } from './weaponStats';
  */
 
 export const WEAPON_STAT_SHEET_ID = '1FWMC-Vd_bGEoRkkrn3drWIORCFYyWQVMNlMasa4OE6I';
-export const WEAPON_STAT_SHEET_URL = `https://docs.google.com/spreadsheets/d/${WEAPON_STAT_SHEET_ID}`;
 /** Tab ids; the plain CSV export keeps header rows intact, unlike gviz. */
 export const WEAPON_STAT_CHART_GID = '1692216024';
 export const WEAPON_DATA_GID = '1678079223';
