@@ -62,12 +62,38 @@ By type (Minor, median): Scout 2.31, Pulse 2.15, Auto 1.99, Sidearm 1.87, Combat
 
 The scalars file (`src/data/combatantScalars.json`, MossyMax's sheet) has no date or source link on file (`src/data/credits.ts` says "No public link on file"). The gap could be that oracle's data is older, that the two use different baselines (the site normalises its power-delta curve to 1.0 at delta 0), or an error in one of them. **One in-game test (shots to kill a Minor with a known weapon) would settle which is right.** Until then, treat absolute PvE TTK and DPS as unverified, and relative comparisons between weapons as more trustworthy than the totals.
 
-### X2b. Frames have their own PvE scalars; our model has one per weapon type *(structure confirmed, numbers may be outdated)*
-The project owner points out that frames have different scalars, and that oracle_engine is right about that even if its numbers are old. Its data agrees, in two ways, and our model cannot express either:
-- **PvE base damage differs per frame.** oracle gives every frame a `pve_damage` next to its PvP `damage`. The PvE / PvP ratio varies inside a type: 14 of 107 frames differ by more than 10 % from their type's median ratio. Legendary examples: Hand Cannon Precision 0.85×, Pulse Rifle Heavy Burst 0.79×, High-Impact 1.18×, Aggressive 1.16×, Scout Rifle Aggressive 1.32× and Lightweight 0.86×. (The extreme ones are exotics: Choir of One 3.7×, Rocket-Assisted sidearm 2.6×.)
-- **Some frames use their own enemy scalars.** For example Fusion Rifle Aggressive Frame uses minor 3.14 / elite 2.93 against the type's 2.73 / 2.55 (+15 %); Grand Overture, Xenophage, Cerberus+1, Vex Mythoclast, Arbalest, Revision Zero, Wardcliff Coil, Eyes of Tomorrow, Anarchy and Parasite do too.
-- **Our model:** `src/lib/damageMath.ts` line 339 and `src/lib/dpsCalc.ts` line 75 use `typeScalar(tier) × pveMultiplier(entry)`. The type scalar is the same for every legendary frame of a type (`combatantScalars.json`, "normalised to Major/Elite = 3.0"), and `pveMultiplier` is only filled in for the 13 exotics in `src/data/compendium.ts`. So a hand cannon Precision frame and a hand cannon Aggressive frame get the same PvE-over-PvP conversion.
-- **What to do:** treat this as a model gap. The structure to add is a per-frame (and per-tier) PvE factor, like the one exotics already have. The values must come from a current source, because oracle's figures may be out of date. Until then, expect PvE numbers to be off by roughly 10 to 30 % for the frames listed above, relative to other frames of the same type.
+### X2b. Per-frame PvE scalars: the two sources disagree, and our file has neither *(checked against both sources)*
+The project owner says frames have different scalars and that oracle_engine is right about that even if its numbers are old.
+- **oracle_engine (about 2024):** every frame has its own `pve_damage`; 14 of 107 frames differ by more than 10 % from their type's median PvE / PvP ratio (Hand Cannon Precision 0.85×, Pulse Heavy Burst 0.79×, High-Impact 1.18×, Aggressive 1.16×, Scout Aggressive 1.32× and Lightweight 0.86×), and some frames use their own enemy scalars.
+- **MossyMax's current "Weapon Combatant Scaling" tab (the source of our file; its sheet dates from 2025-02-20 and says "LOTS OF THIS IS PRETTY OUTDATED"):** its own text says "Every weapon archetype has a different scaling, but the scaling is consistent across frames within an archetype, e.g. precision scouts will scale the same as high impact scouts. Most exotics also behave like their frame." But the tab does have separate rows for individual frames and exotics: **Aggressive Fusion Rifle (minor 4.08 / elite 3.81 against the Fusion Rifle's 3.55 / 3.31, about +15 %, the same +15 % oracle shows)**, Cerberus +1, Revision Zero, Bastion, Vex Mythoclast (and its LFR mode), New Land Beyond, Lorentz Driver, Arbalest, Rocket Sidearm, Two-Tailed Fox, Wardcliff Coil, Eyes of Tomorrow, Xenophage and Grand Overture. The sheet's own text also lists "PvE damage bonus" values per sub-family (pellet shotguns 1.107×, Dead Man's Tale 1.2×) that apply to all damage.
+- **Our file:** `src/data/combatantScalars.json` has one row per weapon *type* (15 types) and none of those frame or exotic rows. So the Aggressive Fusion Rifle +15 % and the other listed frames are missing, and nothing models the sub-family bonuses. `pveMultiplier` (`weaponStats.ts`) is filled in only for the 13 exotics in `compendium.ts`.
+- The per-frame PvE/PvP differences in oracle_engine's file could be outdated; MossyMax's 2025 text says archetype scaling is consistent across frames. I cannot tell from here which frames differ in the current game. The Aggressive Fusion Rifle row is the one case where both sources agree.
+
+### X2c. Our scalar file is the source tab with each type's Elite value removed *(verified, 15 of 15 types)*
+`combatantScalars.json` is exactly MossyMax's "Weapon Combatant Scaling" numbers (vehicle, boss, champion, miniboss, elite, minor) **divided by that type's Elite value and multiplied by 3.0**: all 15 types match to within 0.004. That is what `plan.md` means by "normalised to Major/Elite = 3.0". The effect is that every type gets the same absolute PvE damage against an Elite (PvP × 3.0), while the sheet's Elite values differ a lot by type:
+
+| Type | Source tab Elite value | Our file |
+|---|---|---|
+| Pulse Rifle | 1.70 | 3.0 |
+| Auto Rifle | 1.78 | 3.0 |
+| Scout Rifle | 1.85 | 3.0 |
+| Linear Fusion | 1.93 | 3.0 |
+| SMG | 1.99 | 3.0 |
+| Bow | 2.03 | 3.0 |
+| Trace Rifle | 2.04 | 3.0 |
+| Sidearm | 2.15 | 3.0 |
+| Machine Gun | 2.83 | 3.0 |
+| Shotgun | 2.88 | 3.0 |
+| Glaive | 3.00 | 3.0 |
+| Hand Cannon | 3.08 | 3.0 |
+| Fusion Rifle | 3.31 | 3.0 |
+| Sniper Rifle | 3.43 | 3.0 |
+| Rocket Launcher | 5.00 | 3.0 |
+
+- **Why this might be fine:** the sheet's PvE damage is a product of several factors (PvE bonus, recommended-power multiplier, delta, combatant scalar), and the CSV export lost the header rows, so I cannot tell whether another factor already cancels the per-type difference. The original author may have normalised on purpose.
+- **Why it might not be:** the gap between our PvE numbers and oracle_engine's at Elite tracks this table. Our numbers are about 2.3× oracle's for scouts, 2.0× for pulse rifles and 1.85× for auto rifles (the types with the lowest Elite values), and about 1.1× for glaives, shotguns and machine guns (Elite near 3.0). Correlation between "our gap" and "3.0 / source Elite" across 14 types: r = 0.61. That is moderate evidence, not proof, and part of the gap is data age (for example oracle's sniper Elite is 1.55 against 3.43 in the sheet).
+- If the per-type Elite value should be kept, our PvE results would be too high for pulse, auto, scout, SMG, bow, trace, sidearm and LFR (by up to 1.76×) and too low for sniper (0.87×) and rockets (0.6×).
+- **Needs one in-game measurement or a question to MossyMax.** The measurement: shots to kill a known Elite with a pulse rifle and with a hand cannon. If both match PvP × 3.0, the normalisation is right.
 
 ## Confirmed bug (reproduced, with two independent sources)
 
@@ -82,6 +108,34 @@ The project owner points out that frames have different scalars, and that oracle
 
 ### X4. Fusion Rifle, Aggressive frame: different bolt structure *(reproduced)*
 Ours is 28.8 damage per bolt with 4 pellets × 3 bursts (345.8 per trigger); oracle is 54.0 per bolt with 7 bolts (377.9 per trigger). The per-trigger totals differ by 8.5 %, and the bolt structure differs, which may be a game patch or may be our data. Per-bolt numbers agree for the other fusion frames I compared (for example Adaptive 46.3 against 46.3). Other frames about 8 % or more apart: Combat Bow Wish-Ender (ours 21 % higher), Hand Cannon Lightweight (+12 %), Sidearm Forerunner (−11 %), Auto Rifle High-Impact (−8 %). These look like balance changes but are unexplained.
+
+## Correction to a feature I added: the Raid & Dungeon and Master difficulty curves are outdated *(verified)*
+The difficulty selector in PR #2 uses Raid & Dungeon and Master tables copied from oracle_engine (`src/data/difficultyCurves.json`). They are the **old** tables:
+- MossyMax's sheet prints the identical numbers (Normal / RAD / Master at -30: 0.591 / 0.563 / 0.535; at -50: 0.500 / 0.495 / 0.490) under the heading **"OUTDATED, SEE PL DELTA TAB"**.
+- The sheet's current "PL Delta and Activity Scaling" tab has only two curves, **"EoF Standard"** (the one our site already uses) and **"Legendary Campaign"**. No Raid or Master curve.
+- The Destiny Data Compendium front page gives the current numbers: -30 delta = 0.446× outgoing damage, -50 = 0.144×. Our Standard curve gives 0.446 and 0.143 (matches). The Raid and Master options give 0.563 / 0.535 at -30 and 0.495 / 0.490 at -50, which is up to 3.4× too generous.
+- So choosing Raid & Dungeon or Master changes PvE numbers away from the current, correct curve. **Recommended: remove those two options** (`DIFFICULTY_OPTIONS` in `src/lib/plDelta.ts`, the selectors in `TTKAndFalloffPanel.tsx` and `DpsPanel.tsx`, `src/data/difficultyCurves.json`, the store field and tests), or replace them with the sheet's real second curve, "Legendary Campaign". Measured from the tab: it is identical to Standard at -50 and below, and lower from -49 up to 0. Normalised the way the site does (delta 0 of Standard = 1.0), Standard / Legendary Campaign is 1.000 / 0.850 at delta 0, 0.802 / 0.687 at -10, 0.617 / 0.534 at -20, 0.446 / 0.393 at -30 and 0.288 / 0.263 at -40 (Legendary Campaign is 0.85× Standard at level, rising to 1.0× at -50). The tab covers deltas -100 to 0 only.
+- The sheet's "Activity Types and Levels" tab has per-activity recommended power and deltas, but for the previous game version (power 1900 to 2060). The only current-system row is "EoF Firing Range" at power 10. So named activity presets for today's game still have no source.
+- I also should not have written "No per-activity list exists" as a limitation earlier without finding this sheet; the old activity list does exist, it just does not describe the current game.
+
+## Open question on the exotic PvE factors *(source note)*
+The compendium's front page says its PvE damage values are "scaled to Elite Combatants in the Shooting Range, 0 Weapons, and Normal Difficulty Delta (0)". `src/data/compendium.ts` derives each exotic's factor as `PvE / (PvP × the type's Minor scalar)`. If the figures really are Elite-scaled, the divisor should be the Elite value and the factors change:
+
+| Exotic | Current factor | If Elite-scaled |
+|---|---|---|
+| Arbalest | 1.39 | 1.47 |
+| Bastion | 1.36 | 1.45 |
+| Buried Bloodline | 1.75 | 1.96 (outside the 1.0 to 1.8 band the author used to accept a factor) |
+| Crimson | 1.21 | 1.24 |
+| Euphony | 1.41 | 1.49 |
+| Final Warning | 1.40 | 1.57 |
+| Ice Breaker | 1.27 | 1.85 (outside the band) |
+| Lorentz Driver | 1.21 | 1.28 |
+| Malfeasance | 1.56 | 1.60 |
+| New Land Beyond | 1.43 | 2.09 (outside the band) |
+| The Last Word | 1.33 | 1.36 |
+
+The Wardcliff Coil and Eyes of Tomorrow rows use the rocket Minor scalar (3.6) the same way. I could not tell from the compendium alone which tier its numbers use; this ties directly to X2c, because the right divisor depends on how Elite is defined.
 
 ## Not compared
 - The ADS multiplier. We use `(zoom + 7) / 14` with special cases; oracle uses fixed per-type values (hand cannon 1.5, auto rifle 1.6, pulse 1.7, SMG 1.4, sidearm 1.2).
