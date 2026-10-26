@@ -2145,5 +2145,23 @@
     "weaponNames": [
       "Duality"
     ]
+  },
+  "the_right_choice": {
+    "hash": "the_right_choice",
+    "name": "The Right Choice",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1.3607,
+    "description": "Khvostov 7G-0X: every 7th shot in the magazine deals +252.52% damage in PvE (+5% in PvP) and ricochets. Shown as the average over seven shots, since the calculator has no per-shot sequence.",
+    "perkNames": [
+      "The Right Choice"
+    ],
+    "icon": null,
+    "weaponNames": [
+      "Khvostov 7G-0X"
+    ],
+    "pvp": {
+      "multiplier": 1.0071
+    }
   }
 }

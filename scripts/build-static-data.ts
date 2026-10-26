@@ -99,7 +99,7 @@ function write(name: string, data: unknown) {
 // DATA_FORMAT_VERSION: bump this whenever parser logic changes in a way that
 // would produce different weapon data output from the same manifest.
 // This forces a re-parse even when the Bungie manifest version is unchanged.
-const DATA_FORMAT_VERSION = '24';
+const DATA_FORMAT_VERSION = '25';
 
 const NEXT_CACHE_DIR     = path.join(ROOT, '.next', 'cache');
 const MANIFEST_VER_CACHE = path.join(NEXT_CACHE_DIR, 'bungie-manifest-version');

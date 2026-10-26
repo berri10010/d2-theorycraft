@@ -358,4 +358,11 @@ describe('more exotic trait buffs', () => {
     expect(getBuffKeyForPerk('Tempest Cascade', 'Delicate Tomb')).toBe('tempest_cascade');
     expect(getBuffKeyForPerk('Tempest Cascade', 'Some Other Gun')).toBeNull();
   });
+
+  it('Khvostov The Right Choice averages the 7th-shot bonus over seven shots', () => {
+    expect(dmg('the_right_choice', 'pve')).toBeCloseTo(1 + 2.5252 / 7, 3);
+    expect(dmg('the_right_choice', 'pvp')).toBeCloseTo(1 + 0.05 / 7, 3);
+    expect(getBuffKeyForPerk('The Right Choice', 'Khvostov 7G-0X')).toBe('the_right_choice');
+    expect(getBuffKeyForPerk('The Right Choice', 'Other')).toBeNull();
+  });
 });
