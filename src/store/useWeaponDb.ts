@@ -15,24 +15,34 @@ interface WeaponDbState {
   fetchWeapons: () => Promise<void>;
 }
 
-export const useWeaponDb = create<WeaponDbState>((set) => ({
+/** The load in progress, so calls made while it runs share it instead of starting another. */
+let inFlight: Promise<void> | null = null;
+
+export const useWeaponDb = create<WeaponDbState>((set, get) => ({
   weapons: [],
   isLoading: false,
   error: null,
 
-  fetchWeapons: async () => {
+  fetchWeapons: () => {
+    if (get().weapons.length > 0) return Promise.resolve(); // already loaded: no refetch, no loading flash
+    if (inFlight) return inFlight;
     set({ isLoading: true, error: null });
-    try {
-      // Packed weapon data is pre-built at deploy time by scripts/build-static-data.ts.
-      const [weapons, perks, mods, statGroups] = await Promise.all([
-        fetchJson<WeaponPack['weapons']>('/data/weapons.json'),
-        fetchJson<WeaponPack['perks']>('/data/perks.json'),
-        fetchJson<WeaponPack['mods']>('/data/mods.json'),
-        fetchJson<WeaponPack['statGroups']>('/data/statgroups.json'),
-      ]);
-      set({ weapons: unpackWeapons({ weapons, perks, mods, statGroups }), isLoading: false });
-    } catch (err) {
-      set({ error: err instanceof Error ? err.message : 'Failed to load weapons', isLoading: false });
-    }
+    inFlight = (async () => {
+      try {
+        // Packed weapon data is pre-built at deploy time by scripts/build-static-data.ts.
+        const [weapons, perks, mods, statGroups] = await Promise.all([
+          fetchJson<WeaponPack['weapons']>('/data/weapons.json'),
+          fetchJson<WeaponPack['perks']>('/data/perks.json'),
+          fetchJson<WeaponPack['mods']>('/data/mods.json'),
+          fetchJson<WeaponPack['statGroups']>('/data/statgroups.json'),
+        ]);
+        set({ weapons: unpackWeapons({ weapons, perks, mods, statGroups }), isLoading: false });
+      } catch (err) {
+        set({ error: err instanceof Error ? err.message : 'Failed to load weapons', isLoading: false });
+      } finally {
+        inFlight = null; // a failed load can be retried
+      }
+    })();
+    return inFlight;
   },
 }));
