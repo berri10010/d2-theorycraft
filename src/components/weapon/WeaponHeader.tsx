@@ -218,7 +218,7 @@ export const WeaponHeader: React.FC = () => {
             <div className={`relative w-14 h-14 rounded-lg overflow-hidden border-2 shrink-0 bg-white/5 transition-colors duration-300 ${cardBorderClass(activeWeapon, isCrafted)}`}>
               <Image
                 src={BUNGIE_URL + activeWeapon.icon}
-                alt={activeWeapon.name}
+                alt=""
                 fill
                 sizes="56px"
                 className="object-cover"

@@ -460,7 +460,7 @@ function Dashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 z-40 min-[720px]:hidden"
+            className="scrim fixed inset-0 bg-black/60 z-40 min-[720px]:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -468,10 +468,12 @@ function Dashboard() {
 
       {/* Sidebar */}
       <div className={[
-        'fixed inset-y-0 left-0 z-50 w-[85vw] max-w-72 transform transition-transform duration-300 ease-in-out',
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        'min-[720px]:static min-[720px]:translate-x-0 min-[720px]:z-auto min-[720px]:transition-[width] min-[720px]:duration-300',
-        sidebarCollapsed ? 'min-[720px]:w-0' : 'min-[720px]:w-72',
+        'fixed inset-y-0 left-0 z-50 w-[85vw] max-w-72 transform transition-[transform,visibility] duration-300 ease-in-out',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full max-[719px]:invisible',
+        'min-[720px]:static min-[720px]:translate-x-0 min-[720px]:z-auto min-[720px]:transition-[width,visibility] min-[720px]:duration-300',
+        // `invisible` (visibility: hidden) takes the off-screen list out of the Tab order and the accessibility tree.
+        // It is in the transition list, so it only flips once the slide or collapse has finished.
+        sidebarCollapsed ? 'min-[720px]:w-0 min-[720px]:invisible' : 'min-[720px]:w-72',
         'border-r border-white/10 shrink-0 overflow-hidden',
       ].join(' ')}>
         <SearchSidebar />
@@ -486,7 +488,7 @@ function Dashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4"
+            className="scrim fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4"
             onClick={() => setShowShortcuts(false)}
           >
             <motion.div
@@ -647,7 +649,7 @@ function Dashboard() {
                     ].join(' ')}
                   >
                     {mode === m && <motion.span layoutId="mode-pill" className="absolute inset-0 rounded-md bg-white/10" transition={{ type: 'spring', stiffness: 500, damping: 40 }} />}
-                    <span className="relative">{m}</span>
+                    <span className="relative">{m === 'pve' ? 'PvE' : 'PvP'}</span>
                   </button>
                 ))}
               </div>

@@ -15,7 +15,8 @@
     "start": "next start",
     "audit:widths": "node scripts/audit-widths.mjs",
     "audit:a11y": "node scripts/audit-a11y.mjs",
-    "audit:keyboard": "node scripts/audit-keyboard.mjs"
+    "audit:keyboard": "node scripts/audit-keyboard.mjs",
+    "audit:aria": "node scripts/aria-dump.mjs"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.13.24",

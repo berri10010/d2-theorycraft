@@ -155,7 +155,7 @@ export const EffectsPanel: React.FC = () => {
                       {icon && (
                         <Image
                           src={BUNGIE_URL + icon}
-                          alt={name}
+                          alt=""
                           fill
                           sizes="40px"
                           className={['object-cover transition-opacity', isOn ? 'opacity-100' : 'opacity-40'].join(' ')}
@@ -362,7 +362,7 @@ export const EffectsPanel: React.FC = () => {
                     {icon && (
                       <Image
                         src={BUNGIE_URL + icon}
-                        alt={name}
+                        alt=""
                         fill
                         sizes="40px"
                         className="object-cover"

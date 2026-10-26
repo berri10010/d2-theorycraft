@@ -252,6 +252,7 @@ function WeaponSearch({ groups, loaded, loadError, onRetry }: WeaponSearchProps)
       {/* Search input */}
       <div className="relative">
         <svg
+          aria-hidden="true"
           viewBox="0 0 20 20" fill="currentColor"
           className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-4 pointer-events-none"
         >
@@ -463,7 +464,8 @@ function FeaturedGodRolls({
                       </p>
                       {roll.tier && TIER_COLORS[roll.tier] && (
                         <span className={`text-2xs font-black px-1.5 py-0.5 rounded shrink-0 ${TIER_COLORS[roll.tier]}`}>
-                          {roll.tier}
+                          <span aria-hidden="true">{roll.tier}</span>
+                          <span className="sr-only">{roll.tier} tier</span>
                         </span>
                       )}
                     </div>
@@ -498,7 +500,7 @@ function FeaturedGodRolls({
                     onClick={() => router.push(`/editor?w=${w.hash}&godroll=1`)}
                     className="text-2xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
                   >
-                    View Roll →
+                    View Roll<span className="sr-only"> for {name}</span> <span aria-hidden="true">→</span>
                   </button>
                 </div>
               </div>

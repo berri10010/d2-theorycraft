@@ -129,6 +129,9 @@ select option { background: rgb(var(--c-surface)); color: rgb(var(--c-ink)); }
 [data-resolved='light'] .bg-white\/5 .bg-white\/5 { background-color: rgb(241 245 249 / 0.8); box-shadow: none; }
 [data-resolved='light'] .border-white\/10 { border-color: rgb(15 23 42 / 0.12); }
 
+/* Dialog and drawer backdrops darken the page in both themes (bg-black is the page colour, which is light here). */
+[data-resolved='light'] .scrim { background-color: rgb(15 23 42 / 0.5); }
+
 /* The weapon header's picture sits under a scrim that matches the page colour; on the light theme it is firmer,
    so the text never fights the artwork (and covers the whole picture on phones, where the text spans it). */
 [data-resolved='light'] .hero-scrim-x { background-image: linear-gradient(to right, rgb(241 245 249 / 0.96), rgb(241 245 249 / 0.7) 45%, rgb(241 245 249 / 0)); }

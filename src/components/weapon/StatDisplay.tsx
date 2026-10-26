@@ -112,11 +112,20 @@ function StatBarRow({ label, base, current, highlighted }: {
 
   return (
     <div className={`flex items-center text-sm rounded-md transition-colors duration-150 ${highlighted ? 'bg-amber-500/8' : ''}`}>
-      <div className={`stat-label font-medium shrink-0 transition-colors duration-150 ${highlighted ? 'text-amber-300' : 'text-ink-2'}`}>
+      <div aria-hidden="true" className={`stat-label font-medium shrink-0 transition-colors duration-150 ${highlighted ? 'text-amber-300' : 'text-ink-2'}`}>
         {label}
       </div>
 
-      <div className="flex-1 h-2.5 bg-black rounded-full overflow-hidden relative stat-bar">
+      {/* The bar is the one thing a screen reader gets for this row (the label and the counting number are hidden). */}
+      <div
+        role="meter"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.max(0, Math.min(current, 100))}
+        aria-valuetext={`${current}${diff !== 0 ? `, ${diff > 0 ? '+' : ''}${diff} from base` : ''}`}
+        className="flex-1 h-2.5 bg-black rounded-full overflow-hidden relative stat-bar"
+      >
         <motion.div
           className={`absolute top-0 left-0 h-full transition-colors duration-150 ${highlighted ? 'bg-amber-400' : 'bg-slate-300'}`}
           animate={{ width: `${Math.min(base, 100)}%` }}
@@ -138,7 +147,7 @@ function StatBarRow({ label, base, current, highlighted }: {
         )}
       </div>
 
-      <div className="stat-value text-right font-mono flex flex-col justify-center items-end">
+      <div aria-hidden="true" className="stat-value text-right font-mono flex flex-col justify-center items-end">
         <span className={
           'font-bold text-sm ' +
           (diff > 0 ? 'text-green-400' : diff < 0 ? 'text-red-400' : highlighted ? 'text-amber-300' : 'text-white')
@@ -167,7 +176,7 @@ function CompactStatCard({ statName, base, current, label }: {
 
   return (
     <div className={`bg-black/30 rounded-lg px-2.5 py-2 border border-white/5 flex items-center gap-2 min-w-0 overflow-hidden ${isRecoil ? "stat-recoil" : ""}`}>
-      {isRecoil && <RecoilChart value={current} />}
+      {isRecoil && <div aria-hidden="true" className="contents"><RecoilChart value={current} /></div>}
       <div className="min-w-0">
         <div className="text-2xs text-ink-4 leading-none mb-0.5">{label}</div>
         <div className={[

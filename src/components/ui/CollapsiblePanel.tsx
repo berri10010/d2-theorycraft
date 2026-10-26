@@ -63,10 +63,11 @@ export function CollapsiblePanel({
             {headerRight}
           </div>
         )}
+        {/* The title button above does the same job, so for assistive tech and the Tab key this chevron is a duplicate. */}
         <button
           onClick={toggle}
-          aria-label={open ? 'Collapse panel' : 'Expand panel'}
-          aria-expanded={open}
+          aria-hidden="true"
+          tabIndex={-1}
           className="shrink-0 text-ink-4 p-[var(--pad-panel)] pl-3"
         >
           <motion.svg

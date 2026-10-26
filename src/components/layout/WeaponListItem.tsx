@@ -44,6 +44,7 @@ export function WeaponListItem({
     >
       <button
         onClick={() => onLoad(group.default, group.variants)}
+        aria-current={isActive ? 'true' : undefined}
         className="w-full text-left p-2 flex items-center gap-2.5 transition-all duration-150"
       >
         <div className="relative w-14 h-14 shrink-0">
@@ -65,7 +66,8 @@ export function WeaponListItem({
             </p>
             {tier && TIER_STYLE[tier] && (
               <span className={`shrink-0 text-3xs font-black px-1.5 py-0.5 rounded leading-none ${TIER_STYLE[tier].bg} ${TIER_STYLE[tier].text}`}>
-                {tier}
+                <span aria-hidden="true">{tier}</span>
+                <span className="sr-only">{tier} tier</span>
               </span>
             )}
           </div>
@@ -75,7 +77,7 @@ export function WeaponListItem({
             </span>
             {AMMO_LABELS[d.ammoType] && (
               <>
-                <span className="text-ink-4">|</span>
+                <span aria-hidden="true" className="text-ink-4">|</span>
                 <span className={AMMO_COLORS[d.ammoType] ?? 'text-ink-4'}>{AMMO_LABELS[d.ammoType]}</span>
               </>
             )}

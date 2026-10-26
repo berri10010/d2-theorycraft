@@ -198,13 +198,15 @@ export const RollEditor: React.FC = () => {
             return (
               <div
                 key={column.name}
+                role="group"
+                aria-label={displayLabel}
                 className={[
                   'flex flex-col items-center min-w-0',
                   !isLast ? 'border-r border-white/5 pr-[clamp(0.375rem,1.2vw,1rem)]' : '',
                 ].join(' ')}
               >
                 {/* Column header */}
-                <div className="w-full flex flex-col items-center gap-1 mb-3">
+                <div aria-hidden="true" className="w-full flex flex-col items-center gap-1 mb-3">
                   <span className="text-2xs font-bold text-ink-3 uppercase tracking-wider text-center leading-tight">
                     {displayLabel}
                   </span>
@@ -347,6 +349,14 @@ export const RollEditor: React.FC = () => {
                       </div>
                     );
 
+                    // The tier badge, enhanced mark and god-roll star sit beside the button as pictures, so say them in its name.
+                    const perkLabel = [
+                      displayPerk.name,
+                      isUpgraded ? 'enhanced' : null,
+                      !isUpgraded && tierCfg && !tierEditEnabled ? `${tierCfg.label} tier` : null,
+                      isGodRoll ? 'god roll perk' : null,
+                    ].filter(Boolean).join(', ');
+
                     const isFlashing = flashHash === perk.hash || flashHash === perk.enhancedVersion?.hash;
 
                     return (
@@ -368,6 +378,7 @@ export const RollEditor: React.FC = () => {
                         <button
                           onClick={handleClick}
                           aria-pressed={isActive}
+                          aria-label={perkLabel}
                           className={[
                             'perk-icon relative w-12 h-12 md:w-13 md:h-13 rounded-full border-2 transition-all duration-150 overflow-hidden block',
                             isActive
@@ -396,9 +407,9 @@ export const RollEditor: React.FC = () => {
 
                         {!isUpgraded && tierCfg && !tierEditEnabled && (
                           tierBadgeStyle === 'dot' ? (
-                            <span className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full z-10 ring-1 ring-black/30 ${tierCfg.badge.replace(/text-\S+/, '')}`} title={tierCfg.label} />
+                            <span aria-hidden="true" className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full z-10 ring-1 ring-black/30 ${tierCfg.badge.replace(/text-\S+/, '')}`} title={tierCfg.label} />
                           ) : (
-                            <span className={`absolute -bottom-1 -right-1 text-3xs font-black leading-none z-10 ${tierBadgeStyle === 'pill' ? 'px-1 py-px rounded-full' : ''} ${tierCfg.badge}`}>
+                            <span aria-hidden="true" className={`absolute -bottom-1 -right-1 text-3xs font-black leading-none z-10 ${tierBadgeStyle === 'pill' ? 'px-1 py-px rounded-full' : ''} ${tierCfg.badge}`}>
                               {tierCfg.label}
                             </span>
                           )
@@ -420,14 +431,14 @@ export const RollEditor: React.FC = () => {
                         )}
 
                         {isUpgraded && (
-                          <span className="absolute -bottom-1 -right-1 text-3xs font-black leading-none px-1 py-px rounded-full z-10 bg-amber-400 text-black">
+                          <span aria-hidden="true" className="absolute -bottom-1 -right-1 text-3xs font-black leading-none px-1 py-px rounded-full z-10 bg-amber-400 text-black">
                             ENH
                           </span>
                         )}
 
                         {/* God roll star — top-left; only when not selected */}
                         {isGodRoll && !isActive && !isUpgraded && (
-                          <span className="absolute -top-1 -left-1 w-3.5 h-3.5 rounded-full z-10 bg-amber-500 flex items-center justify-center">
+                          <span aria-hidden="true" className="absolute -top-1 -left-1 w-3.5 h-3.5 rounded-full z-10 bg-amber-500 flex items-center justify-center">
                             <svg viewBox="0 0 12 12" fill="currentColor" className="w-2 h-2 text-black">
                               <path d="M6 1l1.2 3.7H11L8.1 6.6l1.1 3.4L6 8.1 2.8 10l1.1-3.4L1 4.7h3.8z" />
                             </svg>

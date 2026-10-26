@@ -223,7 +223,7 @@ export function MobileMoreSheet({ open, onClose, onSharePermalink, onShareDim, o
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-black/70"
+            className="scrim absolute inset-0 bg-black/70"
             onClick={onClose}
           />
           <motion.div

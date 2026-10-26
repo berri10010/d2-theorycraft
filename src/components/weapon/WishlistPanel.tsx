@@ -225,7 +225,7 @@ export const WishlistPanel: React.FC = () => {
             !hasSelection ? 'opacity-40 pointer-events-none' : '',
           ].join(' ')}
         >
-          {isPersonal ? '★ Saved' : '☆ Save Roll'}
+          {isPersonal ? <><span aria-hidden="true">★ </span>Saved</> : <><span aria-hidden="true">☆ </span>Save Roll</>}
         </button>
       }
     >

@@ -33,12 +33,17 @@ const shots = [
   { name: 'editor-effects', path: HAWK, ready: '.editor-grid', scrollTo: 'Perk Effects' },
   { name: 'editor-data', path: SUNSHOT, ready: '.editor-grid', scrollTo: 'Weapon Data' },
   { name: 'credits', path: '/credits', full: true },
+  { name: 'drawer', path: SUNSHOT, ready: '.editor-grid', phoneOnly: true, act: async (page) => { await page.getByRole('button', { name: 'Weapons', exact: true }).dispatchEvent('click'); await page.waitForTimeout(800); } },
+  { name: 'drawer-filters', path: SUNSHOT, ready: '.editor-grid', phoneOnly: true, act: async (page) => { await page.getByRole('button', { name: 'Weapons', exact: true }).dispatchEvent('click'); await page.waitForTimeout(800); await page.getByTitle('Filters').click(); await page.waitForTimeout(600); } },
+  { name: 'more', path: SUNSHOT, ready: '.editor-grid', phoneOnly: true, act: async (page) => { await page.getByRole('button', { name: 'More', exact: true }).dispatchEvent('click'); await page.waitForTimeout(900); } },
+  { name: 'compare-phone', path: SUNSHOT, ready: '.editor-grid', phoneOnly: true, act: async (page) => { await page.locator('nav[aria-label="Primary"] button').nth(2).dispatchEvent('click'); await page.waitForTimeout(500); await page.locator('nav[aria-label="Primary"] button').nth(3).dispatchEvent('click'); await page.waitForTimeout(900); } },
   { name: 'filters', path: SUNSHOT, ready: '.editor-grid', act: async (page) => { await page.getByTitle('Filters').click(); await page.waitForTimeout(600); } },
   { name: 'settings', path: SUNSHOT, ready: '.editor-grid', act: async (page) => { await page.getByTitle(/settings/i).first().click(); await page.waitForTimeout(600); } },
   { name: 'compare', path: SUNSHOT, ready: '.editor-grid', act: async (page) => { await page.getByRole('button', { name: /add to compare/i }).first().click(); await page.waitForTimeout(300); await page.getByRole('tab', { name: /compare/i }).or(page.getByRole('button', { name: /^compare/i })).first().click(); await page.waitForTimeout(900); } },
   { name: 'buffs', path: HAWK, ready: '.editor-grid', scrollTo: 'External Buffs', act: async (page) => { await page.getByRole('heading', { name: /external buffs/i }).click(); await page.waitForTimeout(700); } },
 ];
 for (const s of shots) {
+  if (s.phoneOnly && !phone) continue;
   const page = await context.newPage();
   await page.goto(BASE + s.path, { waitUntil: 'networkidle' });
   if (s.ready) { await page.waitForSelector(s.ready, { timeout: 30000 }); await page.waitForTimeout(1200); }
@@ -51,4 +56,4 @@ for (const s of shots) {
   await page.close();
 }
 await browser.close();
-console.log(`saved ${shots.length} screenshots to audit-shots/ (${suffix})`);
+console.log(`saved ${shots.filter((x) => phone || !x.phoneOnly).length} screenshots to audit-shots/ (${suffix})`);
