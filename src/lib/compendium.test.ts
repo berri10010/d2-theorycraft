@@ -70,8 +70,8 @@ describe('rows taken straight from the compendium', () => {
       expect(row.pve, name).toBe(pve);
       expect(row.pvp, name).toBe(pvp);
       expect(row.bodyDamage, name).toBe(pvp);
-      const rocketMinor = (scalars as Record<string, Record<string, number>>)[String(sheetSubType(exotic(name).itemSubType))].Minor;
-      expect(Math.abs(row.pveFactor - pve / (pvp * rocketMinor)), name).toBeLessThan(0.01);
+      const typeMinor = (scalars as Record<string, Record<string, number>>)[String(sheetSubType(exotic(name).itemSubType))].Minor;
+      expect(Math.abs(row.pveFactor - pve / (pvp * typeMinor)), name).toBeLessThan(0.01);
       // Fire delay is Bungie's rpm in 30fps frames.
       expect(row.shotDelay, name).toBeCloseTo(1800 / exotic(name).rpm!, 0);
     });
@@ -91,7 +91,7 @@ describe('rows taken straight from the compendium', () => {
   });
 
   it('only exotics of the right type and ammo get a compendium row', () => {
-    for (const name of Object.keys(COMPENDIUM_ROWS)) expect(exotic(name).itemTypeDisplayName).toBe('Rocket Launcher');
+    for (const [name, row] of Object.entries(COMPENDIUM_ROWS)) expect(exotic(name).itemTypeDisplayName, name).toBe(row.type === 'Scout' ? 'Scout Rifle' : row.type);
   });
 });
 
