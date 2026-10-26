@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { interpolateStat, adsMultiplier, roundTo3 } from './math';
+import { interpolateStat, adsMultiplier, roundTo3, lerp, clamp } from './math';
 
 const curve = [
   { stat: 0, value: 10 },
@@ -42,5 +42,18 @@ describe('roundTo3', () => {
   it('rounds to three decimals', () => {
     expect(roundTo3(1.23456)).toBe(1.235);
     expect(roundTo3(2)).toBe(2);
+  });
+});
+
+describe('lerp and clamp (shared helpers)', () => {
+  it('lerp runs from a to b', () => {
+    expect(lerp(10, 20, 0)).toBe(10);
+    expect(lerp(10, 20, 1)).toBe(20);
+    expect(lerp(10, 20, 0.25)).toBe(12.5);
+  });
+  it('clamp keeps a value inside its range', () => {
+    expect(clamp(5, 0, 10)).toBe(5);
+    expect(clamp(-3, 0, 10)).toBe(0);
+    expect(clamp(99, 0, 10)).toBe(10);
   });
 });

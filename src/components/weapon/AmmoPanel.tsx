@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import ammoData from '../../data/ammoData.json';
+import { AMMO_LABELS } from '../../lib/weaponFilters';
 
 interface AmmoEntry {
   ammoType: string | null;
@@ -20,7 +21,6 @@ interface AmmoEntry {
 
 const DB = ammoData as Record<string, AmmoEntry>;
 
-const AMMO_NUM_TO_STR: Record<number, string> = { 1: 'Primary', 2: 'Special', 3: 'Heavy' };
 
 // ── Ammo type styling ─────────────────────────────────────────────────
 const AMMO_STYLE: Record<string, { bg: string; text: string; dot: string }> = {
@@ -54,7 +54,7 @@ export const AmmoPanel: React.FC = () => {
   if (!activeWeapon) return null;
 
   // ── Manifest (Bungie API) data ────────────────────────────────────
-  const ammoTypeStr  = AMMO_NUM_TO_STR[activeWeapon.ammoType] ?? 'Primary';
+  const ammoTypeStr  = AMMO_LABELS[activeWeapon.ammoType] ?? 'Primary';
   const isPrimary    = activeWeapon.ammoType === 1;
   const calcStats    = getCalculatedStats();
   const magStatApi   = calcStats['Magazine'] ?? activeWeapon.baseStats['Magazine'] ?? null;

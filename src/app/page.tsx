@@ -5,6 +5,8 @@ import React, { Suspense, useEffect, useState, useMemo, useRef, useCallback } fr
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { BUNGIE_URL } from '../lib/bungieUrl';
+import { AMMO_LABELS } from '../lib/weaponFilters';
+import { ELEMENT_TEXT_COLORS } from '../lib/elementColors';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -114,16 +116,8 @@ const VARIANT_COLOURS: Record<string, string> = {
   Brave:    'bg-sky-500/20 text-sky-300 border-sky-500/30 hover:bg-sky-500/35',
 };
 
-const DAMAGE_COLORS: Record<string, string> = {
-  kinetic: 'text-ink-2',
-  solar:   'text-orange-400',
-  arc:     'text-blue-400',
-  void:    'text-purple-400',
-  stasis:  'text-cyan-400',
-  strand:  'text-emerald-400',
-};
+const DAMAGE_COLORS: Record<string, string> = { kinetic: 'text-ink-2', ...ELEMENT_TEXT_COLORS };
 
-const AMMO_LABELS: Record<number, string> = { 1: 'Primary', 2: 'Special', 3: 'Heavy' };
 const AMMO_COLORS: Record<number, string> = {
   1: 'text-green-400',
   2: 'text-purple-400',

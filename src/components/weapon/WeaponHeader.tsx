@@ -8,6 +8,7 @@ import { isLegacyVariant } from '../../lib/weaponGroups';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import { useClarityPerks } from '../../lib/useClarityPerks';
 import { intrinsicDescription } from '../../lib/intrinsicText';
+import { AMMO_LABELS } from '../../lib/weaponFilters';
 import { WeaponSources } from './WeaponSources';
 
 // ── Colour maps ───────────────────────────────────────────────────────────────
@@ -21,7 +22,6 @@ const DAMAGE_COLORS: Record<string, { text: string; dot: string }> = {
   strand:  { text: 'text-emerald-300', dot: 'bg-emerald-400' },
 };
 
-const AMMO_LABELS: Record<number, string> = { 1: 'Primary', 2: 'Special', 3: 'Heavy' };
 
 /** Weapon name colour keyed by rarity — replaces the old solid pill badge. */
 const RARITY_NAME_COLOR: Record<string, string> = {

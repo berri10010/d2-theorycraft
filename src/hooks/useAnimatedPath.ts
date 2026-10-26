@@ -1,13 +1,10 @@
 import { useRef, useState, useEffect } from 'react';
+import { lerp } from '../lib/math';
 
 const DEFAULT_DURATION = 300;
 
 function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
-}
-
-function lerp(a: number, b: number, t: number): number {
-  return a + (b - a) * t;
 }
 
 /**

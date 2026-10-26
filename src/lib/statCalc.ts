@@ -1,5 +1,5 @@
 import type { StatMap, StatCurveNode } from '../types/weapon';
-import { interpolateStat } from './math';
+import { interpolateStat, clamp } from './math';
 
 /**
  * Weapon stat maths.
@@ -34,8 +34,6 @@ export const UNCAPPED_STATS = new Set([
   'Draw Time', 'Charge Time', 'RPM', 'Magazine', 'Ammo Capacity',
   'Cooling Efficiency', 'Heat Generated', 'Vent Speed', 'Persistence',
 ]);
-
-const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 export interface StatCurveData {
   /** Raw investment per curved stat. */

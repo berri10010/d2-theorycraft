@@ -24,6 +24,10 @@ export function adsMultiplier(zoom: number, subtype?: number): number {
   return (zoom + 7) / 14;           // Calibrated: exact at zoom=14 (HC) and zoom=21 (Scout)
 }
 
+export const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
+
+export const clamp = (value: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, value));
+
 export function roundTo3(val: number): number {
   return Math.round(val * 1000) / 1000;
 }

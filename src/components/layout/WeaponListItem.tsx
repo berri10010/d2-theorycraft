@@ -4,11 +4,9 @@ import React from 'react';
 import type { Weapon, WeaponGroup } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { AMMO_LABELS, bestSeasonName } from '../../lib/weaponFilters';
+import { ELEMENT_TEXT_COLORS } from '../../lib/elementColors';
 
-const DAMAGE_COLORS: Record<string, string> = {
-  kinetic: 'text-ink', solar: 'text-orange-400', arc: 'text-blue-400',
-  void: 'text-purple-400', stasis: 'text-cyan-400', strand: 'text-emerald-400',
-};
+const DAMAGE_COLORS: Record<string, string> = { kinetic: 'text-ink', ...ELEMENT_TEXT_COLORS };
 const AMMO_COLORS: Record<number, string> = { 1: 'text-ink-3', 2: 'text-green-400', 3: 'text-purple-400' };
 const TIER_STYLE: Record<string, { bg: string; text: string }> = {
   S: { bg: 'bg-amber-400', text: 'text-slate-950' },
