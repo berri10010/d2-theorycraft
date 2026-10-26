@@ -15,6 +15,20 @@ import { interpolateStat } from './math';
  * after each individual modifier).
  */
 
+/**
+ * Every stat name a weapon can display. Keep in sync with STAT_HASH_MAP in src/lib/bungie/parser.ts and
+ * CANONICAL_STATS in scripts/validate-data.ts.
+ */
+export const STAT_NAMES = new Set([
+  'Impact', 'Range', 'Stability', 'Handling', 'Reload',
+  'Aim Assistance', 'Zoom', 'Recoil Direction', 'Airborne Effectiveness',
+  'RPM', 'Magazine', 'Charge Time', 'Draw Time',
+  'Blast Radius', 'Velocity', 'Accuracy', 'Ammo Generation',
+  'Swing Speed', 'Guard Resistance', 'Charge Rate', 'Guard Endurance',
+  'Shield Duration', 'Ammo Capacity',
+  'Cooling Efficiency', 'Heat Generated', 'Vent Speed', 'Persistence',
+]);
+
 /** Stats with no 0–100 cap that have no curve data to fall back on. */
 export const UNCAPPED_STATS = new Set([
   'Draw Time', 'Charge Time', 'RPM', 'Magazine', 'Ammo Capacity',
