@@ -1,14 +1,13 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { sanitizePersistedWeaponState } from './persistedState';
 import { BUFF_DATABASE } from './buffDatabase';
-import { getPlDeltaMultiplier } from './plDelta';
 
 const realBuff = Object.keys(BUFF_DATABASE)[0];
 
 describe('sanitizePersistedWeaponState (finding 17)', () => {
   it('keeps a healthy saved state as it is', () => {
     const saved = {
-      activeWeaponHash: '123', mode: 'pvp', weaponsStat: 80, enemyTier: 'Boss', powerDelta: -10, difficulty: 'master',
+      activeWeaponHash: '123', mode: 'pvp', weaponsStat: 80, enemyTier: 'Boss', powerDelta: -10,
       surgeStacks: 2, activeBuffs: [realBuff], buffStacks: { [realBuff]: 1 }, weaponRolls: {},
     };
     expect(sanitizePersistedWeaponState(saved)).toEqual(saved);
@@ -16,7 +15,7 @@ describe('sanitizePersistedWeaponState (finding 17)', () => {
 
   it('drops values that are the wrong type or not allowed, so the defaults apply', () => {
     const out = sanitizePersistedWeaponState({
-      mode: 'coop', weaponsStat: null, enemyTier: 'Bogus', powerDelta: 'x', difficulty: 'nightmare', surgeStacks: 9.5,
+      mode: 'coop', weaponsStat: null, enemyTier: 'Bogus', powerDelta: 'x', surgeStacks: 9.5,
       activeWeaponHash: 12, weaponRolls: 'oops',
     });
     expect(out).toEqual({ surgeStacks: 4 });
@@ -39,11 +38,11 @@ describe('sanitizePersistedWeaponState (finding 17)', () => {
   });
 });
 
-describe('an unknown difficulty cannot reach the curve lookup (finding 17)', () => {
-  it('the sanitised state never carries one', () => {
-    const { difficulty } = sanitizePersistedWeaponState({ difficulty: 'nightmare' });
-    expect(difficulty).toBeUndefined();
-    expect(() => getPlDeltaMultiplier(-10, (difficulty ?? 'standard') as 'standard')).not.toThrow();
+// The Raid & Dungeon and Master difficulty options were removed (ACCURACY_REPORT, outdated tables); old saves may still hold one.
+describe('an old saved difficulty is ignored', () => {
+  it('the sanitised state never carries one, valid or not', () => {
+    expect(sanitizePersistedWeaponState({ difficulty: 'master', powerDelta: -10 })).toEqual({ powerDelta: -10 });
+    expect(sanitizePersistedWeaponState({ difficulty: 'nightmare' })).toEqual({});
   });
 });
 
@@ -51,7 +50,7 @@ describe('loading the weapon store from bad saved state (finding 17)', () => {
   afterEach(() => { vi.unstubAllGlobals(); vi.resetModules(); });
 
   it('falls back to the defaults for what is unusable and keeps the rest', async () => {
-    const bad = { state: { difficulty: 'nightmare', enemyTier: 'Bogus', weaponsStat: null, mode: 'pvp', activeBuffs: ['nope'] }, version: 0 };
+    const bad = { state: { difficulty: 'master', enemyTier: 'Bogus', weaponsStat: null, mode: 'pvp', activeBuffs: ['nope'] }, version: 0 };
     const memory: Record<string, string> = { 'd2tc-weapon': JSON.stringify(bad) };
     vi.stubGlobal('localStorage', {
       getItem: (k: string) => memory[k] ?? null,
@@ -61,6 +60,7 @@ describe('loading the weapon store from bad saved state (finding 17)', () => {
     vi.resetModules();
     const { useWeaponStore } = await import('../store/useWeaponStore'); // created fresh, so it reads the stubbed storage
     const s = useWeaponStore.getState();
-    expect([s.difficulty, s.enemyTier, s.weaponsStat, s.mode, s.activeBuffs]).toEqual(['standard', 'Major / Elite', 0, 'pvp', []]);
+    expect([s.enemyTier, s.weaponsStat, s.mode, s.activeBuffs]).toEqual(['Major / Elite', 0, 'pvp', []]);
+    expect('difficulty' in s).toBe(false); // an old saved difficulty is ignored, not loaded
   });
 });

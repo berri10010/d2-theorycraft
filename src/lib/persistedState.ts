@@ -1,6 +1,5 @@
 import { BUFF_DATABASE } from './buffDatabase';
 import { PVE_HEALTH_TIERS } from './damageMath';
-import { DIFFICULTY_OPTIONS } from './plDelta';
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 
@@ -10,7 +9,7 @@ function intInRange(v: unknown, min: number, max: number): number | undefined {
 
 /**
  * The usable parts of the weapon store's saved state. localStorage can hold values from an older version or
- * hand-edited ones (an unknown difficulty, a null stat, a removed buff); anything unusable is left out so the
+ * hand-edited ones (a null stat, a removed buff, the difficulty option that no longer exists); anything unusable is left out so the
  * store's defaults apply, instead of the bad value reaching the calculators.
  */
 export function sanitizePersistedWeaponState(saved: unknown): Record<string, unknown> {
@@ -20,7 +19,6 @@ export function sanitizePersistedWeaponState(saved: unknown): Record<string, unk
   if (typeof saved.activeWeaponHash === 'string' || saved.activeWeaponHash === null) out.activeWeaponHash = saved.activeWeaponHash;
   if (saved.mode === 'pve' || saved.mode === 'pvp') out.mode = saved.mode;
   if (typeof saved.enemyTier === 'string' && saved.enemyTier in PVE_HEALTH_TIERS) out.enemyTier = saved.enemyTier;
-  if (DIFFICULTY_OPTIONS.some((o) => o.key === saved.difficulty)) out.difficulty = saved.difficulty;
 
   const weaponsStat = intInRange(saved.weaponsStat, 0, 200);
   if (weaponsStat !== undefined) out.weaponsStat = weaponsStat;

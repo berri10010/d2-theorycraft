@@ -245,7 +245,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Compare tab: Ready/ADS/Stow handling chips + Reload/Charge/Perfect timing row (per-weapon-type) | ✅ Done |
 | Damage vs Distance chart: interactive line chart showing actual damage values per meter (hip-fire vs ADS) | ✅ Done |
 | Flinch resistance: show flinch resist derived from Stability + Health (0–100 → 0–10%) | ✅ Done |
-| Per-activity PvE scaling: Enemy Type + Difficulty (Standard, Raid & Dungeon, Master) + Power Delta, shared by the TTK and DPS panels through the store (`enemyTier`, `difficulty`, `powerDelta`, persisted). Raid and Master curves from oracle_engine (`src/data/difficultyCurves.json`); Standard is the MossyMax curve | ✅ Done (no per-activity list: oracle_engine has no activity-to-delta table, so the delta stays a slider) |
+| Per-activity PvE scaling: Enemy Type + Power Delta, shared by the TTK and DPS panels through the store (`enemyTier`, `powerDelta`, persisted). The delta curve is MossyMax's current Edge of Fate "Standard" curve (matches the Destiny Data Compendium: 0.446x at -30, 0.144x at -50). Difficulty presets (Raid & Dungeon, Master) were removed again because the only sourced tables, from oracle_engine, are the old pre-Edge-of-Fate ones that MossyMax's own sheet marks "OUTDATED"; the sheet's current second curve ("Legendary Campaign") is not added yet | ✅ Done (no per-activity list: the only activity table found is for the previous game version, so the delta stays a slider) |
 
 #### 12B — Sharing & Presentation
 

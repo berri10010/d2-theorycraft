@@ -32,26 +32,9 @@ describe('fmtPlDelta', () => {
   });
 });
 
-describe('difficulty curves (oracle_engine)', () => {
-  it('Raid & Dungeon and Master cost damage even at level: 0.925 and 0.85', () => {
-    expect(getPlDeltaMultiplier(0, 'raid')).toBeCloseTo(0.925, 4);
-    expect(getPlDeltaMultiplier(0, 'master')).toBeCloseTo(0.85, 4);
-  });
-  it('matches the table at its knots and interpolates between them', () => {
-    expect(getPlDeltaMultiplier(-10, 'raid')).toBeCloseTo(0.73, 4);
-    expect(getPlDeltaMultiplier(-20, 'master')).toBeCloseTo(0.58, 4);
-    expect(getPlDeltaMultiplier(-15, 'master')).toBeCloseTo((0.58 + 0.68) / 2, 4);
-  });
-  it('gives no bonus for being over-levelled', () => {
-    expect(getPlDeltaMultiplier(30, 'raid')).toBeCloseTo(0.925, 4);
-    expect(getPlDeltaMultiplier(10, 'master')).toBeCloseTo(0.85, 4);
-  });
-  it('is stricter than standard at every delta at or below zero', () => {
-    for (let d = -50; d <= 0; d++) {
-      expect(getPlDeltaMultiplier(d, 'master')).toBeLessThanOrEqual(getPlDeltaMultiplier(d, 'raid') + 1e-9);
-    }
-  });
-  it('standard stays the default', () => {
-    expect(getPlDeltaMultiplier(-10)).toBe(getPlDeltaMultiplier(-10, 'standard'));
+describe('the current Edge of Fate curve matches the Destiny Data Compendium', () => {
+  it('is 0.446x at -30 and 0.144x at -50 (ACCURACY_REPORT)', () => {
+    expect(getPlDeltaMultiplier(-30)).toBeCloseTo(0.446, 3);
+    expect(getPlDeltaMultiplier(-50)).toBeCloseTo(0.144, 2);
   });
 });

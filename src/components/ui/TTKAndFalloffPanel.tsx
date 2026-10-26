@@ -11,7 +11,7 @@ import type { Weapon } from '../../types/weapon';
 import { getArchetype } from '../../lib/archetypes';
 import { calculateTTK, calculateTTKCurve, getFalloffFloor, PVE_HEALTH_TIERS, TTKBreakpoint } from '../../lib/damageMath';
 import { adsMultiplier } from '../../lib/math';
-import { getPlDeltaMultiplier, fmtPlDelta, DIFFICULTY_OPTIONS } from '../../lib/plDelta';
+import { getPlDeltaMultiplier, fmtPlDelta } from '../../lib/plDelta';
 import { useAnimatedPath } from '../../hooks/useAnimatedPath';
 import { useAnimatedValue } from '../../hooks/useAnimatedValue';
 import { IW, toSvg, interpolate } from '../../lib/chartMath';
@@ -34,7 +34,7 @@ const TTKAndFalloffBody: React.FC<{ activeWeapon: Weapon }> = ({ activeWeapon })
   useWeaponStore((s) => s.catalystActive); // re-render when the catalyst is switched, since the stats below include it
   const {
     getCalculatedStats, mode,
-    weaponsStat, setWeaponsStat, enemyTier, setEnemyTier, powerDelta, setPowerDelta, difficulty, setDifficulty,
+    weaponsStat, setWeaponsStat, enemyTier, setEnemyTier, powerDelta, setPowerDelta,
     getDamageMultiplier, getWeaponEffects, activeBuffs, activeMod, surgeStacks,
     activeEffects, selectedPerks,
   } = useWeaponStore(
@@ -47,8 +47,6 @@ const TTKAndFalloffBody: React.FC<{ activeWeapon: Weapon }> = ({ activeWeapon })
       setEnemyTier:        s.setEnemyTier,
       powerDelta:          s.powerDelta,
       setPowerDelta:       s.setPowerDelta,
-      difficulty:          s.difficulty,
-      setDifficulty:       s.setDifficulty,
       getDamageMultiplier: s.getDamageMultiplier,
       getWeaponEffects:    s.getWeaponEffects,
       activeBuffs:         s.activeBuffs,
@@ -95,7 +93,7 @@ const TTKAndFalloffBody: React.FC<{ activeWeapon: Weapon }> = ({ activeWeapon })
   ]);
 
   // PL delta multiplier — PvE only, normalised so delta 0 = 1.0
-  const plMult            = mode === 'pve' ? getPlDeltaMultiplier(powerDelta, difficulty) : 1.0;
+  const plMult            = mode === 'pve' ? getPlDeltaMultiplier(powerDelta) : 1.0;
   const effectiveMultiplier = multiplier * plMult;
 
   const pvpWeaponsBonus = Math.max(0, weaponsStat - 100) / 100 * 0.05;
@@ -407,17 +405,6 @@ const TTKAndFalloffBody: React.FC<{ activeWeapon: Weapon }> = ({ activeWeapon })
             </div>
           </div>
 
-          <div>
-            <label className="text-sm text-ink-3 block mb-1">Difficulty</label>
-            <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as typeof difficulty)}
-              className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-amber-500"
-            >
-              {DIFFICULTY_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-            </select>
-          </div>
-
           {/* Power-level delta slider */}
           <div>
             <div className="flex items-center justify-between mb-1">
@@ -426,7 +413,7 @@ const TTKAndFalloffBody: React.FC<{ activeWeapon: Weapon }> = ({ activeWeapon })
                 'text-xs font-bold font-mono tabular-nums',
                 powerDelta < 0 ? 'text-red-400' : powerDelta > 0 ? 'text-green-400' : 'text-ink-4',
               ].join(' ')}>
-                {fmtPlDelta(powerDelta, difficulty)}
+                {fmtPlDelta(powerDelta)}
               </span>
             </div>
             <input

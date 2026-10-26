@@ -8,7 +8,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { calcDps, DpsResult } from '../../lib/dpsCalc';
 import { PVE_HEALTH_TIERS } from '../../lib/damageMath';
-import { getPlDeltaMultiplier, fmtPlDelta, DIFFICULTY_OPTIONS } from '../../lib/plDelta';
+import { getPlDeltaMultiplier, fmtPlDelta } from '../../lib/plDelta';
 
 // ── Stat row ──────────────────────────────────────────────────────────────────
 
@@ -59,7 +59,7 @@ export function DpsPanel() {
     activeEffects,
     activeBuffs,
     catalystActive,
-    enemyTier, setEnemyTier, powerDelta, setPowerDelta, difficulty, setDifficulty,
+    enemyTier, setEnemyTier, powerDelta, setPowerDelta,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:       s.activeWeapon,
@@ -82,8 +82,6 @@ export function DpsPanel() {
       setEnemyTier:       s.setEnemyTier,
       powerDelta:         s.powerDelta,
       setPowerDelta:      s.setPowerDelta,
-      difficulty:         s.difficulty,
-      setDifficulty:      s.setDifficulty,
     }))
   );
 
@@ -129,7 +127,7 @@ export function DpsPanel() {
   }
 
   // The power-level delta scales every PvE damage number the same way; PvP is untouched.
-  const plMult = getPlDeltaMultiplier(powerDelta, difficulty);
+  const plMult = getPlDeltaMultiplier(powerDelta);
   const optimalPve   = Math.round(dps.optimalDpsPve * plMult);
   const sustainedPve = Math.round(dps.sustainedDpsPve * plMult);
 
@@ -157,7 +155,7 @@ export function DpsPanel() {
 
       {/* ── PvE target (shared with the TTK panel) ───────────────────────── */}
       <div className="grid grid-cols-2 gap-2">
-        <label className="text-2xs text-ink-4 uppercase tracking-wide flex flex-col gap-1">
+        <label className="text-2xs text-ink-4 uppercase tracking-wide flex flex-col gap-1 col-span-2">
           PvE Enemy
           <select
             value={enemyTier}
@@ -167,18 +165,8 @@ export function DpsPanel() {
             {Object.keys(PVE_HEALTH_TIERS).map((tier) => <option key={tier} value={tier}>{tier}</option>)}
           </select>
         </label>
-        <label className="text-2xs text-ink-4 uppercase tracking-wide flex flex-col gap-1">
-          Difficulty
-          <select
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value as typeof difficulty)}
-            className="bg-black/40 border border-white/10 rounded-md px-2 py-1.5 text-sm normal-case tracking-normal text-ink focus:outline-none focus:border-amber-500"
-          >
-            {DIFFICULTY_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
-          </select>
-        </label>
         <label className="text-2xs text-ink-4 uppercase tracking-wide flex flex-col gap-1 col-span-2">
-          Power Delta ({fmtPlDelta(powerDelta, difficulty)})
+          Power Delta ({fmtPlDelta(powerDelta)})
           <input
             type="range" min={-30} max={10} step={1}
             value={powerDelta}
