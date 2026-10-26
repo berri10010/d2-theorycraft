@@ -1,18 +1,26 @@
 # D2 Theorycraft bug report, round 2 (data, flows and tooling)
 
-A third read-only pass, after `BUG_REPORT.md` and `CODE_REVIEW.md`. Nothing was fixed. Numbers here start at N so they do not clash with the other reports.
+A third read-only pass, after `BUG_REPORT.md` and `CODE_REVIEW.md`. The pass itself was read-only; what was fixed afterwards is under "Fix status". Numbers here start at N so they do not clash with the other reports.
 
 Marked **reproduced** (seen happening, or measured on the real data) or **by reading** (found in the code, not run).
+
+## Fix status
+
+Fixed on `claude/dazzling-thompson-ci58yr`: N1, N3 (checked, correct), N6, N8, and parts of N2, N4, N5, N7. Needs your decision: the 20 variant keys in N2. Data files touched: one perk in `perks.json` (N1) and eight key names in `god-rolls.json` (N2), both described in their entries below.
 
 ## Data bugs
 
 ### N1. The "One For All" buff cannot be switched on from the perk *(reproduced)*
+
+- **Status:** **Fixed** in 237dc06. The perk name in `buffs.json` is now `One for All`, `getBuffKeyForPerk` ignores capitalisation, and a test checks every non-"Enhanced" buff perk name is a real perk. I kept the 15 dead "Enhanced X" entries (harmless; the test skips them) and did not add `One for All Refit` (not sure it has the same effect). Data note: `perks.json` gets its `buffKey` at data-build time, so I hand-patched that one perk (hash 4049631843: `buffKey` one_for_all, `isConditional` true), which is what the next refresh produces and what the repo's own audit test requires.
 - `src/data/buffs.json` `one_for_all` lists `perkNames: ["One For All", "Enhanced One For All"]`. The actual perks are named `One for All` (lower-case "for"; hashes 859780267 and 4049631843, and `One for All Refit` 4204405033). Matching is by exact name, so in `public/data/perks.json` all three perks have `buffKey: null`. The Effects panel never offers the toggle for them.
 - Nothing catches it: `src/lib/buffAudit.test.ts` only checks perks that *do* match a buff name.
 - **Fix direction:** correct the name (and decide about the Refit perk), and add a test that every buff `perkNames` entry that is not an "Enhanced ..." name matches at least one real perk. Matching names case-insensitively would stop this whole class of mistake.
 - 15 other buffs list `"Enhanced X"` names that exist on no perk (`getBuffKeyForPerk` is skipped for enhanced perks and the base perk is used instead; I checked 401 weapon and perk pairs and the enhanced version gives the same damage as the base). They are dead entries, harmless.
 
 ### N2. 28 god-roll entries can never match a weapon, and god rolls are not in the daily refresh *(reproduced)*
+
+- **Status:** **Partly fixed** in c5ec51a. `lookupGodRoll` ignores capitalisation, the 8 case-only keys in `god-rolls.json` were renamed to the weapon's spelling (IKELOS_SMG_v1.0.3, Redback-5si, Arsenic Bite-4b, Lunulata-4b, BrayTech Werewolf, BrayTech Osprey, IKELOS_HC_v1.0.3, Just in Case), and a test checks every other key resolves to a weapon. **Needs decision:** the 20 keys with a note line (RotN, Pantheon, BRAVE version). 18 of them have a base entry under the plain name, so taking the first line would overwrite the base; Edge Transit and The Mountaintop (BRAVE) have no base entry. The refresh script's key handling waits on that, and so does adding god rolls to the daily refresh. Not addressed: the 9 perk names in the file that match no perk (for example Enhanced Heatsink). The refresh script was not run.
 - `public/data/god-rolls.json` is looked up by exact name (`src/lib/godRolls.ts` `lookupGodRoll`: `db[weapon.name] ?? db[weapon.baseName]`). 28 of its 747 keys match no weapon:
   - 11 differ only in capitalisation: `Braytech Werewolf` (data: `BrayTech Werewolf`), `Braytech Osprey`, `Just In Case` (`Just in Case`), `Redback-5SI` (`Redback-5si`), `Arsenic Bite-4B`, `Lunulata-4B`, `IKELOS_HC_V1.0.3`, `IKELOS_SMG_V1.0.3` and so on.
   - 17 have a spreadsheet note inside the key, for example `"Prosecutor\nRotN version"`, `"Succession\nBRAVE version"`, `"Chattering Bone\nPantheon version"` (Rite of the Nine, Onslaught and Pantheon variants).
@@ -23,30 +31,42 @@ Marked **reproduced** (seen happening, or measured on the real data) or **by rea
 - **Fix direction:** normalise keys in the script (first line only, trimmed; case-insensitive lookup), re-run it, and consider adding it to the daily workflow, or a test that every god-roll key resolves to a weapon.
 
 ### N3. Check: `golden_tricorn` stacks start at ×2 *(by reading)*
+
+- **Status:** **Checked, correct** (39c97ec). The stack selectors index by array position and use `count` only as a React key, so index 0 is x2 (+15%) and 1 is x3 (+50%); the default is the last stack. A test pins it.
 - Its `stacks` array has counts `2` and `3` (there is no ×1). Probably deliberate (the perk needs two kills), but it is the only buff whose first stack count is not 1, so check that the stack selector indexes correctly.
 
 ## Behaviour bugs
 
 ### N4. Wishlist import accepts almost anything and then forgets it *(reproduced)*
+
+- **Status:** **Partly fixed** in bd98612: files with no valid lines are rejected with a message, the item hash must be digits, and a failed save shows a warning. Not done: parsing in a worker or in chunks, and storing the parsed list compactly (the 9.7 MB case still freezes the page for a few seconds and cannot be saved).
 - A 9.7 MB wishlist is accepted (199,999 entries, about 4 s of frozen UI while it parses), works for the session, then is lost on reload. `WishlistPanel.tsx` stores the whole raw text in localStorage, the browser refuses it (about 5 MB limit) and the `try/catch` swallows the error. There is no message.
 - A 3 MB binary file loads "successfully": the panel shows the file name with 0 entries and no error.
 - A line like `dimwishlist:item=abc&perks=1,2,3` is accepted as a weapon (hash is not checked to be digits).
 - **Fix direction:** warn when saving fails, store the parsed result compactly or the first N MB, reject files with 0 valid lines, and parse in a worker or in chunks.
 
 ### N5. Compare snapshots weigh about 24 KB each *(measured)*
+
+- **Status:** **Partly fixed** in 1778f6b: capped at 12 snapshots (see CODE_REVIEW.md item C for the rest).
 - Four snapshots of one weapon took 97 KB of localStorage (`d2tc-compare`). With no cap, roughly 200 snapshots hit the browser quota (extends `CODE_REVIEW.md` item C).
 
 ### N6. Tier list store guards only in the UI *(by reading)*
+
+- **Status:** **Fixed** in db0c724. `createList` never replaces a list or accepts a blank name, and `deleteList` never removes the last list.
 - `src/store/useTierListStore.ts`: `createList(name)` replaces an existing list with the same name (it is `{...lists, [name]: {}}`), and `deleteList` of the last list leaves `pveModeList` pointing at a list that no longer exists. `TierListPanel.tsx` prevents both, but the store itself does not. Low.
 
 ## Tooling
 
 ### N7. Data build has no timeouts or retries *(by reading)*
+
+- **Status:** **Partly fixed** in 0a560aa: the Bungie API (60 s), manifest table (180 s) and Clarity (120 s) fetches have timeouts through a `fetchWithTimeout` helper. Not changed: retries, the `prebuild` hook (a plain `npm run build` still needs `BUNGIE_API_KEY`), and a failed step leaving a half-updated `public/data`.
 - `scripts/build-static-data.ts`: `bungieGet`, `fetchTable` and the Clarity fetch call `fetch(...)` with no `AbortSignal.timeout` and no retry (the screenshot HEAD checks and the sheet fetches do have timeouts). One stalled connection hangs the daily `refresh-data` job until its 20-minute limit.
 - `npm run build` runs `prebuild` (`npx tsx scripts/build-static-data.ts`), so a plain local `npm run build` needs `BUNGIE_API_KEY` and the network. CI uses `build:ci`, which has no such hook. This is easy to trip over.
 - A failed step calls `process.exit(1)` after earlier steps have already written their files, so a local run can leave a half-updated `public/data`.
 
 ### N8. The audit scripts do not find a Linux Playwright Chromium *(reproduced)*
+
+- **Status:** **Fixed** in 38ac079. The three audit scripts' headers say to set `CHROME_PATH` when no browser is found in the usual places, with an example.
 - `scripts/audit-a11y.mjs`, `audit-keyboard.mjs` and `audit-widths.mjs` search fixed Windows, macOS and `/usr/bin` paths and throw "No Chrome or Edge found" otherwise. They need `CHROME_PATH` (for example `/opt/pw-browsers/chromium-1243/chrome-linux64/chrome` here). Not documented in the script headers. Low.
 
 ## Checked and found fine in this round
