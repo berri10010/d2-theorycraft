@@ -91,7 +91,9 @@ export function calcDps(
 
   const totalDmg       = magSize * critPerTrigger;
   const reloadS        = reloadMs != null ? reloadMs / 1000 : 2.0;
-  const cycleTime_s    = magDuration_s + reloadS;
+  // The next shot can never come sooner than one shot delay after the last, so a reload shorter than
+  // that gap (shotguns, snipers at high Reload) cannot make the cycle shorter than the mag at full rate.
+  const cycleTime_s    = Math.max(magDuration_s + reloadS, magSize * timePerShot_s);
   const sustainedDpsPvp = totalDmg * damageMult.pvp / cycleTime_s;
   const sustainedDpsPve = totalDmg * damageMult.pve / cycleTime_s * pveScalar;
 
