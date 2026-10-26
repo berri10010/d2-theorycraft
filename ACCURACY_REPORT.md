@@ -1,65 +1,83 @@
 # D2 Theorycraft accuracy report: do the numbers match the game?
 
-The earlier reports asked whether the code is consistent. This one asks whether the calculator's *numbers* are right. Nothing was fixed.
+Nothing was fixed. This is the corrected second version: the first version overstated what the evidence showed, and every claim below was re-checked against the code and data.
 
-**Method:** d2foundry's `oracle_engine` (the open-source Destiny 2 damage engine this site already credits) was used as an independent reference. Its data file `build_resources/weapon_formulas.json` has per-weapon-type and per-frame formulas for reload, handling, range falloff, magazine, damage and enemy damage scalars, and its perk code has the perk numbers. I ran our code against it for every weapon type.
+**Method:** d2foundry's `oracle_engine` (open source, already credited on this site) was used as an *independent reference*, not as ground truth. Its data file `build_resources/weapon_formulas.json` and its perk code were compared with ours. Its data looks about a year old (the perk files are "year 1" to "year 7"), and it only *outputs* falloff start, end and floor numbers; the code that applies them to damage is not in that repository. Where we differ, the difference is a question to settle in game, not proof that we are wrong.
 
-**Caveat:** oracle_engine's data looks like it dates from roughly 2024 (its perk files are "year 1" to "year 7"). Where we differ, it is possible that *we* are the newer and correct one. The findings below say which differences are certain (they follow from how the game works, or from the perk's own description text) and which need an in-game check.
+## Confirmed matches (re-verified with counts)
 
-## What matches (good news)
-
-| Area | Result |
+| Area | Evidence |
 |---|---|
-| Reload time formulas, all 16 weapon types | Match at stats 0 to 100. Biggest difference 0.8 % (Combat Bow at 100, from our deliberate 85 clamp). |
-| Handling (ready, stow, ADS) formulas, all types | Match. |
-| PvP damage per shot, per frame (66 frames compared) | 49 of 66 within 3 %; the rest are in the list below. |
-| Perk numbers: Rampage ×1.1/1.21/1.331, Kill Clip +25 %, Frenzy +15 %, Adrenaline Junkie and Swashbuckler +6.7 % per stack, Surrounded +40 % (swords +35 %), Killing Tally | Match oracle_engine and Clarity. |
+| Reload time, all 16 weapon types (grenade launchers split into special and heavy) | 170 comparisons (stats 0, 5, 10, 25, 40, 50, 60, 75, 90, 100). Largest difference 0.77 %, Combat Bow at stat 90 to 100 (our deliberate 85 clamp). Everything else within 0.2 %. |
+| Handling ready, stow and ADS, all 16 types | 510 comparisons. Largest difference 0.3 % (rounding to milliseconds). |
+| Perk numbers: Rampage 1.1 / 1.21 / 1.331, Kill Clip +25 %, Frenzy +15 %, Adrenaline Junkie and Swashbuckler +6.7 % per stack, Surrounded +40 % (swords +35 %), Killing Tally +10 % per stack (PvP half) | Read in oracle's perk code and compared with `src/data/buffs.json`. Only these seven perks were checked. |
+| PvP body damage per projectile, by frame | 66 frames matched by name; 49 are within 3 %. |
 
-## Differences
+## Claims from the first version that I am retracting
 
-### X1. The falloff model is invented, and it is wrong for several weapon types *(reproduced, certain for part of it)*
-`src/lib/damageMath.ts` and `src/components/ui/TTKAndFalloffPanel.tsx` build the "Damage Falloff" and "TTK vs distance" charts from a single falloff start, a made-up end and a made-up floor:
-- **End:** the damage reaches its floor at `maxDist = 2 × (ADS start)` (`TTKAndFalloffPanel.tsx` line 127). oracle_engine has a separate end formula per type, and the end is 1.3× to 2.8× the start depending on type (hand cannon about 1.5×, auto rifle 2.3×, shotgun 2.8×, machine gun 1.3×).
-- **Floor:** `getFalloffFloor` (`damageMath.ts` line 47) returns 0.5 for every weapon type except Linear Fusion Rifle (0.85, hardcoded, no source). oracle_engine's per-type floors:
+1. **"Snipers, bows and linear fusion rifles do not lose damage with distance" was wrong to call certain.** The only support was oracle_engine's data, which gives them a placeholder falloff start of 999 m. That shows how oracle models them, not how the game behaves. The project owner states that snipers and linear fusion rifles do have damage falloff through the Range stat, and our own data (`archetypes.json`, measured by huwugo and rockstarmatt) also gives them Range curves. I have no evidence that the falloff chart for those types is wrong, so I am not reporting it as a bug.
+2. **"The game's PvE damage has been reworked since" was memory, not evidence.** Removed.
+3. **"Shotguns lose almost all damage at range; oracle floor 0.001" was presented as a defect in ours.** The 0.001 is in oracle's data, but I could not confirm what the floor number means when applied (the applying code is not in that repository). Reported below only as an open difference.
+4. **"No other buff has the Firing Line mistake"** was too strong: my scan only looked at buffs whose description mentions precision, headshots or crits.
+5. **"Fusion Aggressive PvP damage is suspicious (0.53×)"** was a misreading; see X4.
+6. The earlier chat summary said "wrong weapon types" and "invented end distance" with confidence. Both overstated the evidence, as above.
+
+## Open differences (cannot be settled from the repo; each needs an in-game check)
+
+### X1. How our falloff model compares with oracle's *(facts reproduced, which is right is unknown)*
+Facts, verified:
+- **Falloff end.** `src/components/ui/TTKAndFalloffPanel.tsx` line 127 sets `maxDist = adsFalloffStart * 2.0`, and both the hip and ADS damage curves are drawn to that same end. No source for the 2.0 is cited. oracle's data gives each type its own end formula, and each mode (hip and ADS) has its own start and end. At Range 50, oracle's end is 1.29× its start for machine guns, 1.49× for hand cannons, 1.59× scouts, 1.70× SMGs, 1.81× sidearms and trace rifles, 2.03× pulse rifles, 2.27× glaives, 2.35× auto rifles, 2.40× fusion rifles and 2.77× shotguns. Our ADS curve ends at 2.0× its start, and our hip curve ends at about 3× its start (hip start × 2 × the ADS multiplier, for example 21.7 m to 65.1 m for a hand cannon at Range 50 with Zoom 14).
+- **Floor.** `getFalloffFloor` (`src/lib/damageMath.ts` line 47) returns 0.5 for every type except Linear Fusion Rifle, 0.85. No source is cited in the code or in `plan.md`. oracle's floors: shotgun 0.001, hand cannon and glaive 0.33, trace rifle 0.4, fusion rifle 0.45, auto, pulse, scout, SMG, sidearm and machine gun 0.5, and 0.999 for sniper, bow, linear fusion, rocket and grenade launcher.
+- **Start distances** (hip, at Range 0 / 50 / 100; ours first, from `archetypes.json`; oracle from `weapon_formulas.json`):
 
   | Type | Ours | Oracle |
   |---|---|---|
-  | Shotgun | 0.5 | 0.001 (damage falls to almost nothing) |
-  | Hand Cannon, Glaive | 0.5 | 0.33 |
-  | Trace Rifle | 0.5 | 0.4 |
-  | Fusion Rifle | 0.5 | 0.45 |
-  | Sniper Rifle, Combat Bow, Linear Fusion, Rocket, Grenade Launcher | 0.5 (LFR 0.85) | 0.999, which means **no damage falloff** |
+  | Auto Rifle | 13.0 / 18.0 / 23.0 | 10.8 / 17.0 / 23.2 |
+  | Hand Cannon | 13.9 / 21.7 / 29.5 | 16.0 / 20.5 / 25.0 |
+  | Pulse Rifle | 13.5 / 19.6 / 25.7 | 16.0 / 19.8 / 23.5 |
+  | Sidearm | 9.0 / 13.6 / 18.3 | 11.0 / 13.0 / 15.0 |
+  | SMG | 9.5 / 13.5 / 17.5 | 10.3 / 13.6 / 16.8 |
+  | Scout Rifle | 20.0 / 35.2 / 50.4 | 30.2 / 38.1 / 45.9 |
+  | Fusion Rifle | 8.0 / 12.5 / 17.0 | 10.7 / 12.8 / 14.8 |
+  | Shotgun | 4.5 / 7.5 / 12.0 | 3.8 / 5.2 / 6.7 |
+  | Machine Gun | 15.0 / 24.0 / 38.0 | 28.5 / 29.6 / 30.7 |
+  | Trace Rifle | 11.0 / 19.0 / 30.0 | 14.8 / 19.8 / 24.9 |
+  | Glaive | 13.5 / 19.0 / 24.5 (the shared default curve) | 15.0 / 17.7 / 20.5 |
 
-- **Certain, whatever the data age:** snipers, bows and linear fusion rifles do not lose damage with distance in the game. The TTK tab nevertheless shows a "Damage Falloff" section with a start and end for them. Measured in the app: 1000 Yard Stare (sniper) hip 66.4 m / ADS 241.9 m; A Good Shout (bow) 20.0 / 37.1 m; Boomslang-4fr (LFR) 60.6 / 138.4 m. Their TTK-vs-distance curves therefore get worse with range when they should be flat.
-- **Likely wrong:** shotguns (floor 0.5 against about 0). TTK at range is much too optimistic for them.
-- **Falloff start distances** (hip, at Range 0 / 50 / 100) are close for most types but not all. Machine gun: ours 15 / 24 / 38 m, oracle 28.5 / 29.6 / 30.7 m. Shotgun: 4.5 / 7.5 / 12 against 3.8 / 5.2 / 6.7 m. Scout at Range 0: 20 against 30 m. Hand cannon: 13.9 / 21.7 / 29.5 against 16 / 20.5 / 25 m. These might be a patch difference (our start curves come from huwugo and rockstarmatt's measurements), so they need an in-game check.
-- **Fix direction:** take the end and the floor per weapon type (with "no falloff" for the five types above) and hide the falloff section for those types. Verify the start curves for machine guns and shotguns in game first.
+  Sniper, bow, linear fusion, rocket and grenade launcher: oracle has no start (placeholder 999 m); ours has curves for sniper, bow and LFR (for example sniper 40 / 65 / 100 m), the default placeholder curve for rocket, and no Range curve for grenade launchers.
+- Differences of more than about 20 % at some Range values: machine gun, shotgun, scout, trace rifle and hand cannon at the ends of the range. Auto rifle, pulse, SMG, sidearm and fusion are close.
 
-### X2. Enemy damage scalars disagree with oracle_engine by up to 2.3× *(reproduced, which one is right is unknown)*
-`src/data/combatantScalars.json` (MossyMax's sheet) against oracle_engine's `combatant_scalars`:
+What this does not tell us: whether our start curves (measured data) or oracle's (older formulas) are right, what the end and floor really are in the current game, or whether sniper, bow, LFR, rocket and grenade launcher falloff should be shown. **A short in-game test of damage at a few distances for one hand cannon, one shotgun and one machine gun would settle most of this.**
 
-| Type | Minor (ours / oracle) | Elite | Boss |
+### X2. Enemy damage: our PvE numbers are about 1.7× oracle's on a typical weapon *(measured, which is right is unknown)*
+First version only compared the scalars. The right comparison is the final PvE body damage per projectile: ours (`bodyDamage × combatantScalars`) against oracle (`pve_damage × combat scalar`), for the 65 frames both sides have:
+
+| Enemy tier | median ours / oracle | range | within ±10 % |
 |---|---|---|---|
-| Pulse Rifle | 4.56 / 2.00 | 3.0 / 1.42 | 1.98 / 1.0 |
-| Scout Rifle | 4.33 / 1.9 | 3.0 / 1.3 | 1.96 / 1.3 |
-| Sniper Rifle | 4.37 / 2.5 | 3.0 / 1.55 | 1.33 / 1.2 |
-| Auto Rifle | 3.54 / 1.79 | 3.0 / 1.63 | 1.80 / 1.15 |
-| Rocket Launcher | 3.6 / **6.0** | 3.0 / **5.0** | 2.82 / **4.7** |
-| Glaive | 4.5 / 4.5 | 3.0 / 3.0 | 3.0 / 3.0 |
+| Minor | 1.66 | 0.56 to 2.79 | 5 of 65 |
+| Major / Elite | 1.58 | 0.52 to 2.74 | 4 of 65 |
+| Boss | 1.30 | 0.44 to 2.42 | 19 of 65 |
 
-Ours are higher for almost every type and lower for rockets. Oracle is the older data, and the game's PvE damage has been reworked since, so ours may well be right. But these numbers set every PvE TTK and DPS figure, and our file carries no date or source link (`credits.ts` says "no public link on file"). **Needs one in-game test** (for example shots to kill a Minor with a known weapon), then a date and provenance note in the data.
+By type (Minor, median): Scout 2.31, Pulse 2.15, Auto 1.99, Sidearm 1.87, Combat Bow 1.85, Sniper 1.68, SMG 1.67, Trace 1.59, Linear Fusion 1.35, Fusion 1.31, Hand Cannon 1.16, Shotgun 1.14, Glaive 1.12, Machine Gun 1.07.
 
-### X3. Firing Line is a precision-only perk but our buff boosts all damage *(reproduced, certain)*
-`src/data/buffs.json` `firing_line` is `multiplier: 1.2` with the description "+20% precision damage". Both Clarity ("20% increased Precision Damage") and oracle_engine (crit scale 1.2, nothing for body shots) agree it is precision only. The calculator applies it to body shots too, so TTK and DPS for body shots come out about 20 % too high when it is on.
-- **Fix:** `multiplier: 1`, `critMultiplier: 1.2` (the same shape `catalyst_whispered_breathing` already uses). I scanned the other 93 buffs for this mistake: no other buff has it (the remaining "precision" mentions are triggers, not restrictions).
+The scalars file (`src/data/combatantScalars.json`, MossyMax's sheet) has no date or source link on file (`src/data/credits.ts` says "No public link on file"). The gap could be that oracle's data is older, that the two use different baselines (the site normalises its power-delta curve to 1.0 at delta 0), or an error in one of them. **One in-game test (shots to kill a Minor with a known weapon) would settle which is right.** Until then, treat absolute PvE TTK and DPS as unverified, and relative comparisons between weapons as more trustworthy than the totals.
 
-### X4. A few frames have PvP damage that differs more than patch drift would explain *(reproduced)*
-Ours / oracle for body damage per shot:
-- Fusion Rifle Aggressive 28.8 / 54.0 (ratio 0.53). Probably a per-bolt against per-trigger difference or a recent patch, but worth a look.
-- Combat Bow Wish-Ender 1.21, LeMonarque 1.09; Hand Cannon Lightweight 1.12; Sidearm Forerunner 0.89; Auto Rifle High-Impact 0.92.
-Most are within the size of normal balance patches, so only the Aggressive fusion rifle looks suspicious.
+## Confirmed bug (reproduced, with two independent sources)
+
+### X3. Firing Line is precision-only, but our buff boosts all damage
+- `src/data/buffs.json` `firing_line` is `multiplier: 1.2` with the description "+20% precision damage when within 15m of two or more allies".
+- Clarity's text: "Being within 15 meters of 2 allies grants 20% increased Precision Damage". oracle_engine's code: `crit_scale: 1.2`, no change to body damage.
+- Effect: with the buff on, body-shot damage, TTK and DPS are overstated by 20 %.
+- **Fix:** `multiplier: 1`, `critMultiplier: 1.2` (the shape `catalyst_whispered_breathing` already uses).
+- Scan scope: the other 93 buffs were checked only if their description mentions precision, headshots or crits and they have no crit multiplier; none besides Firing Line is a precision-only restriction (the other four hits use a precision hit as a trigger).
+
+## Differences that need a look, but are probably not errors
+
+### X4. Fusion Rifle, Aggressive frame: different bolt structure *(reproduced)*
+Ours is 28.8 damage per bolt with 4 pellets × 3 bursts (345.8 per trigger); oracle is 54.0 per bolt with 7 bolts (377.9 per trigger). The per-trigger totals differ by 8.5 %, and the bolt structure differs, which may be a game patch or may be our data. Per-bolt numbers agree for the other fusion frames I compared (for example Adaptive 46.3 against 46.3). Other frames about 8 % or more apart: Combat Bow Wish-Ender (ours 21 % higher), Hand Cannon Lightweight (+12 %), Sidearm Forerunner (−11 %), Auto Rifle High-Impact (−8 %). These look like balance changes but are unexplained.
 
 ## Not compared
-- ADS range multiplier: `adsMultiplier()` in `src/lib/math.ts` uses a calibrated `(zoom + 7) / 14` with special cases for sidearms and fusion rifles, where oracle_engine uses a per-type function. Not compared.
-- Magazine and ammo reserve formulas.
-- Exotic effects I added myself in this session (Tempest Cascade, Nightsworn Sight, On Black Wings, The Right Choice) have no independent source other than Clarity text.
+- The ADS multiplier. We use `(zoom + 7) / 14` with special cases; oracle uses fixed per-type values (hand cannon 1.5, auto rifle 1.6, pulse 1.7, SMG 1.4, sidearm 1.2).
+- Magazine and reserve formulas.
+- Perks other than the seven listed above.
+- The exotic effects added in this session (Tempest Cascade, Nightsworn Sight, On Black Wings, The Right Choice) have no independent source other than Clarity text.
