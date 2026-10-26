@@ -345,6 +345,14 @@ function isDefaultRoll(roll: WeaponRoll, weapon: Weapon): boolean {
   );
 }
 
+// ─── Calculated-stats cache ──────────────────────────────────────────────────
+
+/** Returned while no weapon is loaded; one shared object so selectors that return it stay stable. */
+const NO_STATS: StatMap = Object.freeze({}) as StatMap;
+
+/** The last getCalculatedStats result with the state it was computed from. Callers must not modify the result. */
+let statsCache: { inputs: unknown[]; result: StatMap } | null = null;
+
 // ─── Store ───────────────────────────────────────────────────────────────────
 
 export const useWeaponStore = create<WeaponState>()(
@@ -552,7 +560,11 @@ export const useWeaponStore = create<WeaponState>()(
 
       getCalculatedStats: () => {
         const { activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, isEnhanced, catalystActive, weaponTier, activeMod, armorMods, activeBuffs, activeExoticArmor } = get();
-        if (!activeWeapon) return {};
+        if (!activeWeapon) return NO_STATS;
+
+        // About seven panels ask for these on every change: compute once and share until an input changes.
+        const inputs = [activeWeapon, selectedPerks, activeEffects, masterworkStat, isCrafted, isEnhanced, catalystActive, weaponTier, activeMod, armorMods, activeBuffs, activeExoticArmor];
+        if (statsCache && inputs.every((value, i) => value === statsCache!.inputs[i])) return statsCache.result;
 
         const baseStats: StatMap = { ...activeWeapon.baseStats };
 
@@ -677,7 +689,9 @@ export const useWeaponStore = create<WeaponState>()(
 
         // isCrafted is tracked in state; stat impact is via perk slot availability
 
-        return applyStatDeltas(baseStats, deltas, activeWeapon);
+        const result = applyStatDeltas(baseStats, deltas, activeWeapon);
+        statsCache = { inputs, result };
+        return result;
       },
 
       getWeaponEffects: () => {
