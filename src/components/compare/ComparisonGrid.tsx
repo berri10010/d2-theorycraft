@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useCompareStore } from '../../store/useCompareStore';
 import { useWeaponStore } from '../../store/useWeaponStore';
-import { CompareSnapshot, StatCurveNode } from '../../types/weapon';
+import { CompareSnapshot } from '../../types/weapon';
 import { BUNGIE_URL as BUNGIE_ROOT } from '../../lib/bungieUrl';
 import { calculateTTK, PVE_HEALTH_TIERS } from '../../lib/damageMath';
 import { ammoFromStats } from '../../lib/ttkAmmo';

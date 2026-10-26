@@ -136,7 +136,6 @@ function getMwWhitelist(weaponType: string, frameName: string): string[] | null 
 
 /** Ordered from highest to lowest priority for default selection */
 const VARIANT_SUFFIXES = ['(Adept)', '(Timelost)', '(Harrowed)', '(Brave)'] as const;
-type VariantLabel = typeof VARIANT_SUFFIXES[number] extends `(${infer L})` ? L : never;
 
 function extractBaseName(name: string): string {
   for (const suffix of VARIANT_SUFFIXES) {
@@ -446,8 +445,6 @@ function shortenSeasonName(name: string): string {
     .replace(/^Season of\s+/i, '')
     .trim() || name;
 }
-
-interface SeasonInfo { name: string; number: number; }
 
 /** Build a map from season number → season name from DestinySeasonDefinition. */
 function buildSeasonNumberToName(

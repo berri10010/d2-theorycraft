@@ -6,7 +6,6 @@ import { useWeaponStore } from '../../store/useWeaponStore';
 import {
   buildDamageProfile,
   detectArchetype,
-  ARCHETYPE_LABELS,
   type SupportedArchetype,
 } from '../../lib/weaponSystemAdapter';
 

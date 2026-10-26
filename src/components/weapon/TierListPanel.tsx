@@ -176,7 +176,7 @@ export const TierListPanel: React.FC = () => {
           <p className="text-2xs text-ink-4 uppercase tracking-widest mb-2">
             {activeWeapon.baseName} perks
           </p>
-          {perkRows.map(({ colName, perkName }) => {
+          {perkRows.map(({ perkName }) => {
             const current = getPerkTier(mode, perkName);
             return (
               <div key={perkName} className="flex flex-col gap-1.5 py-1 md:flex-row md:items-center md:gap-2 md:py-0">

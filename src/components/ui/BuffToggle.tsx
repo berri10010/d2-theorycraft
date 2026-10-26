@@ -86,7 +86,6 @@ function BuffRow({ buff: rawBuff, isActive, isOverridden, activeStackIndex, onTo
   const buff = buffForMode(rawBuff, mode); // PvP values replace the PvE ones
   const isDebuff    = buff.stackType === 'debuff';
   const isUtility   = buff.multiplier === 1.0;
-  const activeColor = isDebuff ? 'red' : 'amber';
   const icon        = localIcon('buff', buff.name);
 
   const effectiveMult = isActive
