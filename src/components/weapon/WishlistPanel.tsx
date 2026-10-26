@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
@@ -149,7 +150,9 @@ function usePersonalRolls() {
 const ROLLS_PREVIEW = 4; // number of personal rolls shown before "show all"
 
 export const WishlistPanel: React.FC = () => {
-  const { activeWeapon, selectedPerks, loadWeapon, selectPerk } = useWeaponStore();
+  const { activeWeapon, selectedPerks, loadWeapon, selectPerk } = useWeaponStore(
+    useShallow((s) => ({ activeWeapon: s.activeWeapon, selectedPerks: s.selectedPerks, loadWeapon: s.loadWeapon, selectPerk: s.selectPerk })),
+  );
   const mode = useWeaponStore((s) => s.mode);
   const { weapons } = useWeaponDb();
   const fileInputRef = useRef<HTMLInputElement>(null);

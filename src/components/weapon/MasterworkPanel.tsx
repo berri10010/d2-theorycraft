@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import {
   useWeaponStore,
   buildWeaponModsList,
@@ -58,7 +59,17 @@ export const MasterworkPanel: React.FC = () => {
     isEnhanced,
     weaponTier,
     activeMod, setActiveMod,
-  } = useWeaponStore();
+  } = useWeaponStore(
+    useShallow((s) => ({
+      activeWeapon: s.activeWeapon,
+      masterworkStat: s.masterworkStat, setMasterworkStat: s.setMasterworkStat,
+      hoveredMasterworkStat: s.hoveredMasterworkStat, setHoveredMasterworkStat: s.setHoveredMasterworkStat,
+      isCrafted: s.isCrafted,
+      isEnhanced: s.isEnhanced,
+      weaponTier: s.weaponTier,
+      activeMod: s.activeMod, setActiveMod: s.setActiveMod,
+    })),
+  );
 
   const isTiered = (activeWeapon?.seasonNumber ?? 0) >= 27 && activeWeapon?.rarity !== 'Exotic';
   const canEnhanceMod = !isTiered || weaponTier >= 3;

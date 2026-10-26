@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useLayoutEffect, useState, useMemo, useRef, useCallback, Suspense } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -90,7 +91,14 @@ function Dashboard() {
     getCalculatedStats, getDamageMultiplier, getWeaponEffects, mode, setMode,
     masterworkStat, activeBuffs, setWeaponsStat, weaponsStat, catalystActive, setCatalystActive,
     setMasterworkStat, toggleBuff, clearRoll, setWeaponTier, weaponTier,
-  } = useWeaponStore();
+  } = useWeaponStore(
+    useShallow((s) => ({
+      loadWeapon: s.loadWeapon, activeWeapon: s.activeWeapon, activeWeaponHash: s.activeWeaponHash, selectedPerks: s.selectedPerks, selectPerk: s.selectPerk,
+      getCalculatedStats: s.getCalculatedStats, getDamageMultiplier: s.getDamageMultiplier, getWeaponEffects: s.getWeaponEffects, mode: s.mode, setMode: s.setMode,
+      masterworkStat: s.masterworkStat, activeBuffs: s.activeBuffs, setWeaponsStat: s.setWeaponsStat, weaponsStat: s.weaponsStat, catalystActive: s.catalystActive, setCatalystActive: s.setCatalystActive,
+      setMasterworkStat: s.setMasterworkStat, toggleBuff: s.toggleBuff, clearRoll: s.clearRoll, setWeaponTier: s.setWeaponTier, weaponTier: s.weaponTier,
+    })),
+  );
   const { addSnapshot, snapshots } = useCompareStore();
   const { weapons, isLoading, error, fetchWeapons } = useWeaponDb();
   const { data: godRollDb } = useGodRolls();

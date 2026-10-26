@@ -120,7 +120,7 @@ function useApplyGodRoll() {
 }
 
 export const GodRollPanel: React.FC = () => {
-  const { activeWeapon } = useWeaponStore();
+  const activeWeapon = useWeaponStore((s) => s.activeWeapon);
   const mode = useWeaponStore((s) => s.mode);
   const selectedPerks = useWeaponStore((s) => s.selectedPerks);
   const masterworkStat = useWeaponStore((s) => s.masterworkStat);

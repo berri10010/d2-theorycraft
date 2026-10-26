@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWeaponStore } from '../../store/useWeaponStore';
@@ -24,7 +25,7 @@ import {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export const SearchSidebar: React.FC = () => {
-  const { loadWeapon, activeWeapon } = useWeaponStore();
+  const { loadWeapon, activeWeapon } = useWeaponStore(useShallow((s) => ({ loadWeapon: s.loadWeapon, activeWeapon: s.activeWeapon })));
   const { weapons, isLoading, error } = useWeaponDb();
   const { data: godRollDb } = useGodRolls();
   const { data: prideDb } = usePride();

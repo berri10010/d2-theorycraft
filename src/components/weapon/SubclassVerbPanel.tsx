@@ -113,13 +113,13 @@ function ResultCard({ verb, baseImpact, rps, tier, magSize }: {
 // ─── Main panel ───────────────────────────────────────────────────────────────
 
 export const SubclassVerbPanel: React.FC = () => {
-  const { activeWeapon, getCalculatedStats } = useWeaponStore();
+  const activeWeapon = useWeaponStore((s) => s.activeWeapon);
+  const stats = useWeaponStore((s) => s.getCalculatedStats()); // shared, and only changes when the roll does
   const [activeVerbKey, setActiveVerbKey] = useState<string | null>(null);
   const [enemyTier, setEnemyTier] = useState<EnemyTier>('major');
 
   if (!activeWeapon) return null;
 
-  const stats = getCalculatedStats();
   const impact  = stats['Impact']   ?? activeWeapon.baseStats['Impact']   ?? 50;
   const magSize = Math.max(1, Math.round(stats['Magazine'] ?? activeWeapon.baseStats['Magazine'] ?? 30));
   // baseStats stores this under 'RPM' (from STAT_HASH_MAP in parser.ts)

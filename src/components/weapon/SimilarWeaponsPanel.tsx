@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import Image from 'next/image';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
@@ -210,7 +211,7 @@ function SimilarRow({
 // ─── Main panel ───────────────────────────────────────────────────────────────
 
 export const SimilarWeaponsPanel: React.FC = () => {
-  const { activeWeapon, loadWeapon, variantGroup } = useWeaponStore();
+  const { activeWeapon, loadWeapon, variantGroup } = useWeaponStore(useShallow((s) => ({ activeWeapon: s.activeWeapon, loadWeapon: s.loadWeapon, variantGroup: s.variantGroup })));
   const { weapons } = useWeaponDb();
   const [showAll, setShowAll] = useState(false);
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import Image from 'next/image';
 import { localIcon } from '../../lib/localIcons';
 import {
@@ -86,7 +87,9 @@ function ModRow({ label, subLabel, value, onChange, color, readout }: ModRowProp
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export const ArmorModPanel: React.FC = () => {
-  const { activeWeapon, armorMods, setArmorMods, surgeStacks, setSurgeStacks, mode } = useWeaponStore();
+  const { activeWeapon, armorMods, setArmorMods, surgeStacks, setSurgeStacks, mode } = useWeaponStore(
+    useShallow((s) => ({ activeWeapon: s.activeWeapon, armorMods: s.armorMods, setArmorMods: s.setArmorMods, surgeStacks: s.surgeStacks, setSurgeStacks: s.setSurgeStacks, mode: s.mode })),
+  );
   const surgeIcon = localIcon('mod', 'Weapon Surge');
   const { targeting, loader, dexterity, unflinching, inFlight, ammoGeneration } = armorMods;
 

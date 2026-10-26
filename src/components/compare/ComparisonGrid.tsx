@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import Image from 'next/image';
 import { useCompareStore } from '../../store/useCompareStore';
 import { useWeaponStore } from '../../store/useWeaponStore';
@@ -59,7 +60,9 @@ function SnapshotCard({
   onLoadToEditor?: () => void;
 }) {
   const { removeSnapshot, renameSnapshot, reorderSnapshot } = useCompareStore();
-  const { loadWeapon, selectPerk, setMasterworkStat, setWeaponTier } = useWeaponStore();
+  const { loadWeapon, selectPerk, setMasterworkStat, setWeaponTier } = useWeaponStore(
+    useShallow((s) => ({ loadWeapon: s.loadWeapon, selectPerk: s.selectPerk, setMasterworkStat: s.setMasterworkStat, setWeaponTier: s.setWeaponTier })),
+  );
   const [editing, setEditing] = useState(false);
   const [labelValue, setLabel] = useState(snapshot.label);
 
