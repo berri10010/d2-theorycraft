@@ -1,5 +1,5 @@
 // Cache version — bump this string to force all clients to evict the old cache.
-const CACHE = 'd2tc-v10';
+const CACHE = 'd2tc-v11';
 
 const DATA_FILES = [
   '/data/weapons.json',
@@ -36,11 +36,14 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
       fetch(request)
         .then((res) => {
+          // Only good responses are cached; on an error status prefer the last good copy.
+          if (!res.ok) return caches.match(request).then((cached) => cached || res);
           const clone = res.clone();
           caches.open(CACHE).then((c) => c.put(request, clone));
           return res;
         })
-        .catch(() => caches.match(request))
+        // respondWith needs a Response, so offline with nothing cached is a network error, not undefined.
+        .catch(() => caches.match(request).then((cached) => cached || Response.error()))
     );
     return;
   }
