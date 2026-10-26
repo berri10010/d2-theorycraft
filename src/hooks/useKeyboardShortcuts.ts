@@ -15,11 +15,19 @@ interface UseKeyboardShortcutsOptions {
   onShortcutLegend?: () => void;
 }
 
+/** True when keys typed at this element belong to it (text fields, selects' type-ahead, contenteditable). */
+export function isTypingTarget(target: HTMLElement | null): boolean {
+  if (!target) return false;
+  const tag = target.tagName.toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
+  return !!target.isContentEditable;
+}
+
 /**
  * Registers global keyboard shortcuts.
  *
  * Shortcuts are only active when the user is NOT inside a text input,
- * textarea, or contenteditable element — so typing in search boxes still works.
+ * textarea, select, or contenteditable element — so typing in search boxes still works.
  */
 export function useKeyboardShortcuts({
   onSearch,
@@ -36,17 +44,8 @@ export function useKeyboardShortcuts({
   }, [onSearch, onEscape, onPve, onPvp, onCompare, onShortcutLegend]);
 
   useEffect(() => {
-    function isTyping(e: KeyboardEvent): boolean {
-      const target = e.target as HTMLElement | null;
-      if (!target) return false;
-      const tag = target.tagName.toLowerCase();
-      if (tag === 'input' || tag === 'textarea') return true;
-      if (target.isContentEditable) return true;
-      return false;
-    }
-
     function handleKeyDown(e: KeyboardEvent) {
-      if (isTyping(e)) return;
+      if (isTypingTarget(e.target as HTMLElement | null)) return;
 
       // Never intercept when any OS/browser modifier is held.
       // This preserves Ctrl+C (copy), Ctrl+V (paste), Ctrl+Z (undo),
