@@ -43,17 +43,34 @@ export interface GodRollEntry {
 
 export type GodRollDatabase = Record<string, GodRollEntry>;
 
+const lowerCaseKeys = new WeakMap<GodRollDatabase, Map<string, string>>();
+
+/** Lower-cased key -> real key, built once per database (the sheets spell names like "Redback-5SI" vs "Redback-5si"). */
+function keysByLowerCase(db: GodRollDatabase): Map<string, string> {
+  let index = lowerCaseKeys.get(db);
+  if (!index) {
+    index = new Map(Object.keys(db).map((key) => [key.toLowerCase(), key]));
+    lowerCaseKeys.set(db, index);
+  }
+  return index;
+}
+
 /**
  * Look up a god roll entry for a weapon using the family hierarchy:
  *   1. Exact weapon name (version-specific override)
  *   2. baseName (applies to the whole weapon family)
- * Returns null if neither exists.
+ *   3. The same two names, ignoring capitalisation
+ * Returns null if none exists.
  */
 export function lookupGodRoll(
   db: GodRollDatabase,
   weapon: { name: string; baseName: string },
 ): GodRollEntry | null {
-  return db[weapon.name] ?? db[weapon.baseName] ?? null;
+  const exact = db[weapon.name] ?? db[weapon.baseName];
+  if (exact) return exact;
+  const index = keysByLowerCase(db);
+  const key = index.get(weapon.name.toLowerCase()) ?? index.get(weapon.baseName.toLowerCase());
+  return key ? db[key] : null;
 }
 
 // ──────────────────────────────────────────────────
