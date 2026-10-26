@@ -61,13 +61,19 @@ export const useTierListStore = create<TierListStore>()(
       setActiveList: (mode, name) =>
         set(() => ({ [mode === 'pve' ? 'pveModeList' : 'pvpModeList']: name })),
 
+      // An existing list is never replaced, and a blank name makes no list.
       createList: (name) =>
-        set((s) => ({ lists: { ...s.lists, [name]: {} } })),
+        set((s) => {
+          const listName = name.trim();
+          return !listName || listName in s.lists ? s : { lists: { ...s.lists, [listName]: {} } };
+        }),
 
+      // The last remaining list cannot be deleted, so the modes always point at a list that exists.
       deleteList: (name) =>
         set((s) => {
+          if (!(name in s.lists) || Object.keys(s.lists).length <= 1) return s;
           const { [name]: _removed, ...rest } = s.lists;
-          const fallback = Object.keys(rest)[0] ?? DEFAULT_PVE;
+          const fallback = Object.keys(rest)[0];
           return {
             lists: rest,
             pveModeList: s.pveModeList === name ? fallback : s.pveModeList,
