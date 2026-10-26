@@ -159,8 +159,6 @@ export const SUBCLASS_VERBS: VerbDef[] = [
     calcBonus(baseImpact, rps, tier, _magSize) {
       const bulletDmg = impactToDamage(baseImpact);
       const volatileDmg = Math.round(bulletDmg * VOLATILE_MULT);
-      // Suppression / Volatile triggers on next hit after debuff applies
-      const bulletsToProc = Math.ceil(rps * 0.5); // ~0.5s to proc
       const dpsBonus = volatileDmg * rps; // roughly one volatile per bullet at high rate
       const tierHp = ENEMY_TIERS.find((t) => t.key === tier)!.hp;
       const pct = ((volatileDmg / tierHp) * 100).toFixed(1);
@@ -170,7 +168,7 @@ export const SUBCLASS_VERBS: VerbDef[] = [
         element: 'void',
         rows: [
           { label: 'Explosion damage',     value: volatileDmg.toLocaleString() },
-          { label: '% of bullet damage',   value: '~35%' },
+          { label: '% of bullet damage',   value: `~${Math.round(VOLATILE_MULT * 100)}%` },
           { label: 'Explosion radius',      value: '~5m' },
           { label: 'Approximate DPS bonus',value: `+${Math.round(dpsBonus).toLocaleString()}/s` },
           { label: '% of enemy HP',        value: `${pct}%` },
