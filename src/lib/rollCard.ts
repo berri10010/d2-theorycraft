@@ -138,6 +138,8 @@ export interface CardImages {
   perks: Array<Array<HTMLImageElement | null>>;
 }
 
+const CARD_IMAGE_TIMEOUT_MS = 8000;
+
 /**
  * Loads an image so it can be drawn on a canvas that must stay exportable. An `<img crossOrigin>` is not enough: the
  * browser may serve the same URL from its cache from an earlier plain `<img>` load, a copy stored without CORS
@@ -145,8 +147,22 @@ export interface CardImages {
  */
 export async function loadCardImage(url: string | null): Promise<HTMLImageElement | null> {
   if (!url) return null;
+  // A hung request must not hold the whole card back: after the timeout the image simply draws as a blank.
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null>((resolve) => {
+    timer = setTimeout(() => { controller.abort(); resolve(null); }, CARD_IMAGE_TIMEOUT_MS);
+  });
   try {
-    const res = await fetch(url, { mode: 'cors', cache: 'no-store' });
+    return await Promise.race([fetchCardImage(url, controller.signal), timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchCardImage(url: string, signal: AbortSignal): Promise<HTMLImageElement | null> {
+  try {
+    const res = await fetch(url, { mode: 'cors', cache: 'no-store', signal });
     if (!res.ok) return null;
     const objectUrl = URL.createObjectURL(await res.blob());
     return await new Promise((resolve) => {
