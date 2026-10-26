@@ -228,6 +228,10 @@ interface WeaponState {
   activeMod:             WeaponMod;
   surgeStacks:           0 | 1 | 2 | 3 | 4;
   weaponsStat:           number;
+  /** PvE target for the TTK and DPS panels: a PVE_HEALTH_TIERS key. */
+  enemyTier:             string;
+  /** PvE power-level delta (-50..+30, see plDelta.ts); scales every PvE damage number. */
+  powerDelta:            number;
   armorMods:             ArmorModState;
 
   /** Per-weapon roll cache, keyed by weapon hash. Persisted to localStorage. */
@@ -257,6 +261,8 @@ interface WeaponState {
   setActiveMod:      (mod: WeaponMod) => void;
   setSurgeStacks:    (stacks: 0 | 1 | 2 | 3 | 4) => void;
   setWeaponsStat:    (stat: number) => void;
+  setEnemyTier:      (tier: string) => void;
+  setPowerDelta:     (delta: number) => void;
   setArmorMods:      (mods: Partial<ArmorModState>) => void;
   setExoticArmor:    (classType: ExoticClassType, id: string | null) => void;
 
@@ -349,6 +355,8 @@ export const useWeaponStore = create<WeaponState>()(
       activeMod:         NONE_MOD,
       surgeStacks:       0,
       weaponsStat:       0,
+      enemyTier:         'Major / Elite',
+      powerDelta:        0,
       armorMods:         DEFAULT_ARMOR_MODS,
       weaponRolls:       {},
       activeExoticArmor: { hunter: null, warlock: null, titan: null },
@@ -523,6 +531,8 @@ export const useWeaponStore = create<WeaponState>()(
       setActiveMod:      (mod)    => set({ activeMod: mod }),
       setSurgeStacks:    (stacks) => set({ surgeStacks: stacks }),
       setWeaponsStat:    (stat)   => set({ weaponsStat: Math.max(0, Math.min(200, stat)) }),
+      setEnemyTier:      (tier)   => set({ enemyTier: tier }),
+      setPowerDelta:     (delta)  => set({ powerDelta: Math.max(-50, Math.min(30, Math.round(delta) || 0)) }),
       setArmorMods:      (mods)   => set((s) => ({ armorMods: { ...s.armorMods, ...mods } })),
       setExoticArmor:    (cls, id) => set((s) => ({ activeExoticArmor: { ...s.activeExoticArmor, [cls]: id } })),
 
@@ -777,6 +787,8 @@ export const useWeaponStore = create<WeaponState>()(
         weaponRolls:      state.weaponRolls,
         mode:             state.mode,
         weaponsStat:      state.weaponsStat,
+        enemyTier:        state.enemyTier,
+        powerDelta:       state.powerDelta,
         surgeStacks:      state.surgeStacks,
         activeBuffs:      state.activeBuffs,
         buffStacks:       state.buffStacks,

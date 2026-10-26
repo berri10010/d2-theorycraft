@@ -245,7 +245,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Compare tab: Ready/ADS/Stow handling chips + Reload/Charge/Perfect timing row (per-weapon-type) | ✅ Done |
 | Damage vs Distance chart: interactive line chart showing actual damage values per meter (hip-fire vs ADS) | ✅ Done |
 | Flinch resistance: show flinch resist derived from Stability + Health (0–100 → 0–10%) | ✅ Done |
-| Per-activity PvE scaling: Activity + Difficulty + Enemy Type dropdown scales all damage numbers; include custom option | ⬜ Pending |
+| Per-activity PvE scaling: Enemy Type + Power Delta (custom) now shared by the TTK and DPS panels through the store (`enemyTier`, `powerDelta`, persisted) | 🟡 Partial: named Activity/Difficulty presets still need a sourced table of enemy power deltas (none found; do not guess) |
 
 #### 12B — Sharing & Presentation
 
@@ -428,7 +428,7 @@ Everything in Stages 1–11 and 13–16 is done. Remaining priorities, in order:
 1. **More exotic effects** — Turncoat, Ice Breaker, Trespasser's burst (Delicate Tomb, Slayer's Fang and Duality are done) (see Known Issues); each needs a model for one-shot or periodic bonuses the calculator does not have.
 2. **Exotics with no stat row** — 78 of 146; ask huwugo's sheet to cover them or add rows by hand.
 3. **12B** — Shareable roll links with Open Graph previews; screenshot-mode weapon card.
-4. **12A** — Per-activity PvE scaling dropdown.
+4. **12A** — Activity/Difficulty presets on top of the shared Enemy Type + Power Delta controls; needs a sourced table of per-activity enemy power deltas.
 5. **Use the unused D2Assets** — set bonuses, archetype images (Similar Weapons), weapon-type silhouettes (filter chips).
 6. **Accessibility** — dim-text contrast, focus rings and labels on icon-only buttons (a first pass is in Engineering notes).
 

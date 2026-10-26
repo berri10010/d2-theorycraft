@@ -20,7 +20,6 @@ import { ShotsChart, FalloffChart } from './ttkCharts';
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const PVP_GUARDIAN_HP = 230;
-const PVE_TIERS_KEYS = Object.keys(PVE_HEALTH_TIERS);
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -28,7 +27,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
   useWeaponStore((s) => s.catalystActive); // re-render when the catalyst is switched, since the stats below include it
   const {
     activeWeapon, getCalculatedStats, mode,
-    weaponsStat, setWeaponsStat,
+    weaponsStat, setWeaponsStat, enemyTier, setEnemyTier, powerDelta, setPowerDelta,
     getDamageMultiplier, getWeaponEffects, activeBuffs, activeMod, surgeStacks,
     activeEffects, selectedPerks,
   } = useWeaponStore(
@@ -38,6 +37,10 @@ export const TTKAndFalloffPanel: React.FC = () => {
       mode:                s.mode,
       weaponsStat:         s.weaponsStat,
       setWeaponsStat:      s.setWeaponsStat,
+      enemyTier:           s.enemyTier,
+      setEnemyTier:        s.setEnemyTier,
+      powerDelta:          s.powerDelta,
+      setPowerDelta:       s.setPowerDelta,
       getDamageMultiplier: s.getDamageMultiplier,
       getWeaponEffects:    s.getWeaponEffects,
       activeBuffs:         s.activeBuffs,
@@ -48,8 +51,6 @@ export const TTKAndFalloffPanel: React.FC = () => {
     }))
   );
 
-  const [enemyTier, setEnemyTier] = useState(PVE_TIERS_KEYS[0]);
-  const [powerDelta, setPowerDelta] = useState(0);
   const [championMod, setChampionMod] = useState<'none' | 'overload' | 'unstoppable' | 'barrier'>('none');
   const [hoverX, setHoverX] = useState<number | null>(null);
   const [showAds, setShowAds] = useState(true);

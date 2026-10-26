@@ -7,6 +7,8 @@ import React, { useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { calcDps, DpsResult } from '../../lib/dpsCalc';
+import { PVE_HEALTH_TIERS } from '../../lib/damageMath';
+import { getPlDeltaMultiplier, fmtPlDelta } from '../../lib/plDelta';
 
 // ── Stat row ──────────────────────────────────────────────────────────────────
 
@@ -52,6 +54,7 @@ export function DpsPanel() {
     activeEffects,
     activeBuffs,
     catalystActive,
+    enemyTier, setEnemyTier, powerDelta, setPowerDelta,
   } = useWeaponStore(
     useShallow((s) => ({
       activeWeapon:       s.activeWeapon,
@@ -65,6 +68,10 @@ export function DpsPanel() {
       activeEffects:      s.activeEffects,
       activeBuffs:        s.activeBuffs,
       catalystActive:     s.catalystActive,
+      enemyTier:          s.enemyTier,
+      setEnemyTier:       s.setEnemyTier,
+      powerDelta:         s.powerDelta,
+      setPowerDelta:      s.setPowerDelta,
     }))
   );
 
@@ -84,12 +91,12 @@ export function DpsPanel() {
       activeWeapon.itemTypeDisplayName,
       reloadStat,
       magStat,
-      undefined,
+      enemyTier,
       getWeaponEffects(),
       activeWeapon.baseName ?? activeWeapon.name,
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWeapon, calcStats, selectedPerks, activeEffects, activeBuffs]);
+  }, [activeWeapon, calcStats, selectedPerks, activeEffects, activeBuffs, enemyTier]);
 
   if (!activeWeapon) return null;
 
@@ -100,6 +107,11 @@ export function DpsPanel() {
       </div>
     );
   }
+
+  // The power-level delta scales every PvE damage number the same way; PvP is untouched.
+  const plMult = getPlDeltaMultiplier(powerDelta);
+  const optimalPve   = Math.round(dps.optimalDpsPve * plMult);
+  const sustainedPve = Math.round(dps.sustainedDpsPve * plMult);
 
   const burstLabel = dps.burstSize > 1 ? `${dps.burstSize}×` : '—';
   const reloadLabel = dps.reloadMs != null ? `${(dps.reloadMs / 1000).toFixed(2)}s` : '—';
@@ -118,14 +130,38 @@ export function DpsPanel() {
         </div>
       </div>
 
+      {/* ── PvE target (shared with the TTK panel) ───────────────────────── */}
+      <div className="grid grid-cols-2 gap-2">
+        <label className="text-2xs text-ink-4 uppercase tracking-wide flex flex-col gap-1">
+          PvE Enemy
+          <select
+            value={enemyTier}
+            onChange={(e) => setEnemyTier(e.target.value)}
+            className="bg-black/40 border border-white/10 rounded-md px-2 py-1.5 text-sm normal-case tracking-normal text-ink focus:outline-none focus:border-amber-500"
+          >
+            {Object.keys(PVE_HEALTH_TIERS).map((tier) => <option key={tier} value={tier}>{tier}</option>)}
+          </select>
+        </label>
+        <label className="text-2xs text-ink-4 uppercase tracking-wide flex flex-col gap-1">
+          Power Delta ({fmtPlDelta(powerDelta)})
+          <input
+            type="range" min={-30} max={10} step={1}
+            value={powerDelta}
+            onChange={(e) => setPowerDelta(Number(e.target.value))}
+            aria-label="Power delta"
+            className="w-full accent-amber-500 h-1.5 rounded-full cursor-pointer mt-2.5"
+          />
+        </label>
+      </div>
+
       {/* ── DPS rows ─────────────────────────────────────────────────────── */}
       <div>
         <div className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-2">
           DPS (All-Crit)
         </div>
         <div className="space-y-2">
-          <Row label="Optimal DPS"   pvp={dps.optimalDpsPvp}   pve={dps.optimalDpsPve}   />
-          <Row label="Sustained DPS" pvp={dps.sustainedDpsPvp} pve={dps.sustainedDpsPve} />
+          <Row label="Optimal DPS"   pvp={dps.optimalDpsPvp}   pve={optimalPve}   />
+          <Row label="Sustained DPS" pvp={dps.sustainedDpsPvp} pve={sustainedPve} />
         </div>
       </div>
 
@@ -139,7 +175,7 @@ export function DpsPanel() {
       </div>
 
       <p className="text-2xs text-ink-4 text-center">
-        PvE uses per-archetype Major/Elite scalar. Optimal = continuous fire, no reloads.
+        PvE uses the per-archetype scalar for the enemy chosen above. Optimal = continuous fire, no reloads.
       </p>
       <EstimateNote weapon={activeWeapon} className="text-center" />
       <SourceNote className="text-center" label="Timing data" ids={['huwugo']} detail={statsMeta.sheetVersion || undefined} />
