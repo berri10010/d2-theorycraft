@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "npx tsx scripts/build-static-data.ts",
-    "build": "next build",
-    "build:ci": "next build",
+    "build": "next build && tsx scripts/build-share-data.ts",
+    "build:ci": "next build && tsx scripts/build-share-data.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "refresh-data": "tsx scripts/build-static-data.ts",

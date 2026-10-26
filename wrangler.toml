@@ -10,6 +10,9 @@ main = "worker.ts"
 [assets]
 directory = "./out"
 binding = "ASSETS"
+# A matching static file is normally served without running the Worker. These paths run it first so shared roll links
+# (/editor?w=...) get their link-preview tags; every other request still goes straight to the assets.
+run_worker_first = ["/editor", "/editor/"]
 
 # The Worker is a pass-through, so per-invocation log persistence is just cost
 # and noise. Re-enable `[observability]` here if request logs are ever needed.
