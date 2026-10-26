@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { describe, it, expect } from 'vitest';
-import { BUFF_DATABASE, buffForMode, buffApplies, resolveBuffMultiplier, resolveBuffEffects, type DamageBuff } from './buffDatabase';
+import { BUFF_DATABASE, getBuffKeyForPerk, buffForMode, buffApplies, resolveBuffMultiplier, resolveBuffEffects, type DamageBuff } from './buffDatabase';
 
 const b = (key: string) => BUFF_DATABASE[key];
 const find = (name: string) => Object.values(BUFF_DATABASE).find((x) => x.name === name)!;
@@ -332,5 +332,30 @@ describe('more exotic trait buffs', () => {
     const named = Object.values(perks).filter((p) => p.name === 'Honed Edge');
     expect(named.length).toBeGreaterThan(1);
     expect(named.filter((p) => p.buffKey === 'honed_edge')).toHaveLength(1);
+  });
+
+  it('Delicate Tomb Tempest Cascade is +100% in PvE and +7% in PvP', () => {
+    expect(dmg('tempest_cascade', 'pve')).toBeCloseTo(2, 3);
+    expect(dmg('tempest_cascade', 'pvp')).toBeCloseTo(1.07, 3);
+  });
+
+  it("Slayer's Fang Nightsworn Sight adds 15% precision damage only", () => {
+    expect(dmg('nightsworn_sight', 'pve')).toBe(1);
+    expect(fx('nightsworn_sight', 'pve').critMultiplier).toBeCloseTo(1.15, 3);
+  });
+
+  it('Duality On Black Wings: pellet precision +3.5 / 8.8 / 12.4% over three stacks', () => {
+    expect(b('on_black_wings').stacks).toHaveLength(3);
+    expect(fx('on_black_wings', 'pve', 0).critMultiplier).toBeCloseTo(1.035, 3);
+    expect(fx('on_black_wings', 'pve', 2).critMultiplier).toBeCloseTo(1.124, 3);
+  });
+
+  it('the three new traits link only on their own exotics', () => {
+    const perks = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'public', 'data', 'perks.json'), 'utf8')) as Record<string, { name: string; isEnhanced: boolean; buffKey: string | null }>;
+    for (const [name, key] of [['Tempest Cascade', 'tempest_cascade'], ['Nightsworn Sight', 'nightsworn_sight'], ['On Black Wings', 'on_black_wings']]) {
+      expect(Object.values(perks).filter((p) => p.name === name && !p.isEnhanced).every((p) => p.buffKey === key), name).toBe(true);
+    }
+    expect(getBuffKeyForPerk('Tempest Cascade', 'Delicate Tomb')).toBe('tempest_cascade');
+    expect(getBuffKeyForPerk('Tempest Cascade', 'Some Other Gun')).toBeNull();
   });
 });

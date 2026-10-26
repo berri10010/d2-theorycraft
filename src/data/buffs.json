@@ -2075,5 +2075,75 @@
       "Phase Converter"
     ],
     "icon": null
+  },
+  "tempest_cascade": {
+    "hash": "tempest_cascade",
+    "name": "Tempest Cascade",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 2,
+    "description": "Delicate Tomb: collecting an Ionic Trace gives the next shot +100% damage in PvE (+7% in PvP) and applies Jolt. The calculator applies it to every shot.",
+    "perkNames": [
+      "Tempest Cascade"
+    ],
+    "icon": null,
+    "weaponNames": [
+      "Delicate Tomb"
+    ],
+    "pvp": {
+      "multiplier": 1.07
+    }
+  },
+  "nightsworn_sight": {
+    "hash": "nightsworn_sight",
+    "name": "Nightsworn Sight",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1,
+    "description": "Slayer's Fang: a kill or Void Breach pickup grants Nightsworn Sight for 7 seconds, +15% precision damage (also +10% against Fallen and Scorn, not modelled).",
+    "perkNames": [
+      "Nightsworn Sight"
+    ],
+    "icon": null,
+    "critMultiplier": 1.15,
+    "weaponNames": [
+      "Slayer's Fang"
+    ]
+  },
+  "on_black_wings": {
+    "hash": "on_black_wings",
+    "name": "On Black Wings",
+    "category": "weapon_perk",
+    "stackType": "multiplicative",
+    "multiplier": 1,
+    "description": "Duality: a pellet kill or 10 pellet hits grants a stack for 10 seconds (max 3). Pellet precision damage +3.5 / 8.8 / 12.4%; slug precision damage +15.6 / 39 / 54.7% (the calculator uses the pellet numbers).",
+    "perkNames": [
+      "On Black Wings"
+    ],
+    "icon": null,
+    "critMultiplier": 1.124,
+    "stacks": [
+      {
+        "count": 1,
+        "label": "×1",
+        "critMultiplier": 1.035,
+        "multiplier": 1
+      },
+      {
+        "count": 2,
+        "label": "×2",
+        "critMultiplier": 1.088,
+        "multiplier": 1
+      },
+      {
+        "count": 3,
+        "label": "×3",
+        "critMultiplier": 1.124,
+        "multiplier": 1
+      }
+    ],
+    "weaponNames": [
+      "Duality"
+    ]
   }
 }
