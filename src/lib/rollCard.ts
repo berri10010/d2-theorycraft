@@ -61,6 +61,8 @@ export function buildRollCardData(opts: {
   masterworkStat: string | null;
   isCrafted: boolean;
   url: string;
+  /** The intrinsic's description, resolved by the caller (it can come from Clarity, which loads separately). */
+  intrinsicDescription?: string | null;
 }): RollCardData {
   const { weapon, selectedPerks, calcStats } = opts;
 
@@ -100,7 +102,7 @@ export function buildRollCardData(opts: {
     masterwork: opts.masterworkStat,
     crafted: opts.isCrafted,
     columns,
-    intrinsic: intr ? { name: intr.name, description: intr.description ?? '', iconUrl: abs(intr.icon) } : null,
+    intrinsic: intr ? { name: intr.name, description: opts.intrinsicDescription ?? intr.description ?? '', iconUrl: abs(intr.icon) } : null,
     bars: pick(BAR_STATS, MAX_BARS),
     numbers: pick(NUMBER_STATS, MAX_NUMBERS),
     imageUrl: abs(weapon.screenshot),

@@ -3,6 +3,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
+import { useClarityPerks } from '../../lib/useClarityPerks';
+import { intrinsicDescription } from '../../lib/intrinsicText';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
 import { buildRollCardData, drawRollCard, loadCardImages, rollCardFileName, CARD_W, CARD_H } from '../../lib/rollCard';
 
@@ -20,6 +22,7 @@ export function RollCardDialog({ open, onClose, permalink }: Props) {
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [notice, setNotice] = useState('');
   useDialogFocus(open, ref, onClose);
+  const { data: clarity } = useClarityPerks();
 
   const { activeWeapon, selectedPerks, mode, masterworkStat, isCrafted, getCalculatedStats } = useWeaponStore(
     useShallow((s) => ({
@@ -32,10 +35,11 @@ export function RollCardDialog({ open, onClose, permalink }: Props) {
     if (!open || !activeWeapon) return null;
     return buildRollCardData({
       weapon: activeWeapon, selectedPerks, calcStats: getCalculatedStats(), mode, masterworkStat, isCrafted, url: permalink,
+      intrinsicDescription: activeWeapon.intrinsicTrait ? intrinsicDescription(activeWeapon.intrinsicTrait, clarity) : null,
     });
   // The store snapshot is read when the dialog opens; the card is a picture of that moment.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, clarity]);
 
   useEffect(() => {
     if (!data) return;
