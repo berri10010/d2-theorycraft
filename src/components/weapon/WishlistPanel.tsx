@@ -7,6 +7,7 @@ import { SavedRollScore } from './RollVsMeta';
 import { useWeaponDb } from '../../store/useWeaponDb';
 import { groupWeapons } from '../../lib/weaponGroups';
 import { perkNamesFromHashes, perkSelectionFromHashes } from '../../lib/rollHelpers';
+import { type PersonalRoll, parsePersonalRolls } from '../../lib/personalRolls';
 import {
   WishlistDb,
   parseWishlist,
@@ -19,13 +20,6 @@ const LS_WISHLIST_KEY    = 'd2tc_wishlist_raw';
 const LS_PERSONAL_KEY   = 'd2tc_personal_rolls';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-interface PersonalRoll {
-  weaponHash: string;
-  weaponName: string;
-  perkHashes: string[];
-  savedAt: string; // ISO date
-}
 
 // ─── Hook: persisted wishlist state ──────────────────────────────────────────
 
@@ -83,14 +77,18 @@ function useWishlist() {
   return { wishlistDb, wishlistName, entryCount, isLoading, loadFile, clear };
 }
 
+/** Saving is best-effort: with storage full or blocked the list still works for this visit. */
+function persistRolls(next: PersonalRoll[]) {
+  try { localStorage.setItem(LS_PERSONAL_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+}
+
 function usePersonalRolls() {
   const [rolls, setRolls] = useState<PersonalRoll[]>([]);
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(LS_PERSONAL_KEY);
-      if (raw) setRolls(JSON.parse(raw) as PersonalRoll[]);
-    } catch { /* ignore */ }
+      setRolls(parsePersonalRolls(localStorage.getItem(LS_PERSONAL_KEY)));
+    } catch { /* storage blocked: start with no saved rolls */ }
   }, []);
 
   /** Sort-stable equality so perk selection order doesn't matter */
@@ -103,7 +101,7 @@ function usePersonalRolls() {
         roll,
         ...prev.filter((r) => !(r.weaponHash === roll.weaponHash && hashesEqual(r.perkHashes, roll.perkHashes))),
       ];
-      localStorage.setItem(LS_PERSONAL_KEY, JSON.stringify(next));
+      persistRolls(next);
       return next;
     });
   }, []);
@@ -113,7 +111,7 @@ function usePersonalRolls() {
       const next = prev.filter(
         (r) => !(r.weaponHash === weaponHash && hashesEqual(r.perkHashes, perkHashes))
       );
-      localStorage.setItem(LS_PERSONAL_KEY, JSON.stringify(next));
+      persistRolls(next);
       return next;
     });
   }, []);
