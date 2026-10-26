@@ -4,6 +4,7 @@ import { Weapon, StatMap, GameMode, WeaponGroup, Perk, PerkColumn } from '../typ
 import { BUFF_DATABASE, resolveBuffMultiplier, resolveBuffEffects } from '../lib/buffDatabase';
 import { EXOTIC_ARMOR, ExoticClassType } from '../data/exoticArmor';
 import { getCurves } from '../lib/archetypes';
+import type { Difficulty } from '../lib/plDelta';
 import { applyStatDeltas } from '../lib/statCalc';
 import { combineEffects, type WeaponEffects } from '../lib/weaponEffects';
 import { intrinsicEffectPerk, catalystEffectKeys, catalystEffectId } from '../lib/effectPerks';
@@ -232,6 +233,8 @@ interface WeaponState {
   enemyTier:             string;
   /** PvE power-level delta (-50..+30, see plDelta.ts); scales every PvE damage number. */
   powerDelta:            number;
+  /** Which damage-scaling curve the power delta uses (see plDelta.ts). */
+  difficulty:            Difficulty;
   armorMods:             ArmorModState;
 
   /** Per-weapon roll cache, keyed by weapon hash. Persisted to localStorage. */
@@ -263,6 +266,7 @@ interface WeaponState {
   setWeaponsStat:    (stat: number) => void;
   setEnemyTier:      (tier: string) => void;
   setPowerDelta:     (delta: number) => void;
+  setDifficulty:     (difficulty: Difficulty) => void;
   setArmorMods:      (mods: Partial<ArmorModState>) => void;
   setExoticArmor:    (classType: ExoticClassType, id: string | null) => void;
 
@@ -357,6 +361,7 @@ export const useWeaponStore = create<WeaponState>()(
       weaponsStat:       0,
       enemyTier:         'Major / Elite',
       powerDelta:        0,
+      difficulty:        'standard',
       armorMods:         DEFAULT_ARMOR_MODS,
       weaponRolls:       {},
       activeExoticArmor: { hunter: null, warlock: null, titan: null },
@@ -532,6 +537,7 @@ export const useWeaponStore = create<WeaponState>()(
       setSurgeStacks:    (stacks) => set({ surgeStacks: stacks }),
       setWeaponsStat:    (stat)   => set({ weaponsStat: Math.max(0, Math.min(200, stat)) }),
       setEnemyTier:      (tier)   => set({ enemyTier: tier }),
+      setDifficulty:     (difficulty) => set({ difficulty }),
       setPowerDelta:     (delta)  => set({ powerDelta: Math.max(-50, Math.min(30, Math.round(delta) || 0)) }),
       setArmorMods:      (mods)   => set((s) => ({ armorMods: { ...s.armorMods, ...mods } })),
       setExoticArmor:    (cls, id) => set((s) => ({ activeExoticArmor: { ...s.activeExoticArmor, [cls]: id } })),
@@ -789,6 +795,7 @@ export const useWeaponStore = create<WeaponState>()(
         weaponsStat:      state.weaponsStat,
         enemyTier:        state.enemyTier,
         powerDelta:       state.powerDelta,
+        difficulty:       state.difficulty,
         surgeStacks:      state.surgeStacks,
         activeBuffs:      state.activeBuffs,
         buffStacks:       state.buffStacks,

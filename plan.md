@@ -245,7 +245,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Compare tab: Ready/ADS/Stow handling chips + Reload/Charge/Perfect timing row (per-weapon-type) | ✅ Done |
 | Damage vs Distance chart: interactive line chart showing actual damage values per meter (hip-fire vs ADS) | ✅ Done |
 | Flinch resistance: show flinch resist derived from Stability + Health (0–100 → 0–10%) | ✅ Done |
-| Per-activity PvE scaling: Enemy Type + Power Delta (custom) now shared by the TTK and DPS panels through the store (`enemyTier`, `powerDelta`, persisted) | 🟡 Partial: named Activity/Difficulty presets still need a sourced table of enemy power deltas (none found; do not guess) |
+| Per-activity PvE scaling: Enemy Type + Difficulty (Standard, Raid & Dungeon, Master) + Power Delta, shared by the TTK and DPS panels through the store (`enemyTier`, `difficulty`, `powerDelta`, persisted). Raid and Master curves from oracle_engine (`src/data/difficultyCurves.json`); Standard is the MossyMax curve | ✅ Done (no per-activity list: oracle_engine has no activity-to-delta table, so the delta stays a slider) |
 
 #### 12B — Sharing & Presentation
 
@@ -415,7 +415,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 | Buff values re-verified (October 2026) | Against Clarity's full database, Blueberries.gg, Destinypedia and community guides: Spark of Frequency (+50 Reload, +15 Stability), Thread of Ascent (+40 Reload, +30 Airborne), Flow State (+50 Reload), Rally Barricade (+100 Reload, +30 Stability), Heat Rises (+20 Airborne), Amplified (+40 Handling only), Hazardous Propulsion (rocket launchers only, +10% to +35% by stack, no PvP value), Weapons of Light (+25% for 10s; the PvP 25% is inferred from the Helm of Saint-14 listing). Still open: Amplified's +40 is a community figure (Bungie does not publish it); Thread of Ascent's Handling (~+40) is unconfirmed and not applied; Explosive Light and Surrounded special cases beyond grenade/rocket launchers and swords are not modelled. |
 | Sheet corrections (STAT_OVERRIDES) | `src/lib/weaponStatSheet.ts` overrides the sheet where it is wrong, and they survive every refresh: Spread Shot HC = 11 pellets sharing the sheet's 120 damage per shot (matches the chart: 2 shots, 0.6s); Bastion fusion = 3 bullets x 7 pellets. Bastion keeps the sheet's 30.6 damage per pellet (confirmed by the owner), i.e. 642 per trigger. Trespasser stays a 3-round burst: Bungie's own RPM stat (491) equals 3 bullets x 164 bursts/min, WeaponData agrees, and the chart tab's 6 is its Unrepentant trait state. |
 | Unused art | Weapons of Light, Amplified, Sever and Deadfall icons are local WebP because the manifest has none. Set-bonus, armor, archetype and silhouette art in `D2Assets/` is not used anywhere yet. |
-| LFR charge-time damage penalty not modelled | oracle_engine applies a proportional damage penalty when perks reduce charge time below base on LFRs: `dmg *= 1.0 - (0.6 * delta) / base_damage`. We don't apply this. |
+| LFR charge-time damage penalty: nothing to apply it to | Checked against oracle_engine's `meta_perks.rs`: for legendary LFRs, `dmg *= 1 - 0.6 * stat / total_damage` where `stat` is the perk-driven change in the Charge Time stat (and charge delay changes by `stat * 0.0033` s). No perk on any Linear Fusion Rifle or Fusion Rifle in the current manifest data carries a Charge Time stat modifier, and TTK/DPS take charge time from the sheet (plus exotic `chargeMult` buffs), so the penalty would never fire. Add it, with the delay change, if a perk with a Charge Time modifier appears. |
 
 ---
 
@@ -428,7 +428,6 @@ Everything in Stages 1–11 and 13–16 is done. Remaining priorities, in order:
 1. **More exotic effects** — Turncoat, Ice Breaker, Trespasser's burst (Delicate Tomb, Slayer's Fang and Duality are done) (see Known Issues); each needs a model for one-shot or periodic bonuses the calculator does not have.
 2. **Exotics with no stat row** — 41 left, most blocked on missing source numbers (see Engineering notes); ask huwugo's sheet to cover them or add rows by hand.
 3. **12B** — Shareable roll links with Open Graph previews; screenshot-mode weapon card.
-4. **12A** — Activity/Difficulty presets on top of the shared Enemy Type + Power Delta controls; needs a sourced table of per-activity enemy power deltas.
 5. **Use the unused D2Assets** — set bonuses, archetype images (Similar Weapons), weapon-type silhouettes (filter chips).
 6. **Accessibility** — dim-text contrast, focus rings and labels on icon-only buttons (a first pass is in Engineering notes).
 

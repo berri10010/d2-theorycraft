@@ -125,8 +125,8 @@ export const CREDITS: Credit[] = [
   {
     id: 'oracle', short: 'd2foundry', name: 'oracle_engine', by: 'd2foundry', url: 'https://github.com/d2foundry/oracle_engine',
     group: 'math',
-    what: 'The formulas that turn Reload, Handling and Draw Time stats into seconds, and the perfect-draw window for bows.',
-    where: 'Stat tooltips, reload time, ready / stow / ADS times, bow draw window.',
+    what: 'The formulas that turn Reload, Handling and Draw Time stats into seconds, the perfect-draw window for bows, and the Raid & Dungeon and Master damage curves.',
+    where: 'Stat tooltips, reload time, ready / stow / ADS times, bow draw window, difficulty selector.',
   },
   {
     id: 'blueberries', short: 'Blueberries.gg', name: 'Destiny 2 Buffs and Debuffs guide', by: 'Blueberries.gg', url: 'https://www.blueberries.gg/leveling/destiny-2-buffs-debuffs/',
@@ -194,6 +194,7 @@ export const DATA_FILE_CREDITS: Record<string, string[]> = {
   'src/data/compendium.ts': ['compendium'],
   'src/data/combatantScalars.json': ['mossymax'],
   'src/data/credits.ts': [],
+  'src/data/difficultyCurves.json': ['oracle'],
   'src/data/exoticArmor.ts': ['bungie'],
   'src/data/localIcons.json': ['bungie'],
   'src/data/perkAudit.json': ['clarity'],
