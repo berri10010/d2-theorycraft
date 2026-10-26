@@ -113,7 +113,7 @@ export function RollCardDialog({ open, onClose, permalink }: Props) {
           <canvas
             ref={canvasRef}
             role="img"
-            aria-label={`${data.name} roll card: ${data.perks.map((p) => p.name).join(', ') || 'no perks chosen'}`}
+            aria-label={`${data.name} roll card: ${data.columns.flatMap((c) => c.perks.filter((p) => p.selected).map((p) => p.name)).join(', ') || 'no perks chosen'}`}
             className="w-full h-full block"
             style={{ visibility: status === 'ready' ? 'visible' : 'hidden' }}
           />

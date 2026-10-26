@@ -251,7 +251,7 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Task | Status |
 |------|--------|
-| Screenshot mode: weapon card renderer for social sharing: Share > Roll Card Image (and the phone menu) draws a 1200x630 PNG on a canvas (`src/lib/rollCard.ts`, `RollCardDialog.tsx`): weapon art, frame, chosen perks with icons, up to nine stats, mode and masterwork, with Save and Copy buttons | ✅ Done |
+| Screenshot mode: weapon card renderer for social sharing: Share > Roll Card Image (and the phone menu) draws a 1920x1080 PNG on a canvas (`src/lib/rollCard.ts`, `RollCardDialog.tsx`) laid out like the game's inspect screen: Bungie's screenshot full-bleed, uppercase name, every perk option per column with the rolled one lit (enhanced ones gold-edged), the intrinsic, bars and numbers in the game's order and names, mode and masterwork in the footer; Save and Copy buttons | ✅ Done (no weapon mods row or power number; intrinsic description is empty for most frames in the data) |
 | Screenshot mode: multi-select (weapons can have more than one perk per column; only one active at a time) | ⬜ Pending (the card draws the one active perk per column) |
 | Share button: offer choice between "DIM Wishlist Item" and "Roll Permalink" | ✅ Done |
 
