@@ -251,8 +251,8 @@ A broad set of UI, data, and UX improvements requested for the next development 
 
 | Task | Status |
 |------|--------|
-| Screenshot mode: Destiny-style weapon card renderer for social sharing | ⬜ Pending |
-| Screenshot mode: multi-select (weapons can have more than one perk per column; only one active at a time) | ⬜ Pending |
+| Screenshot mode: weapon card renderer for social sharing: Share > Roll Card Image (and the phone menu) draws a 1200x630 PNG on a canvas (`src/lib/rollCard.ts`, `RollCardDialog.tsx`): weapon art, frame, chosen perks with icons, up to nine stats, mode and masterwork, with Save and Copy buttons | ✅ Done |
+| Screenshot mode: multi-select (weapons can have more than one perk per column; only one active at a time) | ⬜ Pending (the card draws the one active perk per column) |
 | Share button: offer choice between "DIM Wishlist Item" and "Roll Permalink" | ✅ Done |
 
 #### 12C — Perk & Annotation System
@@ -427,7 +427,7 @@ Everything in Stages 1–11 and 13–16 is done. Remaining priorities, in order:
 
 1. **More exotic effects** — Turncoat, Ice Breaker, Trespasser's burst (Delicate Tomb, Slayer's Fang and Duality are done) (see Known Issues); each needs a model for one-shot or periodic bonuses the calculator does not have.
 2. **Exotics with no stat row** — 41 left, most blocked on missing source numbers (see Engineering notes); ask huwugo's sheet to cover them or add rows by hand.
-3. **12B** — Shareable roll links with Open Graph previews; screenshot-mode weapon card.
+3. **12B** — Screenshot-mode multi-select (several perks per column, one active at a time).
 5. **Use the unused D2Assets** — set bonuses, archetype images (Similar Weapons), weapon-type silhouettes (filter chips).
 6. **Accessibility** — dim-text contrast, focus rings and labels on icon-only buttons (a first pass is in Engineering notes).
 

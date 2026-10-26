@@ -29,6 +29,7 @@ import { useSiteSettings } from '../../store/useSiteSettings';
 import { lookupGodRoll } from '../../lib/godRolls';
 import { perkSelectionFromHashes } from '../../lib/rollHelpers';
 import { buildRollParams as buildRollParamsFor, buildDimWishlistEntry } from '../../lib/shareRoll';
+import { RollCardDialog } from '../../components/weapon/RollCardDialog';
 
 // Below-the-fold / secondary panels are split into their own chunks so the
 // first paint only ships the roll editor, stats and effects.
@@ -133,6 +134,7 @@ function Dashboard() {
   const [compareMounted,     setCompareMounted]     = useState(false);
   useEffect(() => { if (activeTab === 'compare') setCompareMounted(true); }, [activeTab]);
   const [shareOpen,          setShareOpen]          = useState(false);
+  const [cardOpen,           setCardOpen]           = useState(false);
   const [copiedType,         setCopiedType]         = useState<'permalink' | 'dim' | null>(null);
   const [sidebarOpen,        setSidebarOpen]        = useState(false);
   const [moreOpen,           setMoreOpen]           = useState(false);
@@ -479,6 +481,8 @@ function Dashboard() {
         <SearchSidebar />
       </div>
 
+      <RollCardDialog open={cardOpen} onClose={() => setCardOpen(false)} permalink={cardOpen ? buildPermalink() : ''} />
+
       {/* Keyboard shortcut legend modal */}
       <AnimatePresence>
         {showShortcuts && (
@@ -558,6 +562,7 @@ function Dashboard() {
         onClose={() => setMoreOpen(false)}
         onSharePermalink={() => { handleSharePermalink(); setMoreOpen(false); }}
         onShareDim={() => { handleShareDim(); setMoreOpen(false); }}
+        onShareImage={() => { setCardOpen(true); setMoreOpen(false); }}
         onClear={() => { const wasPending = clearPending; handleClearClick(); if (wasPending) setMoreOpen(false); }}
         clearPending={clearPending}
       />
@@ -729,6 +734,19 @@ function Dashboard() {
                           <div>
                             <p className="text-xs font-semibold text-ink">DIM Wishlist Item</p>
                             <p className="text-2xs text-ink-4 leading-tight mt-0.5">Copies a wishlist entry to paste into DIM</p>
+                          </div>
+                        </button>
+                        <div className="border-t border-white/8" />
+                        <button
+                          onClick={() => { setCardOpen(true); setShareOpen(false); }}
+                          className="w-full flex items-start gap-3 px-4 py-3 hover:bg-white/6 transition-colors text-left"
+                        >
+                          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" aria-hidden="true">
+                            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                          </svg>
+                          <div>
+                            <p className="text-xs font-semibold text-ink">Roll Card Image</p>
+                            <p className="text-2xs text-ink-4 leading-tight mt-0.5">A picture of the weapon, perks and stats</p>
                           </div>
                         </button>
                       </motion.div>
