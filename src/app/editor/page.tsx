@@ -147,6 +147,8 @@ function Dashboard() {
   // URL <-> roll sync: ready once the first restore from the URL has run, and a ref of
   // the last query string we wrote so our own replaceState doesn't re-trigger a restore.
   const [urlSyncReady,       setUrlSyncReady]       = useState(false);
+  /** The link's ?w= hash matches no weapon (reissued or removed), so the default weapon loaded instead. */
+  const [staleLink,          setStaleLink]          = useState(false);
   const lastWrittenRef = useRef<string | null>(null);
 
   const shareRef    = useRef<HTMLDivElement>(null);
@@ -185,7 +187,9 @@ function Dashboard() {
 
   // Auto-load default weapon
   useEffect(() => {
-    if (weapons.length === 0 || activeWeapon || searchParams.get('w')) return;
+    // A ?w= that names a real weapon is loaded by the restore effect below; an unknown one falls through to the default.
+    const linkedHash = searchParams.get('w');
+    if (weapons.length === 0 || activeWeapon || (linkedHash && weapons.some((w) => w.hash === linkedHash))) return;
     if (activeWeaponHash) {
       const group = weaponGroups.find((g) =>
         g.default.hash === activeWeaponHash ||
@@ -213,7 +217,7 @@ function Dashboard() {
     if (weapons.length === 0) return;
     if (!weaponHash) { setUrlSyncReady(true); return; }
     const found = weapons.find((w) => w.hash === weaponHash);
-    if (!found) { setUrlSyncReady(true); return; }
+    if (!found) { setStaleLink(true); setUrlSyncReady(true); return; }
 
     const group = weaponGroups.find((g) => g.variants.some((v) => v.hash === weaponHash));
     loadWeapon(found, group?.variants);
@@ -787,6 +791,31 @@ function Dashboard() {
           </header>
 
           {/* ── Editor tab ──────────────────────────────────────────────── */}
+          <AnimatePresence initial={false}>
+            {staleLink && (
+              <motion.div
+                key="stale-link"
+                role="status"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+                  <span>That weapon from the link was not found, so a default weapon is shown instead.</span>
+                  <button
+                    onClick={() => setStaleLink(false)}
+                    aria-label="Dismiss"
+                    className="shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center text-amber-300 hover:text-amber-100"
+                  >
+                    <span aria-hidden="true">✕</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div role="tabpanel" id="view-panel-editor" aria-labelledby="view-tab-editor" hidden={activeTab !== 'editor'} className="tab-in">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.div
