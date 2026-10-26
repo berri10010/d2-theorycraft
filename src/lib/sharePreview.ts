@@ -24,6 +24,8 @@ export interface ShareRecord {
   s: string | null;
   /** Perk hash -> name, for every perk the weapon can roll (plain and enhanced). */
   p: Record<string, string>;
+  /** The masterwork stats this weapon can have, so a link's `mw` text can be checked before it is shown. */
+  m: string[];
 }
 
 export function shareRecord(weapon: Weapon): ShareRecord {
@@ -42,6 +44,7 @@ export function shareRecord(weapon: Weapon): ShareRecord {
     v: weapon.variantLabel,
     s: weapon.screenshot ?? (weapon.icon ? BUNGIE_URL + weapon.icon : null),
     p,
+    m: weapon.masterworkOptions ?? [],
   };
 }
 
@@ -63,7 +66,7 @@ export function buildPreview(rec: ShareRecord, params: URLSearchParams): Preview
   const parts = [kind];
   if (unique.length) parts.push(`Roll: ${unique.slice(0, 8).join(' / ')}`);
   const mw = params.get('mw');
-  if (mw) parts.push(`Masterwork: ${mw}`);
+  if (mw && rec.m?.includes(mw)) parts.push(`Masterwork: ${mw}`); // never print text from the link that is not a real option
   if (params.get('cat') === '1') parts.push('Catalyst complete');
   const buffs = (params.get('b') ?? '').split(',').filter(Boolean).length;
   if (buffs) parts.push(`${buffs} external buff${buffs === 1 ? '' : 's'}`);

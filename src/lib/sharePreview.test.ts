@@ -29,6 +29,13 @@ describe('shareRecord', () => {
     for (const h of hashes) expect(rec.p[h], h).toBeTruthy();
   });
 
+  it('lists the masterwork stats of the weapon itself (CODE_REVIEW D)', () => {
+    const legendary = weapons.find((w) => w.rarity === 'Legendary' && w.masterworkOptions.length > 0)!;
+    expect(shareRecord(legendary).m).toEqual(legendary.masterworkOptions);
+    expect(shareRecord(legendary).m.length).toBeGreaterThan(0);
+    expect(rec.m).toEqual([]); // exotics have no masterwork choice
+  });
+
   it('every weapon has a record with a name and a picture', () => {
     for (const w of weapons) { const r = shareRecord(w); expect(r.n.length, w.hash).toBeGreaterThan(0); }
     expect(weapons.filter((w) => !shareRecord(w).s).length).toBeLessThan(weapons.length * 0.01);
@@ -36,7 +43,7 @@ describe('shareRecord', () => {
 });
 
 describe('buildPreview', () => {
-  const rec: ShareRecord = { n: 'Abyss Defiant', t: 'Auto Rifle', e: 'solar', r: 'Legendary', v: null, s: 'https://www.bungie.net/x.jpg', p: { '1': 'Eager Edge', '2': 'Burning Ambition', '3': 'Rampage' } };
+  const rec: ShareRecord = { n: 'Abyss Defiant', t: 'Auto Rifle', e: 'solar', r: 'Legendary', v: null, s: 'https://www.bungie.net/x.jpg', p: { '1': 'Eager Edge', '2': 'Burning Ambition', '3': 'Rampage' }, m: ['Range', 'Stability'] };
   const params = (q: string) => new URLSearchParams(q);
 
   it('names the weapon and the mode in the title', () => {
@@ -57,6 +64,18 @@ describe('buildPreview', () => {
     expect(d).toContain('Masterwork: Range');
     expect(d).toContain('Catalyst complete');
     expect(d).toContain('2 external buffs');
+  });
+
+  it('only names a masterwork the weapon can have (CODE_REVIEW D)', () => {
+    expect(buildPreview(rec, params('w=5&mw=Stability')).description).toContain('Masterwork: Stability');
+    const forged = buildPreview(rec, params('w=5&mw=' + encodeURIComponent('Free gift cards at example.test'))).description;
+    expect(forged).not.toContain('Masterwork');
+    expect(forged).not.toContain('gift');
+  });
+
+  it('skips the masterwork for an older record that does not list them', () => {
+    const { m: _m, ...old } = rec;
+    expect(buildPreview(old as ShareRecord, params('w=5&mw=Range')).description).not.toContain('Masterwork');
   });
 
   it('works for a bare link with no roll', () => {
