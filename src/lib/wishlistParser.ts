@@ -31,8 +31,8 @@ export function parseWishlist(text: string): WishlistDb {
     }
     if (!line.startsWith('dimwishlist:')) continue;
 
-    // Strip prefix
-    const payload = line.slice('dimwishlist:'.length);
+    // Strip prefix, and any trailing "#notes:..." so it doesn't stick to the last value
+    const payload = line.slice('dimwishlist:'.length).split('#')[0];
     const params = new URLSearchParams(payload);
 
     const itemStr = params.get('item');

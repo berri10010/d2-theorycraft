@@ -27,6 +27,24 @@ describe('parseWishlist', () => {
   });
 });
 
+describe('parseWishlist notes (finding 3)', () => {
+  const NOTES = [
+    'dimwishlist:item=100&perks=1,2,3#notes:Great for PvE',
+    'dimwishlist:item=101&perks=4,5&tags=pvp#notes:hi',
+    'dimwishlist:item=102&perks=6#notes:only a note after one perk',
+  ].join('\n');
+  const db = parseWishlist(NOTES);
+
+  it('cuts each line at the first # so the last perk and tag stay clean', () => {
+    expect(db.get('100')![0].perkSets).toEqual([['1', '2', '3']]);
+    expect(db.get('101')![0].tags).toEqual(['pvp']);
+  });
+  it('matches a roll for a line that carries a #notes: suffix', () => {
+    expect(isWishlistMatch(db, '100', ['1', '2', '3'])).toBe(true);
+    expect(isWishlistMatch(db, '102', ['6'])).toBe(true);
+  });
+});
+
 describe('isWishlistMatch', () => {
   const db = parseWishlist(SAMPLE);
   it('requires every perk in a set', () => {
