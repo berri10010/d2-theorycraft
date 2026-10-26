@@ -8,6 +8,7 @@ import type { Difficulty } from '../lib/plDelta';
 import { applyStatDeltas } from '../lib/statCalc';
 import { combineEffects, type WeaponEffects } from '../lib/weaponEffects';
 import { intrinsicEffectPerk, catalystEffectKeys, catalystEffectId } from '../lib/effectPerks';
+import { sanitizePersistedWeaponState } from '../lib/persistedState';
 
 // ─── Weapon Mods ────────────────────────────────────────────────────────────
 
@@ -793,6 +794,8 @@ export const useWeaponStore = create<WeaponState>()(
     }),
     {
       name: 'd2tc-weapon',
+      // Saved state can be from an older version or hand-edited: keep only usable values.
+      merge: (persisted, current) => ({ ...current, ...sanitizePersistedWeaponState(persisted) }),
       // Only persist fields meaningful across reloads.
       // activeWeapon is NOT persisted (large object); it's restored from the DB
       // using activeWeaponHash when weapons load.
