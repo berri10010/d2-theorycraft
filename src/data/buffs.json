@@ -266,13 +266,14 @@
     "name": "Firing Line",
     "category": "weapon_perk",
     "stackType": "multiplicative",
-    "multiplier": 1.2,
+    "multiplier": 1,
     "description": "+20% precision damage when within 15m of two or more allies.",
     "perkNames": [
       "Firing Line",
       "Enhanced Firing Line"
     ],
-    "icon": null
+    "icon": null,
+    "critMultiplier": 1.2
   },
   "trench_barrel": {
     "hash": "trench_barrel",

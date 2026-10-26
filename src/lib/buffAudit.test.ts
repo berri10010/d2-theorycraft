@@ -57,9 +57,10 @@ describe('weapon perk buffs use the current numbers', () => {
     expect(resolveBuffMultiplier(b('killing_tally'), 'pvp', null, 0)).toBe(1.05);
   });
 
-  it('Bait and Switch is 30%, Firing Line 20%, Target Lock 40% (25% PvP)', () => {
+  it('Bait and Switch is 30%, Firing Line 20% precision only, Target Lock 40% (25% PvP)', () => {
     expect(b('bait_and_switch').multiplier).toBe(1.3);
-    expect(b('firing_line').multiplier).toBe(1.2);
+    expect(b('firing_line').multiplier).toBe(1); // precision-only: body damage is untouched (ACCURACY_REPORT X3)
+    expect(b('firing_line').critMultiplier).toBe(1.2);
     expect(resolveBuffMultiplier(b('target_lock'), 'pve', null)).toBe(1.4);
     expect(resolveBuffMultiplier(b('target_lock'), 'pvp', null)).toBe(1.25);
   });
