@@ -99,8 +99,9 @@ export const BUFF_DATABASE = buffData as Record<string, DamageBuff>;
 
 /** Returns the buff key for a given perk name (on the named weapon, for buffs limited by `weaponNames`), or null. */
 export function getBuffKeyForPerk(perkName: string, weaponName?: string): string | null {
+  const wanted = perkName.toLowerCase(); // Bungie's capitalisation varies ("One for All"); a miss here silently drops the buff
   for (const [key, buff] of Object.entries(BUFF_DATABASE)) {
-    if (!buff.perkNames.includes(perkName)) continue;
+    if (!buff.perkNames.some((name) => name.toLowerCase() === wanted)) continue;
     if (buff.weaponNames && !(weaponName && buff.weaponNames.includes(weaponName))) continue;
     return key;
   }

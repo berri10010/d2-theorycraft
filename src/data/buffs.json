@@ -524,8 +524,8 @@
     "multiplier": 1.35,
     "description": "Hitting 3 different targets in quick succession grants +35% damage for 10.5s.",
     "perkNames": [
-      "One For All",
-      "Enhanced One For All"
+      "One for All",
+      "Enhanced One for All"
     ],
     "icon": null
   },
