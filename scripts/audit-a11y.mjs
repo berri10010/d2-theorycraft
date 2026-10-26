@@ -76,6 +76,8 @@ const lines = [];
 
 for (const view of VIEWS) {
   const context = await browser.newContext({ reducedMotion: 'reduce', colorScheme: view.scheme, viewport: { width: view.width, height: view.height } });
+  // The site has its own theme setting (default dark); the OS scheme only matters when it is set to System.
+  await context.addInitScript((t) => { try { localStorage.setItem('site-settings', JSON.stringify({ state: { theme: t }, version: 2 })); } catch {} }, view.scheme);
   for (const screen of SCREENS) {
     if (screen.desktopOnly && view.width < 720) continue;
     const page = await context.newPage();

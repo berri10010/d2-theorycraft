@@ -197,9 +197,9 @@ export const WeaponHeader: React.FC = () => {
           {/* 1. Base scrim */}
           <div className="absolute inset-0 bg-black/20" />
           {/* 2. Left fade — darkens the text column, fades out to the right */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
+          <div className="hero-scrim-x absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
           {/* 3. Bottom fade — darkens intrinsic / flavour text area */}
-          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/90 to-transparent" />
+          <div className="hero-scrim-y absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/90 to-transparent" />
         </>
       )}
       {!hasScreenshot && (

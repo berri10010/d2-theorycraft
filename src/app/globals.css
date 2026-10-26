@@ -120,6 +120,23 @@ select option { background: rgb(var(--c-surface)); color: rgb(var(--c-ink)); }
   --clr-heavy: #6d28d9;
 }
 
+/* Light theme surfaces. The tint classes (bg-white/5 etc.) are dark-ink tints there, which made every panel a
+   slightly darker grey than the page. Instead panels are white with a soft shadow, and a panel inside a panel
+   drops back to a faint slate tint so nesting stays visible. */
+[data-resolved='light'] .bg-white\/5 { background-color: rgb(255 255 255 / 0.9); }
+[data-resolved='light'] .bg-white\/5.rounded-xl,
+[data-resolved='light'] .bg-white\/5.rounded-2xl { box-shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 4px 14px rgb(15 23 42 / 0.05); }
+[data-resolved='light'] .bg-white\/5 .bg-white\/5 { background-color: rgb(241 245 249 / 0.8); box-shadow: none; }
+[data-resolved='light'] .border-white\/10 { border-color: rgb(15 23 42 / 0.12); }
+
+/* The weapon header's picture sits under a scrim that matches the page colour; on the light theme it is firmer,
+   so the text never fights the artwork (and covers the whole picture on phones, where the text spans it). */
+[data-resolved='light'] .hero-scrim-x { background-image: linear-gradient(to right, rgb(241 245 249 / 0.96), rgb(241 245 249 / 0.7) 45%, rgb(241 245 249 / 0)); }
+[data-resolved='light'] .hero-scrim-y { background-image: linear-gradient(to top, rgb(241 245 249 / 0.95), rgb(241 245 249 / 0)); }
+@media (max-width: 639px) {
+  [data-resolved='light'] .hero-scrim-x { background-image: none; background-color: rgb(241 245 249 / 0.9); }
+}
+
 /* Fade-and-rise used when a tab panel becomes visible (display: none -> block restarts the animation). */
 @keyframes tab-in {
   from { opacity: 0; transform: translateY(8px); }
