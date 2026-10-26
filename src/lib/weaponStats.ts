@@ -172,6 +172,25 @@ export const EXOTIC_FRAME_FALLBACK: Record<string, string> = {
   "Traveler's Chosen": 'Adaptive',
   'Wicked Implement': 'Rapid Fire',
 };
+/**
+ * PvE damage that one frame has on top of its weapon type's scalar, at particular enemy tiers. Keyed by the stat
+ * row's lookup ("type_ammo_frame"). From MossyMax's current "Weapon Combatant Scaling" tab, which has a row for this
+ * frame: Aggressive Fusion Rifle 3.81 against Elite and 4.08 against Minor, where the Fusion Rifle row is 3.31 and
+ * 3.55 (the other tiers are the same as the type). oracle_engine shows the same +15%. Other frames with their own
+ * rows in the sheet are not added until they are checked in game.
+ */
+const FRAME_PVE_TIER_MULT: Record<string, Partial<Record<string, number>>> = {
+  'Fusion_s_Aggressive': { 'Major / Elite': 1.151, Minor: 1.149 },
+};
+const frameCache = new Map<string, WeaponStatEntry>();
+function withFramePve(entry: WeaponStatEntry): WeaponStatEntry {
+  const tierMult = FRAME_PVE_TIER_MULT[entry.lookup];
+  if (!tierMult) return entry;
+  let out = frameCache.get(entry.lookup);
+  if (!out) { out = { ...entry, pveTierMult: tierMult }; frameCache.set(entry.lookup, out); }
+  return out;
+}
+
 const fallbackByName = new Map(Object.entries(EXOTIC_FRAME_FALLBACK).map(([n, f]) => [looseName(n), f]));
 const pveBonusByName = new Map(Object.entries(EXOTIC_PVE).map(([n, b]) => [looseName(n), b]));
 const compendiumRowByName = new Map(Object.entries(COMPENDIUM_ROWS).map(([n, r]) => [looseName(n), { name: n, row: r }]));
@@ -243,7 +262,7 @@ export function lookupWeaponStat(
   if (aliased && entryByLookup.has(aliased)) return withPveBonus(entryByLookup.get(aliased)!, weaponName);
 
   const exact = intrinsicName ? entryIndex.get(`${typeStr}_${ammoSlot}_${normalizeFrameName(intrinsicName)}`) : undefined;
-  if (exact) return exact;
+  if (exact) return withFramePve(exact);
 
   // No row of its own: an exotic built on a standard frame borrows that frame's numbers, marked as approximate.
   const fallbackFrame = weaponName ? fallbackByName.get(looseName(weaponName)) : undefined;
