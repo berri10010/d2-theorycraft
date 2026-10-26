@@ -302,6 +302,12 @@ function autoSelectFixedPerks(weapon: Weapon): Record<string, string> {
   return result;
 }
 
+/** Round to a whole number and clamp to [min, max]; NaN and infinities fall back to `fallback`. */
+function clampInt(value: number, min: number, max: number, fallback: number): number {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.max(min, Math.min(max, Math.round(value)));
+}
+
 function captureRoll(state: WeaponState): WeaponRoll {
   return {
     selectedPerks:  state.selectedPerks,
@@ -532,10 +538,10 @@ export const useWeaponStore = create<WeaponState>()(
         : { isEnhanced: true, isCrafted: false }),
       setEnhanced:       (val)    => set(val ? { isEnhanced: true, isCrafted: false } : { isEnhanced: false }),
       setCatalystActive: (on)     => set({ catalystActive: on }),
-      setWeaponTier:     (tier)   => set({ weaponTier: Math.max(1, Math.min(5, tier)) }),
+      setWeaponTier:     (tier)   => set({ weaponTier: clampInt(tier, 1, 5, 1) }),
       setActiveMod:      (mod)    => set({ activeMod: mod }),
-      setSurgeStacks:    (stacks) => set({ surgeStacks: stacks }),
-      setWeaponsStat:    (stat)   => set({ weaponsStat: Math.max(0, Math.min(200, stat)) }),
+      setSurgeStacks:    (stacks) => set({ surgeStacks: clampInt(stacks, 0, 4, 0) as 0 | 1 | 2 | 3 | 4 }),
+      setWeaponsStat:    (stat)   => set({ weaponsStat: clampInt(stat, 0, 200, 0) }),
       setEnemyTier:      (tier)   => set({ enemyTier: tier }),
       setDifficulty:     (difficulty) => set({ difficulty }),
       setPowerDelta:     (delta)  => set({ powerDelta: Math.max(-50, Math.min(30, Math.round(delta) || 0)) }),
