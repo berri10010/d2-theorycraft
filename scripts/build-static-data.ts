@@ -35,6 +35,7 @@ import { fileURLToPath } from 'url';
 import { parseWeapons } from '../src/lib/bungie/parser.js';
 import { catalystStatsFromText, findCatalystEntry, firstLine } from '../src/lib/catalystStats.js';
 import { packWeapons, unpackWeapons, type PackedWeapon } from '../src/lib/weaponPack.js';
+import { fetchWithTimeout } from '../src/lib/fetchWithTimeout.js';
 import { PVP_WISHLIST_URL, parseWishlistBlocks, buildPvpEntries } from '../src/lib/pvpWishlist.js';
 import { SAX_SHEET_ID, SAX_TABS, buildSourceTable, type SaxTab } from '../src/lib/weaponSources.js';
 import {
@@ -128,13 +129,14 @@ function apiKey(): string {
 }
 
 async function bungieGet(url: string) {
-  const res = await fetch(url, { headers: { 'X-API-Key': apiKey() } });
+  const res = await fetchWithTimeout(url, { headers: { 'X-API-Key': apiKey() } }, 60_000);
   if (!res.ok) throw new Error(`Bungie fetch failed (${res.status}): ${url}`);
   return res.json();
 }
 
 async function fetchTable(relativePath: string) {
-  const res = await fetch(BUNGIE_ROOT + relativePath);
+  // The item table is the biggest download (tens of MB), so it gets longer than the small files.
+  const res = await fetchWithTimeout(BUNGIE_ROOT + relativePath, {}, 180_000);
   if (!res.ok) throw new Error(`Table fetch failed (${res.status}): ${relativePath}`);
   return res.json();
 }
@@ -309,8 +311,10 @@ async function buildWeapons() {
 
 async function buildClarity() {
   console.log('\n[clarity] Fetching Clarity database...');
-  const res = await fetch(
-    'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/descriptions/clarity.json'
+  const res = await fetchWithTimeout(
+    'https://raw.githubusercontent.com/Database-Clarity/Live-Clarity-Database/master/descriptions/clarity.json',
+    {},
+    120_000,
   );
   if (!res.ok) throw new Error(`Clarity fetch failed: ${res.status}`);
   const full = await res.json() as Record<string, any>;
