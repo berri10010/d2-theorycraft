@@ -163,6 +163,7 @@ export const EXOTIC_FRAME_FALLBACK: Record<string, string> = {
   'Polaris Lance': 'High-Impact',
   'Quicksilver Storm': 'Rapid Fire',
   'SUROS Regime': 'Adaptive',
+  'Service of Luzaku': 'High-Impact',
   'Symmetry': 'Rapid Fire',
   'Tessellation': 'Adaptive',
   'The Jade Rabbit': 'High-Impact',

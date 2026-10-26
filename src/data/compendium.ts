@@ -75,6 +75,16 @@ export const COMPENDIUM_ROWS: Record<string, CompendiumRow> = {
     pve: 1015, pvp: 215,
     evidence: 'Fires 6 Rockets per Volley, with each Rocket exploding on proximity to an enemy, individually dealing up to 1,015 [215] Splash Damage.',
   },
+  // A Lightweight scout (Bungie's 200 rpm) that fires 4 projectiles a shot. Its PvE damage per projectile is a lot
+  // lower than its PvP damage scaled up (29 against 14 x the scout Minor scalar 4.33), hence a factor under 1.
+  // Amalgamation Rounds (+290% PvE, +18% PvP) are not modelled.
+  'Third Iteration': {
+    type: 'Scout', ammo: 'p', bodyDamage: 14, critDamage: 23.66, shotDelay: 9, pellets: 4, rpm: 200,
+    // 29 PvE / (14 PvP x scout Minor scalar 4.33)
+    pveFactor: 0.48,
+    pve: 29, pvp: 14,
+    evidence: 'Fires a narrow Spread Shot of 4 Void Projectiles, each dealing 29 [14] Damage with a 1.69x Precision Multiplier.',
+  },
 };
 
 /**

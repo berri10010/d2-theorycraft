@@ -28,6 +28,7 @@ const ColumnsIcon = () => <svg {...iconProps}><rect x="4" y="4" width="7" height
 const PlusIcon    = () => <svg {...iconProps} strokeWidth={2.4}><path d="M12 5v14M5 12h14" /></svg>;
 const MoreIcon    = () => <svg {...iconProps}><circle cx="5" cy="12" r="1.2" fill="currentColor" /><circle cx="12" cy="12" r="1.2" fill="currentColor" /><circle cx="19" cy="12" r="1.2" fill="currentColor" /></svg>;
 const LinkIcon    = () => <svg {...iconProps}><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1" /></svg>;
+const ImageIcon   = () => <svg {...iconProps}><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 16l5-5 4 4 3-3 6 6" /></svg>;
 const StarIcon    = () => <svg {...iconProps}><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" /></svg>;
 const TrashIcon   = () => <svg {...iconProps}><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12M9 7V4h6v3" /></svg>;
 const GearIcon    = () => <svg {...iconProps}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" /></svg>;
@@ -178,6 +179,7 @@ interface MoreSheetProps {
   onClose: () => void;
   onSharePermalink: () => void;
   onShareDim: () => void;
+  onShareImage: () => void;
   onClear: () => void;
   clearPending: boolean;
 }
@@ -203,7 +205,7 @@ function SheetRow({ icon, title, hint, onClick, danger, trailing }: {
   );
 }
 
-export function MobileMoreSheet({ open, onClose, onSharePermalink, onShareDim, onClear, clearPending }: MoreSheetProps) {
+export function MobileMoreSheet({ open, onClose, onSharePermalink, onShareDim, onShareImage, onClear, clearPending }: MoreSheetProps) {
   const [view, setView] = useState<'menu' | 'settings'>('menu');
   const controls = useDragControls();
 
@@ -270,6 +272,7 @@ export function MobileMoreSheet({ open, onClose, onSharePermalink, onShareDim, o
                 <div className="divide-y divide-white/5">
                   <SheetRow icon={<LinkIcon />} title="Copy roll link" hint="A URL with your full roll state" onClick={onSharePermalink} />
                   <SheetRow icon={<StarIcon />} title="Copy DIM wishlist entry" hint="Paste straight into DIM" onClick={onShareDim} />
+                  <SheetRow icon={<ImageIcon />} title="Save roll card image" hint="A picture of the weapon, perks and stats" onClick={onShareImage} />
                   <SheetRow
                     icon={<TrashIcon />}
                     title={clearPending ? 'Tap again to confirm' : 'Clear roll'}

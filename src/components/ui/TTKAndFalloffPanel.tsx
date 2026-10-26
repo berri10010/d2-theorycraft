@@ -10,7 +10,7 @@ import { useWeaponStore } from '../../store/useWeaponStore';
 import { getArchetype } from '../../lib/archetypes';
 import { calculateTTK, calculateTTKCurve, getFalloffFloor, PVE_HEALTH_TIERS, TTKBreakpoint } from '../../lib/damageMath';
 import { adsMultiplier } from '../../lib/math';
-import { getPlDeltaMultiplier, fmtPlDelta } from '../../lib/plDelta';
+import { getPlDeltaMultiplier, fmtPlDelta, DIFFICULTY_OPTIONS } from '../../lib/plDelta';
 import { useAnimatedPath } from '../../hooks/useAnimatedPath';
 import { useAnimatedValue } from '../../hooks/useAnimatedValue';
 import { IW, toSvg, interpolate } from '../../lib/chartMath';
@@ -20,7 +20,6 @@ import { ShotsChart, FalloffChart } from './ttkCharts';
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const PVP_GUARDIAN_HP = 230;
-const PVE_TIERS_KEYS = Object.keys(PVE_HEALTH_TIERS);
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -28,7 +27,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
   useWeaponStore((s) => s.catalystActive); // re-render when the catalyst is switched, since the stats below include it
   const {
     activeWeapon, getCalculatedStats, mode,
-    weaponsStat, setWeaponsStat,
+    weaponsStat, setWeaponsStat, enemyTier, setEnemyTier, powerDelta, setPowerDelta, difficulty, setDifficulty,
     getDamageMultiplier, getWeaponEffects, activeBuffs, activeMod, surgeStacks,
     activeEffects, selectedPerks,
   } = useWeaponStore(
@@ -38,6 +37,12 @@ export const TTKAndFalloffPanel: React.FC = () => {
       mode:                s.mode,
       weaponsStat:         s.weaponsStat,
       setWeaponsStat:      s.setWeaponsStat,
+      enemyTier:           s.enemyTier,
+      setEnemyTier:        s.setEnemyTier,
+      powerDelta:          s.powerDelta,
+      setPowerDelta:       s.setPowerDelta,
+      difficulty:          s.difficulty,
+      setDifficulty:       s.setDifficulty,
       getDamageMultiplier: s.getDamageMultiplier,
       getWeaponEffects:    s.getWeaponEffects,
       activeBuffs:         s.activeBuffs,
@@ -48,8 +53,6 @@ export const TTKAndFalloffPanel: React.FC = () => {
     }))
   );
 
-  const [enemyTier, setEnemyTier] = useState(PVE_TIERS_KEYS[0]);
-  const [powerDelta, setPowerDelta] = useState(0);
   const [championMod, setChampionMod] = useState<'none' | 'overload' | 'unstoppable' | 'barrier'>('none');
   const [hoverX, setHoverX] = useState<number | null>(null);
   const [showAds, setShowAds] = useState(true);
@@ -87,7 +90,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
   if (!activeWeapon) return null;
 
   // PL delta multiplier — PvE only, normalised so delta 0 = 1.0
-  const plMult            = mode === 'pve' ? getPlDeltaMultiplier(powerDelta) : 1.0;
+  const plMult            = mode === 'pve' ? getPlDeltaMultiplier(powerDelta, difficulty) : 1.0;
   const effectiveMultiplier = multiplier * plMult;
 
   const pvpWeaponsBonus = Math.max(0, weaponsStat - 100) / 100 * 0.05;
@@ -399,6 +402,17 @@ export const TTKAndFalloffPanel: React.FC = () => {
             </div>
           </div>
 
+          <div>
+            <label className="text-sm text-ink-3 block mb-1">Difficulty</label>
+            <select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value as typeof difficulty)}
+              className="w-full bg-black/40 border border-white/10 rounded-md px-3 py-1.5 text-sm text-ink focus:outline-none focus:border-amber-500"
+            >
+              {DIFFICULTY_OPTIONS.map((o) => <option key={o.key} value={o.key}>{o.label}</option>)}
+            </select>
+          </div>
+
           {/* Power-level delta slider */}
           <div>
             <div className="flex items-center justify-between mb-1">
@@ -407,7 +421,7 @@ export const TTKAndFalloffPanel: React.FC = () => {
                 'text-xs font-bold font-mono tabular-nums',
                 powerDelta < 0 ? 'text-red-400' : powerDelta > 0 ? 'text-green-400' : 'text-ink-4',
               ].join(' ')}>
-                {fmtPlDelta(powerDelta)}
+                {fmtPlDelta(powerDelta, difficulty)}
               </span>
             </div>
             <input
