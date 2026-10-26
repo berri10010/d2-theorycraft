@@ -7,6 +7,7 @@ import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { Tooltip } from '../ui/Tooltip';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
+import type { Weapon } from '../../types/weapon';
 import { interpolateStat, adsMultiplier } from '../../lib/math';
 import { getStatsForWeapon } from '../../lib/weaponStatMappings';
 import { calcHandlingTimes } from '../../lib/handlingTimes';
@@ -198,8 +199,13 @@ function CompactStatCard({ statName, base, current, label }: {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export const StatDisplay: React.FC = () => {
+  const activeWeapon = useWeaponStore((s) => s.activeWeapon);
+  // The body has many hooks, so it only mounts once there is a weapon (hooks cannot follow an early return).
+  return activeWeapon ? <StatDisplayBody activeWeapon={activeWeapon} /> : null;
+};
+
+const StatDisplayBody: React.FC<{ activeWeapon: Weapon }> = ({ activeWeapon }) => {
   const {
-    activeWeapon,
     getCalculatedStats,
     selectedPerks,
     masterworkStat,
@@ -214,7 +220,6 @@ export const StatDisplay: React.FC = () => {
     catalystActive,
   } = useWeaponStore(
     useShallow((s) => ({
-      activeWeapon:          s.activeWeapon,
       getCalculatedStats:    s.getCalculatedStats,
       selectedPerks:         s.selectedPerks,
       masterworkStat:        s.masterworkStat,
@@ -235,11 +240,8 @@ export const StatDisplay: React.FC = () => {
     activeWeapon, selectedPerks, masterworkStat, isCrafted, isEnhanced, weaponTier, activeMod, armorMods, activeEffects, activeBuffs, catalystActive,
   ]);
 
-  if (!activeWeapon) return null;
-
   const baseStats = activeWeapon.baseStats;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const displayStats = useMemo(() => getStatsForWeapon(
     activeWeapon.itemTypeDisplayName,
     activeWeapon.intrinsicTrait?.name ?? null,
@@ -252,14 +254,12 @@ export const StatDisplay: React.FC = () => {
     const stat = calcStats['Handling'] ?? activeWeapon.baseStats['Handling'] ?? null;
     if (stat === null) return null;
     return calcHandlingTimes(activeWeapon.itemTypeDisplayName, stat);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calcStats, activeWeapon]);
 
   const reloadMs = useMemo(() => {
     const stat = calcStats['Reload'] ?? activeWeapon.baseStats['Reload'] ?? null;
     if (stat === null) return null;
     return calcReloadTime(activeWeapon.itemTypeDisplayName, activeWeapon.ammoType, stat);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calcStats, activeWeapon]);
 
   const bowPerfectDrawMs = useMemo(() => {
@@ -267,7 +267,6 @@ export const StatDisplay: React.FC = () => {
     const stat = calcStats['Stability'] ?? activeWeapon.baseStats['Stability'] ?? null;
     if (stat === null) return null;
     return calcBowPerfectDraw(activeWeapon.intrinsicTrait?.name ?? null, stat);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calcStats, activeWeapon]);
 
   // Zoom stat for ADS falloff multiplier

@@ -7,6 +7,7 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useWeaponStore } from '../../store/useWeaponStore';
+import type { Weapon } from '../../types/weapon';
 import { getArchetype } from '../../lib/archetypes';
 import { calculateTTK, calculateTTKCurve, getFalloffFloor, PVE_HEALTH_TIERS, TTKBreakpoint } from '../../lib/damageMath';
 import { adsMultiplier } from '../../lib/math';
@@ -24,15 +25,20 @@ const PVP_GUARDIAN_HP = 230;
 // ── Main component ────────────────────────────────────────────────────────────
 
 export const TTKAndFalloffPanel: React.FC = () => {
+  const activeWeapon = useWeaponStore((s) => s.activeWeapon);
+  // The panel body has many hooks, so it only mounts once there is a weapon (hooks cannot follow an early return).
+  return activeWeapon ? <TTKAndFalloffBody activeWeapon={activeWeapon} /> : null;
+};
+
+const TTKAndFalloffBody: React.FC<{ activeWeapon: Weapon }> = ({ activeWeapon }) => {
   useWeaponStore((s) => s.catalystActive); // re-render when the catalyst is switched, since the stats below include it
   const {
-    activeWeapon, getCalculatedStats, mode,
+    getCalculatedStats, mode,
     weaponsStat, setWeaponsStat, enemyTier, setEnemyTier, powerDelta, setPowerDelta, difficulty, setDifficulty,
     getDamageMultiplier, getWeaponEffects, activeBuffs, activeMod, surgeStacks,
     activeEffects, selectedPerks,
   } = useWeaponStore(
     useShallow((s) => ({
-      activeWeapon:        s.activeWeapon,
       getCalculatedStats:  s.getCalculatedStats,
       mode:                s.mode,
       weaponsStat:         s.weaponsStat,
@@ -77,17 +83,16 @@ export const TTKAndFalloffPanel: React.FC = () => {
   const rangeStat = calcStats['Range'] ?? 0;
   const zoomStat  = calcStats['Zoom'] ?? 14;
 
+  // getDamageMultiplier / getWeaponEffects are stable store functions that read the state listed here.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const multiplier = useMemo(() => getDamageMultiplier(), [
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     activeBuffs, activeMod, surgeStacks, mode, weaponsStat, activeEffects, selectedPerks,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const effects = useMemo(() => getWeaponEffects(), [
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     activeBuffs, activeEffects, selectedPerks,
   ]);
-
-  if (!activeWeapon) return null;
 
   // PL delta multiplier — PvE only, normalised so delta 0 = 1.0
   const plMult            = mode === 'pve' ? getPlDeltaMultiplier(powerDelta, difficulty) : 1.0;
