@@ -1,4 +1,5 @@
 import type { Weapon, GameMode } from '../types/weapon';
+import { BUFF_DATABASE } from './buffDatabase';
 
 export interface RollState {
   weapon: Weapon;
@@ -32,6 +33,17 @@ export function buildRollParams(roll: RollState): URLSearchParams {
   if (weaponTier !== 1) params.set('tier', String(weaponTier));
   if (catalystActive && weapon.catalyst) params.set('cat', '1');
   return params;
+}
+
+/** The ?mw= value if it is one of this weapon's own masterwork stats (bows, swords and others differ), else null. */
+export function masterworkFromParam(weapon: Weapon, param: string | null): string | null {
+  return param && (weapon.masterworkOptions ?? []).includes(param) ? param : null;
+}
+
+/** The known buff keys in a ?b= value, once each; unknown keys are dropped. */
+export function buffKeysFromParam(param: string | null): string[] {
+  if (!param) return [];
+  return [...new Set(param.split(',').filter((key) => key in BUFF_DATABASE))];
 }
 
 /**

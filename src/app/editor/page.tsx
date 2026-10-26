@@ -4,7 +4,7 @@ import React, { useEffect, useLayoutEffect, useState, useMemo, useRef, useCallba
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useWeaponStore, MASTERWORK_STATS } from '../../store/useWeaponStore';
+import { useWeaponStore } from '../../store/useWeaponStore';
 import { useCompareStore } from '../../store/useCompareStore';
 import { useWeaponDb } from '../../store/useWeaponDb';
 import { SearchSidebar } from '../../components/layout/SearchSidebar';
@@ -18,7 +18,6 @@ import { groupWeapons } from '../../lib/weaponGroups';
 import { GodRollPanel } from '../../components/weapon/GodRollPanel';
 import { calculateTTK } from '../../lib/damageMath';
 import { ammoFromStats } from '../../lib/ttkAmmo';
-import { MasterworkStat } from '../../store/useWeaponStore';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useDialogFocus } from '../../hooks/useDialogFocus';
 import { onTablistKeyDown } from '../../hooks/useTabKeys';
@@ -28,7 +27,7 @@ import { SettingsButton } from '../../components/ui/SettingsPanel';
 import { useSiteSettings } from '../../store/useSiteSettings';
 import { lookupGodRoll } from '../../lib/godRolls';
 import { perkSelectionFromHashes } from '../../lib/rollHelpers';
-import { buildRollParams as buildRollParamsFor, buildDimWishlistEntry } from '../../lib/shareRoll';
+import { buildRollParams as buildRollParamsFor, buildDimWishlistEntry, masterworkFromParam, buffKeysFromParam } from '../../lib/shareRoll';
 import { RollCardDialog } from '../../components/weapon/RollCardDialog';
 
 // Below-the-fold / secondary panels are split into their own chunks so the
@@ -229,13 +228,13 @@ function Dashboard() {
     }
     if (modeParam === 'pvp' || modeParam === 'pve') setMode(modeParam);
     else setMode(useSiteSettings.getState().defaultMode);
-    if (mwParam && (MASTERWORK_STATS as readonly string[]).includes(mwParam))
-      setMasterworkStat(mwParam as MasterworkStat);
+    const masterwork = masterworkFromParam(found, mwParam);
+    if (masterwork) setMasterworkStat(masterwork);
     if (wsParam) setWeaponsStat(Number(wsParam));
     if (tierParam) { const t = Number(tierParam); if (t >= 1 && t <= 5) setWeaponTier(t); }
     if (searchParams.get('cat') === '1' && found.catalyst) setCatalystActive(true);
     if (buffsParam) {
-      const toActivate = buffsParam.split(',').filter(Boolean);
+      const toActivate = buffKeysFromParam(buffsParam);
       const currentBuffs = useWeaponStore.getState().activeBuffs;
       toActivate.forEach((hash) => { if (!currentBuffs.includes(hash)) toggleBuff(hash); });
     }

@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { buildRollParams, buildDimWishlistEntry } from './shareRoll';
+import { buildRollParams, buildDimWishlistEntry, masterworkFromParam, buffKeysFromParam } from './shareRoll';
+import { BUFF_DATABASE } from './buffDatabase';
+import { findWeapon } from '../test/realData';
 import { parseWishlist, isWishlistMatch } from './wishlistParser';
 import type { Weapon, Perk } from '../types/weapon';
 
@@ -65,5 +67,34 @@ describe('buildDimWishlistEntry', () => {
   it('is parseable by our own wishlist parser', () => {
     const db = parseWishlist(buildDimWishlistEntry(weapon, ['t1', 't2']));
     expect(isWishlistMatch(db, '777', ['t1', 't2', 'b1'])).toBe(true);
+  });
+});
+
+describe('masterworkFromParam (finding 6)', () => {
+  const bow = findWeapon((w) => w.itemTypeDisplayName === 'Combat Bow' && (w.masterworkOptions ?? []).includes('Draw Time'));
+
+  it("accepts a weapon's own masterwork stat, even one outside the standard seven", () => {
+    expect(masterworkFromParam(bow, 'Draw Time')).toBe('Draw Time');
+  });
+  it('round-trips through a share link', () => {
+    const qs = buildRollParams({ ...base, weapon: bow, masterworkStat: 'Draw Time' });
+    expect(masterworkFromParam(bow, qs.get('mw'))).toBe('Draw Time');
+  });
+  it('rejects stats this weapon cannot masterwork, and empty values', () => {
+    expect(masterworkFromParam(bow, 'Nonsense')).toBeNull();
+    expect(masterworkFromParam(bow, '')).toBeNull();
+    expect(masterworkFromParam(bow, null)).toBeNull();
+  });
+});
+
+describe('buffKeysFromParam (finding 7)', () => {
+  const real = Object.keys(BUFF_DATABASE)[0];
+  it('keeps known buff keys and drops unknown ones', () => {
+    expect(buffKeysFromParam(`${real},nope`)).toEqual([real]);
+  });
+  it('handles empty values, blanks and repeats', () => {
+    expect(buffKeysFromParam(null)).toEqual([]);
+    expect(buffKeysFromParam(',,')).toEqual([]);
+    expect(buffKeysFromParam(`${real},${real}`)).toEqual([real]);
   });
 });
