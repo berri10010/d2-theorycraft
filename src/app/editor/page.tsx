@@ -27,6 +27,7 @@ import { SettingsButton } from '../../components/ui/SettingsPanel';
 import { useSiteSettings } from '../../store/useSiteSettings';
 import { lookupGodRoll } from '../../lib/godRolls';
 import { perkSelectionFromHashes } from '../../lib/rollHelpers';
+import { copyText } from '../../lib/clipboard';
 import { buildRollParams as buildRollParamsFor, buildDimWishlistEntry, masterworkFromParam, buffKeysFromParam } from '../../lib/shareRoll';
 import { RollCardDialog } from '../../components/weapon/RollCardDialog';
 
@@ -341,24 +342,25 @@ function Dashboard() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlSyncReady, activeWeapon?.hash, selectedPerks, mode, masterworkStat, weaponsStat, activeBuffs, weaponTier, catalystActive]);
 
+  // Copy to the clipboard; when the browser refuses, show the text so it can be copied by hand.
+  const copyOrShow = async (text: string, type: 'permalink' | 'dim') => {
+    setShareOpen(false);
+    if (await copyText(text)) {
+      setCopiedType(type);
+      setTimeout(() => setCopiedType(null), 2000);
+    } else {
+      window.prompt('Your browser blocked copying. Copy this by hand:', text);
+    }
+  };
+
   const handleSharePermalink = () => {
     const url = buildPermalink();
-    if (!url) return;
-    navigator.clipboard.writeText(url).then(() => {
-      setCopiedType('permalink');
-      setTimeout(() => setCopiedType(null), 2000);
-    });
-    setShareOpen(false);
+    if (url) void copyOrShow(url, 'permalink');
   };
 
   const handleShareDim = () => {
     if (!activeWeapon) return;
-    const entry = buildDimWishlistEntry(activeWeapon, Object.values(selectedPerks));
-    navigator.clipboard.writeText(entry).then(() => {
-      setCopiedType('dim');
-      setTimeout(() => setCopiedType(null), 2000);
-    });
-    setShareOpen(false);
+    void copyOrShow(buildDimWishlistEntry(activeWeapon, Object.values(selectedPerks)), 'dim');
   };
 
   // Close share dropdown on outside click
