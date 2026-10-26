@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseWishlist, isWishlistMatch, exportPersonalWishlist } from './wishlistParser';
+import { parseWishlist, isWishlistMatch, exportPersonalWishlist, wishlistEntryCount } from './wishlistParser';
 
 const SAMPLE = `title:Test list
 description:ignored
@@ -42,6 +42,21 @@ describe('parseWishlist notes (finding 3)', () => {
   it('matches a roll for a line that carries a #notes: suffix', () => {
     expect(isWishlistMatch(db, '100', ['1', '2', '3'])).toBe(true);
     expect(isWishlistMatch(db, '102', ['6'])).toBe(true);
+  });
+});
+
+describe('parseWishlist input checks (BUG_REPORT_2 N4)', () => {
+  it('requires a numeric weapon hash', () => {
+    const db = parseWishlist(['dimwishlist:item=abc&perks=1,2,3', 'dimwishlist:item=12x&perks=1', 'dimwishlist:item= 5&perks=1', 'dimwishlist:item=777&perks=1'].join('\n'));
+    expect([...db.keys()]).toEqual(['777']);
+  });
+  it('finds no entries in text that is not a wishlist, so the panel can reject the file', () => {
+    expect(wishlistEntryCount(parseWishlist('\u0000\u0001\u0002 binary \ufffd junk\nmore junk'))).toBe(0);
+    expect(wishlistEntryCount(parseWishlist(''))).toBe(0);
+    expect(wishlistEntryCount(parseWishlist('title:only metadata\n// and a comment'))).toBe(0);
+  });
+  it('counts every entry across weapons', () => {
+    expect(wishlistEntryCount(parseWishlist('dimwishlist:item=1&perks=1\ndimwishlist:item=1&perks=2\ndimwishlist:item=2&perks=3'))).toBe(3);
   });
 });
 

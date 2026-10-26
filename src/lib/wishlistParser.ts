@@ -42,6 +42,9 @@ export function parseWishlist(text: string): WishlistDb {
     // Negative item IDs are used by DIM for exclusion lists — skip them
     if (itemStr.startsWith('-')) continue;
 
+    // A weapon hash is all digits; anything else is a typo or not a wishlist line
+    if (!/^\d+$/.test(itemStr)) continue;
+
     const perkHashes = perksStr
       .split(',')
       .map((p) => p.trim())
@@ -68,6 +71,13 @@ export function parseWishlist(text: string): WishlistDb {
   }
 
   return db;
+}
+
+/** How many entries a parsed wishlist holds, across all weapons. */
+export function wishlistEntryCount(db: WishlistDb): number {
+  let count = 0;
+  for (const entries of db.values()) count += entries.length;
+  return count;
 }
 
 /**

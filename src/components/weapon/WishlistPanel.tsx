@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { CollapsiblePanel } from '../ui/CollapsiblePanel';
 import { useWeaponStore } from '../../store/useWeaponStore';
 import { SavedRollScore } from './RollVsMeta';
@@ -11,6 +12,7 @@ import { type PersonalRoll, parsePersonalRolls } from '../../lib/personalRolls';
 import {
   WishlistDb,
   parseWishlist,
+  wishlistEntryCount,
   isWishlistMatch,
   exportPersonalWishlist,
 } from '../../lib/wishlistParser';
@@ -28,6 +30,8 @@ function useWishlist() {
   const [wishlistName, setWishlistName] = useState<string>('');
   const [entryCount, setEntryCount]     = useState(0);
   const [isLoading, setIsLoading]       = useState(false);
+  /** Why an import was rejected (error) or could not be kept (warning). */
+  const [notice, setNotice]             = useState<{ kind: 'error' | 'warning'; text: string } | null>(null);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -38,7 +42,7 @@ function useWishlist() {
         const db = parseWishlist(parsed.text);
         setWishlistDb(db);
         setWishlistName(parsed.name);
-        setEntryCount(Array.from(db.values()).reduce((n, arr) => n + arr.length, 0));
+        setEntryCount(wishlistEntryCount(db));
       }
     } catch { /* ignore */ }
   }, []);
@@ -49,20 +53,29 @@ function useWishlist() {
     reader.onload = (e) => {
       const text = e.target?.result as string;
       const db = parseWishlist(text);
-      const count = Array.from(db.values()).reduce((n, arr) => n + arr.length, 0);
+      const count = wishlistEntryCount(db);
+      setIsLoading(false);
+      if (count === 0) {
+        setNotice({ kind: 'error', text: `No wishlist entries found in ${file.name}. Choose a DIM wishlist .txt file.` });
+        return;
+      }
       setWishlistDb(db);
       setWishlistName(file.name);
       setEntryCount(count);
-      setIsLoading(false);
       try {
         localStorage.setItem(LS_WISHLIST_KEY, JSON.stringify({ name: file.name, text }));
-      } catch { /* ignore */ }
+        setNotice(null);
+      } catch {
+        // Browsers allow about 5 MB per site, so a very large list cannot be kept between visits.
+        setNotice({ kind: 'warning', text: 'Imported, but this browser could not save the list (it is probably too big), so it will be gone after a reload.' });
+      }
     };
     reader.onerror = () => {
       console.error('WishlistPanel: Failed to read file', file.name);
       setWishlistName('');
       setEntryCount(0);
       setIsLoading(false);
+      setNotice({ kind: 'error', text: `Could not read ${file.name}.` });
     };
     reader.readAsText(file);
   }, []);
@@ -71,10 +84,11 @@ function useWishlist() {
     setWishlistDb(null);
     setWishlistName('');
     setEntryCount(0);
+    setNotice(null);
     localStorage.removeItem(LS_WISHLIST_KEY);
   }, []);
 
-  return { wishlistDb, wishlistName, entryCount, isLoading, loadFile, clear };
+  return { wishlistDb, wishlistName, entryCount, isLoading, notice, loadFile, clear };
 }
 
 /** Saving is best-effort: with storage full or blocked the list still works for this visit. */
@@ -142,7 +156,7 @@ export const WishlistPanel: React.FC = () => {
   const [showAllRolls, setShowAllRolls] = useState(false);
   const [dragging, setDragging] = useState(false);
 
-  const { wishlistDb, wishlistName, entryCount, isLoading, loadFile, clear } = useWishlist();
+  const { wishlistDb, wishlistName, entryCount, isLoading, notice, loadFile, clear } = useWishlist();
   const { rolls, save: saveRoll, remove: removeRoll, exportFile } = usePersonalRolls();
 
   if (!activeWeapon) return null;
@@ -277,6 +291,22 @@ export const WishlistPanel: React.FC = () => {
             className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) loadFile(f); }}
           />
+
+          <AnimatePresence initial={false}>
+            {notice && (
+              <motion.p
+                key={notice.text}
+                role={notice.kind === 'error' ? 'alert' : 'status'}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className={['text-2xs mt-2 overflow-hidden', notice.kind === 'error' ? 'text-red-400' : 'text-amber-400'].join(' ')}
+              >
+                {notice.text}
+              </motion.p>
+            )}
+          </AnimatePresence>
 
           {/* Match callout */}
           {wishlistDb && hasSelection && (
