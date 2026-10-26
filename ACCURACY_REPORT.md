@@ -62,6 +62,13 @@ By type (Minor, median): Scout 2.31, Pulse 2.15, Auto 1.99, Sidearm 1.87, Combat
 
 The scalars file (`src/data/combatantScalars.json`, MossyMax's sheet) has no date or source link on file (`src/data/credits.ts` says "No public link on file"). The gap could be that oracle's data is older, that the two use different baselines (the site normalises its power-delta curve to 1.0 at delta 0), or an error in one of them. **One in-game test (shots to kill a Minor with a known weapon) would settle which is right.** Until then, treat absolute PvE TTK and DPS as unverified, and relative comparisons between weapons as more trustworthy than the totals.
 
+### X2b. Frames have their own PvE scalars; our model has one per weapon type *(structure confirmed, numbers may be outdated)*
+The project owner points out that frames have different scalars, and that oracle_engine is right about that even if its numbers are old. Its data agrees, in two ways, and our model cannot express either:
+- **PvE base damage differs per frame.** oracle gives every frame a `pve_damage` next to its PvP `damage`. The PvE / PvP ratio varies inside a type: 14 of 107 frames differ by more than 10 % from their type's median ratio. Legendary examples: Hand Cannon Precision 0.85×, Pulse Rifle Heavy Burst 0.79×, High-Impact 1.18×, Aggressive 1.16×, Scout Rifle Aggressive 1.32× and Lightweight 0.86×. (The extreme ones are exotics: Choir of One 3.7×, Rocket-Assisted sidearm 2.6×.)
+- **Some frames use their own enemy scalars.** For example Fusion Rifle Aggressive Frame uses minor 3.14 / elite 2.93 against the type's 2.73 / 2.55 (+15 %); Grand Overture, Xenophage, Cerberus+1, Vex Mythoclast, Arbalest, Revision Zero, Wardcliff Coil, Eyes of Tomorrow, Anarchy and Parasite do too.
+- **Our model:** `src/lib/damageMath.ts` line 339 and `src/lib/dpsCalc.ts` line 75 use `typeScalar(tier) × pveMultiplier(entry)`. The type scalar is the same for every legendary frame of a type (`combatantScalars.json`, "normalised to Major/Elite = 3.0"), and `pveMultiplier` is only filled in for the 13 exotics in `src/data/compendium.ts`. So a hand cannon Precision frame and a hand cannon Aggressive frame get the same PvE-over-PvP conversion.
+- **What to do:** treat this as a model gap. The structure to add is a per-frame (and per-tier) PvE factor, like the one exotics already have. The values must come from a current source, because oracle's figures may be out of date. Until then, expect PvE numbers to be off by roughly 10 to 30 % for the frames listed above, relative to other frames of the same type.
+
 ## Confirmed bug (reproduced, with two independent sources)
 
 ### X3. Firing Line is precision-only, but our buff boosts all damage
