@@ -12,7 +12,6 @@
 // Chromium), set CHROME_PATH to the browser executable, for example
 //   CHROME_PATH=/path/to/chromium/chrome-linux64/chrome npm run audit:a11y
 import fs from 'fs';
-import path from 'path';
 import { createRequire } from 'module';
 import { chromium } from 'playwright-core';
 

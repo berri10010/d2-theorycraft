@@ -312,7 +312,7 @@ function Dashboard() {
     }
 
     setPendingGodRoll(false);
-  }, [pendingGodRoll, activeWeapon, godRollDb, selectPerk]);
+  }, [pendingGodRoll, activeWeapon, godRollDb, selectPerk, weaponTier]);
 
   // Auto-apply god roll whenever the active weapon changes (setting-gated)
   const prevAutoWeaponRef = useRef<string | null>(null);
@@ -321,6 +321,8 @@ function Dashboard() {
     if (prevAutoWeaponRef.current === activeWeapon.hash) return;
     prevAutoWeaponRef.current = activeWeapon.hash;
     setPendingGodRoll(true);
+  // Keyed on the weapon's hash, not the object, so a re-spread of the same weapon does not re-apply the roll.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWeapon?.hash, settings.autoApplyGodRoll]);
 
   // ── Share helpers ────────────────────────────────────────────────────────────

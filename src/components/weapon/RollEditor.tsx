@@ -79,7 +79,6 @@ export const RollEditor: React.FC = () => {
       perk1ColName: perkCols[0]?.name ?? null,
       perk2ColName: perkCols[1]?.name ?? null,
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWeapon, godRollDb, pvpWishlistDb, prideDb, mode]);
 
   const isTieredWeapon = (activeWeapon?.seasonNumber ?? 0) >= 27 && activeWeapon?.rarity !== 'Exotic';
@@ -133,7 +132,7 @@ export const RollEditor: React.FC = () => {
       return col.perks.some((p) => p.enhancedVersion?.hash === selected);
     };
     return isEnhancedSelected(perk1) && isEnhancedSelected(perk2);
-  }, [isCrafted, activeWeapon, selectedPerks]);
+  }, [isCrafted, activeWeapon, selectedPerks, isTieredWeapon]);
 
   // Auto-sync isEnhanced to the derived condition
   useEffect(() => {

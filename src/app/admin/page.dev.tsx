@@ -7,6 +7,7 @@ import { Weapon, PerkColumn, WeaponGroup } from '../../types/weapon';
 import { TIER_CONFIG, PerkTier } from '../../lib/perkTierDatabase';
 import { BUNGIE_URL } from '../../lib/bungieUrl';
 import Image from 'next/image';
+import Link from 'next/link';
 
 // Standalone dev server — see scripts/admin-server.mjs
 const ADMIN = 'http://localhost:3001';
@@ -917,7 +918,7 @@ export default function AdminPage() {
             <h1 className="text-xl font-bold text-white">D2 Theorycraft Admin</h1>
             <p className="text-2xs text-amber-500 font-semibold mt-0.5 uppercase tracking-wider">Dev only · writes to source data files</p>
           </div>
-          <a href="/" className="text-xs text-ink-4 hover:text-ink-2 border border-white/10 px-3 py-1.5 rounded-lg transition-colors">← Editor</a>
+          <Link href="/" className="text-xs text-ink-4 hover:text-ink-2 border border-white/10 px-3 py-1.5 rounded-lg transition-colors">← Editor</Link>
         </div>
 
         {/* Tab nav */}

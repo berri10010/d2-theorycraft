@@ -73,7 +73,7 @@ if (!process.env.BUNGIE_API_KEY) {
         }
       }
     }
-  } catch (e) {
+  } catch {
     // Ignore env loading errors
   }
 }
