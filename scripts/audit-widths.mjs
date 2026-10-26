@@ -6,7 +6,10 @@
 //
 // For every page and width it checks: no horizontal page scroll, no element poking out of the window, and (on
 // the editor) that the one/two-column layout matches the width the editor area has. Exits 1 on any problem.
-// Uses your installed Chrome or Edge through playwright-core (no browser download); set CHROME_PATH to override.
+// Uses your installed Chrome or Edge through playwright-core (no browser download).
+// If none is found in the usual places (typical on Linux or in a container, or with a Playwright-downloaded
+// Chromium), set CHROME_PATH to the browser executable, for example
+//   CHROME_PATH=/path/to/chromium/chrome-linux64/chrome npm run audit:widths
 import fs from 'fs';
 import path from 'path';
 import { chromium } from 'playwright-core';

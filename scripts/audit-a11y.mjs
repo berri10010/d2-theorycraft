@@ -5,9 +5,12 @@
 //   npm run audit:a11y               (in another)
 //   npm run audit:a11y -- --verbose  (also print the offending HTML)
 //
-// Uses your installed Chrome or Edge through playwright-core; set CHROME_PATH to override. Exits 1 when anything is
-// found. axe cannot judge everything (reading order, whether a label makes sense), so it complements a keyboard and
-// screen-reader check rather than replacing one.
+// Uses your installed Chrome or Edge through playwright-core. Exits 1 when anything is found. axe cannot judge
+// everything (reading order, whether a label makes sense), so it complements a keyboard and screen-reader check
+// rather than replacing one.
+// If none is found in the usual places (typical on Linux or in a container, or with a Playwright-downloaded
+// Chromium), set CHROME_PATH to the browser executable, for example
+//   CHROME_PATH=/path/to/chromium/chrome-linux64/chrome npm run audit:a11y
 import fs from 'fs';
 import path from 'path';
 import { createRequire } from 'module';

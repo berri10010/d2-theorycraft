@@ -3,7 +3,10 @@
 //   npm run dev                       (in one terminal)
 //   npm run audit:keyboard            (in another)
 //
-// Uses your installed Chrome or Edge through playwright-core; set CHROME_PATH to override. Exits 1 on any failure.
+// Uses your installed Chrome or Edge through playwright-core. Exits 1 on any failure.
+// If none is found in the usual places (typical on Linux or in a container, or with a Playwright-downloaded
+// Chromium), set CHROME_PATH to the browser executable, for example
+//   CHROME_PATH=/path/to/chromium/chrome-linux64/chrome npm run audit:keyboard
 import fs from 'fs';
 import { chromium } from 'playwright-core';
 
