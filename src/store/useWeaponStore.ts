@@ -272,7 +272,8 @@ interface WeaponState {
 
   // Computed
   getCalculatedStats:  () => StatMap;
-  getDamageMultiplier: () => number;
+  /** Damage multiplier for the current mode, or for `forMode` (the DPS panel shows both). */
+  getDamageMultiplier: (forMode?: GameMode) => number;
   /** Timing / crit changes from active exotic-trait effects (Business Time, Silkbound Slayer, ...). */
   getWeaponEffects:    () => WeaponEffects;
 }
@@ -706,8 +707,9 @@ export const useWeaponStore = create<WeaponState>()(
           .filter((e): e is NonNullable<typeof e> => e !== null));
       },
 
-      getDamageMultiplier: () => {
-        const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, activeMod, surgeStacks, mode, weaponsStat, catalystActive } = get();
+      getDamageMultiplier: (forMode) => {
+        const { activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, activeMod, surgeStacks, mode: stateMode, weaponsStat, catalystActive } = get();
+        const mode = forMode ?? stateMode;
 
         const effectBuffEntries: Array<{ key: string; stackIndex: number }> = [];
          if (activeWeapon) {

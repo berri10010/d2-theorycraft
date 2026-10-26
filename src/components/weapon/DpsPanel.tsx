@@ -46,6 +46,11 @@ export function DpsPanel() {
     activeWeapon,
     getCalculatedStats,
     getWeaponEffects,
+    getDamageMultiplier,
+    mode,
+    buffStacks,
+    surgeStacks,
+    weaponsStat,
     selectedPerks,
     masterworkStat,
     isCrafted,
@@ -60,6 +65,11 @@ export function DpsPanel() {
       activeWeapon:       s.activeWeapon,
       getCalculatedStats: s.getCalculatedStats,
       getWeaponEffects:   s.getWeaponEffects,
+      getDamageMultiplier: s.getDamageMultiplier,
+      mode:               s.mode,
+      buffStacks:         s.buffStacks,
+      surgeStacks:        s.surgeStacks,
+      weaponsStat:        s.weaponsStat,
       selectedPerks:      s.selectedPerks,
       masterworkStat:     s.masterworkStat,
       isCrafted:          s.isCrafted,
@@ -82,6 +92,13 @@ export function DpsPanel() {
     activeWeapon, selectedPerks, masterworkStat, isCrafted, activeMod, armorMods, activeEffects, activeBuffs, catalystActive,
   ]);
 
+  // Buffs, weapon mod, surge and the weapons stat scale damage the same way they do in the TTK panel.
+  const damageMult = useMemo(
+    () => ({ pvp: getDamageMultiplier('pvp'), pve: getDamageMultiplier('pve') }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeWeapon, selectedPerks, activeEffects, activeBuffs, buffStacks, activeMod, surgeStacks, weaponsStat, catalystActive],
+  );
+
   const dps = useMemo<DpsResult | null>(() => {
     if (!activeWeapon) return null;
     const reloadStat = calcStats['Reload']   ?? activeWeapon.baseStats['Reload']   ?? 0;
@@ -96,9 +113,10 @@ export function DpsPanel() {
       enemyTier,
       getWeaponEffects(),
       activeWeapon.baseName ?? activeWeapon.name,
+      damageMult,
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWeapon, calcStats, selectedPerks, activeEffects, activeBuffs, enemyTier]);
+  }, [activeWeapon, calcStats, selectedPerks, activeEffects, activeBuffs, buffStacks, mode, enemyTier, damageMult]);
 
   if (!activeWeapon) return null;
 
@@ -115,6 +133,11 @@ export function DpsPanel() {
   const optimalPve   = Math.round(dps.optimalDpsPve * plMult);
   const sustainedPve = Math.round(dps.sustainedDpsPve * plMult);
 
+  // The per-pull chips show damage for the mode currently selected, like the TTK panel.
+  const modeMult = mode === 'pvp' ? damageMult.pvp : damageMult.pve;
+  const bodyDamage = dps.bodyDamage * modeMult;
+  const critDamage = dps.critDamage * modeMult;
+
   const burstLabel = dps.burstSize > 1 ? `${dps.burstSize}×` : '—';
   const reloadLabel = dps.reloadMs != null ? `${(dps.reloadMs / 1000).toFixed(2)}s` : '—';
 
@@ -126,8 +149,8 @@ export function DpsPanel() {
           Damage per Trigger Pull
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <Chip label="Body"  value={dps.bodyDamage.toFixed(1)} />
-          <Chip label="Crit"  value={dps.critDamage.toFixed(1)} />
+          <Chip label="Body"  value={bodyDamage.toFixed(1)} />
+          <Chip label="Crit"  value={critDamage.toFixed(1)} />
           <Chip label="Burst" value={burstLabel} />
         </div>
       </div>

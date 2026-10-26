@@ -40,6 +40,8 @@ export function calcDps(
   enemyTier = 'Major / Elite',
   effects?: WeaponEffects,
   weaponName?: string,
+  /** Damage multiplier from buffs, mods, surge and the weapons stat, per mode (1 = no change). */
+  damageMult: { pvp: number; pve: number } = { pvp: 1, pve: 1 },
 ): DpsResult | null {
   const base = lookupWeaponStat(itemSubType, ammoType, intrinsicName, weaponName);
   if (!base) return null;
@@ -72,8 +74,8 @@ export function calcDps(
   // ── Optimal DPS (continuous fire, all crits) ───────────────────────────────
   const pveScalar      = getPveScalar(itemSubType, enemyTier) * pveMultiplier(base, enemyTier);
   const critPerTrigger = entry.critDamage * burstSize * pellets;
-  const optimalDpsPvp  = critPerTrigger / timePerShot_s;
-  const optimalDpsPve  = optimalDpsPvp * pveScalar;
+  const optimalDpsPvp  = critPerTrigger * damageMult.pvp / timePerShot_s;
+  const optimalDpsPve  = critPerTrigger * damageMult.pve / timePerShot_s * pveScalar;
 
   // ── Sustained DPS (mag + reload) ───────────────────────────────────────────
   let magDuration_s: number;
@@ -90,8 +92,8 @@ export function calcDps(
   const totalDmg       = magSize * critPerTrigger;
   const reloadS        = reloadMs != null ? reloadMs / 1000 : 2.0;
   const cycleTime_s    = magDuration_s + reloadS;
-  const sustainedDpsPvp = totalDmg / cycleTime_s;
-  const sustainedDpsPve = sustainedDpsPvp * pveScalar;
+  const sustainedDpsPvp = totalDmg * damageMult.pvp / cycleTime_s;
+  const sustainedDpsPve = totalDmg * damageMult.pve / cycleTime_s * pveScalar;
 
   return {
     optimalDpsPvp:  Math.round(optimalDpsPvp),
